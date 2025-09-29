@@ -1,27 +1,173 @@
-import { X, Plus, Edit, Trash, UserCircle2, Check, Info } from 'lucide-react'
+import {
+  Plus,
+  Edit,
+  Trash,
+  UserCircle2,
+  Check,
+  X,
+  Minus,
+  ChevronsUp,
+} from 'lucide-react'
 import { router } from '@inertiajs/react'
+import { toast } from 'sonner'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Separator } from '@/components/ui/separator'
 import TextareaAutosize from 'react-textarea-autosize'
+
+const GeneratedItemsModal = ({
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+}) => {
+  return (
+    <div
+      className={`
+          transition-all duration-300 z-50
+          ${
+            isModalMinimized
+              ? 'fixed bottom-4 right-4 w-[400px]'
+              : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
+          }
+        `}
+    >
+      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'Personas Geradas por IA'}
+            {isModalMinimized && 'Personas Geradas'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              size="icon"
+              variant="secondary"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+
+        {!isModalMinimized && (
+          <>
+            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+              <span className="text-foreground font-medium">
+                {generatedItems.filter((j) => j.selected).length} de{' '}
+                {generatedItems.length} selecionadas
+              </span>
+              <Button
+                onClick={toggleAllItems}
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+              >
+                {generatedItems.every((story) => story.selected)
+                  ? 'Desmarcar Todas'
+                  : 'Selecionar Todas'}
+              </Button>
+            </div>
+
+            <div className=" px-6 overflow-y-auto min-h-0">
+              <div className="flex flex-col gap-4 py-2">
+                {generatedItems.map((persona, index) => (
+                  <div
+                    key={persona.id || `temp-${index}`}
+                    className={`rounded-lg p-4 border transition-all duration-300 w-full ${
+                      persona.selected
+                        ? 'bg-muted border-primary shadow-lg scale-[1.02]' // Efeito de destaque ao selecionar
+                        : 'bg-muted/40 border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <label className="flex flex-col cursor-pointer w-full">
+                      {/* Cabeçalho do Card */}
+                      <div className="flex items-center justify-between w-full mb-4 pb-3 border-b border-border">
+                        <h3 className="text-xl font-bold text-foreground">
+                          {persona.name}
+                        </h3>
+                        <Checkbox
+                          checked={persona.selected}
+                          onCheckedChange={() => toggleItemSelection(index)}
+                          // Adicionar uma 'aria-label' melhora a acessibilidade para leitores de tela.
+                          aria-label={`Selecionar ${persona.name}`}
+                        />
+                      </div>
+
+                      {/* Corpo do Card */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 text-sm text-left">
+                        {/* Seção de Perfil */}
+                        <div className="flex flex-col gap-2">
+                          <h4 className="font-semibold text-foreground mb-1">
+                            Perfil
+                          </h4>
+                          <ul className="list-disc list-inside space-y-1.5 text-muted-foreground">
+                            {persona.profile.map((item, i) => (
+                              <li key={`profile-${persona.id}-${i}`}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Seção de Expectativas */}
+                        <div className="flex flex-col gap-2">
+                          <h4 className="font-semibold text-foreground mb-1">
+                            Expectativas
+                          </h4>
+                          <ul className="list-disc list-inside space-y-1.5 text-muted-foreground">
+                            {persona.expectations.map((item, i) => (
+                              <li key={`expectation-${persona.id}-${i}`}>
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Seção de Objetivos */}
+                        <div className="flex flex-col gap-2">
+                          <h4 className="font-semibold text-foreground mb-1">
+                            Objetivos
+                          </h4>
+                          <ul className="list-disc list-inside space-y-1.5 text-muted-foreground">
+                            {persona.goals.map((item, i) => (
+                              <li key={`goal-${persona.id}-${i}`}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-border flex-shrink-0">
+              <Button
+                onClick={cancelGeneratedItems}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmGeneratedItems}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+                disabled={generatedItems.filter((j) => j.selected).length === 0}
+              >
+                <Check className="mr-2" size={16} />
+                Confirmar e Adicionar (
+                {generatedItems.filter((j) => j.selected).length})
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const PersonaItem = ({
   item,
@@ -115,6 +261,11 @@ const Personas = ({ project, setProject }) => {
   const [editPersonaName, setEditPersonaName] = useState('')
   const [deleteConfirmPersona, setDeleteConfirmPersona] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  //ia states
+  const [aiGeneratedPersonas, setAiGeneratedPersonas] = useState([])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
 
   const personaFieldVariants = {
     profile: { text: 'text-primary' },
@@ -300,14 +451,145 @@ const Personas = ({ project, setProject }) => {
     }
   }
 
-  useEffect(() => {
-    if (editingField.personaId && textareaRef.current) {
-      textareaRef.current.focus()
+  //rotas relacionadas ao modal de IA
+  const generatePersonas = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post('/api/personas/generate', {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      const personasWithSelection = data.message.personas.map((persona) => ({
+        ...persona,
+        selected: true,
+      }))
+
+      setAiGeneratedPersonas(personasWithSelection)
+      setShowAiModal(true)
+      toast.success('Personas geradas com sucesso.')
+    } catch (error) {
+      console.error('Erro ao gerar personas:', error)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data
+
+        if (errorData.status === 'warning') {
+          toast.warning(errorData.message)
+        } else {
+          toast.error(
+            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
+          )
+        }
+      } else {
+        toast.error(
+          'Não foi possível conectar ao servidor. Verifique sua internet.',
+        )
+      }
+    } finally {
+      setIsGenerating(false)
     }
-  }, [editingField])
+  }
+  const confirmGeneratedPersonas = () => {
+    const selectedPersonas = aiGeneratedPersonas.filter(
+      (persona) => persona.selected,
+    )
+    const remainingPersonas = aiGeneratedPersonas.filter(
+      (persona) => !persona.selected,
+    )
+
+    if (selectedPersonas.length === 0) {
+      toast.warning('Selecione pelo menos uma persona para adicionar.')
+      return
+    }
+
+    const personasToAdd = selectedPersonas.map((persona) => ({
+      id: `temp-${Date.now()}-${Math.random()}`,
+      created_at: new Date().toISOString(),
+      project_id: project.id,
+      ...persona,
+    }))
+
+    setProject((prevProject) => ({
+      ...prevProject,
+      personas: [...(prevProject.personas || []), ...personasToAdd],
+    }))
+
+    const personasForBackend = selectedPersonas.map(({ title, type }) => ({
+      title,
+      type,
+      project_id: project.id,
+    }))
+
+    // router.post(
+    //   route('persona.bulk-store'),
+    //   { personas: personasForBackend },
+    //   {
+    //     preserveState: true,
+    //     preserveScroll: true,
+    //     onSuccess: () => {
+    //       toast.success(
+    //         `${selectedPersonas.length} persona(s) adicionada(s) com sucesso!`,
+    //       )
+    //       setAiGeneratedPersonas(remainingPersonas)
+    //       if (remainingPersonas.length === 0) {
+    //         setShowAiModal(false)
+    //         setIsModalMinimized(false)
+    //       }
+    //     },
+    //     onError: (errors) => {
+    //       toast.error('Ocorreu um erro ao salvar as personas.')
+    //       console.error('Erro do backend:', errors)
+    //       setProject((prevProject) => {
+    //         const personasToAddIds = personasToAdd.map((p) => p.id)
+    //         return {
+    //           ...prevProject,
+    //           personas: prevProject.personas.filter(
+    //             (p) => !personasToAddIds.includes(p.id),
+    //           ),
+    //         }
+    //       })
+    //     },
+    //   },
+    // )
+  }
+
+  const cancelGeneratedPersonas = () => {
+    setShowAiModal(false)
+    setAiGeneratedPersonas([])
+    setIsModalMinimized(false)
+  }
+
+  const togglePersonaSelection = (index) => {
+    setAiGeneratedPersonas((prev) =>
+      prev.map((persona, i) =>
+        i === index ? { ...persona, selected: !persona.selected } : persona,
+      ),
+    )
+  }
+
+  const toggleAllPersonas = () => {
+    const allSelected = aiGeneratedPersonas.every((persona) => persona.selected)
+    setAiGeneratedPersonas((prev) =>
+      prev.map((persona) => ({ ...persona, selected: !allSelected })),
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-2 w-full p-4">
+      {showAiModal && (
+        <GeneratedItemsModal
+          isModalMinimized={isModalMinimized}
+          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+          cancelGeneratedItems={cancelGeneratedPersonas}
+          generatedItems={aiGeneratedPersonas}
+          toggleItemSelection={togglePersonaSelection}
+          confirmGeneratedItems={confirmGeneratedPersonas}
+          toggleAllItems={toggleAllPersonas}
+        />
+      )}
       <div className="xl:col-span-2 flex flex-col sm:flex-row gap-2">
         <Button
           variant="secondary"
