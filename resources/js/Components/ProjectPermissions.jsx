@@ -169,9 +169,17 @@ export function ProjectPermissions({ project }) {
                           <SelectValue placeholder="Role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="editor">Editor</SelectItem>
-                          <SelectItem value="viewer">Visualizador</SelectItem>
+                          <SelectItem value="customer">Customer</SelectItem>
+                          <SelectItem value="domain_expert">
+                            Domain Expert
+                          </SelectItem>
+                          <SelectItem value="team">Team</SelectItem>
+                          <SelectItem value="facilitator">
+                            Facilitator
+                          </SelectItem>
+                          <SelectItem value="administrator">
+                            Administrator
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <Button

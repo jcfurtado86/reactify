@@ -11,6 +11,9 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use App\Enums\UserRole;
+use Illuminate\Validation\Rules\Enum as EnumRule; // Regra de validação para Enums
+
 
 class ProjectPermissionController extends Controller
 {
@@ -45,7 +48,8 @@ class ProjectPermissionController extends Controller
     $validated = $request->validate([
       'users' => 'required|array',
       'users.*.id' => 'required|exists:users,id',
-      'users.*.role' => 'required|string|in:admin,editor,viewer', // Adapte os papéis conforme necessário
+      'users.*.role' => ['required', new EnumRule(UserRole::class)],
+      // 'users.*.role' => 'required|string|in:admin,editor,viewer', // Adapte os papéis conforme necessário
     ]);
 
     $editorUser = $request->user();

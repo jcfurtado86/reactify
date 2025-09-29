@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole as EnumsUserRole;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,6 +17,9 @@ class UserRole extends Model
     'can_create',
     'can_read',
     'can_update'
+  ];
+  protected $casts = [
+    'name' => EnumsUserRole::class,
   ];
 
   // Relação: Uma role pertence a vários usuários

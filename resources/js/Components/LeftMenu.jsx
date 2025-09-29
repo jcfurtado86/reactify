@@ -117,7 +117,7 @@ const LeftMenu = () => {
   }, [])
 
   useEffect(() => {
-    //console.log(props)
+    console.log(props)
   }, [props])
 
   const currentRouteName = route().current()
