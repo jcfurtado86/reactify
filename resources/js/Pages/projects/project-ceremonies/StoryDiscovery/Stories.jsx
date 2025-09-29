@@ -47,11 +47,7 @@ const GeneratedItemsModal = ({
             {isModalMinimized && 'Stories Geradas'}
           </h3>
           <div className="flex items-center gap-2">
-            <Button
-              // onClick={() => setIsModalMinimized(!isModalMinimized)}
-              onClick={changeModalState}
-              className="text-muted-foreground hover:text-foreground"
-            >
+            <Button onClick={changeModalState} size="icon" variant="secondary">
               {isModalMinimized ? (
                 <ChevronsUp size={20} />
               ) : (
@@ -60,7 +56,8 @@ const GeneratedItemsModal = ({
             </Button>
             <Button
               onClick={cancelGeneratedItems}
-              className="text-muted-foreground hover:text-foreground"
+              size="icon"
+              variant="secondary"
             >
               <X size={24} />
             </Button>
@@ -95,36 +92,25 @@ const GeneratedItemsModal = ({
                         : 'bg-muted/50 border-border hover:border-muted-foreground'
                     }`}
                   >
-                    <label className="flex items-center cursor-pointer flex-1 gap-4">
-                      <input
-                        type="checkbox"
-                        checked={story.selected}
-                        onChange={() => toggleItemSelection(index)}
-                        className="sr-only"
-                      />
-                      <Badge
-                        className={`border-none text-primary-foreground font-bold ${
-                          story.type === 'system'
-                            ? 'bg-secondary'
-                            : 'bg-primary'
-                        }`}
-                      >
-                        {story.type === 'system' ? 'SS' : 'US'}
-                      </Badge>
-                      <span className="text-sm text-foreground">
-                        {story.title}
-                      </span>
-                      <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
-                          story.selected
-                            ? 'bg-primary border-primary/80'
-                            : 'bg-muted-foreground border-border'
-                        } `}
-                      >
-                        {story.selected && (
-                          <Check className="w-4 h-4 text-primary-foreground" />
-                        )}
+                    <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                      <div className="flex items-center gap-2 text-left">
+                        <Badge
+                          className={`border-none text-primary-foreground font-bold ${
+                            story.type === 'system'
+                              ? 'bg-secondary'
+                              : 'bg-primary'
+                          }`}
+                        >
+                          {story.type === 'system' ? 'SS' : 'US'}
+                        </Badge>
+                        <span className="text-sm text-foreground">
+                          {story.title}
+                        </span>
                       </div>
+                      <Checkbox
+                        checked={story.selected}
+                        onCheckedChange={() => toggleItemSelection(index)}
+                      />
                     </label>
                   </div>
                 ))}
@@ -289,6 +275,100 @@ const Stories = ({ project, setProject }) => {
   const isTemporary = (story) =>
     typeof story.id === 'string' && story.id.startsWith('temp-')
 
+  const handleInputChange = (e) => {
+    setEditValue(e.target.value)
+  }
+
+  const toggleTypeSelect = (storyId) => {
+    console.log(storyId)
+    if (typeSelectId === storyId) {
+      setTypeSelectId(null)
+    } else {
+      setTypeSelectId(storyId)
+    }
+  }
+
+  const addNewStory = (type = 'user') => {
+    setProject({
+      ...project,
+      stories: [
+        ...project.stories,
+        {
+          id: `temp-${Date.now()}`,
+          title: 'Nova Story',
+          type: type,
+        },
+      ],
+    })
+
+    router.post(
+      route('story.store'),
+      {
+        title: 'Nova Story',
+        type: type,
+        project_id: project.id,
+      },
+      { preserveState: true, preserveScroll: true },
+    )
+  }
+
+  const editStory = (story) => {
+    if (editingId === story.id) {
+      if (story.title !== editValue) {
+        const updatedStories = project.stories.map((s) =>
+          s.id === story.id
+            ? {
+                ...s,
+                title: editValue,
+                updated_at: new Date().toISOString(),
+              }
+            : s,
+        )
+
+        setProject({ ...project, stories: updatedStories })
+
+        router.patch(route('story.update', story.id), {
+          title: editValue,
+        })
+      }
+      setEditingId(null)
+    } else {
+      setEditingId(story.id)
+      setEditValue(story.title)
+    }
+  }
+
+  const changeStoryType = (storyId, newType) => {
+    const story = project.stories.find((s) => s.id === storyId)
+
+    if (story.type !== newType) {
+      const updatedStories = project.stories.map((s) =>
+        s.id === storyId
+          ? {
+              ...s,
+              type: newType,
+              updated_at: new Date().toISOString(),
+            }
+          : s,
+      )
+
+      setProject({ ...project, stories: updatedStories })
+
+      router.patch(route('story.update', storyId), {
+        type: newType,
+      })
+    }
+
+    setTypeSelectId(null)
+  }
+
+  const deleteStory = (storyId) => {
+    const updatedStories = project?.stories.filter((s) => s.id !== storyId)
+    setProject({ ...project, stories: updatedStories })
+    router.delete(route('story.delete', storyId))
+  }
+
+  //rotas relacionadas ao modal de IA
   const generateStories = async () => {
     setIsGenerating(true)
     setIsModalMinimized(false)
@@ -413,105 +493,6 @@ const Stories = ({ project, setProject }) => {
     setIsModalMinimized(false)
   }
 
-  const handleInputChange = (e) => {
-    setEditValue(e.target.value)
-  }
-
-  const toggleTypeSelect = (storyId) => {
-    console.log(storyId)
-    if (typeSelectId === storyId) {
-      setTypeSelectId(null)
-    } else {
-      setTypeSelectId(storyId)
-    }
-  }
-
-  const addNewStory = (type = 'user') => {
-    setProject({
-      ...project,
-      stories: [
-        ...project.stories,
-        {
-          id: `temp-${Date.now()}`,
-          title: 'Nova Story',
-          type: type,
-        },
-      ],
-    })
-
-    router.post(
-      route('story.store'),
-      {
-        title: 'Nova Story',
-        type: type,
-        project_id: project.id,
-      },
-      { preserveState: true, preserveScroll: true },
-    )
-  }
-
-  const editStory = (story) => {
-    if (editingId === story.id) {
-      if (story.title !== editValue) {
-        const updatedStories = project.stories.map((s) =>
-          s.id === story.id
-            ? {
-                ...s,
-                title: editValue,
-                updated_at: new Date().toISOString(),
-              }
-            : s,
-        )
-
-        setProject({ ...project, stories: updatedStories })
-
-        router.patch(route('story.update', story.id), {
-          title: editValue,
-        })
-      }
-      setEditingId(null)
-    } else {
-      setEditingId(story.id)
-      setEditValue(story.title)
-    }
-  }
-
-  const changeStoryType = (storyId, newType) => {
-    const story = project.stories.find((s) => s.id === storyId)
-
-    if (story.type !== newType) {
-      const updatedStories = project.stories.map((s) =>
-        s.id === storyId
-          ? {
-              ...s,
-              type: newType,
-              updated_at: new Date().toISOString(),
-            }
-          : s,
-      )
-
-      setProject({ ...project, stories: updatedStories })
-
-      router.patch(route('story.update', storyId), {
-        type: newType,
-      })
-    }
-
-    setTypeSelectId(null)
-  }
-
-  const deleteStory = (storyId) => {
-    const updatedStories = project?.stories.filter((s) => s.id !== storyId)
-    setProject({ ...project, stories: updatedStories })
-    router.delete(route('story.delete', storyId))
-  }
-
-  useEffect(() => {
-    if (editingId && textareaRef.current) {
-      textareaRef.current.focus()
-    }
-  }, [editingId])
-
   return (
     <div className="stories rounded grid grid-cols-2 gap-2 w-full p-4 cursor-pointer items-start">
       {showAiModal && (
@@ -525,131 +506,6 @@ const Stories = ({ project, setProject }) => {
           toggleAllItems={toggleAllStories}
         />
       )}
-      {/* {showAiModal && (
-        <div
-          className={`
-            transition-all duration-300 z-50
-            ${
-              isModalMinimized
-                ? 'fixed bottom-4 right-4 w-[400px]'
-                : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
-            }
-          `}
-        >
-          <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
-              <h3 className="text-xl font-bold text-foreground flex items-center">
-                {!isModalMinimized && 'Stories Geradas por IA'}
-                {isModalMinimized && 'Stories Geradas'}
-              </h3>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => setIsModalMinimized(!isModalMinimized)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  {isModalMinimized ? (
-                    <ChevronsUp size={20} />
-                  ) : (
-                    <Minus size={20} />
-                  )}
-                </Button>
-                <Button
-                  onClick={cancelGeneratedStories}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X size={24} />
-                </Button>
-              </div>
-            </div>
-
-            {!isModalMinimized && (
-              <>
-                <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
-                  <span className="text-foreground font-medium">
-                    {aiGeneratedStories.filter((j) => j.selected).length} de{' '}
-                    {aiGeneratedStories.length} selecionadas
-                  </span>
-                  <Button
-                    onClick={toggleAllStories}
-                    className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
-                  >
-                    {aiGeneratedStories.every((story) => story.selected)
-                      ? 'Desmarcar Todas'
-                      : 'Selecionar Todas'}
-                  </Button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto px-6 min-h-0">
-                  <div className="space-y-2 pb-4">
-                    {aiGeneratedStories.map((story, index) => (
-                      <div
-                        key={index}
-                        className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
-                          story.selected
-                            ? 'bg-muted border-primary'
-                            : 'bg-muted/50 border-border hover:border-muted-foreground'
-                        }`}
-                      >
-                        <label className="flex items-center cursor-pointer flex-1 gap-4">
-                          <input
-                            type="checkbox"
-                            checked={story.selected}
-                            onChange={() => toggleStorySelection(index)}
-                            className="sr-only"
-                          />
-                          <Badge
-                            className={`border-none text-primary-foreground font-bold ${
-                              story.type === 'system'
-                                ? 'bg-secondary'
-                                : 'bg-primary'
-                            }`}
-                          >
-                            {story.type === 'system' ? 'SS' : 'US'}
-                          </Badge>
-                          <span className="text-sm text-foreground">
-                            {story.title}
-                          </span>
-                          <div
-                            className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
-                              story.selected
-                                ? 'bg-primary border-primary/80'
-                                : 'bg-muted-foreground border-border'
-                            } `}
-                          >
-                            {story.selected && (
-                              <Check className="w-4 h-4 text-primary-foreground" />
-                            )}
-                          </div>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-border flex-shrink-0">
-                  <Button
-                    onClick={cancelGeneratedStories}
-                    className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={confirmGeneratedStories}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
-                    disabled={
-                      aiGeneratedStories.filter((j) => j.selected).length === 0
-                    }
-                  >
-                    <Check className="mr-2" size={16} />
-                    Confirmar e Adicionar (
-                    {aiGeneratedStories.filter((j) => j.selected).length})
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}*/}
 
       <div className="flex flex-col gap-2 ">
         <InfoButton
