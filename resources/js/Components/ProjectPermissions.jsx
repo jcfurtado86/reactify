@@ -1,7 +1,7 @@
 import { Plus, LoaderCircle, X } from 'lucide-react'
 import { usePage, router } from '@inertiajs/react'
 import axios from 'axios'
-
+import { toast } from 'sonner'
 export function ProjectPermissions({ project }) {
   const { auth, errors } = usePage().props
   const [users, setUsers] = useState([])
@@ -13,7 +13,7 @@ export function ProjectPermissions({ project }) {
   const [newUserEmail, setNewUserEmail] = useState('')
 
   // Variável de controle de permissão
-  const canManagePermissions = currentUserRole === 'admin'
+  const canManagePermissions = currentUserRole === 'administrator'
 
   useEffect(() => {
     if (isOpen) {
@@ -59,8 +59,13 @@ export function ProjectPermissions({ project }) {
         onSuccess: () => {
           setIsOpen(false)
         },
-        onError: (error) => {
-          // console.error('Failed to update permissions:', error)
+        onError: (currentError) => {
+          const errorKeys = Object.keys(currentError)
+          const hasRoleError = errorKeys.some((key) => key.includes('.role'))
+          if (hasRoleError) {
+            toast.error('Função inválida! Verifique e tente novamente.')
+            console.error('Função inválida! Verifique e tente novamente.')
+          }
         },
       },
     )
@@ -79,7 +84,7 @@ export function ProjectPermissions({ project }) {
       },
       {
         onSuccess: () => {
-          setNewUserEmail('') // Limpa o input
+          // setNewUserEmail('') // Limpa o input
           // fetchPermissions() // Recarrega a lista de usuários
           normalizeProjectUsers(project?.users)
         },
@@ -145,7 +150,8 @@ export function ProjectPermissions({ project }) {
             users
               .filter((user) => user.id !== auth.user.id)
               .map((user) => {
-                const isOwner = user.id == auth.user.id && user.role === 'admin'
+                const isOwner =
+                  user.id == auth.user.id && user.role === 'administrator'
                 return (
                   <div
                     key={user.id}
@@ -251,9 +257,15 @@ export function ProjectPermissions({ project }) {
                       <SelectValue placeholder="Role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="editor">Editor</SelectItem>
-                      <SelectItem value="viewer">Observador</SelectItem>
+                      <SelectItem value="customer">Customer</SelectItem>
+                      <SelectItem value="domain_expert">
+                        Domain Expert
+                      </SelectItem>
+                      <SelectItem value="team">Team</SelectItem>
+                      <SelectItem value="facilitator">Facilitator</SelectItem>
+                      <SelectItem value="administrator">
+                        Administrator
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

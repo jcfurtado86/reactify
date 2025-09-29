@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use App\Services\InvitationService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Enum as EnumRule;
+use App\Enums\UserRole;
 
 class ProjectInvitationController extends Controller
 {
@@ -19,7 +21,7 @@ class ProjectInvitationController extends Controller
 
     $validated = $request->validate([
       'email' => 'required|email',
-      'role' => 'required|in:member,admin,viewer'
+      'role' =>  ['required', new EnumRule(UserRole::class)],
     ]);
 
     $user = Auth::user();
@@ -30,7 +32,7 @@ class ProjectInvitationController extends Controller
       return back()->with(['message' => 'You are not participating in this project', 'status' => 'error']);
     };
 
-    if ($currentProject->pivot->role !== 'admin') {
+    if ($currentProject->pivot->role !== 'administrator') {
       return back()->with(['message' => 'You are not authorized to invite users', 'status' => 'error']);
     }
     if ($project->users()->where('email', $validated['email'])->exists()) {

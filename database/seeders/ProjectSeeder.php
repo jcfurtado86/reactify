@@ -17,21 +17,13 @@ class ProjectSeeder extends Seeder
   public function run(): void
   {
 
+    $adminRoleId = DB::table("user_roles")->insertGetId([
+      "name" => "administrator",
+      "can_create" => true,
+      "can_read" => true,
+      "can_update" => true,
+    ]);
 
-
-    // Criar User Role (admin) se não existir
-    $adminRole = DB::table("user_roles")->where("name", "admin")->first();
-
-    if (!$adminRole) {
-      $adminRoleId = DB::table("user_roles")->insertGetId([
-        "name" => "admin",
-        "can_create" => true,
-        "can_read" => true,
-        "can_update" => true,
-      ]);
-    } else {
-      $adminRoleId = $adminRole->id;
-    }
 
     // Criar Usuário Admin (evitar duplicação de email)
     $user1 = DB::table("users")
@@ -43,7 +35,6 @@ class ProjectSeeder extends Seeder
         "name" => "Admin",
         "email" => "admin@example.com",
         "password" => Hash::make("senha123"),
-        // "user_role_id" => $adminRoleId,
         'provider_avatar' => 'https://www.allthingswild.co.uk/wp-content/uploads/2022/01/IMG_4702.jpg',
         "active" => true,
         "email_verified_at" => now(),
@@ -64,7 +55,6 @@ class ProjectSeeder extends Seeder
         "name" => "Kat",
         "email" => "katlenvanessa15@gmail.com",
         "password" => Hash::make("senha123"),
-        // "user_role_id" => $adminRoleId,
         "active" => true,
         "email_verified_at" => now(),
         "created_at" => now(),
@@ -84,7 +74,6 @@ class ProjectSeeder extends Seeder
         "name" => "luma",
         "email" => "lumagabriela1333@gmail.com",
         "password" => Hash::make("senha123"),
-        // "user_role_id" => $adminRoleId,
         "active" => true,
         "email_verified_at" => now(),
         "created_at" => now(),
@@ -153,14 +142,14 @@ class ProjectSeeder extends Seeder
     DB::table("user_project")->insert([
       [
         "user_id" => $userId1,
-        "role" => "admin",
+        "role" => "administrator",
         "project_id" => $projectId,
         "created_at" => now(),
         "updated_at" => now(),
       ],
       [
         "user_id" => $userId2,
-        "role" => "admin",
+        "role" => "facilitator",
         "project_id" => $projectId,
         "created_at" => now(),
         "updated_at" => now(),

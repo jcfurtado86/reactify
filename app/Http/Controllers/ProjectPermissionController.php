@@ -49,7 +49,6 @@ class ProjectPermissionController extends Controller
       'users' => 'required|array',
       'users.*.id' => 'required|exists:users,id',
       'users.*.role' => ['required', new EnumRule(UserRole::class)],
-      // 'users.*.role' => 'required|string|in:admin,editor,viewer', // Adapte os papéis conforme necessário
     ]);
 
     $editorUser = $request->user();
@@ -106,7 +105,7 @@ class ProjectPermissionController extends Controller
   public function addMember(Request $request, Project $project)
   {
     $validated = $request->validate([
-      'role' => 'required|string|in:admin,editor,viewer',
+      'role' =>  ['required', new EnumRule(UserRole::class)],
       'email' => 'required|email|exists:users,email',
     ]);
 
