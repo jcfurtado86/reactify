@@ -1,10 +1,19 @@
-import { Plus, Minus, Check, X, LoaderCircle, ChevronDown } from 'lucide-react'
+import {
+  Plus,
+  Minus,
+  Check,
+  X,
+  LoaderCircle,
+  ChevronDown,
+  ChevronsUp,
+} from 'lucide-react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { tooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
+import GenerateAIButton from '@/Components/GenerateAIButton'
 import { toast } from 'sonner'
 export const typeColors = {
   bg: { color: '!bg-orange-600', title: 'bg' },
@@ -37,17 +46,13 @@ const GeneratedItemsModal = ({
         `}
     >
       <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'Stories Geradas por IA'}
-            {isModalMinimized && 'Stories Geradas'}
+            {!isModalMinimized && 'Goals Geradas por IA'}
+            {isModalMinimized && 'Goals Geradas'}
           </h3>
           <div className="flex items-center gap-2">
-            <Button
-              // onClick={() => setIsModalMinimized(!isModalMinimized)}
-              onClick={changeModalState}
-              className="text-muted-foreground hover:text-foreground"
-            >
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
               {isModalMinimized ? (
                 <ChevronsUp size={20} />
               ) : (
@@ -56,7 +61,8 @@ const GeneratedItemsModal = ({
             </Button>
             <Button
               onClick={cancelGeneratedItems}
-              className="text-muted-foreground hover:text-foreground"
+              size="icon"
+              variant="secondary"
             >
               <X size={24} />
             </Button>
@@ -91,36 +97,25 @@ const GeneratedItemsModal = ({
                         : 'bg-muted/50 border-border hover:border-muted-foreground'
                     }`}
                   >
-                    <label className="flex items-center cursor-pointer flex-1 gap-4">
-                      <input
-                        type="checkbox"
-                        checked={story.selected}
-                        onChange={() => toggleItemSelection(index)}
-                        className="sr-only"
-                      />
-                      <Badge
-                        className={`border-none text-primary-foreground font-bold ${
-                          story.type === 'system'
-                            ? 'bg-secondary'
-                            : 'bg-primary'
-                        }`}
-                      >
-                        {story.type === 'system' ? 'SS' : 'US'}
-                      </Badge>
-                      <span className="text-sm text-foreground">
-                        {story.title}
-                      </span>
-                      <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
-                          story.selected
-                            ? 'bg-primary border-primary/80'
-                            : 'bg-muted-foreground border-border'
-                        } `}
-                      >
-                        {story.selected && (
-                          <Check className="w-4 h-4 text-primary-foreground" />
-                        )}
+                    <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                      <div className="flex items-center gap-2 text-left">
+                        <Badge
+                          className={`border-none text-primary-foreground font-bold ${
+                            story.type === 'system'
+                              ? 'bg-secondary'
+                              : 'bg-primary'
+                          }`}
+                        >
+                          {story.type === 'system' ? 'SS' : 'US'}
+                        </Badge>
+                        <span className="text-sm text-foreground">
+                          {story.title}
+                        </span>
                       </div>
+                      <Checkbox
+                        checked={story.selected}
+                        onCheckedChange={() => toggleItemSelection(index)}
+                      />
                     </label>
                   </div>
                 ))}
@@ -328,18 +323,6 @@ const Goals = ({ project, setProject }) => {
   //ia states
   const [aiGeneratedGoals, setAiGeneratedGoals] = useState([
     {
-      id: 1,
-      title:
-        'Atendimento às leis de direitos autorais e relacionadas à conteúdo em domínio público.',
-      type: 'cg',
-      priority: 'medium',
-      project_id: 1,
-      created_at: '2025-09-29T01:07:16.000000Z',
-      updated_at: '2025-09-29T01:07:16.000000Z',
-      deleted_at: null,
-    },
-    {
-      id: 2,
       title: 'Atendimento às leis de proteção do consumidor.',
       type: 'cg',
       priority: 'medium',
@@ -347,9 +330,9 @@ const Goals = ({ project, setProject }) => {
       created_at: '2025-09-29T01:07:16.000000Z',
       updated_at: '2025-09-29T01:07:16.000000Z',
       deleted_at: null,
+      selected: false,
     },
     {
-      id: 3,
       title: 'Conformidade com padrões de segurança da informação.',
       type: 'cg',
       priority: 'low',
@@ -357,9 +340,9 @@ const Goals = ({ project, setProject }) => {
       created_at: '2025-09-29T01:07:16.000000Z',
       updated_at: '2025-09-29T01:07:16.000000Z',
       deleted_at: null,
+      selected: false,
     },
     {
-      id: 4,
       title: 'Atendimento às leis de proteção de dados pessoais.',
       type: 'cg',
       priority: 'low',
@@ -367,9 +350,9 @@ const Goals = ({ project, setProject }) => {
       created_at: '2025-09-29T01:07:16.000000Z',
       updated_at: '2025-09-29T01:07:16.000000Z',
       deleted_at: null,
+      selected: false,
     },
     {
-      id: 5,
       title:
         'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
       type: 'cg',
@@ -378,6 +361,7 @@ const Goals = ({ project, setProject }) => {
       created_at: '2025-09-29T01:07:16.000000Z',
       updated_at: '2025-09-29T01:07:16.000000Z',
       deleted_at: null,
+      selected: false,
     },
   ])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -539,6 +523,47 @@ const Goals = ({ project, setProject }) => {
     router.delete(route('goal.delete', goalId))
   }
 
+  //rotas relacionadas ao modal de IA
+  const generateGoals = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post('/api/stories/generate', {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      const goalsWithSelection = data.message.goal_sketches.map((goal) => ({
+        ...goal,
+        selected: true,
+      }))
+
+      setAiGeneratedGoals(goalsWithSelection)
+      setShowAiModal(true)
+      toast.success('Histórias geradas com sucesso.')
+    } catch (error) {
+      console.error('Erro ao gerar goals:', error)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data
+
+        if (errorData.status === 'warning') {
+          toast.warning(errorData.message)
+        } else {
+          toast.error(
+            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
+          )
+        }
+      } else {
+        toast.error(
+          'Não foi possível conectar ao servidor. Verifique sua internet.',
+        )
+      }
+    } finally {
+      setIsGenerating(false)
+    }
+  }
   const confirmGeneratedGoals = () => {
     const selectedGoals = aiGeneratedGoals.filter((goal) => goal.selected)
     const remainingGoals = aiGeneratedGoals.filter((goal) => !goal.selected)
@@ -557,7 +582,7 @@ const Goals = ({ project, setProject }) => {
 
     setProject((prevProject) => ({
       ...prevProject,
-      goals: [...(prevProject.goals || []), ...goalsToAdd],
+      goal_sketches: [...(prevProject.goal_sketches || []), ...goalsToAdd],
     }))
 
     const goalsForBackend = selectedGoals.map(({ title, type }) => ({
@@ -566,37 +591,37 @@ const Goals = ({ project, setProject }) => {
       project_id: project.id,
     }))
 
-    router.post(
-      route('goal.bulk-store'),
-      { goals: goalsForBackend },
-      {
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-          toast.success(
-            `${selectedGoals.length} goal(s) adicionada(s) com sucesso!`,
-          )
-          setAiGeneratedGoals(remainingGoals)
-          if (remainingGoals.length === 0) {
-            setShowAiModal(false)
-            setIsModalMinimized(false)
-          }
-        },
-        onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as goals.')
-          console.error('Erro do backend:', errors)
-          setProject((prevProject) => {
-            const goalsToAddIds = goalsToAdd.map((g) => g.id)
-            return {
-              ...prevProject,
-              goals: prevProject.goals.filter(
-                (g) => !goalsToAddIds.includes(g.id),
-              ),
-            }
-          })
-        },
-      },
-    )
+    // router.post(
+    //   route('goal.bulk-store'),
+    //   { goals: goalsForBackend },
+    //   {
+    //     preserveState: true,
+    //     preserveScroll: true,
+    //     onSuccess: () => {
+    //       toast.success(
+    //         `${selectedGoals.length} goal(s) adicionada(s) com sucesso!`,
+    //       )
+    //       setAiGeneratedGoals(remainingGoals)
+    //       if (remainingGoals.length === 0) {
+    //         setShowAiModal(false)
+    //         setIsModalMinimized(false)
+    //       }
+    //     },
+    //     onError: (errors) => {
+    //       toast.error('Ocorreu um erro ao salvar as goals.')
+    //       console.error('Erro do backend:', errors)
+    //       setProject((prevProject) => {
+    //         const goalsToAddIds = goalsToAdd.map((g) => g.id)
+    //         return {
+    //           ...prevProject,
+    //           goals: prevProject.goals.filter(
+    //             (g) => !goalsToAddIds.includes(g.id),
+    //           ),
+    //         }
+    //       })
+    //     },
+    //   },
+    // )
   }
 
   const cancelGeneratedGoals = () => {
@@ -745,6 +770,12 @@ const Goals = ({ project, setProject }) => {
           <Plus size={18} className="mr-2" />
           <span>Nova Business Goal</span>
         </Button>
+        <GenerateAIButton
+          isGenerating={isGenerating}
+          onClick={generateGoals}
+          // tooltip={tooltipInfo.aiGeneratedStory}
+          className="w-1/2"
+        />
       </div>
     </div>
   )
