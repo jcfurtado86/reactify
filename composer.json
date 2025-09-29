@@ -71,8 +71,8 @@
       "@php artisan migrate --graceful --ansi"
     ],
     "dev": [
-        "Composer\\Config::disableProcessTimeout",
-        "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74,#4ade80,#4ff3ed\" --kill-others-on-fail \"php artisan reverb:start\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" \"source .venv/bin/activate && cd py_service && flask run --port=5001\" --names=reverb,server,queue,logs,vite,python"
+      "Composer\\Config::disableProcessTimeout",
+      "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74,#4ade80,#4ff3ed\" --kill-others-on-fail \"php artisan reverb:start\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" \"source .venv/bin/activate && cd py_service && flask run --port=5001\" --names=reverb,server,queue,logs,vite,python"
     ]
   },
   "extra": {

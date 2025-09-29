@@ -1,10 +1,11 @@
-import { Plus, Check, X, LoaderCircle, ChevronDown } from 'lucide-react'
+import { Plus, Minus, Check, X, LoaderCircle, ChevronDown } from 'lucide-react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { tooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
+import { toast } from 'sonner'
 export const typeColors = {
   bg: { color: '!bg-orange-600', title: 'bg' },
   cg: { color: '!bg-purple-600', title: 'cg' },
@@ -14,6 +15,142 @@ export const priorityColors = {
   medium: { color: '!bg-yellow-600', title: 'medium' },
   low: { color: '!bg-green-600', title: 'low' },
 }
+
+const GeneratedItemsModal = ({
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+}) => {
+  return (
+    <div
+      className={`
+          transition-all duration-300 z-50
+          ${
+            isModalMinimized
+              ? 'fixed bottom-4 right-4 w-[400px]'
+              : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
+          }
+        `}
+    >
+      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'Stories Geradas por IA'}
+            {isModalMinimized && 'Stories Geradas'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button
+              // onClick={() => setIsModalMinimized(!isModalMinimized)}
+              onClick={changeModalState}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+
+        {!isModalMinimized && (
+          <>
+            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+              <span className="text-foreground font-medium">
+                {generatedItems.filter((j) => j.selected).length} de{' '}
+                {generatedItems.length} selecionadas
+              </span>
+              <Button
+                onClick={toggleAllItems}
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+              >
+                {generatedItems.every((story) => story.selected)
+                  ? 'Desmarcar Todas'
+                  : 'Selecionar Todas'}
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              <div className="space-y-2 pb-4">
+                {generatedItems.map((story, index) => (
+                  <div
+                    key={'temp-' + index}
+                    className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                      story.selected
+                        ? 'bg-muted border-primary'
+                        : 'bg-muted/50 border-border hover:border-muted-foreground'
+                    }`}
+                  >
+                    <label className="flex items-center cursor-pointer flex-1 gap-4">
+                      <input
+                        type="checkbox"
+                        checked={story.selected}
+                        onChange={() => toggleItemSelection(index)}
+                        className="sr-only"
+                      />
+                      <Badge
+                        className={`border-none text-primary-foreground font-bold ${
+                          story.type === 'system'
+                            ? 'bg-secondary'
+                            : 'bg-primary'
+                        }`}
+                      >
+                        {story.type === 'system' ? 'SS' : 'US'}
+                      </Badge>
+                      <span className="text-sm text-foreground">
+                        {story.title}
+                      </span>
+                      <div
+                        className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
+                          story.selected
+                            ? 'bg-primary border-primary/80'
+                            : 'bg-muted-foreground border-border'
+                        } `}
+                      >
+                        {story.selected && (
+                          <Check className="w-4 h-4 text-primary-foreground" />
+                        )}
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-border flex-shrink-0">
+              <Button
+                onClick={cancelGeneratedItems}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmGeneratedItems}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+                disabled={generatedItems.filter((j) => j.selected).length === 0}
+              >
+                <Check className="mr-2" size={16} />
+                Confirmar e Adicionar (
+                {generatedItems.filter((j) => j.selected).length})
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const GoalItem = ({
   goal,
   isTemporary,
@@ -182,18 +319,70 @@ const GoalItem = ({
   )
 }
 const Goals = ({ project, setProject }) => {
-  // Estado para controlar qual goal está sendo editada
   const [editingId, setEditingId] = useState(null)
-  // Estado para armazenar o valor temporário durante a edição
   const [editValue, setEditValue] = useState('')
-
   const textareaRef = useRef(null)
-  // Estado para controlar qual goal está com o seletor de tipo aberto
   const [typeSelectId, setTypeSelectId] = useState(null)
-  // Estado para controlar qual goal está com o seletor de prioridade aberto
   const [prioritySelectId, setPrioritySelectId] = useState(null)
-  // Estado para controlar qual goal está com o diálogo de confirmação de exclusão aberto
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+  //ia states
+  const [aiGeneratedGoals, setAiGeneratedGoals] = useState([
+    {
+      id: 1,
+      title:
+        'Atendimento às leis de direitos autorais e relacionadas à conteúdo em domínio público.',
+      type: 'cg',
+      priority: 'medium',
+      project_id: 1,
+      created_at: '2025-09-29T01:07:16.000000Z',
+      updated_at: '2025-09-29T01:07:16.000000Z',
+      deleted_at: null,
+    },
+    {
+      id: 2,
+      title: 'Atendimento às leis de proteção do consumidor.',
+      type: 'cg',
+      priority: 'medium',
+      project_id: 1,
+      created_at: '2025-09-29T01:07:16.000000Z',
+      updated_at: '2025-09-29T01:07:16.000000Z',
+      deleted_at: null,
+    },
+    {
+      id: 3,
+      title: 'Conformidade com padrões de segurança da informação.',
+      type: 'cg',
+      priority: 'low',
+      project_id: 1,
+      created_at: '2025-09-29T01:07:16.000000Z',
+      updated_at: '2025-09-29T01:07:16.000000Z',
+      deleted_at: null,
+    },
+    {
+      id: 4,
+      title: 'Atendimento às leis de proteção de dados pessoais.',
+      type: 'cg',
+      priority: 'low',
+      project_id: 1,
+      created_at: '2025-09-29T01:07:16.000000Z',
+      updated_at: '2025-09-29T01:07:16.000000Z',
+      deleted_at: null,
+    },
+    {
+      id: 5,
+      title:
+        'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
+      type: 'cg',
+      priority: 'high',
+      project_id: 1,
+      created_at: '2025-09-29T01:07:16.000000Z',
+      updated_at: '2025-09-29T01:07:16.000000Z',
+      deleted_at: null,
+    },
+  ])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(true)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
 
   const isTemporary = (goal) =>
     typeof goal.id === 'string' && goal.id.startsWith('temp-')
@@ -350,9 +539,101 @@ const Goals = ({ project, setProject }) => {
     router.delete(route('goal.delete', goalId))
   }
 
+  const confirmGeneratedGoals = () => {
+    const selectedGoals = aiGeneratedGoals.filter((goal) => goal.selected)
+    const remainingGoals = aiGeneratedGoals.filter((goal) => !goal.selected)
+
+    if (selectedGoals.length === 0) {
+      toast.warning('Selecione pelo menos uma goal para adicionar.')
+      return
+    }
+
+    const goalsToAdd = selectedGoals.map((goal) => ({
+      id: `temp-${Date.now()}-${Math.random()}`,
+      created_at: new Date().toISOString(),
+      project_id: project.id,
+      ...goal,
+    }))
+
+    setProject((prevProject) => ({
+      ...prevProject,
+      goals: [...(prevProject.goals || []), ...goalsToAdd],
+    }))
+
+    const goalsForBackend = selectedGoals.map(({ title, type }) => ({
+      title,
+      type,
+      project_id: project.id,
+    }))
+
+    router.post(
+      route('goal.bulk-store'),
+      { goals: goalsForBackend },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedGoals.length} goal(s) adicionada(s) com sucesso!`,
+          )
+          setAiGeneratedGoals(remainingGoals)
+          if (remainingGoals.length === 0) {
+            setShowAiModal(false)
+            setIsModalMinimized(false)
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar as goals.')
+          console.error('Erro do backend:', errors)
+          setProject((prevProject) => {
+            const goalsToAddIds = goalsToAdd.map((g) => g.id)
+            return {
+              ...prevProject,
+              goals: prevProject.goals.filter(
+                (g) => !goalsToAddIds.includes(g.id),
+              ),
+            }
+          })
+        },
+      },
+    )
+  }
+
+  const cancelGeneratedGoals = () => {
+    setShowAiModal(false)
+    setAiGeneratedGoals([])
+    setIsModalMinimized(false)
+  }
+
+  const toggleGoalSelection = (index) => {
+    setAiGeneratedGoals((prev) =>
+      prev.map((goal, i) =>
+        i === index ? { ...goal, selected: !goal.selected } : goal,
+      ),
+    )
+  }
+
+  const toggleAllGoals = () => {
+    const allSelected = aiGeneratedGoals.every((goal) => goal.selected)
+    setAiGeneratedGoals((prev) =>
+      prev.map((goal) => ({ ...goal, selected: !allSelected })),
+    )
+  }
+
   return (
     <div className="goalSketches rounded grid grid-cols-2 gap-2 w-full p-4 cursor-pointer items-start">
       {/* --- Column 1: Constraint Goals --- */}
+      {showAiModal && (
+        <GeneratedItemsModal
+          isModalMinimized={isModalMinimized}
+          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+          cancelGeneratedItems={cancelGeneratedGoals}
+          generatedItems={aiGeneratedGoals}
+          toggleItemSelection={toggleGoalSelection}
+          confirmGeneratedItems={confirmGeneratedGoals}
+          toggleAllItems={toggleAllGoals}
+        />
+      )}
 
       <div className="flex flex-col gap-2">
         <InfoButton

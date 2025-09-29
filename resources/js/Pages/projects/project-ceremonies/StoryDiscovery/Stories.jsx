@@ -20,7 +20,7 @@ export const storyVariants = {
   user: { bg: 'bg-purple-600', title: 'user' },
   system: { bg: 'bg-orange-600', title: 'system' },
 }
-const GeneratedStoriesModal = ({
+const GeneratedItemsModal = ({
   isModalMinimized,
   changeModalState,
   cancelGeneratedItems,
@@ -515,7 +515,7 @@ const Stories = ({ project, setProject }) => {
   return (
     <div className="stories rounded grid grid-cols-2 gap-2 w-full p-4 cursor-pointer items-start">
       {showAiModal && (
-        <GeneratedStoriesModal
+        <GeneratedItemsModal
           isModalMinimized={isModalMinimized}
           changeModalState={() => setIsModalMinimized(!isModalMinimized)}
           cancelGeneratedItems={cancelGeneratedStories}
