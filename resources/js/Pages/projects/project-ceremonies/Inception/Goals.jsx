@@ -321,51 +321,9 @@ const Goals = ({ project, setProject }) => {
   const [prioritySelectId, setPrioritySelectId] = useState(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   //ia states
-  const [aiGeneratedGoals, setAiGeneratedGoals] = useState([
-    {
-      title: 'Atendimento às leis de proteção do consumidor.',
-      type: 'cg',
-      priority: 'medium',
-      project_id: 1,
-      created_at: '2025-09-29T01:07:16.000000Z',
-      updated_at: '2025-09-29T01:07:16.000000Z',
-      deleted_at: null,
-      selected: false,
-    },
-    {
-      title: 'Conformidade com padrões de segurança da informação.',
-      type: 'cg',
-      priority: 'low',
-      project_id: 1,
-      created_at: '2025-09-29T01:07:16.000000Z',
-      updated_at: '2025-09-29T01:07:16.000000Z',
-      deleted_at: null,
-      selected: false,
-    },
-    {
-      title: 'Atendimento às leis de proteção de dados pessoais.',
-      type: 'cg',
-      priority: 'low',
-      project_id: 1,
-      created_at: '2025-09-29T01:07:16.000000Z',
-      updated_at: '2025-09-29T01:07:16.000000Z',
-      deleted_at: null,
-      selected: false,
-    },
-    {
-      title:
-        'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
-      type: 'cg',
-      priority: 'high',
-      project_id: 1,
-      created_at: '2025-09-29T01:07:16.000000Z',
-      updated_at: '2025-09-29T01:07:16.000000Z',
-      deleted_at: null,
-      selected: false,
-    },
-  ])
+  const [aiGeneratedGoals, setAiGeneratedGoals] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
-  const [showAiModal, setShowAiModal] = useState(true)
+  const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
 
   const isTemporary = (goal) =>
