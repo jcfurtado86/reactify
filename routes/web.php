@@ -186,6 +186,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
   //Rotas para goals
   Route::prefix('goal')->group(function () {
     Route::post('/', [GoalController::class, 'store'])->name('goal.store');
+    Route::post('/bulk-store', [GoalController::class, 'bulk'])->name('goal.bulk-store');
     Route::patch('/{goal}', [GoalController::class, 'update'])->name('goal.update');
     Route::delete('/{goal}', [GoalController::class, 'destroy'])->name('goal.delete');
   });
@@ -199,6 +200,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
   Route::prefix('persona')->group(function () {
     Route::post('/', [PersonaController::class, 'store'])->name('persona.store');
     Route::patch('/{persona}', [PersonaController::class, 'update'])->name('persona.update');
+    Route::post('/bulk-store', [PersonaController::class, 'bulk'])->name('persona.bulk-store');
     Route::delete('/{persona}', [PersonaController::class, 'destroy'])->name('persona.delete');
   });
 
