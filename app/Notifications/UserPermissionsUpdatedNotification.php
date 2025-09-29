@@ -41,7 +41,7 @@ class UserPermissionsUpdatedNotification extends Notification
       ->greeting('Hello ' . $notifiable->name . ',')
       ->subject($this->editorUser->name . ' updated your permissions in ' . $this->project->title)
       ->line('[' . $this->editorUser->name . '](mailto:' . $this->editorUser->email . ') updated your permissions in ' . $this->project->title)
-      ->line('Now your current role is ' . $currentRole . '.')
+      ->line('Now your current role is ' . $currentRole . '.');
   }
 
   /**
