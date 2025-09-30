@@ -158,7 +158,7 @@ const Dashboard = ({ project, setProject }) => {
   }, [date])
 
   return (
-    <main className="grid  grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] xl:grid-cols-[22rem,16rem,auto,auto] gap-4 p-4 w-full ">
+    <main className="grid md:grid-cols-[auto,auto] lg:grid-cols-[16rem,auto,auto] xl:grid-cols-[22rem,16rem,auto,auto] gap-4 p-4 w-full ">
       <Head title={project.title || 'Project Title'} />
       {/* progresso de conclusao*/}
       <section className="bg-card rounded-lg flex flex-col justify-between text-muted-foreground p-2 gap-2 w-full h-full">
@@ -232,7 +232,7 @@ const Dashboard = ({ project, setProject }) => {
         disabled={{ before: new Date() }}
         initialFocus
         locale={ptBR}
-        className="bg-card mx-auto xl:col-start-2 xl:row-start-1 xl:w-full"
+        className="bg-card mx-auto xl:col-start-2 xl:row-start-1 w-full"
       />
       {/* </PopoverContent>
         </Popover>*/}
