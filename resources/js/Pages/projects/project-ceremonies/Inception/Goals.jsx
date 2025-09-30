@@ -487,20 +487,20 @@ const Goals = ({ project, setProject }) => {
     setIsModalMinimized(false)
 
     try {
-      const response = await axios.post('/api/stories/generate', {
+      const response = await axios.post('/api/goals/generate', {
         project_id: project.id,
-      })
+      });
 
       const data = response.data
 
-      const goalsWithSelection = data.message.goal_sketches.map((goal) => ({
+      const goalsWithSelection = data.goals.map((goal) => ({
         ...goal,
         selected: true,
       }))
 
       setAiGeneratedGoals(goalsWithSelection)
       setShowAiModal(true)
-      toast.success('Histórias geradas com sucesso.')
+      toast.success('Goals geradas com sucesso a partir das entrevistas mais recentes.');
     } catch (error) {
       console.error('Erro ao gerar goals:', error)
       if (error.response && error.response.data) {
@@ -543,43 +543,44 @@ const Goals = ({ project, setProject }) => {
       goal_sketches: [...(prevProject.goal_sketches || []), ...goalsToAdd],
     }))
 
-    const goalsForBackend = selectedGoals.map(({ title, type }) => ({
+    const goalsForBackend = selectedGoals.map(({ title, type, priority }) => ({
       title,
       type,
+      priority,
       project_id: project.id,
     }))
 
-    // router.post(
-    //   route('goal.bulk-store'),
-    //   { goals: goalsForBackend },
-    //   {
-    //     preserveState: true,
-    //     preserveScroll: true,
-    //     onSuccess: () => {
-    //       toast.success(
-    //         `${selectedGoals.length} goal(s) adicionada(s) com sucesso!`,
-    //       )
-    //       setAiGeneratedGoals(remainingGoals)
-    //       if (remainingGoals.length === 0) {
-    //         setShowAiModal(false)
-    //         setIsModalMinimized(false)
-    //       }
-    //     },
-    //     onError: (errors) => {
-    //       toast.error('Ocorreu um erro ao salvar as goals.')
-    //       console.error('Erro do backend:', errors)
-    //       setProject((prevProject) => {
-    //         const goalsToAddIds = goalsToAdd.map((g) => g.id)
-    //         return {
-    //           ...prevProject,
-    //           goals: prevProject.goals.filter(
-    //             (g) => !goalsToAddIds.includes(g.id),
-    //           ),
-    //         }
-    //       })
-    //     },
-    //   },
-    // )
+    router.post(
+      route('goal.bulk-store'),
+      { goals: goalsForBackend },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedGoals.length} goal(s) adicionada(s) com sucesso!`,
+          )
+          setAiGeneratedGoals(remainingGoals)
+          if (remainingGoals.length === 0) {
+            setShowAiModal(false)
+            setIsModalMinimized(false)
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar as goals.')
+          console.error('Erro do backend:', errors)
+          setProject((prevProject) => {
+            const goalsToAddIds = goalsToAdd.map((g) => g.id)
+            return {
+              ...prevProject,
+              goals: prevProject.goals.filter(
+                (g) => !goalsToAddIds.includes(g.id),
+              ),
+            }
+          })
+        },
+      },
+    )
   }
 
   const cancelGeneratedGoals = () => {
