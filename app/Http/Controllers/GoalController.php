@@ -6,9 +6,28 @@ use App\Http\Requests\StoreGoalRequest;
 use App\Http\Requests\UpdateGoalRequest;
 use App\Models\Goal;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\BulkStoreGoalRequest;
+use Illuminate\Support\Facades\DB;
 
 class GoalController extends Controller
 {
+  public function bulk(BulkStoreGoalRequest $request)
+  {
+    $validatedData = $request->validated();
+    
+    DB::transaction(function () use ($validatedData) {
+      foreach ($validatedData['goals'] as $goalData) {
+        Goal::create($goalData);
+      }
+    });
+
+    Log::info('Bulk goals created successfully within a transaction', [
+      'count' => count($validatedData['goals']),
+    ]);
+
+    return back()->with('success', 'Goals adicionadas com sucesso.');
+  }
+
   public function store(StoreGoalRequest $request)
   {
     $validated = $request->validated();
