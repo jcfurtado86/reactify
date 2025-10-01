@@ -8,15 +8,17 @@ use App\Http\Requests\ProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\ProductCanvas;
 use App\Models\Project;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Illuminate\Support\Facades\Log;
 
 class ProjectController extends Controller
 {
-  public function getUpdatedProject(Project $project)
+  public function getUpdatedProject(Project $project): JsonResponse
   {
     return response()->json([
       'project' => $project->load([
@@ -37,7 +39,7 @@ class ProjectController extends Controller
         'usage_scenarios',
         'system_interfaces',
         'storyboards',
-        'interviews'
+        'interviews',
       ]),
     ]);
   }
@@ -70,18 +72,18 @@ class ProjectController extends Controller
         'usage_scenarios',
         'system_interfaces',
         'storyboards',
-        'interviews'
+        'interviews',
       ]),
       'message' => 'Projects updated successfully.',
       'status' => 'success',
     ]);
   }
-  public function index()
+  public function index(): InertiaResponse
   {
     return Inertia::render('Home');
   }
 
-  public function show(Project $project)
+  public function show(Project $project): InertiaResponse
   {
     $user = Auth::user();
 
@@ -110,14 +112,14 @@ class ProjectController extends Controller
       'interviews',
       'users' => function ($query) {
         $query->select(['user_id', 'name', 'email', 'provider_avatar']);
-      }
+      },
     ]);
 
     return Inertia::render('Dashboard', [
-      'project' => $project
+      'project' => $project,
     ]);
   }
-  public function ceremony(Project $project, string $ceremony)
+  public function ceremony(Project $project, string $ceremony): InertiaResponse
   {
     $user = Auth::user();
 
@@ -146,15 +148,15 @@ class ProjectController extends Controller
       'interviews',
       'users' => function ($query) {
         $query->select(['user_id', 'name', 'email', 'provider_avatar']);
-      }
+      },
     ]);
 
     return Inertia::render('projects/Project', [
       'project' => $project,
-      'page' => $ceremony
+      'page' => $ceremony,
     ]);
   }
-  public function store(ProjectRequest $request)
+  public function store(ProjectRequest $request): RedirectResponse
   {
     $validatedData = $request->validated();
 
@@ -164,7 +166,7 @@ class ProjectController extends Controller
     // Associa o usuário autenticado como o "dono" (admin) do projeto.
     if ($project && $user) {
       // Vincula o usuário ao projeto com o papel de 'admin'
-      $project->users()->attach($user->id, ['role' => 'admin']);
+      $project->users()->attach($user->id, ['role' => 'administrator']);
     }
 
     $productCanvas = ProductCanvas::create([
@@ -175,29 +177,41 @@ class ProjectController extends Controller
 
     $project->save();
 
-    Log::info('Project created successfully: ' . $project->id . ' - ' . $project->title);
+    Log::info(
+      'Project created successfully: ' . $project->id . ' - ' . $project->title
+    );
 
     broadcast(new ProjectUpdated($project));
 
-    Log::info('Project created successfully: ' . $productCanvas->id . ' for Project: ' . $project->id);
+    Log::info(
+      'Project created successfully: ' .
+        $productCanvas->id .
+        ' for Project: ' .
+        $project->id
+    );
 
     return redirect()
       ->route('project.show', $project->id)
       ->with([
         'status' => 'success',
-        'message' => 'Project created successfully. Project id: ' . $project->id,
+        'message' =>
+          'Project created successfully. Project id: ' . $project->id,
       ]);
   }
 
-  public function update(UpdateProjectRequest $request, Project $project)
-  {
+  public function update(
+    UpdateProjectRequest $request,
+    Project $project
+  ): RedirectResponse {
     $validated = $request->validated();
 
     $project->update($validated);
 
     broadcast(new ProjectUpdated($project));
 
-    Log::info('Project updated successfully: ' . $project->id . ' - ' . $project->title);
+    Log::info(
+      'Project updated successfully: ' . $project->id . ' - ' . $project->title
+    );
 
     return back();
   }
@@ -205,7 +219,7 @@ class ProjectController extends Controller
   /**
    * Remove the specified resource from storage.
    */
-  public function destroy(string $id)
+  public function destroy(string $id): RedirectResponse
   {
     $project = Project::findOrFail($id);
 
@@ -214,7 +228,9 @@ class ProjectController extends Controller
     // Excluir o projeto
     $project->delete();
 
-    Log::info('Project deleted successfully: ' . $project->id . ' - ' . $project->title);
+    Log::info(
+      'Project deleted successfully: ' . $project->id . ' - ' . $project->title
+    );
 
     return redirect()
       ->route('dashboard')
@@ -224,14 +240,16 @@ class ProjectController extends Controller
       ]);
   }
 
-  public function toggleActive(string $id)
+  public function toggleActive(string $id): RedirectResponse
   {
     $project = Project::findOrFail($id);
 
     $project->active = !$project->active;
     $project->save();
 
-    $statusMessage = $project->active ? 'Projeto ativado com sucesso.' : 'Projeto desativado com sucesso.';
+    $statusMessage = $project->active
+      ? 'Projeto ativado com sucesso.'
+      : 'Projeto desativado com sucesso.';
 
     broadcast(new ProjectUpdated($project));
 
