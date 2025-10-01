@@ -36,10 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
    *
    * @var list<string>
    */
-  protected $hidden = [
-    'password',
-    'remember_token',
-  ];
+  protected $hidden = ['password', 'remember_token'];
 
   /**
    * Get the attributes that should be cast.
@@ -56,7 +53,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
   public function projects(): BelongsToMany
   {
-    return $this->belongsToMany(Project::class, 'user_project')->withPivot('role')->withTimestamps();
+    return $this->belongsToMany(Project::class, 'user_project')
+      ->withPivot('role')
+      ->withTimestamps();
   }
 
   public function invitations(): HasMany
@@ -66,6 +65,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
   public function changeRequests()
   {
-      return $this->hasMany(ChangeRequest::class, 'requested_by_id');
+    return $this->hasMany(ChangeRequest::class, 'requested_by_id');
   }
 }

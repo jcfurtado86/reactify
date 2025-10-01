@@ -34,8 +34,9 @@ class HandleInertiaRequests extends Middleware
   {
     return array_merge(parent::share($request), [
       'auth' => [
-        'user' =>
-        fn() => $request->user() ? $request->user()->only(['id', 'name', 'email', 'provider_avatar']) : null,
+        'user' => fn() => $request->user()
+          ? $request->user()->only(['id', 'name', 'email', 'provider_avatar'])
+          : null,
 
         'notifications' => function () use ($request) {
           if (!$request->user()) {
@@ -54,26 +55,38 @@ class HandleInertiaRequests extends Middleware
 
           // 4. Mapeia a coleção original de notificações, "anexando" o modelo
           //    completo do convite a cada notificação correspondente.
-          return $userNotifications->map(function ($notification) use ($invitations) {
+          return $userNotifications->map(function ($notification) use (
+            $invitations
+          ) {
             if ($notification->type === UserInvitedToProject::class) {
               $invitationId = $notification->data['invitation_id'];
-              $notification->invitation = $invitations->get($invitationId)->only(['id', 'project_id', 'created_at', 'expires_at', 'token', 'status']);
+              $notification->invitation = $invitations
+                ->get($invitationId)
+                ->only([
+                  'id',
+                  'project_id',
+                  'created_at',
+                  'expires_at',
+                  'token',
+                  'status',
+                ]);
             }
             return $notification;
           });
         },
 
-        'projects' => fn() => $request->user() ? $request->user()->projects()
-          ->with(['users' => function ($query) {
-            $query->select(['user_id', 'name', 'email', 'provider_avatar']);
-          }])
-          ->select([
-            'title',
-            'projects.id',
-            'description',
-            'active',
-
-          ])->get() : null,
+        'projects' => fn() => $request->user()
+          ? $request
+            ->user()
+            ->projects()
+            ->with([
+              'users' => function ($query) {
+                $query->select(['user_id', 'name', 'email', 'provider_avatar']);
+              },
+            ])
+            ->select(['title', 'projects.id', 'description', 'active'])
+            ->get()
+          : null,
       ],
       'flash' => [
         'message' => fn() => $request->session()->get('message'),

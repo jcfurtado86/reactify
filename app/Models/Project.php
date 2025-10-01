@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
@@ -23,52 +24,52 @@ class Project extends Model
     'due_date' => 'date',
   ];
 
-  public function journeys()
+  public function journeys(): HasMany
   {
     return $this->hasMany(Journey::class);
   }
 
-  public function product_canvas()
+  public function product_canvas(): HasOne
   {
     return $this->hasOne(ProductCanvas::class);
   }
 
-  public function personas()
+  public function personas(): HasMany
   {
     return $this->hasMany(Persona::class);
   }
 
-  public function goal_sketches()
+  public function goal_sketches(): HasMany
   {
     return $this->hasMany(Goal::class);
   }
 
-  public function stories()
+  public function stories(): HasMany
   {
     return $this->hasMany(Story::class);
   }
 
-  public function storyboards()
+  public function storyboards(): HasMany
   {
     return $this->hasMany(Storyboard::class);
   }
 
-  public function interviews()
+  public function interviews(): HasMany
   {
     return $this->hasMany(Interview::class);
   }
 
-  public function epic_stories()
+  public function epic_stories(): HasMany
   {
     return $this->hasMany(EpicStory::class);
   }
 
-  public function business_rules()
+  public function business_rules(): HasMany
   {
     return $this->hasMany(BusinessRule::class);
   }
 
-  public function usage_scenarios()
+  public function usage_scenarios(): HasMany
   {
     return $this->hasMany(UsageScenario::class);
   }
@@ -80,40 +81,43 @@ class Project extends Model
 
   public function users(): BelongsToMany
   {
-    return $this->belongsToMany(User::class, 'user_project')->withPivot('role')->withTimestamps();
+    return $this->belongsToMany(User::class, 'user_project')
+      ->using(UserProject::class)
+      ->withPivot('role')
+      ->withTimestamps();
   }
 
-  public function crc_cards()
+  public function crc_cards(): HasMany
   {
     return $this->hasMany(CrcCard::class);
   }
-  public function overall_model_classes()
+  public function overall_model_classes(): HasMany
   {
     return $this->hasMany(OverallModelClass::class);
   }
-  public function prioritizations()
+  public function prioritizations(): HasMany
   {
     return $this->hasMany(Prioritization::class);
   }
-  public function matrix_priorities()
+  public function matrix_priorities(): HasMany
   {
     return $this->hasMany(MatrixPriority::class);
   }
-  public function sprints()
+  public function sprints(): HasMany
   {
     return $this->hasMany(Sprint::class);
   }
 
-  public function change_requests()
+  public function change_requests(): HasMany
   {
     return $this->hasMany(ChangeRequest::class);
   }
 
-  public function system_interfaces()
+  public function system_interfaces(): HasMany
   {
     return $this->hasMany(SystemInterface::class);
   }
-  public function invest_cards()
+  public function invest_cards(): HasMany
   {
     return $this->hasMany(InvestCard::class);
   }
