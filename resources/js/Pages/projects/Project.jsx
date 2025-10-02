@@ -1,5 +1,5 @@
 import { useEcho } from '@laravel/echo-react'
-import { Head, router } from '@inertiajs/react'
+import { Head, router, usePage } from '@inertiajs/react'
 import NavMenu from '@/Components/NavMenu'
 import { ProjectPermissions } from '@/Components/ProjectPermissions'
 // inception
@@ -26,45 +26,63 @@ import { ArrowLeft, PenLine, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import MainLayout from '@/Layouts/MainLayout'
-
+import {
+  PermissionProvider,
+  usePermissions,
+} from '@/Context/PermissionContext.jsx'
 import Sprint from './project-ceremonies/Sprint/Sprint'
 import { tooltipInfo } from '@/lib/projectData.js'
 import Inspection from './project-ceremonies/Inspection/Inspection.jsx'
 //chatbot
 import ChatBot from './ChatBot.jsx'
 import { ProjectSettings } from '@/Components/ProjectSettings.jsx'
-import { useMemo, useState, useEffect } from 'react' 
+import { useMemo, useState, useEffect } from 'react'
 
 const ProjectView = ({ projectDB = [], page = 'inception' }) => {
   const [project, setProject] = useState({ ...projectDB })
-  const [isEditing, setIsEditing] = useState(false)
-  const [newTitle, setNewTitle] = useState(project.title)
+  const { can } = usePermissions()
 
   // Inception States
   const [activeMenu, setActiveMenu] = useState(
     () => localStorage.getItem('activeMenu') || 'Product Canvas',
   )
   const [menuItems, setMenuItems] = useState([
-    {
-      label: 'Product Canvas',
-      value: true,
-      tooltip: tooltipInfo.productCanvas,
-    },
-    {
-      label: 'Personas',
-      value: false,
-      tooltip: tooltipInfo.personas,
-    },
-    {
-      label: 'Goals',
-      value: false,
-      tooltip: tooltipInfo.goals,
-    },
-    {
-      label: 'Journeys',
-      value: false,
-      tooltip: tooltipInfo.journeys,
-    },
+    ...(can('productCanvas.create')
+      ? [
+          {
+            label: 'Product Canvas',
+            value: true,
+            tooltip: tooltipInfo.productCanvas,
+          },
+        ]
+      : []),
+    ...(can('persona.create')
+      ? [
+          {
+            label: 'Personas',
+            value: false,
+            tooltip: tooltipInfo.personas,
+          },
+        ]
+      : []),
+    ...(can('goal.create')
+      ? [
+          {
+            label: 'Goals',
+            value: false,
+            tooltip: tooltipInfo.goals,
+          },
+        ]
+      : []),
+    ...(can('journey.create')
+      ? [
+          {
+            label: 'Journeys',
+            value: false,
+            tooltip: tooltipInfo.journeys,
+          },
+        ]
+      : []),
   ])
 
   // Story Discovery States
@@ -72,26 +90,42 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     () => localStorage.getItem('activeStoryDiscoveryMenu') || 'Stories',
   )
   const [storyDiscoveryMenuItems, setStoryDiscoveryMenuItems] = useState([
-    {
-      label: 'Stories',
-      value: true,
-      tooltip: tooltipInfo.stories,
-    },
-    {
-      label: 'Overall Model',
-      value: true,
-      tooltip: tooltipInfo.overallModel,
-    },
-    {
-      label: 'Matriz de Priorização',
-      value: false,
-      tooltip: tooltipInfo.prioritizationMatrix,
-    },
-    {
-      label: 'Change Log',
-      value: false,
-      tooltip: tooltipInfo.changeLog,
-    },
+    ...(can('userStory.create')
+      ? [
+          {
+            label: 'Stories',
+            value: true,
+            tooltip: tooltipInfo.stories,
+          },
+        ]
+      : []),
+    ...(can('overallModel.create')
+      ? [
+          {
+            label: 'Overall Model',
+            value: true,
+            tooltip: tooltipInfo.overallModel,
+          },
+        ]
+      : []),
+    ...(can('prioritizationMatrix.create')
+      ? [
+          {
+            label: 'Matriz de Priorização',
+            value: false,
+            tooltip: tooltipInfo.prioritizationMatrix,
+          },
+        ]
+      : []),
+    ...(can('changeLog.create')
+      ? [
+          {
+            label: 'Change Log',
+            value: false,
+            tooltip: tooltipInfo.changeLog,
+          },
+        ]
+      : []),
   ])
 
   // Refining States
@@ -99,21 +133,33 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     () => localStorage.getItem('activeRefiningMenu') || 'Epic Stories',
   )
   const [refiningMenuItems, setRefiningMenuItems] = useState([
-    {
-      label: 'Epic Stories',
-      value: true,
-      tooltip: tooltipInfo.epicStories,
-    },
-    {
-      label: 'Business Rules',
-      value: false,
-      tooltip: tooltipInfo.businessRules,
-    },
-    {
-      label: 'Use Scenarios',
-      value: false,
-      tooltip: tooltipInfo.usageScenarios,
-    },
+    ...(can('userStory.create')
+      ? [
+          {
+            label: 'Epic Stories',
+            value: true,
+            tooltip: tooltipInfo.epicStories,
+          },
+        ]
+      : []),
+    ...(can('businessRule.create')
+      ? [
+          {
+            label: 'Business Rules',
+            value: false,
+            tooltip: tooltipInfo.businessRules,
+          },
+        ]
+      : []),
+    ...(can('usageScenario.create')
+      ? [
+          {
+            label: 'Use Scenarios',
+            value: false,
+            tooltip: tooltipInfo.usageScenarios,
+          },
+        ]
+      : []),
   ])
 
   // Modeling States
@@ -121,21 +167,33 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     () => localStorage.getItem('activeModelingMenu') || 'Overall Model',
   )
   const [modelingMenuItems, setModelingMenuItems] = useState([
-    {
-      label: 'Overall Model',
-      value: true,
-      tooltip: tooltipInfo.overallModel,
-    },
-    {
-      label: 'Internal and External Interfaces',
-      value: false,
-      tooltip: tooltipInfo.interfaces,
-    },
-    {
-      label: 'Storyboards',
-      value: false,
-      tooltip: tooltipInfo.storyboards,
-    },
+    ...(can('overallModel.create')
+      ? [
+          {
+            label: 'Overall Model',
+            value: true,
+            tooltip: tooltipInfo.overallModel,
+          },
+        ]
+      : []),
+    ...(can('interface.create')
+      ? [
+          {
+            label: 'Internal and External Interfaces',
+            value: false,
+            tooltip: tooltipInfo.interfaces,
+          },
+        ]
+      : []),
+    ...(can('storyboard.create')
+      ? [
+          {
+            label: 'Storyboards',
+            value: false,
+            tooltip: tooltipInfo.storyboards,
+          },
+        ]
+      : []),
   ])
 
   const currentArtifact = useMemo(() => {
@@ -163,41 +221,35 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     activeModelingMenu,
   ])
 
-  const artifactToDataKeyMap = useMemo(() => ({
-    'Product Canvas': 'product_canvas',
-    Personas: 'personas',
-    Goals: 'goal_sketches',
-    Journeys: 'journeys',
-    Stories: 'stories',
-    'Overall Model': 'overall_model_classes', 
-    'Matriz de Priorização': 'matrix_priorities',
-    'Change Log': 'change_requests',
-    'Epic Stories': 'epic_stories',
-    'Business Rules': 'business_rules',
-    'Use Scenarios': 'usage_scenarios',
-    'Internal and External Interfaces': 'system_interfaces',
-    Storyboards: 'storyboards',
-    //Inspection: '', 
-    //'Product Backlog': 'stories', 
-    Sprint: 'sprints.stories',
-  }), []);
+  const artifactToDataKeyMap = useMemo(
+    () => ({
+      'Product Canvas': 'product_canvas',
+      Personas: 'personas',
+      Goals: 'goal_sketches',
+      Journeys: 'journeys',
+      Stories: 'stories',
+      'Overall Model': 'overall_model_classes',
+      'Matriz de Priorização': 'matrix_priorities',
+      'Change Log': 'change_requests',
+      'Epic Stories': 'epic_stories',
+      'Business Rules': 'business_rules',
+      'Use Scenarios': 'usage_scenarios',
+      'Internal and External Interfaces': 'system_interfaces',
+      Storyboards: 'storyboards',
+      //Inspection: '',
+      //'Product Backlog': 'stories',
+      Sprint: 'sprints.stories',
+    }),
+    [],
+  )
 
   const currentArtifactData = useMemo(() => {
     if (!projectDB || !currentArtifact) {
-      return null;
+      return null
     }
-    const dataKey = artifactToDataKeyMap[currentArtifact];
-    return dataKey ? projectDB[dataKey] : null;
-  }, [projectDB, currentArtifact, artifactToDataKeyMap]);
-
-
-  const updateProjectTitle = () => {
-    setProject({ ...project, title: newTitle })
-    setIsEditing(false)
-    router.patch(route('project.update', project.id), {
-      title: newTitle,
-    })
-  }
+    const dataKey = artifactToDataKeyMap[currentArtifact]
+    return dataKey ? projectDB[dataKey] : null
+  }, [projectDB, currentArtifact, artifactToDataKeyMap])
 
   const getUpdatedProject = async (projectID) => {
     try {
@@ -276,13 +328,29 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
   const renderInceptionContent = () => {
     switch (activeMenu) {
       case 'Product Canvas':
-        return <MainView project={project} setProject={setProject} />
+        return (
+          can('productCanvas.create') && (
+            <MainView project={project} setProject={setProject} />
+          )
+        )
       case 'Personas':
-        return <Personas project={project} setProject={setProject} />
+        return (
+          can('persona.create') && (
+            <Personas project={project} setProject={setProject} />
+          )
+        )
       case 'Goals':
-        return <Goals project={project} setProject={setProject} />
+        return (
+          can('goal.create') && (
+            <Goals project={project} setProject={setProject} />
+          )
+        )
       case 'Journeys':
-        return <Journeys project={project} setProject={setProject} />
+        return (
+          can('journey.create') && (
+            <Journeys project={project} setProject={setProject} />
+          )
+        )
       default:
         return null
     }
@@ -291,15 +359,29 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
   const renderStoryDiscoveryContent = () => {
     switch (activeStoryDiscoveryMenu) {
       case 'Stories':
-        return <Stories project={project} setProject={setProject} />
+        return (
+          can('userStory.create') && (
+            <Stories project={project} setProject={setProject} />
+          )
+        )
       case 'Overall Model':
-        return <OverallModel project={project} setProject={setProject} />
+        return (
+          can('overallModel.create') && (
+            <OverallModel project={project} setProject={setProject} />
+          )
+        )
       case 'Matriz de Priorização':
         return (
-          <PrioritizationMatrix project={project} setProject={setProject} />
+          can('prioritizationMatrix.create') && (
+            <PrioritizationMatrix project={project} setProject={setProject} />
+          )
         )
       case 'Change Log':
-        return <ChangeLog project={project} setProject={setProject} />
+        return (
+          can('changeLog.create') && (
+            <ChangeLog project={project} setProject={setProject} />
+          )
+        )
       default:
         return null
     }
@@ -308,11 +390,23 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
   const renderRefiningContent = () => {
     switch (activeRefiningMenu) {
       case 'Epic Stories':
-        return <EpicStories project={project} setProject={setProject} />
+        return (
+          can('userStory.create') && (
+            <EpicStories project={project} setProject={setProject} />
+          )
+        )
       case 'Business Rules':
-        return <BusinessRules project={project} setProject={setProject} />
+        return (
+          can('businessRule.create') && (
+            <BusinessRules project={project} setProject={setProject} />
+          )
+        )
       case 'Use Scenarios':
-        return <UsageScenarios project={project} setProject={setProject} />
+        return (
+          can('usageScenario.create') && (
+            <UsageScenarios project={project} setProject={setProject} />
+          )
+        )
       default:
         return null
     }
@@ -321,14 +415,24 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
   const renderModelingContent = () => {
     switch (activeModelingMenu) {
       case 'Overall Model':
-        return <OverallModel project={project} setProject={setProject} />
+        return (
+          can('overallModel.create') && (
+            <OverallModel project={project} setProject={setProject} />
+          )
+        )
       case 'Internal and External Interfaces':
-        return <Interfaces project={project} setProject={setProject} />
+        return (
+          can('interface.create') && (
+            <Interfaces project={project} setProject={setProject} />
+          )
+        )
       case 'Storyboards':
         return (
-          <SidebarProvider className="min-h-[calc(100vh-100px)]">
-            <Storyboards project={project} setProject={setProject} />{' '}
-          </SidebarProvider>
+          can('storyboard.create') && (
+            <SidebarProvider className="min-h-[calc(100vh-100px)]">
+              <Storyboards project={project} setProject={setProject} />{' '}
+            </SidebarProvider>
+          )
         )
       default:
         return null
@@ -375,8 +479,14 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
               <TabsTrigger value="refining">Refining</TabsTrigger>
               <TabsTrigger value="modeling">Modeling</TabsTrigger>
               <TabsTrigger value="inspection">Inspection</TabsTrigger>
-              <TabsTrigger value="productBacklog">Product Backlog</TabsTrigger>
-              <TabsTrigger value="sprint">Sprint</TabsTrigger>
+              {can('productBacklog.create') && (
+                <TabsTrigger value="productBacklog">
+                  Product Backlog
+                </TabsTrigger>
+              )}
+              {can('sprint.create') && (
+                <TabsTrigger value="sprint">Sprint</TabsTrigger>
+              )}
             </TabsList>
 
             {/* Center: Title e Botão de Edição */}
@@ -441,11 +551,17 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
   )
 }
 const Project = ({ project, page }) => {
+  const { auth, project: currentProject } = usePage().props
+
+  const currentUserInProject = currentProject.users.find(
+    (user) => user.user_id === auth.user.id,
+  )
+  const currentUserPermissions = currentUserInProject?.pivot?.permissions || []
   return (
-    <>
+    <PermissionProvider permissions={currentUserPermissions}>
       <Head title={project.title} />
       <ProjectView projectDB={project} page={page} />
-    </>
+    </PermissionProvider>
   )
 }
 
