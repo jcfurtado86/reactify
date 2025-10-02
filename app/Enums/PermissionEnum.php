@@ -36,6 +36,14 @@ enum PermissionEnum: string
   case USAGE_SCENARIO_EDIT = 'usageScenario.edit';
   case USAGE_SCENARIO_DELETE = 'usageScenario.delete';
 
+  case INTERFACE_CREATE = 'interface.create';
+  case INTERFACE_EDIT = 'interface.edit';
+  case INTERFACE_DELETE = 'interface.delete';
+
+  case BUSINESS_RULE_CREATE = 'businessRule.create';
+  case BUSINESS_RULE_EDIT = 'businessRule.edit';
+  case BUSINESS_RULE_DELETE = 'businessRule.delete';
+
   case PRIORITIZATION_MATRIX_CREATE = 'prioritizationMatrix.create';
   case PRIORITIZATION_MATRIX_EDIT = 'prioritizationMatrix.edit';
   case PRIORITIZATION_MATRIX_DELETE = 'prioritizationMatrix.delete';
