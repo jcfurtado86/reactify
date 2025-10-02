@@ -26,8 +26,8 @@ class ProjectSeeder extends Seeder
     // Criar Usuário Admin (evitar duplicação de email)
     $user1 = DB::table('users')->where('email', 'admin@example.com')->first();
 
-    if (!$user1) {
-      $userId1 = DB::table('users')->insertGetId([
+    $userId1 = !$user1
+      ? DB::table('users')->insertGetId([
         'name' => 'Admin',
         'email' => 'admin@example.com',
         'password' => Hash::make('senha123'),
@@ -37,18 +37,16 @@ class ProjectSeeder extends Seeder
         'email_verified_at' => now(),
         'created_at' => now(),
         'updated_at' => now(),
-      ]);
-    } else {
-      $userId1 = $user1->id;
-    }
+      ])
+      : $user1->id;
 
     // Criar Usuário
     $user2 = DB::table('users')
       ->where('email', 'lumagabriela1333@gmail.com')
       ->first();
 
-    if (!$user2) {
-      $userId2 = DB::table('users')->insertGetId([
+    $userId2 = !$user2
+      ? DB::table('users')->insertGetId([
         'name' => 'Luma',
         'email' => 'lumagabriela1333@gmail.com',
         'password' => Hash::make('senha123'),
@@ -56,18 +54,16 @@ class ProjectSeeder extends Seeder
         'email_verified_at' => now(),
         'created_at' => now(),
         'updated_at' => now(),
-      ]);
-    } else {
-      $userId2 = $user2->id;
-    }
+      ])
+      : $user2->id;
 
     // Criar Usuário luma
     $user3 = DB::table('users')
       ->where('email', 'lumagabriela1333@gmail.com')
       ->first();
 
-    if (!$user3) {
-      $userId3 = DB::table('users')->insertGetId([
+    $user3 = !$user3
+      ? DB::table('users')->insertGetId([
         'name' => 'luma',
         'email' => 'lumagabriela1333@gmail.com',
         'password' => Hash::make('senha123'),
@@ -75,10 +71,8 @@ class ProjectSeeder extends Seeder
         'email_verified_at' => now(),
         'created_at' => now(),
         'updated_at' => now(),
-      ]);
-    } else {
-      $userId3 = $user3->id;
-    }
+      ])
+      : $user3->id;
 
     // Criar Projeto
     $projectId = DB::table('projects')->insertGetId([
