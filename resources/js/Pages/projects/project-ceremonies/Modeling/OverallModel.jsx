@@ -466,13 +466,15 @@ const OverallModel = ({ project, setProject }) => {
           Adicionar CRC Card
         </Button>
       </section>
-      <div className="flex flex-col items-start">
-        {Object.keys(errors).map((key, item) => (
-          <span key={key} className="text-destructive text-xs font-normal">
-            {errors[key]}
-          </span>
-        ))}
-      </div>
+      {Object.keys(errors).length > 0 && (
+        <div className="flex flex-col items-start">
+          {Object.keys(errors).map((key, item) => (
+            <span key={key} className="text-destructive text-xs font-normal">
+              {errors[key]}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {project?.crc_cards
           ?.slice()
