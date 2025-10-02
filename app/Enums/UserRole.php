@@ -24,7 +24,7 @@ enum UserRole: string
   public function permissions(): array
   {
     return match ($this) {
-      self::ADMINISTRATOR => [],
+      self::ADMINISTRATOR => PermissionEnum::cases(),
       self::CUSTOMER => [
         PermissionEnum::PRODUCT_CANVAS_CREATE,
         PermissionEnum::PRODUCT_CANVAS_EDIT,
@@ -113,7 +113,7 @@ enum UserRole: string
     if ($this === self::ADMINISTRATOR) {
       return true;
     }
-    return in_array($permission->value, $this->permissions());
+    return in_array($permission, $this->permissions());
   }
 
   public static function values(): array
