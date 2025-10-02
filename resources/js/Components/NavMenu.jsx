@@ -1,11 +1,5 @@
-import React, { useState } from 'react'
 import { Info } from 'lucide-react'
-import {
-  Popover,
-  PopoverArrow,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+
 const NavMenu = ({ menuItems, setActiveMenu }) => {
   const [open, setOpen] = useState(false)
   // Calcula o número total de itens para distribuição do indicador

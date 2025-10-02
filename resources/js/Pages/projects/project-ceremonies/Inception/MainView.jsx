@@ -1,25 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react'
 import {
   AlertCircle,
   Users,
   Slash,
   Check,
-  Clock,
   CheckCircle,
   ChevronDown,
   ChevronUp,
   PenLine as EditIcon,
   X,
   Save,
-  Calendar as CalendarIcon,
 } from 'lucide-react'
 
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
-import { Calendar } from '@/components/ui/calendar'
 
 const cardVariants = {
   primary: 'border-t-primary text-primary',
@@ -261,13 +255,6 @@ const MainView = ({ project = {}, setProject }) => {
 
   return (
     <div className="w-full text-foreground p-4">
-      {/* Dashboard Header */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <div className="mt-2"></div>
-        </div>
-      </div>
-
       {/* Main Dashboard - Responsive Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ExpandableCard
