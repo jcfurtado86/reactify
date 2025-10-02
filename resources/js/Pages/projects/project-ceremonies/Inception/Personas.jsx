@@ -12,6 +12,7 @@ import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import TextareaAutosize from 'react-textarea-autosize'
+import GenerateAIButton from '@/Components/GenerateAIButton'
 
 const GeneratedItemsModal = ({
   isModalMinimized,
@@ -771,6 +772,12 @@ const Personas = ({ project, setProject }) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <GenerateAIButton
+        isGenerating={isGenerating}
+        onClick={generatePersonas}
+        // tooltip={tooltipInfo.aiGeneratedStory}
+        className="col-span-2"
+      />
     </div>
   )
 }
