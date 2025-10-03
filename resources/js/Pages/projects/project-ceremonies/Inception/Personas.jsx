@@ -101,7 +101,7 @@ const GeneratedItemsModal = ({
                       </div>
 
                       {/* Corpo do Card */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 text-sm text-left">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm text-left">
                         {/* Seção de Perfil */}
                         <div className="flex flex-col gap-2">
                           <h4 className="font-semibold text-foreground mb-1">
@@ -591,17 +591,15 @@ const Personas = ({ project, setProject }) => {
           toggleAllItems={toggleAllPersonas}
         />
       )}
-      <div className="xl:col-span-2 flex flex-col sm:flex-row gap-2">
-        <Button
-          variant="secondary"
-          onClick={addNewPersona}
-          disabled={isSubmitting}
-          className="flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
-        >
-          <Plus size={18} className="mr-2" />
-          {isSubmitting ? 'Criando...' : 'Nova Persona'}
-        </Button>
-      </div>
+      <Button
+        variant="secondary"
+        onClick={addNewPersona}
+        disabled={isSubmitting}
+        className="xl:col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
+      >
+        <Plus size={18} className="mr-2" />
+        {isSubmitting ? 'Criando...' : 'Nova Persona'}
+      </Button>
 
       {project.personas && project.personas.length > 0 ? (
         project.personas
@@ -660,7 +658,7 @@ const Personas = ({ project, setProject }) => {
                 </div>
               </CardHeader>
 
-              <CardContent className="persona grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-2 gap-2">
+              <CardContent className="persona grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
                 {['profile', 'expectations', 'goals'].map((field) => (
                   <div
                     key={field}
@@ -776,7 +774,7 @@ const Personas = ({ project, setProject }) => {
         isGenerating={isGenerating}
         onClick={generatePersonas}
         // tooltip={tooltipInfo.aiGeneratedStory}
-        className="col-span-2"
+        className="xl:col-span-2"
       />
     </div>
   )
