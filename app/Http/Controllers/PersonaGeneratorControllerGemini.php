@@ -11,40 +11,32 @@ use Illuminate\Validation\Rule;
 
 class PersonaGeneratorControllerGemini extends Controller
 {
-    /**
-     * Gera novas personas com base em uma descrição do papel do usuário.
-     */
     public function generatePersonas(Request $request): JsonResponse
     {
         try {
-            // espera um 'interview_id'
             $validated = $request->validate([
                 'project_id' => 'required|integer|exists:projects,id',
-                'interview_id' => [
-                    'required',
-                    'integer',
-                    // ve se entrevista exista e pertença ao projeto informado
-                    Rule::exists('interviews', 'id')->where(function ($query) use ($request) {
-                        return $query->where('project_id', $request->project_id);
-                    }),
-                ],
             ]);
 
-            $interview = Interview::find($validated['interview_id']);
+            $interviews = Interview::where('project_id', $validated['project_id'])
+                ->whereNotNull('transcript')
+                ->where('transcript', '!=', '')
+                ->latest()
+                //->limit(5)    // Limita a 5
+                ->get();
 
-            // Validação para garantir que a transcrição não esteja vazia
-            if (empty($interview->transcript)) {
+            if ($interviews->isEmpty()) {
                 return response()->json([
                     'status' => 'warning',
-                    'message' => 'A entrevista selecionada não possui uma transcrição para análise.'
+                    'message' => 'Nenhuma entrevista com transcrição foi encontrada neste projeto para análise.'
                 ], 422);
             }
 
-            $prompt = $this->createPrompt($interview->transcript);
-            
+            $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
+
+            $prompt = $this->createPrompt($combinedTranscripts);
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em UX Research e Product Management. ' . $prompt;
-
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();
 
@@ -56,22 +48,11 @@ class PersonaGeneratorControllerGemini extends Controller
                 'personas' => $parsedData['personas'] ?? []
             ]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Dados inválidos fornecidos.',
-                'errors' => $e->errors()
-            ], 422);
-
         } catch (\Exception $e) {
-            Log::error('Erro ao gerar personas: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Ocorreu um erro no servidor ao gerar as personas: ' . $e->getMessage()
-            ], 500);
+            Log::error('Erro ao gerar personas a partir de múltiplas entrevistas: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Ocorreu um erro no servidor ao gerar as personas.'], 500);
         }
     }
-
     /**
      * Cria o prompt detalhado para o modelo Gemini.
      */
@@ -169,13 +150,11 @@ class PersonaGeneratorControllerGemini extends Controller
     private function parseResponse(string $content): array
     {
         try {
-            // Limpa possíveis marcadores de código que a IA possa retornar
             $cleanedContent = preg_replace('/```json\s*(.*?)\s*```/s', '$1', $content);
             $cleanedContent = trim($cleanedContent);
 
             $data = json_decode($cleanedContent, true, 512, JSON_THROW_ON_ERROR);
 
-            // Valida se a chave 'personas' existe e é um array
             if (!isset($data['personas']) || !is_array($data['personas'])) {
                 throw new \Exception("A resposta da IA não contém um array 'personas' válido.");
             }
@@ -187,7 +166,7 @@ class PersonaGeneratorControllerGemini extends Controller
             throw new \Exception('Erro ao decodificar o JSON retornado pela IA: ' . $e->getMessage());
         } catch (\Exception $e) {
             Log::error("Erro no parser da resposta da IA: " . $e->getMessage());
-            throw $e; // Relança a exceção
+            throw $e;
         }
     }
 }

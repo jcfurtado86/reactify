@@ -464,7 +464,7 @@ const Personas = ({ project, setProject }) => {
 
       const data = response.data
 
-      const personasWithSelection = data.message.personas.map((persona) => ({
+      const personasWithSelection = data.personas.map((persona) => ({
         ...persona,
         selected: true,
       }))
@@ -518,43 +518,44 @@ const Personas = ({ project, setProject }) => {
       personas: [...(prevProject.personas || []), ...personasToAdd],
     }))
 
-    const personasForBackend = selectedPersonas.map(({ title, type }) => ({
-      title,
-      type,
-      project_id: project.id,
-    }))
+    const personasForBackend = selectedPersonas.map(
+      ({ selected, ...personaData }) => ({
+        ...personaData,
+        project_id: project.id,
+      }),
+    )
 
-    // router.post(
-    //   route('persona.bulk-store'),
-    //   { personas: personasForBackend },
-    //   {
-    //     preserveState: true,
-    //     preserveScroll: true,
-    //     onSuccess: () => {
-    //       toast.success(
-    //         `${selectedPersonas.length} persona(s) adicionada(s) com sucesso!`,
-    //       )
-    //       setAiGeneratedPersonas(remainingPersonas)
-    //       if (remainingPersonas.length === 0) {
-    //         setShowAiModal(false)
-    //         setIsModalMinimized(false)
-    //       }
-    //     },
-    //     onError: (errors) => {
-    //       toast.error('Ocorreu um erro ao salvar as personas.')
-    //       console.error('Erro do backend:', errors)
-    //       setProject((prevProject) => {
-    //         const personasToAddIds = personasToAdd.map((p) => p.id)
-    //         return {
-    //           ...prevProject,
-    //           personas: prevProject.personas.filter(
-    //             (p) => !personasToAddIds.includes(p.id),
-    //           ),
-    //         }
-    //       })
-    //     },
-    //   },
-    // )
+    router.post(
+      route('persona.bulk-store'),
+      { personas: personasForBackend },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedPersonas.length} persona(s) adicionada(s) com sucesso!`,
+          )
+          setAiGeneratedPersonas(remainingPersonas)
+          if (remainingPersonas.length === 0) {
+            setShowAiModal(false)
+            setIsModalMinimized(false)
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar as personas.')
+          console.error('Erro do backend:', errors)
+          setProject((prevProject) => {
+            const personasToAddIds = personasToAdd.map((p) => p.id)
+            return {
+              ...prevProject,
+              personas: prevProject.personas.filter(
+                (p) => !personasToAddIds.includes(p.id),
+              ),
+            }
+          })
+        },
+      },
+    )
   }
 
   const cancelGeneratedPersonas = () => {

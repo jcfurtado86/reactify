@@ -5,9 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Persona;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\BulkStorePersonaRequest;
+use Illuminate\Support\Facades\DB;
 
 class PersonaController extends Controller
 {
+    public function bulk(BulkStorePersonaRequest $request)
+    {
+        $validatedData = $request->validated();
+
+        DB::transaction(function () use ($validatedData) {
+            foreach ($validatedData['personas'] as $personaData) {
+                Persona::create($personaData);
+            }
+        });
+
+        Log::info('Bulk personas created successfully', [
+            'count' => count($validatedData['personas'])
+        ]);
+
+        return back()->with('success', 'Personas adicionadas com sucesso.');
+    }
 
     public function store(Request $request)
     {
