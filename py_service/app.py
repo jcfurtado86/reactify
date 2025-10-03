@@ -10,6 +10,9 @@ load_dotenv()
 
 app = Flask(__name__)
 
+MODEL_DIR = ".whisper_models"
+os.makedirs(MODEL_DIR, exist_ok=True) 
+
 print("Carregando o modelo Whisper...")
 # Size | Parameters | English-only model | Multilingual model | Required VRAM | Relative speed
 # tiny | 39 M | tiny.en | tiny | ~1 GB | ~10x
@@ -19,7 +22,7 @@ print("Carregando o modelo Whisper...")
 # large | 1550 M | N/A | large | ~10 GB | 1x
 # turbo | 809 M | N/A | turbo | ~6 GB | ~8x
 
-model = whisper.load_model("medium") #para rodar na cpu: device="cpu"
+model = whisper.load_model("medium", download_root=MODEL_DIR) #para rodar na cpu: device="cpu"
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe_audio():
