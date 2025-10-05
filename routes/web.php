@@ -132,16 +132,20 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::patch('/{rule}', [BusinessRuleController::class, 'update'])->name('business-rule.update');
 
     Route::delete('/{rule}', [BusinessRuleController::class, 'destroy'])->name('business-rule.destroy');
+    Route::post('/bulk-store', [BusinessRuleController::class, 'bulk'])->name('business-rule.bulk-store');
   });
   //rotas para UsageScenarios
   Route::prefix('usage-scenario')->group(function () {
     Route::post('/', [UsageScenarioController::class, 'store'])->name('usage-scenario.store');
     Route::patch('/{scenario}', [UsageScenarioController::class, 'update'])->name('usage-scenario.update');
     Route::delete('/{scenario}', [UsageScenarioController::class, 'destroy'])->name('usage-scenario.destroy');
+    Route::post('/bulk-store', [UsageScenarioController::class, 'bulk'])->name('usage-scenario.bulk-store');
+
   });
   //   Rotas para OverallModel
   Route::prefix('overall')->group(function () {
     Route::post('/', [OverallModelController::class, 'store'])->name('overall.store');
+    Route::post('/bulk-store', [OverallModelController::class, 'bulk'])->name('overall.bulk-store');
     Route::patch('/{model}', [OverallModelController::class, 'update'])->name('overall.update');
     Route::delete('/{model}', [OverallModelController::class, 'destroy'])->name('overall.destroy');
   });
@@ -221,6 +225,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('/', [SystemInterfaceController::class, 'store'])->name('system-interface.store');
     Route::patch('/{interface}', [SystemInterfaceController::class, 'update'])->name('system-interface.update');
     Route::delete('/{interface}', [SystemInterfaceController::class, 'destroy'])->name('system-interface.destroy');
+    Route::post('/bulk-store', [SystemInterfaceController::class, 'bulk'])->name('system-interface.bulk-store');
   });
 
   // Rota para upload de entrevista
