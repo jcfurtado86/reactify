@@ -1,17 +1,156 @@
-import { ArrowRight, CornerDownRight, X, Check } from 'lucide-react'
+import {
+  ArrowRight,
+  CornerDownRight,
+  Plus,
+  Minus,
+  Check,
+  X,
+  LoaderCircle,
+  ChevronDown,
+  ChevronsUp,
+} from 'lucide-react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { storyVariants } from '../StoryDiscovery/Stories'
 import React, { useMemo, useState } from 'react' // Adicionei useState que estava faltando no seu exemplo original para EpicStoryCard
 import { router } from '@inertiajs/react'
+import { toast } from 'sonner'
 import { isTemporary } from '@/lib/utils'
 import InfoButton from '@/Components/InfoButton'
 import { tooltipInfo } from '@/lib/projectData'
+import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 /**
  * Componente para renderizar um único card de estória.
  * Gerencia seu próprio estado de hover para exibir o botão de adicionar.
  * @param {{ story: object, addBusinessRule: () => void }} props
  */
+const GeneratedItemsModal = ({
+  allStories,
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+}) => {
+  return (
+    <div
+      className={`
+            transition-all duration-300 z-50
+            ${
+              isModalMinimized
+                ? 'fixed bottom-4 right-4 w-[400px]'
+                : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
+            }
+          `}
+    >
+      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'Epic Stories por IA'}
+            {isModalMinimized && 'Epic Stories Geradas'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              size="icon"
+              variant="secondary"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+
+        {!isModalMinimized && (
+          <>
+            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+              <span className="text-foreground font-medium">
+                {generatedItems.filter((j) => j.selected).length} de{' '}
+                {generatedItems.length} selecionadas
+              </span>
+              <Button
+                onClick={toggleAllItems}
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+              >
+                {generatedItems.every((story) => story.selected)
+                  ? 'Desmarcar Todas'
+                  : 'Selecionar Todas'}
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              <div className="space-y-2 pb-4">
+                {generatedItems.map((story, index) => {
+                  const storyType = allStories.find(
+                    (s) => s.id === story.story_id,
+                  ).type
+                  const selectedVariant =
+                    storyVariants[storyType] || storyVariants.user
+                  return (
+                    <div
+                      key={'temp-' + index}
+                      className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                        story.selected
+                          ? 'bg-muted border-primary'
+                          : 'bg-muted/50 border-border hover:border-muted-foreground'
+                      }`}
+                    >
+                      <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                        <div className="flex items-center gap-2 text-left">
+                          <Badge
+                            variant="outline"
+                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                          >
+                            {`BR`.toUpperCase()}
+                          </Badge>
+
+                          <span className="text-sm text-foreground">
+                            {story.title}
+                          </span>
+                        </div>
+                        <Checkbox
+                          checked={story.selected}
+                          onCheckedChange={() => toggleItemSelection(index)}
+                        />
+                      </label>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 pt-4 border-t border-border flex-shrink-0">
+              <Button
+                onClick={cancelGeneratedItems}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmGeneratedItems}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+                disabled={generatedItems.filter((j) => j.selected).length === 0}
+              >
+                <Check className="mr-2" size={16} />
+                Confirmar e Adicionar (
+                {generatedItems.filter((j) => j.selected).length})
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const StoryCard = ({ story, addBusinessRule }) => {
   const selectedVariant = storyVariants[story.type] || storyVariants.user
 
@@ -171,6 +310,11 @@ const BusinessRuleCard = ({
  * @param {{ project: object, setProject: (project: object) => void }} props
  */
 const BusinessRules = ({ project, setProject }) => {
+  //ia states
+  const [aiGeneratedBusinessRules, setAiGeneratedBusinessRules] = useState([])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
   // Memoriza o estado das business_rules
   const businessRulesByStoryId = useMemo(() => {
     if (!project?.business_rules) return new Map()
@@ -208,8 +352,155 @@ const BusinessRules = ({ project, setProject }) => {
     }))
   }
 
+  //rotas relacionadas ao modal de IA
+  const generateBusinessRules = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post(route('business-rule.generate'), {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      const businessRulesWithSelection = data.business_rules.map(
+        (business_rule) => ({
+          ...business_rule,
+          selected: true,
+        }),
+      )
+
+      setAiGeneratedBusinessRules(businessRulesWithSelection)
+      setShowAiModal(true)
+      toast.success(
+        'Business Rules geradas com sucesso a partir das entrevistas mais recentes.',
+      )
+    } catch (error) {
+      console.error('Erro ao gerar Business Rules:', error)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data
+
+        if (errorData.status === 'warning') {
+          toast.warning(errorData.message)
+        } else {
+          toast.error(
+            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
+          )
+        }
+      } else {
+        toast.error(
+          'Não foi possível conectar ao servidor. Verifique sua internet.',
+        )
+      }
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+  const confirmGeneratedBusinessRules = () => {
+    const selectedBusinessRules = aiGeneratedBusinessRules.filter(
+      (business_rule) => business_rule.selected,
+    )
+    const remainingBusinessRules = aiGeneratedBusinessRules.filter(
+      (business_rule) => !business_rule.selected,
+    )
+
+    if (selectedBusinessRules.length === 0) {
+      toast.warning('Selecione pelo menos uma business rule para adicionar.')
+      return
+    }
+
+    const businessRulesToAdd = selectedBusinessRules.map((business_rule) => ({
+      id: `temp-${Date.now()}-${Math.random()}`,
+      created_at: new Date().toISOString(),
+      project_id: project.id,
+      ...business_rule,
+    }))
+
+    setProject((prevProject) => ({
+      ...prevProject,
+      goal_sketches: [
+        ...(prevProject.goal_sketches || []),
+        ...businessRulesToAdd,
+      ],
+    }))
+
+    const businessRulesForBackend = selectedBusinessRules.map(
+      ({ title, story_id, project_id }) => ({
+        title,
+        story_id,
+        project_id: project.id,
+      }),
+    )
+
+    router.post(
+      route('business-rule.bulk-store'),
+      { business_rules: businessRulesForBackend },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedBusinessRules.length} Business Rules adicionada com sucesso!`,
+          )
+          setAiGeneratedBusinessRules(remainingBusinessRules)
+          if (remainingBusinessRules.length === 0) {
+            setShowAiModal(false)
+            setIsModalMinimized(false)
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar as Business Rules.')
+          console.error('Erro do backend:', errors)
+          setProject((prevProject) => {
+            const businessRulesToAddIds = businessRulesToAdd.map((g) => g.id)
+            return {
+              ...prevProject,
+              business_rules: prevProject.business_rules.filter(
+                (rule) => !businessRulesToAddIds.includes(rule.id),
+              ),
+            }
+          })
+        },
+      },
+    )
+  }
+
+  const cancelGeneratedBusinessRules = () => {
+    setShowAiModal(false)
+    setAiGeneratedBusinessRules([])
+    setIsModalMinimized(false)
+  }
+
+  const toggleBusinessRuleSelection = (index) => {
+    setAiGeneratedBusinessRules((prev) =>
+      prev.map((rule, i) =>
+        i === index ? { ...rule, selected: !rule.selected } : rule,
+      ),
+    )
+  }
+
+  const toggleAllBusinessRules = () => {
+    const allSelected = aiGeneratedBusinessRules.every((rule) => rule.selected)
+    setAiGeneratedBusinessRules((prev) =>
+      prev.map((rule) => ({ ...rule, selected: !allSelected })),
+    )
+  }
+
   return (
     <section className="p-2 flex flex-col gap-2 ">
+      {showAiModal && (
+        <GeneratedItemsModal
+          allStories={project?.stories}
+          isModalMinimized={isModalMinimized}
+          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+          cancelGeneratedItems={cancelGeneratedBusinessRules}
+          generatedItems={aiGeneratedBusinessRules}
+          toggleItemSelection={toggleBusinessRuleSelection}
+          confirmGeneratedItems={confirmGeneratedBusinessRules}
+          toggleAllItems={toggleAllBusinessRules}
+        />
+      )}
       {/* user stories*/}
       {project?.stories
         ?.filter((story) => story.type === 'user')
@@ -272,6 +563,12 @@ const BusinessRules = ({ project, setProject }) => {
             </section>
           )
         })}
+      <GenerateAIButton
+        isGenerating={isGenerating}
+        onClick={generateBusinessRules}
+        // tooltip={tooltipInfo.aiGeneratedStory}
+        className="w-1/2"
+      />
     </section>
   )
 }
