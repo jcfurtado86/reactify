@@ -21,12 +21,12 @@ Route::post('/personas/generate', [PersonaGeneratorControllerGemini::class, 'gen
 
 Route::post('/goals/generate', [GoalGeneratorControllerGemini::class, 'generateGoals'])->name('goal.generate');
 
-Route::post('/overall-model/generate', [OverallModelGeneratorControllerGemini::class, 'generate'])->name('overall-model.generate');
+Route::post('/overall-models/generate', [OverallModelGeneratorControllerGemini::class, 'generate'])->name('overall-model.generate');
 
-Route::post('/stories/{story}/decompose', [EpicStoryGeneratorControllerGemini::class, 'decompose'])->name('epic-story.decompose');
+Route::post('/epic-stories/generate-decomposition', [EpicStoryGeneratorControllerGemini::class, 'generate'])->name('epic-story.generate-decomposition');
 
 Route::post('/business-rules/generate', [BusinessRuleGeneratorControllerGemini::class, 'generate'])->name('business-rule.generate');
 
-Route::post('/stories/{story}/usage-scenarios-generate', [UsageScenarioGeneratorControllerGemini::class, 'generate'])->name('usage-scenarios.generate');
+Route::post('/usage-scenarios/generate', [UsageScenarioGeneratorControllerGemini::class, 'generate'])->name('usage-scenario.generate');
 
 Route::post('/system-interfaces/generate', [SystemInterfaceGeneratorControllerGemini::class, 'generate'])->name('system-interface.generate');

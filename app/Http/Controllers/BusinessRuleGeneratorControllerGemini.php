@@ -6,7 +6,6 @@ use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
 class BusinessRuleGeneratorControllerGemini extends Controller
@@ -16,48 +15,59 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         try {
             $validated = $request->validate([
                 'project_id' => 'required|exists:projects,id',
-                'story_ids' => 'required|array|min:1',
-                'story_ids.*' => 'required|integer|exists:stories,id',
             ]);
 
-            // Busca todas as estórias com base nos IDs fornecidos.
-            $stories = Story::whereIn('id', $validated['story_ids'])->get();
+            $stories = Story::where('project_id', $validated['project_id'])->get();
 
             if($stories->isEmpty()) {
                 return response()->json(['status' => 'error', 'message' => 'Nenhuma estória válida foi encontrada.'], 404);
             }
 
-            $prompt = $this->createPrompt($stories);
+            $allBusinessRules = [];
             $modelName = config('services.gemini.model');
-            $fullPrompt = 'Você é um Analista de Negócios Sênior. ' . $prompt;
-            
-            $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
-            $responseText = $result->text();
-            $parsedData = $this->parseResponse($responseText);
+            $fullPromptPrefix = 'Você é um Analista de Negócios Sênior. ';
+
+            // 3. Itera sobre cada estória e gera as regras separadamente
+            foreach ($stories as $story) {
+                try {
+                    $prompt = $this->createPrompt($story);
+                    $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPromptPrefix . $prompt);
+                    $responseText = $result->text();
+                    $parsedData = $this->parseResponse($responseText);
+
+                    $rulesWithIds = array_map(function($rule) use ($story, $validated) {
+                        $rule['story_id'] = $story->id;
+                        $rule['project_id'] = $validated['project_id'];
+                        return $rule;
+                    }, $parsedData['business_rules']);
+
+                    $allBusinessRules = array_merge($allBusinessRules, $rulesWithIds);
+
+                } catch (\Exception $e) {
+                    Log::warning("Falha ao gerar regra de negócio para a estória ID {$story->id}: " . $e->getMessage());
+                    continue;
+                }
+            }
 
             return response()->json([
                 'status' => 'sucesso',
-                'business_rules' => $parsedData['business_rules'] ?? []
+                'business_rules' => $allBusinessRules
             ]);
         } catch (\Exception $e) {
-            Log::error('Erro ao gerar regras de negócio: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Erro ao processar a geração.'], 500);
+            Log::error('Erro geral ao gerar regras de negócio: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Ocorreu um erro geral no processo de geração.'], 500);
         }
     }
 
-    private function createPrompt(Collection $stories): string
+    private function createPrompt(Story $story): string
     {
-        $storyContext = $stories->map(function ($story) {
-            return "- Story ID {$story->id}: \"{$story->title}\"";
-        })->implode("\n");
-
         return <<<PROMPT
         Sua tarefa é extrair as Regras de Negócio (Business Rules) que estão implícitas ou são necessárias para que as funcionalidades descritas nas Stories abaixo existam.
 
         **Definição de Regra de Negócio**: As regras de negócio são informações que evidenciam o contexto de negócio do cliente e como ele opera. Em termos gerais, as regras de negócio são declarações que definem ou restringem alguma parte do negócio e refletem políticas, procedimentos e práticas do negócio do cliente.
 
         Stories para Análise:
-        {$storyContext}
+        "{$story->title}"
 
         Formato de resposta requerido (JSON):
         {

@@ -10,39 +10,61 @@ use Illuminate\Support\Facades\Log;
 
 class UsageScenarioGeneratorControllerGemini extends Controller
 {
-    public function generate(Request $request, Story $story): JsonResponse
+    public function generate(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([ 'project_id' => 'required|exists:projects,id' ]);
+            $validated = $request->validate([
+                'project_id' => 'required|exists:projects,id',
+            ]);
 
-            $prompt = $this->createPrompt($story);
+            $stories = Story::where('project_id', $validated['project_id'])->get();
+
+            if($stories->isEmpty()) {
+                return response()->json(['status' => 'error', 'message' => 'Nenhuma Story foi encontrada no projeto para análise.'], 404);
+            }
+
+            $allUsageScenarios = [];
             $modelName = config('gemini.model');
-            $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
-            
-            $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
-            $responseText = $result->text();
-            $parsedData = $this->parseResponse($responseText);
+            $fullPromptPrefix = 'Você é um especialista em engenharia de software e análise de requisitos. ';
+
+            // Itera sobre cada estória e gera os cenários separadamente
+            foreach ($stories as $story) {
+                try {
+                    $prompt = $this->createPrompt($story);
+                    $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPromptPrefix . $prompt);
+                    $responseText = $result->text();
+                    $parsedData = $this->parseResponse($responseText);
+                    
+                    $scenariosWithIds = array_map(function($scenario) use ($story, $validated) {
+                        $scenario['story_id'] = $story->id;
+                        $scenario['project_id'] = $validated['project_id']; 
+                        return $scenario;
+                    }, $parsedData['usage_scenarios']);
+
+                    $allUsageScenarios = array_merge($allUsageScenarios, $scenariosWithIds);
+
+                } catch (\Exception $e) {
+                    Log::warning("Falha ao gerar cenário de uso para a estória ID {$story->id}: " . $e->getMessage());
+                    continue;
+                }
+            }
 
             return response()->json([
                 'status' => 'sucesso',
-                'usage_scenarios' => $parsedData['usage_scenarios'] ?? []
+                'usage_scenarios' => $allUsageScenarios
             ]);
         } catch (\Exception $e) {
-            Log::error('Erro ao gerar cenários de uso: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Erro ao processar a geração.'], 500);
+            Log::error('Erro geral ao gerar cenários de uso: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Ocorreu um erro geral no processo de geração.'], 500);
         }
     }
 
     private function createPrompt(Story $story): string
     {
-        // Extrai o papel da persona da estória, se existir.
-        preg_match('/Como (.*?),/', $story->title, $matches);
-        $as = $matches[1] ?? 'usuário';
-
         return <<<PROMPT
-        Analise a User Story a seguir e crie um Cenário de Uso (Usage Scenario) detalhado usando o formato Gherkin.
+        Sua tarefa é criar Cenários de Uso para a Story fornecida, representando-os como Cenários de Aceitação no padrão GIVEN-WHEN-THEN. Os cenários de uso são os comportamentos que o produto possuirá a partir da interação com os usuários finais. Isso garante o refinamento das funcionalidades por meio de exemplos reais do negócio e a criação de cenários para testes de aceitação.
 
-        User Story: "{$story->title}"
+        Story: "- Story: {$story->title}; Tipo: {$story->title}"
 
         O cenário deve seguir a estrutura:
         - 'as': O papel do usuário (extraído da estória).
@@ -57,7 +79,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
             "usage_scenarios": [
                 {
                     "description": {
-                        "as": "{$as}",
+                        "as": "O papel do usuário",
                         "given": "Dado que...",
                         "when": "Quando eu...",
                         "then_1": "Então eu deveria...",
@@ -68,17 +90,18 @@ class UsageScenarioGeneratorControllerGemini extends Controller
             ]
         }
 
-        Exemplo: Se a User Story for "Como cliente, eu quero adicionar um item ao meu carrinho de compras."
+        Exemplo de um Cenário de Aceitação do projeto de streaming de filmes:
+        Se a Story for "Eu como Leon Cardoso quero uma opção de exclusão de filmes do catálogo da plataforma no painel de controle administrativo para remover um filme do catálogo.", a resposta poderia ser:
         {
             "usage_scenarios": [
                 {
                     "description": {
-                        "as": "cliente",
-                        "given": "Dado que estou na página de detalhes de um produto",
-                        "when": "Quando eu clico no botão 'Adicionar ao Carrinho'",
-                        "then_1": "Então o item deve ser adicionado ao meu carrinho",
-                        "and": "E o número de itens no ícone do carrinho deve ser atualizado",
-                        "then_2": null
+                        "as": "Administrador",
+                        "given": "que o Administrador está autenticado no painel de controle administrativo da plataforma.",
+                        "when": "o Administrador seleciona a opção de exclusão para um filme do catálogo.",
+                        "then_1": "o sistema exibe uma mensagem de confirmação solicitando a confirmação da exclusão.",
+                        "and": "o Administrador Cardoso confirma a exclusão.",
+                        "then_2": "uma mensagem é exibida indicando que o filme foi removido com sucesso."
                     }
                 }
             ]
