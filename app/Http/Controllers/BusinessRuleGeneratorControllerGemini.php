@@ -52,11 +52,11 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         })->implode("\n");
 
         return <<<PROMPT
-        Sua tarefa é extrair as Regras de Negócio (Business Rules) que estão implícitas ou são necessárias para que as funcionalidades descritas nas User Stories abaixo existam.
+        Sua tarefa é extrair as Regras de Negócio (Business Rules) que estão implícitas ou são necessárias para que as funcionalidades descritas nas Stories abaixo existam.
 
         **Definição de Regra de Negócio**: As regras de negócio são informações que evidenciam o contexto de negócio do cliente e como ele opera. Em termos gerais, as regras de negócio são declarações que definem ou restringem alguma parte do negócio e refletem políticas, procedimentos e práticas do negócio do cliente.
 
-        User Stories para Análise:
+        Stories para Análise:
         {$storyContext}
 
         Formato de resposta requerido (JSON):
@@ -68,7 +68,7 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         }
 
         Exemplo aplicado a um projeto de streaming de filmes:
-        Se a User Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", a resposta poderia ser:
+        Se a Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", a resposta poderia ser:
         {
             "business_rules": [
                 { "title": "A seção de estatísticas, gráficos ou tabelas de vistas deve estar disponível apenas no painel de controle administrativo, garantindo que apenas usuários autorizados, como administradores, tenham acesso a essas informações." },
