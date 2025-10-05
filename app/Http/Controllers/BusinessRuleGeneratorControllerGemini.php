@@ -6,18 +6,30 @@ use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
 class BusinessRuleGeneratorControllerGemini extends Controller
 {
-    public function generate(Request $request, Story $story): JsonResponse
+    public function generate(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([ 'project_id' => 'required|exists:projects,id' ]);
+            $validated = $request->validate([
+                'project_id' => 'required|exists:projects,id',
+                'story_ids' => 'required|array|min:1',
+                'story_ids.*' => 'required|integer|exists:stories,id',
+            ]);
 
-            $prompt = $this->createPrompt($story);
-            $modelName = config('gemini.model');
-            $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
+            // Busca todas as estórias com base nos IDs fornecidos.
+            $stories = Story::whereIn('id', $validated['story_ids'])->get();
+
+            if($stories->isEmpty()) {
+                return response()->json(['status' => 'error', 'message' => 'Nenhuma estória válida foi encontrada.'], 404);
+            }
+
+            $prompt = $this->createPrompt($stories);
+            $modelName = config('services.gemini.model');
+            $fullPrompt = 'Você é um Analista de Negócios Sênior. ' . $prompt;
             
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();
@@ -33,25 +45,30 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(Story $story): string
+    private function createPrompt(Collection $stories): string
     {
+        $storyContext = $stories->map(function ($story) {
+            return "- Story ID {$story->id}: \"{$story->title}\"";
+        })->implode("\n");
+
         return <<<PROMPT
-        Analise a User Story a seguir e extraia as Regras de Negócio (Business Rules) que estão implícitas ou são necessárias para que a funcionalidade exista.
+        Sua tarefa é extrair as Regras de Negócio (Business Rules) que estão implícitas ou são necessárias para que as funcionalidades descritas nas Stories abaixo existam.
 
-        User Story: "{$story->title}"
+        **Definição de Regra de Negócio**: As regras de negócio são informações que evidenciam o contexto de negócio do cliente e como ele opera. Em termos gerais, as regras de negócio são declarações que definem ou restringem alguma parte do negócio e refletem políticas, procedimentos e práticas do negócio do cliente.
 
-        Regras de negócio são declarações que restringem ou definem alguma parte do negócio.
+        Stories para Análise:
+        {$storyContext}
 
         Formato de resposta requerido (JSON):
         {
             "business_rules": [
-                { "title": "Descrição da primeira regra de negócio." },
-                { "title": "Descrição da segunda regra de negócio." }
+                { "title": "Título da primeira regra de negócio." },
+                { "title": "Título da segunda regra de negócio." }
             ]
         }
 
         Exemplo aplicado a um projeto de streaming de filmes:
-        Se a User Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", a resposta poderia ser:
+        Se a Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", a resposta poderia ser:
         {
             "business_rules": [
                 { "title": "A seção de estatísticas, gráficos ou tabelas de vistas deve estar disponível apenas no painel de controle administrativo, garantindo que apenas usuários autorizados, como administradores, tenham acesso a essas informações." },
@@ -60,7 +77,7 @@ class BusinessRuleGeneratorControllerGemini extends Controller
             ]
         }
 
-        IMPORTANTE: Retorne apenas o JSON.
+        IMPORTANTE: Analise todas as estórias fornecidas para extrair as regras. Retorne apenas o JSON.
         PROMPT;
     }
 

@@ -13,7 +13,6 @@ use App\Http\Controllers\BusinessRuleGeneratorControllerGemini;
 use App\Http\Controllers\UsageScenarioGeneratorControllerGemini;
 use App\Http\Controllers\SystemInterfaceGeneratorControllerGemini;
 
-//Route::post('/stories/generate', [StoryGeneratorController::class, 'generateStories'])->name('story.generate');
 Route::post('/stories/generate', [StoryGeneratorControllerGemini::class, 'generateStories'])->name('story.generate');
 
 Route::post('/journeys/generate', [JourneyGeneratorController::class, 'generateJourneys'])->name('journey.generate');
@@ -24,10 +23,10 @@ Route::post('/goals/generate', [GoalGeneratorControllerGemini::class, 'generateG
 
 Route::post('/overall-model/generate', [OverallModelGeneratorControllerGemini::class, 'generate'])->name('overall-model.generate');
 
-Route::post('/stories/{story}/decompose', [EpicStoryGeneratorControllerGemini::class, 'decompose'])->name('story.decompose');
+Route::post('/stories/{story}/decompose', [EpicStoryGeneratorControllerGemini::class, 'decompose'])->name('epic-story.decompose');
 
-Route::post('/stories/{story}/generate-business-rules', [BusinessRuleGeneratorControllerGemini::class, 'generate'])->name('story.generate-rules');
+Route::post('/business-rules/generate', [BusinessRuleGeneratorControllerGemini::class, 'generate'])->name('business-rule.generate');
 
-Route::post('/stories/{story}/generate-usage-scenarios', [UsageScenarioGeneratorControllerGemini::class, 'generate'])->name('story.generate-scenarios');
+Route::post('/stories/{story}/usage-scenarios-generate', [UsageScenarioGeneratorControllerGemini::class, 'generate'])->name('usage-scenarios.generate');
 
 Route::post('/system-interfaces/generate', [SystemInterfaceGeneratorControllerGemini::class, 'generate'])->name('system-interface.generate');
