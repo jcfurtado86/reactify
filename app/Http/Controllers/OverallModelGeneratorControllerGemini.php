@@ -30,12 +30,10 @@ class OverallModelGeneratorControllerGemini extends Controller
                 ], 422);
             }
 
-            // 2. Combinar os títulos das estórias em um único contexto de texto
             $storyContext = $stories->map(function ($story) {
                 return "- ({$story->type}): {$story->title}";
             })->implode("\n");
 
-            // 3. Criar o prompt, chamar a IA e fazer o parsing da resposta
             $prompt = $this->createPrompt($storyContext);
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um arquiteto de software especialista em design orientado a objetos e na técnica de CRC Cards. ' . $prompt;

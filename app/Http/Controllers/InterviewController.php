@@ -18,8 +18,7 @@ class InterviewController extends Controller
     public function store(Request $request, Project $project)
     {
         $request->validate([
-            'interview' => 'required|file|mimes:mp3,wav,ogg,m4a,mp4,mov,webm,txt,pdf,doc,docx|max:51200',
-        ]);
+            'interview' => 'required|file|mimes:pdf,mp3,mp4|max:51200'        ]);
 
         try {
             $file = $request->file('interview');

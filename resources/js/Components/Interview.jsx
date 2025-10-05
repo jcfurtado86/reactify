@@ -128,7 +128,7 @@ const InterviewUploadCard = ({
   const fileInputRef = useRef(null)
 
   const validateFile = (file) => {
-    const allowedTypes = ['mp3', 'wav', 'ogg', 'm4a', 'mp4', 'mov', 'webm', 'txt', 'pdf', 'doc', 'docx']
+    const allowedTypes = ['pdf', 'mp3', 'mp4']
     const maxSize = 51200 * 1024 // 50MB em bytes
     
     const fileExtension = file.name.split('.').pop().toLowerCase()
@@ -196,7 +196,7 @@ const InterviewUploadCard = ({
       },
     )
   }
-  const acceptedFileTypes = '.mp3,.wav,.ogg,.m4a,.mp4,.mov,.webm,.txt,.pdf,.doc,.docx';
+  const acceptedFileTypes = '.pdf,.mp3,.mp4';
 
   return (
     <div
@@ -233,7 +233,7 @@ const InterviewUploadCard = ({
       {/* Informação sobre tipos e tamanho - posição fixa */}
       <div className="mb-4 rounded-md bg-muted/50 p-3 text-center">
         <p className="text-xs text-muted-foreground">
-          <strong>Tipos permitidos:</strong> mp3, wav, ogg, m4a, mp4, mov, webm, txt, pdf, doc, docx
+          <strong>Tipos permitidos:</strong> PDF, MP3, MP4
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           <strong>Tamanho máximo:</strong> 50MB

@@ -2,7 +2,6 @@ import os
 import whisper
 import requests
 import pdfplumber
-import docx
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 
@@ -46,7 +45,7 @@ def transcribe_audio():
 
         transcript_text = ""
 
-        if file_extension in ['mp3', 'wav', 'ogg', 'm4a', 'mp4', 'mov', 'webm']:
+        if file_extension in ['mp3', 'mp4']:
             print("Processando com Whisper (Áudio/Vídeo)...")
             result = model.transcribe(temp_file_path, fp16=False)
             transcript_text = result.get('text', '')
@@ -56,20 +55,8 @@ def transcribe_audio():
             text_parts = []
             with pdfplumber.open(temp_file_path) as pdf:
                 for page in pdf.pages:
-                    # Adiciona o texto da página, ou uma string vazia se não houver texto
                     text_parts.append(page.extract_text() or "")
             transcript_text = "\n".join(text_parts)
-
-        elif file_extension == 'docx':
-            print("Processando com python-docx (DOCX)...")
-            doc = docx.Document(temp_file_path)
-            text_parts = [p.text for p in doc.paragraphs]
-            transcript_text = "\n".join(text_parts)
-
-        elif file_extension == 'txt':
-            print("Processando como arquivo de texto simples (TXT)...")
-            with open(temp_file_path, 'r', encoding='utf-8') as f:
-                transcript_text = f.read()
         
         else:
             return jsonify({"error": f"Tipo de arquivo '{file_extension}' não suportado."}), 415 # HTTP 415: Unsupported Media Type
