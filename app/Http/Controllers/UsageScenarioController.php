@@ -4,9 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\UsageScenario;
 use Illuminate\Http\Request;
+use App\Http\Requests\BulkStoreUsageScenarioRequest;
+use Illuminate\Support\Facades\DB;  
 
 class UsageScenarioController extends Controller
 {
+  public function bulk(BulkStoreUsageScenarioRequest $request)
+  {
+      $validatedData = $request->validated();
+      DB::transaction(function () use ($validatedData) {
+          foreach ($validatedData['usage_scenarios'] as $scenarioData) {
+              UsageScenario::create($scenarioData);
+          }
+      });
+      return back()->with('success', 'Cenários de uso adicionados com sucesso.');
+  }
+
   public function store(Request $request)
   {
 
