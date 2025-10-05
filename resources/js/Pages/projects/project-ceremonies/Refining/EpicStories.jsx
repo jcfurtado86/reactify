@@ -35,7 +35,6 @@ const GeneratedItemsModal = ({
   confirmGeneratedItems,
   toggleAllItems,
 }) => {
-  console.log(generatedItems)
   return (
     <div
       className={`
