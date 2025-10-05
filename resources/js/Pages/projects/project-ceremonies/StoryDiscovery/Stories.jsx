@@ -527,7 +527,7 @@ const Stories = ({ project, setProject }) => {
                   story={story}
                   isEditing={editingId === story.id}
                   editValue={editValue}
-                  onValue-change={handleInputChange}
+                  onValueChange={handleInputChange}
                   onEdit={() => editStory(story)}
                   onSave={() => editStory(story)}
                   onDelete={() => deleteStory(story.id)}
@@ -590,7 +590,7 @@ const Stories = ({ project, setProject }) => {
                   onValueChange={handleInputChange}
                   onEdit={() => editStory(story)}
                   onSave={() => editStory(story)}
-                  onDelete={() => deleteStory(story)}
+                  onDelete={() => deleteStory(story.id)}
                   onCancel={() => setEditingId(null)}
                   isTemporary={isTemporary(story)}
                   textareaRef={editingId === story.id ? textareaRef : null}
