@@ -1,4 +1,5 @@
 import { darkenColor } from '@/lib/utils'
+import { Minus, X, Check, ChevronsUp } from 'lucide-react'
 import {
   DndContext,
   PointerSensor,
@@ -20,7 +21,8 @@ import { router } from '@inertiajs/react'
 import { storyVariants } from './Stories'
 import { typeColors as goalTypeColors } from '../Inception/Goals'
 import { priorityColors as goalPriorityColors } from '../Inception/Goals'
-
+import { toast } from 'sonner'
+import GenerateAIButton from '@/Components/GenerateAIButton'
 import EditPriorities from './EditPriorities'
 
 const SortablePriorityColumn = ({
@@ -183,6 +185,134 @@ const DroppableCell = ({ id, children, className = '' }) => {
   )
 }
 
+const GeneratedItemsModal = ({
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+  orderedPriorities,
+  GRID_ROWS,
+}) => {
+  return (
+    <div
+      className={`
+          transition-all duration-300 z-50
+          ${
+            isModalMinimized
+              ? 'fixed bottom-4 right-4 w-[400px]'
+              : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
+          }
+        `}
+    >
+      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'Matriz gerada por IA'}
+            {isModalMinimized && 'Matriz gerada'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              size="icon"
+              variant="secondary"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+
+        {!isModalMinimized && (
+          <>
+            {/* <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+              <span className="text-foreground font-medium">
+                {generatedItems.filter((j) => j.selected).length} de{' '}
+                {generatedItems.length} selecionadas
+              </span>
+              <Button
+                onClick={toggleAllItems}
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+              >
+                {generatedItems.every((item) => item.selected)
+                  ? 'Desmarcar Todas'
+                  : 'Selecionar Todas'}
+              </Button>
+            </div>*/}
+
+            <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              {orderedPriorities.map((priority) => {
+                const itemCount = Object.values(generatedItems).filter(
+                  (item) => item && item.priority_id == priority.id,
+                ).length
+                return (
+                  <SortablePriorityColumn
+                    key={priority.id}
+                    priority={priority}
+                    itemCount={itemCount}
+                  >
+                    {Array.from({ length: GRID_ROWS }).map((_, rowIndex) => {
+                      const cellId = `cell-${priority.id}-${rowIndex}`
+                      const storiesInCell = generatedItems[cellId]
+
+                      return (
+                        <DroppableCell
+                          key={cellId}
+                          id={cellId}
+                          className={`h-40 min-w-60`}
+                        >
+                          {storiesInCell && storiesInCell.length > 0 ? (
+                            storiesInCell.map((story) => (
+                              <StoryCard
+                                key={story.id} // Use the prioritization ID for the key
+                                story={story}
+                                priority={priority}
+                              />
+                            ))
+                          ) : (
+                            // Placeholder for empty cells
+                            <div className="h-full w-full flex items-center justify-center"></div>
+                          )}
+                        </DroppableCell>
+                      )
+                    })}
+                  </SortablePriorityColumn>
+                )
+              })}
+            </div>
+
+            <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-border flex-shrink-0">
+              <Button
+                onClick={cancelGeneratedItems}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmGeneratedItems}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+                disabled={generatedItems.filter((j) => j.selected).length === 0}
+              >
+                <Check className="mr-2" size={16} />
+                Confirmar e Adicionar (
+                {generatedItems.filter((j) => j.selected).length})
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Function helper to transform the API array into our state object
 const transformArrayToMatrixObject = (prioritizations, allProjectStories) => {
   if (!prioritizations || !allProjectStories) return {}
@@ -231,6 +361,35 @@ const PrioritizationMatrix = ({ project, setProject }) => {
         (a, b) => a.order_column - b.order_column,
       ),
   )
+  //ia states
+  const [aiGeneratedPrioritizations, setAiGeneratedPrioritizations] = useState([
+    {
+      'cell-3-1': [
+        {
+          id: 2,
+          story_id: 3,
+          story_title:
+            'Como administrador, quero gerenciar usuários para manter o controle de acesso ao sistema',
+          story_type: 'system',
+          project_id: 1,
+          priority_id: 3,
+          position: 1,
+        },
+        {
+          id: 3,
+          story_id: 4,
+          story_title: 'Guaxinim fofo',
+          story_type: 'system',
+          project_id: 1,
+          priority_id: 3,
+          position: 1,
+        },
+      ],
+    },
+  ])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(true)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
 
   useEffect(() => {
     if (project && project.matrix_priorities) {
@@ -245,7 +404,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
       project.prioritizations,
       project.stories,
     )
-
+    console.log(project.prioritizations, newMatrix)
     // Atualiza o estado interno para refletir as novas props
     setPrioritizationMatrix(newMatrix)
   }, [project])
@@ -458,12 +617,171 @@ const PrioritizationMatrix = ({ project, setProject }) => {
     [orderedPriorities],
   )
 
+  //rotas relacionadas ao modal de IA
+  const generatePrioritizations = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post('/api/prioritizations/generate', {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      const prioritizationsWithSelection = data.prioritizations.map(
+        (prioritization) => ({
+          ...prioritization,
+          selected: true,
+        }),
+      )
+
+      setAiGeneratedPrioritizations(prioritizationsWithSelection)
+      setShowAiModal(true)
+      toast.success(
+        'Prioritizations geradas com sucesso a partir das entrevistas mais recentes.',
+      )
+    } catch (error) {
+      console.error('Erro ao gerar prioritizations:', error)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data
+
+        if (errorData.status === 'warning') {
+          toast.warning(errorData.message)
+        } else {
+          toast.error(
+            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
+          )
+        }
+      } else {
+        toast.error(
+          'Não foi possível conectar ao servidor. Verifique sua internet.',
+        )
+      }
+    }
+  }
+  const confirmGeneratedPrioritizations = () => {
+    const selectedPrioritizations = aiGeneratedPrioritizations.filter(
+      (prioritization) => prioritization.selected,
+    )
+    const remainingPrioritizations = aiGeneratedPrioritizations.filter(
+      (prioritization) => !prioritization.selected,
+    )
+
+    if (selectedPrioritizations.length === 0) {
+      toast.warning('Selecione pelo menos uma prioritization para adicionar.')
+      return
+    }
+
+    const prioritizationsToAdd = selectedPrioritizations.map(
+      (prioritization) => ({
+        id: `temp-${Date.now()}-${Math.random()}`,
+        created_at: new Date().toISOString(),
+        project_id: project.id,
+        ...prioritization,
+      }),
+    )
+
+    setProject((prevProject) => ({
+      ...prevProject,
+      prioritizations: [
+        ...(prevProject.prioritizations || []),
+        ...prioritizationsToAdd,
+      ],
+    }))
+
+    const prioritizationsForBackend = selectedPrioritizations.map(
+      ({ title, type, priority }) => ({
+        title,
+        type,
+        priority,
+        project_id: project.id,
+      }),
+    )
+
+    router.post(
+      route('prioritization.bulk-store'),
+      { prioritizations: prioritizationsForBackend },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedPrioritizations.length} goal(s) adicionada(s) com sucesso!`,
+          )
+          setAiGeneratedPrioritizations(remainingPrioritizations)
+          if (remainingPrioritizations.length === 0) {
+            setShowAiModal(false)
+            setIsModalMinimized(false)
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar as goals.')
+          console.error('Erro do backend:', errors)
+          setProject((prevProject) => {
+            const prioritizationsToAddIds = prioritizationsToAdd.map(
+              (prioritization) => prioritization.id,
+            )
+            return {
+              ...prevProject,
+              prioritizations: prevProject.prioritizations.filter(
+                (prioritization) =>
+                  !prioritizationsToAddIds.includes(prioritization.id),
+              ),
+            }
+          })
+        },
+      },
+    )
+  }
+
+  const cancelGeneratedPrioritizations = () => {
+    setShowAiModal(false)
+    setAiGeneratedPrioritizations([])
+    setIsModalMinimized(false)
+  }
+
+  const togglePrioritizationSelection = (index) => {
+    setAiGeneratedPrioritizations((prev) =>
+      prev.map((prioritization, i) =>
+        i === index
+          ? { ...prioritization, selected: !prioritization.selected }
+          : prioritization,
+      ),
+    )
+  }
+
+  const toggleAllPrioritizations = () => {
+    const allSelected = aiGeneratedPrioritizations.every(
+      (prioritization) => prioritization.selected,
+    )
+    setAiGeneratedPrioritizations((prev) =>
+      prev.map((prioritization) => ({
+        ...prioritization,
+        selected: !allSelected,
+      })),
+    )
+  }
+
   return (
     <DndContext
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
+      {showAiModal && (
+        <GeneratedItemsModal
+          isModalMinimized={isModalMinimized}
+          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+          cancelGeneratedItems={cancelGeneratedPrioritizations}
+          generatedItems={aiGeneratedPrioritizations}
+          toggleItemSelection={togglePrioritizationSelection}
+          confirmGeneratedItems={confirmGeneratedPrioritizations}
+          toggleAllItems={toggleAllPrioritizations}
+          orderedPriorities={orderedPriorities}
+          GRID_ROWS={GRID_ROWS}
+        />
+      )}
       <main className="flex flex-col gap-2 py-2 bg-background text-foreground min-h-screen">
         {/* botoes de opcoes*/}
         <div className="w-full flex gap-3 justify-start items-center  relative">
@@ -506,70 +824,74 @@ const PrioritizationMatrix = ({ project, setProject }) => {
           </DroppableCell>
         </section>
 
-        <section className="flex-1">
-          <section className="flex gap-2 justify-between">
-            <aside className="flex flex-col w-64 items-center bg-card p-2 gap-2 rounded">
-              <span className="h-11 py-1 ">Goals</span>
-              {project.goal_sketches
-                .sort((a, b) => {
-                  const priorityA = priorityOrder[a.priority] // Pega o valor numérico para o tipo de 'a'
-                  const priorityB = priorityOrder[b.priority] // Pega o valor numérico para o tipo de 'b'
+        <section className="flex gap-2 justify-between">
+          <aside className="flex flex-col w-64 items-center bg-card p-2 gap-2 rounded">
+            <span className="h-11 py-1 ">Goals</span>
+            {project.goal_sketches
+              .sort((a, b) => {
+                const priorityA = priorityOrder[a.priority] // Pega o valor numérico para o tipo de 'a'
+                const priorityB = priorityOrder[b.priority] // Pega o valor numérico para o tipo de 'b'
 
-                  return priorityB - priorityA // Subtrai para ordenar
-                })
-                .map((goal) => (
-                  <GoalCard key={goal.id} goal={goal}>
-                    {goal.title}
-                  </GoalCard>
-                ))}
-            </aside>
-            <div className="flex-1 grid grid-flow-col auto-cols-max gap-2 pr-2">
-              <SortableContext
-                items={priorityIds}
-                strategy={horizontalListSortingStrategy}
-              >
-                {orderedPriorities.map((priority) => {
-                  const itemCount = Object.values(prioritizationMatrix).filter(
-                    (story) => story && story.priority_id == priority.id,
-                  ).length
-                  return (
-                    <SortablePriorityColumn
-                      key={priority.id}
-                      priority={priority}
-                      itemCount={itemCount}
-                    >
-                      {Array.from({ length: GRID_ROWS }).map((_, rowIndex) => {
-                        const cellId = `cell-${priority.id}-${rowIndex}`
-                        const storiesInCell = prioritizationMatrix[cellId]
+                return priorityB - priorityA // Subtrai para ordenar
+              })
+              .map((goal) => (
+                <GoalCard key={goal.id} goal={goal}>
+                  {goal.title}
+                </GoalCard>
+              ))}
+          </aside>
+          <div className="flex-1 grid grid-flow-col auto-cols-max gap-2 pr-2">
+            <SortableContext
+              items={priorityIds}
+              strategy={horizontalListSortingStrategy}
+            >
+              {orderedPriorities.map((priority) => {
+                const itemCount = Object.values(prioritizationMatrix).filter(
+                  (story) => story && story.priority_id == priority.id,
+                ).length
+                return (
+                  <SortablePriorityColumn
+                    key={priority.id}
+                    priority={priority}
+                    itemCount={itemCount}
+                  >
+                    {Array.from({ length: GRID_ROWS }).map((_, rowIndex) => {
+                      const cellId = `cell-${priority.id}-${rowIndex}`
+                      const storiesInCell = prioritizationMatrix[cellId]
 
-                        return (
-                          <DroppableCell
-                            key={cellId}
-                            id={cellId}
-                            className={`h-40 min-w-60`}
-                          >
-                            {storiesInCell && storiesInCell.length > 0 ? (
-                              storiesInCell.map((story) => (
-                                <StoryCard
-                                  key={story.id} // Use the prioritization ID for the key
-                                  story={story}
-                                  priority={priority}
-                                />
-                              ))
-                            ) : (
-                              // Placeholder for empty cells
-                              <div className="h-full w-full flex items-center justify-center"></div>
-                            )}
-                          </DroppableCell>
-                        )
-                      })}
-                    </SortablePriorityColumn>
-                  )
-                })}
-              </SortableContext>
-            </div>
-          </section>
+                      return (
+                        <DroppableCell
+                          key={cellId}
+                          id={cellId}
+                          className={`h-40 min-w-60`}
+                        >
+                          {storiesInCell && storiesInCell.length > 0 ? (
+                            storiesInCell.map((story) => (
+                              <StoryCard
+                                key={story.id} // Use the prioritization ID for the key
+                                story={story}
+                                priority={priority}
+                              />
+                            ))
+                          ) : (
+                            // Placeholder for empty cells
+                            <div className="h-full w-full flex items-center justify-center"></div>
+                          )}
+                        </DroppableCell>
+                      )
+                    })}
+                  </SortablePriorityColumn>
+                )
+              })}
+            </SortableContext>
+          </div>
         </section>
+        <GenerateAIButton
+          isGenerating={isGenerating}
+          onClick={generatePrioritizations}
+          // tooltip={tooltipInfo.aiGeneratedStory}
+          className="w-1/2"
+        />
       </main>
       {/* overlay adicionado para manter estilo do card de story mesmo ao arrastar*/}
       <DragOverlay>
