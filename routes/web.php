@@ -39,7 +39,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 //rota para envio de email
-Route::post('/email/welcome', [WelcomeEmailController::class, 'store'])->name('welcome-email.store');
+Route::post('/email/welcome', [WelcomeEmailController::class, 'store'])->name(
+  'welcome-email.store'
+);
 
 //rotas de autorizacao com socialite
 Route::get('/auth/{provider}/redirect', function (string $provider) {
@@ -70,184 +72,378 @@ Route::get('/auth/{provider}/callback', function (string $provider) {
 })->name('auth.callback');
 
 //rotas para aceitar/recusar convites de projeto
-Route::get('/invitations/{invitation:token}/accept', [ProjectInvitationController::class, 'accept'])->name('invitations.accept');
+Route::get('/invitations/{invitation:token}/accept', [
+  ProjectInvitationController::class,
+  'accept',
+])->name('invitations.accept');
 
-Route::get('/invitations/{invitation:token}/decline', [ProjectInvitationController::class, 'decline'])->name('invitations.decline');
+Route::get('/invitations/{invitation:token}/decline', [
+  ProjectInvitationController::class,
+  'decline',
+])->name('invitations.decline');
 
 // rotas para usuários autenticados
 Route::group(['middleware' => ['auth', 'verified']], function () {
-  Route::get('/dashboard', [ProjectController::class, 'index'])->name('dashboard');
+  Route::get('/dashboard', [ProjectController::class, 'index'])->name(
+    'dashboard'
+  );
   //rotas para projetos
   Route::prefix('project')->group(function () {
     // Route for saving the state of the Prioritization Matrix for a project
-    Route::post('/create', [ProjectController::class, 'store'])->name('project.store');
-    Route::get('/{project}/', [ProjectController::class, 'show'])->name('project.show');
-    Route::get('/{project}/ceremony/{ceremony}', [ProjectController::class, 'ceremony'])->name('project.ceremony.show');
-    Route::patch('/{project}/members/add', [ProjectController::class, 'addNewMember'])->name('project.users.add');
-    Route::patch('/{project}', [ProjectController::class, 'update'])->name('project.update');
-    Route::patch('/{project}/toggle-active', [ProjectController::class, 'toggleActive'])->name('project.toggle-active');
-    Route::delete('/{project}', [ProjectController::class, 'destroy'])->name('project.destroy');
+    Route::post('/create', [ProjectController::class, 'store'])->name(
+      'project.store'
+    );
+    Route::get('/{project}/', [ProjectController::class, 'show'])->name(
+      'project.show'
+    );
+    Route::get('/{project}/ceremony/{ceremony}', [
+      ProjectController::class,
+      'ceremony',
+    ])->name('project.ceremony.show');
+    Route::patch('/{project}/members/add', [
+      ProjectController::class,
+      'addNewMember',
+    ])->name('project.users.add');
+    Route::patch('/{project}', [ProjectController::class, 'update'])->name(
+      'project.update'
+    );
+    Route::patch('/{project}/toggle-active', [
+      ProjectController::class,
+      'toggleActive',
+    ])->name('project.toggle-active');
+    Route::delete('/{project}', [ProjectController::class, 'destroy'])->name(
+      'project.destroy'
+    );
     // rotas para permissões de projeto
-    Route::post('/{project}/permissions', [ProjectPermissionController::class, 'update'])->name(
-      'project.permissions.update'
-    );
-    Route::post('/{project}/addMember', [ProjectPermissionController::class, 'addMember'])->name(
-      'project.permissions.addMember'
-    );
-    Route::post('/{project}/removeMember', [ProjectPermissionController::class, 'removeMember'])->name(
-      'project.permissions.removeMember'
-    );
+    Route::post('/{project}/permissions', [
+      ProjectPermissionController::class,
+      'update',
+    ])->name('project.permissions.update');
+    Route::post('/{project}/addMember', [
+      ProjectPermissionController::class,
+      'addMember',
+    ])->name('project.permissions.addMember');
+    Route::post('/{project}/removeMember', [
+      ProjectPermissionController::class,
+      'removeMember',
+    ])->name('project.permissions.removeMember');
     //rotas ṕara uso de websocket
-    Route::get('/{project}/getUpdated', [ProjectController::class, 'getUpdatedProject'])->name('project.updated');
+    Route::get('/{project}/getUpdated', [
+      ProjectController::class,
+      'getUpdatedProject',
+    ])->name('project.updated');
   });
   //envia convite de projeto
-  Route::post('/projects/{project}/invitations', [ProjectInvitationController::class, 'store'])->name('projects.invitations.store');
+  Route::post('/projects/{project}/invitations', [
+    ProjectInvitationController::class,
+    'store',
+  ])->name('projects.invitations.store');
 
   // Rotas para stories
   Route::prefix('story')->group(function () {
     Route::post('/', [StoryController::class, 'store'])->name('story.store');
-    Route::post('/bulk-store', [StoryController::class, 'bulk'])->name('story.bulk-store');
-    Route::patch('/{story}', [StoryController::class, 'update'])->name('story.update');
-    Route::patch('/{story}/prioritize', [StoryController::class, 'prioritize'])->name('story.prioritize');
-    Route::delete('/{story}', [StoryController::class, 'destroy'])->name('story.delete');
+    Route::post('/bulk-store', [StoryController::class, 'bulk'])->name(
+      'story.bulk-store'
+    );
+    Route::patch('/{story}', [StoryController::class, 'update'])->name(
+      'story.update'
+    );
+    Route::patch('/{story}/prioritize', [
+      StoryController::class,
+      'prioritize',
+    ])->name('story.prioritize');
+    Route::delete('/{story}', [StoryController::class, 'destroy'])->name(
+      'story.delete'
+    );
   });
   //rotas para storyboard
   Route::prefix('storyboard')->group(function () {
-    Route::post('/', [StoryboardController::class, 'store'])->name('storyboard.store');
-    Route::delete('/{storyboard}', [StoryboardController::class, 'destroy'])->name('storyboard.destroy');
+    Route::post('/', [StoryboardController::class, 'store'])->name(
+      'storyboard.store'
+    );
+    Route::delete('/{storyboard}', [
+      StoryboardController::class,
+      'destroy',
+    ])->name('storyboard.destroy');
   });
   // Rotas para epic stories
   Route::prefix('epic')->group(function () {
-    Route::post('/', [EpicStoryController::class, 'store'])->name('epic-story.store');
+    Route::post('/', [EpicStoryController::class, 'store'])->name(
+      'epic-story.store'
+    );
+    Route::post('/bulk-store', [EpicStoryController::class, 'bulk'])->name(
+      'epic-story.bulk-store'
+    );
+    Route::patch('/{story}', [EpicStoryController::class, 'update'])->name(
+      'epic-story.update'
+    );
 
-    Route::patch('/{story}', [EpicStoryController::class, 'update'])->name('epic-story.update');
-
-    Route::delete('/{story}', [EpicStoryController::class, 'destroy'])->name('epic-story.destroy');
+    Route::delete('/{story}', [EpicStoryController::class, 'destroy'])->name(
+      'epic-story.destroy'
+    );
   });
 
   //rotas para business rules
   Route::prefix('business-rule')->group(function () {
-    Route::post('/', [BusinessRuleController::class, 'store'])->name('business-rule.store');
+    Route::post('/', [BusinessRuleController::class, 'store'])->name(
+      'business-rule.store'
+    );
 
-    Route::patch('/{rule}', [BusinessRuleController::class, 'update'])->name('business-rule.update');
+    Route::patch('/{rule}', [BusinessRuleController::class, 'update'])->name(
+      'business-rule.update'
+    );
 
-    Route::delete('/{rule}', [BusinessRuleController::class, 'destroy'])->name('business-rule.destroy');
-    Route::post('/bulk-store', [BusinessRuleController::class, 'bulk'])->name('business-rule.bulk-store');
+    Route::delete('/{rule}', [BusinessRuleController::class, 'destroy'])->name(
+      'business-rule.destroy'
+    );
+    Route::post('/bulk-store', [BusinessRuleController::class, 'bulk'])->name(
+      'business-rule.bulk-store'
+    );
   });
   //rotas para UsageScenarios
   Route::prefix('usage-scenario')->group(function () {
-    Route::post('/', [UsageScenarioController::class, 'store'])->name('usage-scenario.store');
-    Route::patch('/{scenario}', [UsageScenarioController::class, 'update'])->name('usage-scenario.update');
-    Route::delete('/{scenario}', [UsageScenarioController::class, 'destroy'])->name('usage-scenario.destroy');
-    Route::post('/bulk-store', [UsageScenarioController::class, 'bulk'])->name('usage-scenario.bulk-store');
-
+    Route::post('/', [UsageScenarioController::class, 'store'])->name(
+      'usage-scenario.store'
+    );
+    Route::patch('/{scenario}', [
+      UsageScenarioController::class,
+      'update',
+    ])->name('usage-scenario.update');
+    Route::delete('/{scenario}', [
+      UsageScenarioController::class,
+      'destroy',
+    ])->name('usage-scenario.destroy');
+    Route::post('/bulk-store', [UsageScenarioController::class, 'bulk'])->name(
+      'usage-scenario.bulk-store'
+    );
   });
   //   Rotas para OverallModel
   Route::prefix('overall')->group(function () {
-    Route::post('/', [OverallModelController::class, 'store'])->name('overall.store');
-    Route::post('/bulk-store', [OverallModelController::class, 'bulk'])->name('overall.bulk-store');
-    Route::patch('/{model}', [OverallModelController::class, 'update'])->name('overall.update');
-    Route::delete('/{model}', [OverallModelController::class, 'destroy'])->name('overall.destroy');
+    Route::post('/', [OverallModelController::class, 'store'])->name(
+      'overall.store'
+    );
+    Route::post('/bulk-store', [OverallModelController::class, 'bulk'])->name(
+      'overall.bulk-store'
+    );
+    Route::patch('/{model}', [OverallModelController::class, 'update'])->name(
+      'overall.update'
+    );
+    Route::delete('/{model}', [OverallModelController::class, 'destroy'])->name(
+      'overall.destroy'
+    );
   });
 
   // Rotas para sprints
   Route::prefix('sprint')->group(function () {
     Route::post('/', [SprintController::class, 'store'])->name('sprint.store');
-    Route::get('/{sprint}', [SprintController::class, 'show'])->name('sprint.show');
-    Route::patch('/{sprint}', [SprintController::class, 'update'])->name('sprint.update');
-    Route::delete('/{sprint}', [SprintController::class, 'destroy'])->name('sprint.destroy');
+    Route::get('/{sprint}', [SprintController::class, 'show'])->name(
+      'sprint.show'
+    );
+    Route::patch('/{sprint}', [SprintController::class, 'update'])->name(
+      'sprint.update'
+    );
+    Route::delete('/{sprint}', [SprintController::class, 'destroy'])->name(
+      'sprint.destroy'
+    );
   });
 
   Route::prefix('sprint-stories')->group(function () {
-    Route::post('/{sprint}/add-stories', [StorySprintController::class, 'store'])->name('sprint-stories.store');
-    Route::delete('/{sprint}/stories/{story}', [StorySprintController::class, 'destroy'])->name('sprint-stories.destroy');
-    Route::patch('/{sprint}/update', [StorySprintController::class, 'update'])->name('sprint-stories.update');
+    Route::post('/{sprint}/add-stories', [
+      StorySprintController::class,
+      'store',
+    ])->name('sprint-stories.store');
+    Route::delete('/{sprint}/stories/{story}', [
+      StorySprintController::class,
+      'destroy',
+    ])->name('sprint-stories.destroy');
+    Route::patch('/{sprint}/update', [
+      StorySprintController::class,
+      'update',
+    ])->name('sprint-stories.update');
   });
 
   Route::prefix('change-request')->group(function () {
-    Route::post('/', [ChangeRequestController::class, 'store'])->name('change-request.store');
-    Route::patch('/{changeRequest}', [ChangeRequestController::class, 'update'])->name('change-request.update');
-    Route::delete('/{changeRequest}', [ChangeRequestController::class, 'destroy'])->name('change-request.destroy');
+    Route::post('/', [ChangeRequestController::class, 'store'])->name(
+      'change-request.store'
+    );
+    Route::patch('/{changeRequest}', [
+      ChangeRequestController::class,
+      'update',
+    ])->name('change-request.update');
+    Route::delete('/{changeRequest}', [
+      ChangeRequestController::class,
+      'destroy',
+    ])->name('change-request.destroy');
   });
 
   Route::prefix('overall-model-classes')->group(function () {
-    Route::post('/', [OverallModelClassController::class, 'store'])->name('overall-model-class.store');
-    Route::delete('/{class}', [OverallModelClassController::class, 'destroy'])->name('overall-model-class.destroy');
+    Route::post('/', [OverallModelClassController::class, 'store'])->name(
+      'overall-model-class.store'
+    );
+    Route::delete('/{class}', [
+      OverallModelClassController::class,
+      'destroy',
+    ])->name('overall-model-class.destroy');
   });
   Route::prefix('prioritizations')->group(function () {
-    Route::post('/', [PrioritizationController::class, 'store'])->name('prioritization.store');
-    Route::patch('/{prioritization}', [PrioritizationController::class, 'update'])->name('prioritization.update');
-    Route::delete('/{prioritization}', [PrioritizationController::class, 'destroy'])->name('prioritization.destroy');
+    Route::post('/', [PrioritizationController::class, 'store'])->name(
+      'prioritization.store'
+    );
+    Route::patch('/{prioritization}', [
+      PrioritizationController::class,
+      'update',
+    ])->name('prioritization.update');
+    Route::delete('/{prioritization}', [
+      PrioritizationController::class,
+      'destroy',
+    ])->name('prioritization.destroy');
   });
   Route::prefix('matrix-priorities')->group(function () {
-    Route::post('/', [MatrixPriorityController::class, 'store'])->name('matrix-priority.store');
-    Route::patch('/util/reorder', [MatrixPriorityController::class, 'reorder'])->name('matrix-priority.reorder');
-    Route::patch('/{priority}', [MatrixPriorityController::class, 'update'])->name('matrix-priority.update');
+    Route::post('/', [MatrixPriorityController::class, 'store'])->name(
+      'matrix-priority.store'
+    );
+    Route::patch('/util/reorder', [
+      MatrixPriorityController::class,
+      'reorder',
+    ])->name('matrix-priority.reorder');
+    Route::patch('/{priority}', [
+      MatrixPriorityController::class,
+      'update',
+    ])->name('matrix-priority.update');
 
-    Route::delete('/{priority}', [MatrixPriorityController::class, 'destroy'])->name('matrix-priority.destroy');
+    Route::delete('/{priority}', [
+      MatrixPriorityController::class,
+      'destroy',
+    ])->name('matrix-priority.destroy');
   });
 
   //Rotas para goals
   Route::prefix('goal')->group(function () {
     Route::post('/', [GoalController::class, 'store'])->name('goal.store');
-    Route::post('/bulk-store', [GoalController::class, 'bulk'])->name('goal.bulk-store');
-    Route::patch('/{goal}', [GoalController::class, 'update'])->name('goal.update');
-    Route::delete('/{goal}', [GoalController::class, 'destroy'])->name('goal.delete');
+    Route::post('/bulk-store', [GoalController::class, 'bulk'])->name(
+      'goal.bulk-store'
+    );
+    Route::patch('/{goal}', [GoalController::class, 'update'])->name(
+      'goal.update'
+    );
+    Route::delete('/{goal}', [GoalController::class, 'destroy'])->name(
+      'goal.delete'
+    );
   });
   //Rotas para journeys
   Route::prefix('journey')->group(function () {
-    Route::post('/', [JourneyController::class, 'store'])->name('journey.store');
-    Route::patch('/{journey}', [JourneyController::class, 'update'])->name('journey.update');
-    Route::delete('/{journey}', [JourneyController::class, 'destroy'])->name('journey.delete');
-    Route::post('/bulk-store', [JourneyController::class, 'bulk'])->name('journey.bulk-store');
+    Route::post('/', [JourneyController::class, 'store'])->name(
+      'journey.store'
+    );
+    Route::patch('/{journey}', [JourneyController::class, 'update'])->name(
+      'journey.update'
+    );
+    Route::delete('/{journey}', [JourneyController::class, 'destroy'])->name(
+      'journey.delete'
+    );
+    Route::post('/bulk-store', [JourneyController::class, 'bulk'])->name(
+      'journey.bulk-store'
+    );
   });
   Route::prefix('persona')->group(function () {
-    Route::post('/', [PersonaController::class, 'store'])->name('persona.store');
-    Route::patch('/{persona}', [PersonaController::class, 'update'])->name('persona.update');
-    Route::post('/bulk-store', [PersonaController::class, 'bulk'])->name('persona.bulk-store');
-    Route::delete('/{persona}', [PersonaController::class, 'destroy'])->name('persona.delete');
+    Route::post('/', [PersonaController::class, 'store'])->name(
+      'persona.store'
+    );
+    Route::patch('/{persona}', [PersonaController::class, 'update'])->name(
+      'persona.update'
+    );
+    Route::post('/bulk-store', [PersonaController::class, 'bulk'])->name(
+      'persona.bulk-store'
+    );
+    Route::delete('/{persona}', [PersonaController::class, 'destroy'])->name(
+      'persona.delete'
+    );
   });
 
   Route::prefix('product-canvas')->group(function () {
-    Route::post('/', [ProductCanvasController::class, 'store'])->name('product-canvas.store');
-    Route::patch('/{productCanvas}', [ProductCanvasController::class, 'update'])->name('product-canvas.update');
-    Route::delete('/{productCanvas}', [ProductCanvasController::class, 'destroy'])->name('product-canvas.destroy');
+    Route::post('/', [ProductCanvasController::class, 'store'])->name(
+      'product-canvas.store'
+    );
+    Route::patch('/{productCanvas}', [
+      ProductCanvasController::class,
+      'update',
+    ])->name('product-canvas.update');
+    Route::delete('/{productCanvas}', [
+      ProductCanvasController::class,
+      'destroy',
+    ])->name('product-canvas.destroy');
   });
 
   Route::prefix('invest-card')->group(function () {
-    Route::post('/', [InvestCardController::class, 'store'])->name('invest-card.store');
-    Route::patch('/{investCard}', [InvestCardController::class, 'update'])->name('invest-card.update');
-    Route::delete('/{investCard}', [InvestCardController::class, 'destroy'])->name('invest-card.destroy');
+    Route::post('/', [InvestCardController::class, 'store'])->name(
+      'invest-card.store'
+    );
+    Route::patch('/{investCard}', [
+      InvestCardController::class,
+      'update',
+    ])->name('invest-card.update');
+    Route::delete('/{investCard}', [
+      InvestCardController::class,
+      'destroy',
+    ])->name('invest-card.destroy');
   });
 
   // pagina para system interfaces
   Route::prefix('system-interface')->group(function () {
-    Route::post('/', [SystemInterfaceController::class, 'store'])->name('system-interface.store');
-    Route::patch('/{interface}', [SystemInterfaceController::class, 'update'])->name('system-interface.update');
-    Route::delete('/{interface}', [SystemInterfaceController::class, 'destroy'])->name('system-interface.destroy');
-    Route::post('/bulk-store', [SystemInterfaceController::class, 'bulk'])->name('system-interface.bulk-store');
+    Route::post('/', [SystemInterfaceController::class, 'store'])->name(
+      'system-interface.store'
+    );
+    Route::patch('/{interface}', [
+      SystemInterfaceController::class,
+      'update',
+    ])->name('system-interface.update');
+    Route::delete('/{interface}', [
+      SystemInterfaceController::class,
+      'destroy',
+    ])->name('system-interface.destroy');
+    Route::post('/bulk-store', [
+      SystemInterfaceController::class,
+      'bulk',
+    ])->name('system-interface.bulk-store');
   });
 
   // Rota para upload de entrevista
-  Route::post('/projects/{project}/interviews', [InterviewController::class, 'store'])->name('project.interviews.store');
-  Route::delete('/interviews/{interview}', [InterviewController::class, 'destroy'])->name('interview.destroy');
-
+  Route::post('/projects/{project}/interviews', [
+    InterviewController::class,
+    'store',
+  ])->name('project.interviews.store');
+  Route::delete('/interviews/{interview}', [
+    InterviewController::class,
+    'destroy',
+  ])->name('interview.destroy');
 
   //pagina de notificacoes
   Route::prefix('notifications')->group(function () {
-    Route::get('/', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/', [NotificationController::class, 'store'])->name('notifications.store');
+    Route::get('/', [NotificationController::class, 'index'])->name(
+      'notifications.index'
+    );
+    Route::post('/', [NotificationController::class, 'store'])->name(
+      'notifications.store'
+    );
     // Route::patch('/{notification}', [NotificationController::class, 'update'])->name('notifications.update');
-    Route::patch('/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::patch('/read', [NotificationController::class, 'read'])->name(
+      'notifications.read'
+    );
     // Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('notifications.delete');
   });
 });
 
 // rotas para gerenciar o perfil
 Route::middleware('auth')->group(function () {
-  Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-  Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-  Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+  Route::get('/profile', [ProfileController::class, 'edit'])->name(
+    'profile.edit'
+  );
+  Route::patch('/profile', [ProfileController::class, 'update'])->name(
+    'profile.update'
+  );
+  Route::delete('/profile', [ProfileController::class, 'destroy'])->name(
+    'profile.destroy'
+  );
 });
 
 Route::get('/config', function () {
@@ -266,9 +462,10 @@ Route::get('/', function () {
 Route::prefix('chat')
   ->middleware(['auth', 'verified'])
   ->group(function () {
-    Route::post('/{project}/', [ChatController::class, 'store'])->name('chat.store');
+    Route::post('/{project}/', [ChatController::class, 'store'])->name(
+      'chat.store'
+    );
     // Route::get('/{project}/history', [ChatController::class, 'getHistory'])->name('api.chat.history');
   });
-
 
 require __DIR__ . '/auth.php';

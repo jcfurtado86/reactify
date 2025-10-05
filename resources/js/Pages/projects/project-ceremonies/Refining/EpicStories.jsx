@@ -1,10 +1,22 @@
-import { ArrowRight, CornerDownRight } from 'lucide-react'
+import {
+  ArrowRight,
+  CornerDownRight,
+  Plus,
+  Minus,
+  Check,
+  X,
+  LoaderCircle,
+  ChevronDown,
+  ChevronsUp,
+} from 'lucide-react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { storyVariants } from '../StoryDiscovery/Stories'
 import React from 'react'
+import { toast } from 'sonner'
 import { router } from '@inertiajs/react'
 import { isTemporary } from '@/lib/utils'
 import InfoButton from '@/Components/InfoButton'
+import GenerateAIButton from '@/Components/GenerateAIButton'
 import { tooltipInfo } from '@/lib/projectData'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 /**
@@ -12,6 +24,129 @@ import ReactTextareaAutosize from 'react-textarea-autosize'
  * Gerencia seu próprio estado de hover para exibir o botão de adicionar.
  * @param {{ story: object, addEpicStory: () => void }} props
  */
+
+const GeneratedItemsModal = ({
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+}) => {
+  return (
+    <div
+      className={`
+           transition-all duration-300 z-50
+           ${
+             isModalMinimized
+               ? 'fixed bottom-4 right-4 w-[400px]'
+               : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
+           }
+         `}
+    >
+      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'Epic Stories por IA'}
+            {isModalMinimized && 'Epic Stories Geradas'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              size="icon"
+              variant="secondary"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+
+        {!isModalMinimized && (
+          <>
+            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+              <span className="text-foreground font-medium">
+                {generatedItems.filter((j) => j.selected).length} de{' '}
+                {generatedItems.length} selecionadas
+              </span>
+              <Button
+                onClick={toggleAllItems}
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+              >
+                {generatedItems.every((story) => story.selected)
+                  ? 'Desmarcar Todas'
+                  : 'Selecionar Todas'}
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              <div className="space-y-2 pb-4">
+                {generatedItems.map((story, index) => {
+                  const selectedVariant =
+                    storyVariants[story.type] || storyVariants.user
+                  return (
+                    <div
+                      key={'temp-' + index}
+                      className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                        story.selected
+                          ? 'bg-muted border-primary'
+                          : 'bg-muted/50 border-border hover:border-muted-foreground'
+                      }`}
+                    >
+                      <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                        <div className="flex items-center gap-2 text-left">
+                          <Badge
+                            variant="outline"
+                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                          >
+                            {`${story.type === 'system' ? 'SS' : 'US'}${story.story_id}.NEW_ID`.toUpperCase()}
+                          </Badge>
+
+                          <span className="text-sm text-foreground">
+                            {story.title}
+                          </span>
+                        </div>
+                        <Checkbox
+                          checked={story.selected}
+                          onCheckedChange={() => toggleItemSelection(index)}
+                        />
+                      </label>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 pt-4 border-t border-border flex-shrink-0">
+              <Button
+                onClick={cancelGeneratedItems}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmGeneratedItems}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+                disabled={generatedItems.filter((j) => j.selected).length === 0}
+              >
+                <Check className="mr-2" size={16} />
+                Confirmar e Adicionar (
+                {generatedItems.filter((j) => j.selected).length})
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
 const StoryCard = ({ story, addEpicStory }) => {
   const selectedVariant = storyVariants[story.type] || storyVariants.user
 
@@ -181,6 +316,11 @@ const EpicStoryCard = ({
  * @param {{ project: object, setProject: (project: object) => void }} props
  */
 const EpicStories = ({ project, setProject }) => {
+  //ia states
+  const [aiGeneratedEpicStories, setAiGeneratedEpicStories] = useState([])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
   // memoriza o estado das epic_stories
   const epicsByStoryId = useMemo(() => {
     if (!project?.epic_stories) return new Map()
@@ -215,8 +355,153 @@ const EpicStories = ({ project, setProject }) => {
     }))
   }
 
+  //rotas relacionadas ao modal de IA
+  const generateEpicStories = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post('/api/epic-stories/generate', {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      const epicStoriesWithSelection = data.epic_stories.map((epic_story) => ({
+        ...epic_story,
+        selected: true,
+      }))
+
+      setAiGeneratedEpicStories(epicStoriesWithSelection)
+      setShowAiModal(true)
+      toast.success(
+        'Epic Stories geradas com sucesso a partir das entrevistas mais recentes.',
+      )
+    } catch (error) {
+      console.error('Erro ao gerar epic stories:', error)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data
+
+        if (errorData.status === 'warning') {
+          toast.warning(errorData.message)
+        } else {
+          toast.error(
+            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
+          )
+        }
+      } else {
+        toast.error(
+          'Não foi possível conectar ao servidor. Verifique sua internet.',
+        )
+      }
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+  const confirmGeneratedEpicStories = () => {
+    const selectedEpicStories = aiGeneratedEpicStories.filter(
+      (epic_story) => epic_story.selected,
+    )
+    const remainingEpicStories = aiGeneratedEpicStories.filter(
+      (epic_story) => !epic_story.selected,
+    )
+
+    if (selectedEpicStories.length === 0) {
+      toast.warning('Selecione pelo menos uma epic story para adicionar.')
+      return
+    }
+
+    const epicStoriesToAdd = selectedEpicStories.map((epic_story) => ({
+      id: `temp-${Date.now()}-${Math.random()}`,
+      created_at: new Date().toISOString(),
+      project_id: project.id,
+      ...epic_story,
+    }))
+
+    setProject((prevProject) => ({
+      ...prevProject,
+      goal_sketches: [
+        ...(prevProject.goal_sketches || []),
+        ...epicStoriesToAdd,
+      ],
+    }))
+
+    const epicStoriesForBackend = selectedEpicStories.map(
+      ({ title, type, priority }) => ({
+        title,
+        type,
+        priority,
+        project_id: project.id,
+      }),
+    )
+
+    router.post(
+      route('epic-story.bulk-store'),
+      { epic_stories: epicStoriesForBackend },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedEpicStories.length} Stories adicionada com sucesso!`,
+          )
+          setAiGeneratedGoals(remainingGoals)
+          if (remainingGoals.length === 0) {
+            setShowAiModal(false)
+            setIsModalMinimized(false)
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar as stories.')
+          console.error('Erro do backend:', errors)
+          setProject((prevProject) => {
+            const epicStoriesToAddIds = goalsToAdd.map((g) => g.id)
+            return {
+              ...prevProject,
+              epic_stories: prevProject.epic_stories.filter(
+                (story) => !epicStoriesToAddIds.includes(story.id),
+              ),
+            }
+          })
+        },
+      },
+    )
+  }
+
+  const cancelGeneratedEpicStories = () => {
+    setShowAiModal(false)
+    setAiGeneratedEpicStories([])
+    setIsModalMinimized(false)
+  }
+
+  const toggleEpicStorySelection = (index) => {
+    setAiGeneratedEpicStories((prev) =>
+      prev.map((story, i) =>
+        i === index ? { ...story, selected: !story.selected } : story,
+      ),
+    )
+  }
+
+  const toggleAllEpicStories = () => {
+    const allSelected = aiGeneratedEpicStories.every((story) => story.selected)
+    setAiGeneratedEpicStories((prev) =>
+      prev.map((story) => ({ ...story, selected: !allSelected })),
+    )
+  }
+
   return (
     <section className="p-2 flex flex-col gap-2">
+      {showAiModal && (
+        <GeneratedItemsModal
+          isModalMinimized={isModalMinimized}
+          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+          cancelGeneratedItems={cancelGeneratedEpicStories}
+          generatedItems={aiGeneratedEpicStories}
+          toggleItemSelection={toggleEpicStorySelection}
+          confirmGeneratedItems={confirmGeneratedEpicStories}
+          toggleAllItems={toggleAllEpicStories}
+        />
+      )}
       {/* user stories*/}
       {project?.stories
         ?.filter((story) => story.type === 'user')
@@ -277,6 +562,12 @@ const EpicStories = ({ project, setProject }) => {
             </section>
           )
         })}
+      <GenerateAIButton
+        isGenerating={isGenerating}
+        onClick={generateEpicStories}
+        // tooltip={tooltipInfo.aiGeneratedStory}
+        className="w-1/2"
+      />
     </section>
   )
 }
