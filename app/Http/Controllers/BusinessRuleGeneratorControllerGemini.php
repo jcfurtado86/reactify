@@ -17,7 +17,7 @@ class BusinessRuleGeneratorControllerGemini extends Controller
 
             $prompt = $this->createPrompt($story);
             $modelName = config('gemini.model');
-            $fullPrompt = 'Você é um Analista de Negócios Sênior. ' . $prompt;
+            $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
             
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();
@@ -45,18 +45,18 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         Formato de resposta requerido (JSON):
         {
             "business_rules": [
-                { "title": "Título da primeira regra de negócio." },
-                { "title": "Título da segunda regra de negócio." }
+                { "title": "Descrição da primeira regra de negócio." },
+                { "title": "Descrição da segunda regra de negócio." }
             ]
         }
 
-        Exemplo: Se a User Story for "Como usuário, eu quero poder me inscrever em um plano premium.", a resposta poderia ser:
+        Exemplo aplicado a um projeto de streaming de filmes:
+        Se a User Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", a resposta poderia ser:
         {
             "business_rules": [
-                { "title": "O usuário deve fornecer um e-mail válido e único." },
-                { "title": "A senha deve ter no mínimo 8 caracteres." },
-                { "title": "Um método de pagamento válido deve ser fornecido." },
-                { "title": "O plano premium tem um custo de X por mês." }
+                { "title": "A seção de estatísticas, gráficos ou tabelas de vistas deve estar disponível apenas no painel de controle administrativo, garantindo que apenas usuários autorizados, como administradores, tenham acesso a essas informações." },
+                { "title": "As informações de visitas à plataforma devem ser protegidas e acessíveis apenas para usuários autorizados. É necessário garantir que os dados dos usuários sejam tratados de acordo com as leis de privacidade de dados aplicáveis e as políticas de segurança da empresa." },
+                { "title": "As estatísticas, gráficos ou tabelas devem ser apresentados de forma clara e compreensível para os administradores." }
             ]
         }
 

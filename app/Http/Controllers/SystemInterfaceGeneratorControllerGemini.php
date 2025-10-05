@@ -42,7 +42,7 @@ class SystemInterfaceGeneratorControllerGemini extends Controller
             // 3. Criar prompt, chamar a IA e fazer o parsing
             $prompt = $this->createPrompt($context);
             $modelName = config('gemini.model');
-            $fullPrompt = 'Você é um Arquiteto de Sistemas especialista em design de integrações. ' . $prompt;
+            $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
 
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();

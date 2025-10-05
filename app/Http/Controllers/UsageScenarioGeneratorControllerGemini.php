@@ -17,7 +17,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
 
             $prompt = $this->createPrompt($story);
             $modelName = config('gemini.model');
-            $fullPrompt = 'Você é um Engenheiro de QA Sênior especialista em BDD e Gherkin. ' . $prompt;
+            $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
             
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();

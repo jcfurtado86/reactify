@@ -156,7 +156,7 @@ class JourneyGeneratorControllerGemini extends Controller
         try {
             $prompt = $this->createPrompt($persona);
             
-            $fullPrompt = 'Você é um especialista em UX e jornadas do usuário. ' . $prompt;
+            $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
 
             $modelName = config('gemini.model');
 

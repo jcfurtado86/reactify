@@ -19,7 +19,7 @@ class EpicStoryGeneratorControllerGemini extends Controller
 
             $prompt = $this->createPrompt($story);
             $modelName = config('gemini.model');
-            $fullPrompt = 'Você é um Analista de Requisitos Sênior especialista em metodologias ágeis. ' . $prompt;
+            $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
             
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();

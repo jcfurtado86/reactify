@@ -39,7 +39,7 @@ class GoalGeneratorControllerGemini extends Controller
 
             $prompt = $this->createPrompt($combinedTranscripts);
             $modelName = config('gemini.model');
-            $fullPrompt = 'Você é um especialista em Análise de Requisitos e Product Management. ' . $prompt;
+            $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();
 
