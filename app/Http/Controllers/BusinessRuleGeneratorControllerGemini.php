@@ -24,8 +24,8 @@ class BusinessRuleGeneratorControllerGemini extends Controller
             }
 
             $allBusinessRules = [];
-            $modelName = config('services.gemini.model');
-            $fullPromptPrefix = 'Você é um Analista de Negócios Sênior. ';
+            $modelName = config('gemini.model');
+            $fullPromptPrefix = 'Você é um especialista em engenharia de software e análise de requisitos.';
 
             // 3. Itera sobre cada estória e gera as regras separadamente
             foreach ($stories as $story) {
