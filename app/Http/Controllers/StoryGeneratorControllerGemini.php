@@ -204,7 +204,7 @@ class StoryGeneratorControllerGemini extends Controller
 
             EXEMPLO DE SYSTEM STORY:
               {
-                "title": "Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência"
+                "title": "Título: Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência"
                 "type": "system"
               }
             FIM DO EXEMPLO DE SYSTEM STORY

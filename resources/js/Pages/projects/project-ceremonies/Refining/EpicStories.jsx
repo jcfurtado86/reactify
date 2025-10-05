@@ -106,7 +106,7 @@ const GeneratedItemsModal = ({
                             variant="outline"
                             className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
                           >
-                            {`${story.type === 'system' ? 'SS' : 'US'}${story.story_id}.NEW_ID`.toUpperCase()}
+                            {`${story.type === 'user' ? 'US' : 'SS'}${story.new_epic_identifier}`.toUpperCase()}
                           </Badge>
 
                           <span className="text-sm text-foreground">
@@ -361,34 +361,41 @@ const EpicStories = ({ project, setProject }) => {
     setIsModalMinimized(false)
 
     try {
-      const response = await axios.post('/api/epic-stories/generate', {
+      const response = await axios.post(route('epic-story.generate-decomposition'), {
         project_id: project.id,
       })
 
       const data = response.data
 
-      const epicStoriesWithSelection = data.epic_stories.map((epic_story) => ({
-        ...epic_story,
-        selected: true,
-      }))
+      // Usamos flatMap para achatar o array de 'new_stories' de cada épico decomposto
+      const epicStoriesWithSelection = data.decomposed_epics.flatMap(
+        (epic) =>
+          epic.new_stories.map((newStory, index) => ({
+            ...newStory,
+            story_id: epic.original_epic_id, // Guardamos o ID do épico original
+            selected: true,
+            new_epic_identifier: `${epic.original_epic_id}.${index + 1}`
+          })),
+      )
+
+      if (epicStoriesWithSelection.length === 0) {
+        toast.info('Nenhuma estória foi identificada como um épico para decomposição.')
+        setIsGenerating(false)
+        return
+      }
 
       setAiGeneratedEpicStories(epicStoriesWithSelection)
       setShowAiModal(true)
       toast.success(
-        'Epic Stories geradas com sucesso a partir das entrevistas mais recentes.',
+        `${epicStoriesWithSelection.length} estórias menores foram sugeridas.`,
       )
     } catch (error) {
       console.error('Erro ao gerar epic stories:', error)
       if (error.response && error.response.data) {
-        const errorData = error.response.data
-
-        if (errorData.status === 'warning') {
-          toast.warning(errorData.message)
-        } else {
-          toast.error(
-            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
-          )
-        }
+        toast.error(
+          error.response.data.message ||
+            'Ocorreu um erro desconhecido no servidor.',
+        )
       } else {
         toast.error(
           'Não foi possível conectar ao servidor. Verifique sua internet.',
@@ -398,6 +405,7 @@ const EpicStories = ({ project, setProject }) => {
       setIsGenerating(false)
     }
   }
+
   const confirmGeneratedEpicStories = () => {
     const selectedEpicStories = aiGeneratedEpicStories.filter(
       (epic_story) => epic_story.selected,
@@ -407,30 +415,15 @@ const EpicStories = ({ project, setProject }) => {
     )
 
     if (selectedEpicStories.length === 0) {
-      toast.warning('Selecione pelo menos uma epic story para adicionar.')
+      toast.warning('Selecione pelo menos uma estória para adicionar.')
       return
     }
 
-    const epicStoriesToAdd = selectedEpicStories.map((epic_story) => ({
-      id: `temp-${Date.now()}-${Math.random()}`,
-      created_at: new Date().toISOString(),
-      project_id: project.id,
-      ...epic_story,
-    }))
-
-    setProject((prevProject) => ({
-      ...prevProject,
-      goal_sketches: [
-        ...(prevProject.goal_sketches || []),
-        ...epicStoriesToAdd,
-      ],
-    }))
-
+    // O backend espera 'title', 'story_id' (o ID do épico original) e 'project_id'
     const epicStoriesForBackend = selectedEpicStories.map(
-      ({ title, type, priority }) => ({
+      ({ title, story_id }) => ({
         title,
-        type,
-        priority,
+        story_id,
         project_id: project.id,
       }),
     )
@@ -445,8 +438,8 @@ const EpicStories = ({ project, setProject }) => {
           toast.success(
             `${selectedEpicStories.length} Stories adicionada com sucesso!`,
           )
-          setAiGeneratedGoals(remainingGoals)
-          if (remainingGoals.length === 0) {
+          setAiGeneratedEpicStories(remainingEpicStories)
+          if (remainingEpicStories.length === 0) {
             setShowAiModal(false)
             setIsModalMinimized(false)
           }
@@ -454,15 +447,6 @@ const EpicStories = ({ project, setProject }) => {
         onError: (errors) => {
           toast.error('Ocorreu um erro ao salvar as stories.')
           console.error('Erro do backend:', errors)
-          setProject((prevProject) => {
-            const epicStoriesToAddIds = goalsToAdd.map((g) => g.id)
-            return {
-              ...prevProject,
-              epic_stories: prevProject.epic_stories.filter(
-                (story) => !epicStoriesToAddIds.includes(story.id),
-              ),
-            }
-          })
         },
       },
     )
