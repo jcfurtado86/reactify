@@ -26,6 +26,7 @@ import ReactTextareaAutosize from 'react-textarea-autosize'
  */
 
 const GeneratedItemsModal = ({
+  allStories,
   isModalMinimized,
   changeModalState,
   cancelGeneratedItems,
@@ -34,6 +35,7 @@ const GeneratedItemsModal = ({
   confirmGeneratedItems,
   toggleAllItems,
 }) => {
+  console.log(generatedItems)
   return (
     <div
       className={`
@@ -89,8 +91,11 @@ const GeneratedItemsModal = ({
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
               <div className="space-y-2 pb-4">
                 {generatedItems.map((story, index) => {
+                  const storyType = allStories.find(
+                    (s) => s.id === story.story_id,
+                  ).type
                   const selectedVariant =
-                    storyVariants[story.type] || storyVariants.user
+                    storyVariants[storyType] || storyVariants.user
                   return (
                     <div
                       key={'temp-' + index}
@@ -361,25 +366,29 @@ const EpicStories = ({ project, setProject }) => {
     setIsModalMinimized(false)
 
     try {
-      const response = await axios.post(route('epic-story.generate-decomposition'), {
-        project_id: project.id,
-      })
+      const response = await axios.post(
+        route('epic-story.generate-decomposition'),
+        {
+          project_id: project.id,
+        },
+      )
 
       const data = response.data
 
       // Usamos flatMap para achatar o array de 'new_stories' de cada épico decomposto
-      const epicStoriesWithSelection = data.decomposed_epics.flatMap(
-        (epic) =>
-          epic.new_stories.map((newStory, index) => ({
-            ...newStory,
-            story_id: epic.original_epic_id, // Guardamos o ID do épico original
-            selected: true,
-            new_epic_identifier: `${epic.original_epic_id}.${index + 1}`
-          })),
+      const epicStoriesWithSelection = data.decomposed_epics.flatMap((epic) =>
+        epic.new_stories.map((newStory, index) => ({
+          ...newStory,
+          story_id: epic.original_epic_id, // Guardamos o ID do épico original
+          selected: true,
+          new_epic_identifier: `${epic.original_epic_id}.${index + 1}`,
+        })),
       )
 
       if (epicStoriesWithSelection.length === 0) {
-        toast.info('Nenhuma estória foi identificada como um épico para decomposição.')
+        toast.info(
+          'Nenhuma estória foi identificada como um épico para decomposição.',
+        )
         setIsGenerating(false)
         return
       }
@@ -447,6 +456,15 @@ const EpicStories = ({ project, setProject }) => {
         onError: (errors) => {
           toast.error('Ocorreu um erro ao salvar as stories.')
           console.error('Erro do backend:', errors)
+          setProject((prevProject) => {
+            const epicStoriesToAddIds = epicStoriesToAdd.map((g) => g.id)
+            return {
+              ...prevProject,
+              epic_stories: prevProject.epic_stories.filter(
+                (story) => !epicStoriesToAddIds.includes(story.id),
+              ),
+            }
+          })
         },
       },
     )
@@ -477,6 +495,7 @@ const EpicStories = ({ project, setProject }) => {
     <section className="p-2 flex flex-col gap-2">
       {showAiModal && (
         <GeneratedItemsModal
+          allStories={project?.stories}
           isModalMinimized={isModalMinimized}
           changeModalState={() => setIsModalMinimized(!isModalMinimized)}
           cancelGeneratedItems={cancelGeneratedEpicStories}
