@@ -18,6 +18,7 @@ class UserProject extends Pivot
 
   public function getPermissionsAttribute(): array
   {
+    Log::debug('pao');
     return $this->role
       ? collect($this->role->permissions())
         ->map(fn($p) => $p->value)
