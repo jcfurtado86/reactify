@@ -4,10 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SystemInterface;
-use DB;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\BulkStoreSystemInterfaceRequest;  
 
 class SystemInterfaceController extends Controller
 {
+  public function bulk(BulkStoreSystemInterfaceRequest $request)
+  {
+      $validatedData = $request->validated();
+
+      DB::transaction(function () use ($validatedData) {
+          foreach ($validatedData['system_interfaces'] as $interfaceData) {
+              SystemInterface::create($interfaceData);
+          }
+      });
+
+      return back()->with(['message' => 'Interfaces criadas com sucesso', 'status' => 'success']);
+  }
+
   public function store(Request $request)
   {
     $validatedData = $request->validate([
