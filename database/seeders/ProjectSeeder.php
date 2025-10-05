@@ -526,5 +526,91 @@ class ProjectSeeder extends Seeder
         'updated_at' => now(),
       ],
     ]);
+
+    DB::table('interviews')->insert([
+        [
+            'project_id' => $projectId,
+            'file_name' => 'classicflix.pdf', 
+            'file_path' => 'https://res.cloudinary.com/dlbpjcsvm/image/upload/v1759674129/reactify/interviews/1/classicflix.pdf',
+            'public_id' => 'reactify/interviews/1/classicflix',
+            'resource_type' => 'image',
+            'extraction_status' => 'completed',
+            'transcript' => 'Bom dia. Obrigado por reservar este tempo. O objetivo hoje é começarmos a desenhar o que
+será o Classiflix. Quero entender sua visão, os objetivos, quem vai usar a plataforma e o que
+ela precisa fazer. Podemos começar?
+Bom dia! Com certeza. Estou animado para tirar essa ideia do papel. O Classiflix é mais que
+um simples streaming, é um projeto de preservação cultural.
+Ótimo! Gosto dessa visão. Então, para começar, me fale em poucas palavras: Qual é o
+principal problema que o Classiflix resolve ou a principal necessidade que ele atende?
+A principal necessidade é o acesso facilitado e organizado a obras cinematográficas que estão
+em domínio público. Hoje, esses filmes estão espalhados pela internet, em qualidade duvidosa,
+sem legendas adequadas e sem nenhum contexto histórico. O Classiflix vai ser um portal
+único, confiável e educativo para quem ama cinema clássico.
+Perfeito. Isso já nos dá um norte. Agora, vamos falar sobre os usuários. Quem você imagina
+usando o Classiflix?
+Eu vejo três perfis principais:
+1. O Cinéfilo Clássico: Alguém que já ama filmes antigos, diretores como Chaplin,
+Hitchcock, e quer um lugar para revê-los em boa qualidade, talvez com materiais extras.
+2. O Estudante de Cinema/Artes: Um universitário que precisa estudar esses filmes para
+a faculdade. Para ele, informações como ano, diretor, elenco, e contexto histórico são
+cruciais.
+3. O Espectador Curioso: Pessoas que ouviram falar de filmes clássicos, mas não sabem
+por onde começar. Precisam de uma interface amigável e de boas recomendações.
+Excelente segmentação. Pensando nesses usuários, quais seriam as 5 funcionalidades mais
+importantes que o Classiflix precisa ter no lançamento (MVP - Mínimo Produto Viável)?
+Boa pergunta. Para o lançamento, eu diria:
+1. Catálogo de Filmes Pesquisável: O usuário precisa conseguir buscar por título,
+diretor, gênero ou ano.
+2. Player de Vídeo Funcional: Um player simples, mas que permita ajustar a qualidade
+do vídeo e selecionar legendas (em português, no mínimo).
+3. Página de Detalhes do Filme: Cada filme deve ter sua própria página com sinopse,
+ficha técnica (diretor, elenco, ano) e, se possível, uma curiosidade.
+4. Categorias e Gêneros: Uma forma de navegar pelo acervo sem precisar de uma busca
+específica. Ex: ""Comédias dos anos 30"", ""Suspense Mudo"", ""Clássicos do Cinema Noir"".
+5. Criação de Conta de Usuário Simples: Apenas para que o usuário possa criar uma
+lista de ""Meus Favoritos"" e continuar assistindo de onde parou.
+Entendido. Isso define um bom escopo inicial. Agora, vamos pensar um pouco além do básico.
+Como os filmes serão adicionados à plataforma? Haverá uma área administrativa?
+Sim, absolutamente. Precisamos de um painel de administração (back-office) onde nossa
+equipe possa:
+● Fazer o upload do arquivo de vídeo do filme.
+● Adicionar e editar os metadados: título, sinopse, ficha técnica, etc.
+● Anexar arquivos de legenda em diferentes idiomas.
+● Associar o filme a um ou mais gêneros/categorias.
+● Destacar um filme na página inicial.
+Certo, isso é um requisito fundamental para a operação. E sobre a qualidade? Existe algum
+requisito não-funcional importante, como desempenho, qualidade de vídeo ou compatibilidade?
+Sim, alguns pontos são cruciais para a experiência:
+● Qualidade do Vídeo: Devemos sempre tentar oferecer a melhor resolução possível que
+encontramos daquele filme. O player deve permitir que o usuário escolha entre
+qualidades (ex: 480p, 720p) para se adaptar à sua internet.
+● Desempenho: A plataforma precisa ser rápida. Ninguém quer esperar minutos para um
+filme começar a carregar.
+● Compatibilidade: No lançamento, o foco é funcionar bem em navegadores de desktop
+(Chrome, Firefox, Safari). Uma versão para celular (responsiva) é essencial. Aplicativos
+nativos podem vir depois.
+● Acessibilidade: As legendas são um bom começo, mas seria ótimo se a plataforma
+seguisse as diretrizes de acessibilidade web (WCAG).
+Anotado. E sobre as regras de negócio? Existe alguma restrição legal ou regra específica que
+devemos seguir?
+A regra de ouro é: só podemos exibir filmes que estão 100% confirmados em domínio público
+no Brasil. Isso é inegociável. Precisaremos de um processo de verificação rigoroso para cada
+filme adicionado. Não queremos nenhum problema com direitos autorais.
+Faz todo sentido. É uma premissa do projeto. Agora, uma pergunta mais aberta: Imagine que o
+Classiflix já foi lançado e é um sucesso. O que o tornaria um sucesso na sua opinião? Como
+medimos isso?
+Para mim, o sucesso seria medido por três fatores:
+1. Número de Usuários Ativos Mensais: Mostra que as pessoas estão voltando.
+2. Tempo Médio de Visualização: Indica que as pessoas não estão apenas visitando,
+mas de fato assistindo aos filmes.
+3. Feedback Qualitativo: Ver estudantes e professores usando a plataforma como
+ferramenta de ensino seria a maior recompensa. Poderíamos medir isso com pesquisas
+de satisfação.
+Perfeito. Isso me dá uma base excelente para começar a detalhar os requisitos.
+Exatamente. Você capturou a essência do que precisamos para começar.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+    ]);
   }
 }
