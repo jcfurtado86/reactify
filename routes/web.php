@@ -189,15 +189,16 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
       'business-rule.store'
     );
 
+    Route::post('/bulk-store', [BusinessRuleController::class, 'bulk'])->name(
+      'business-rule.bulk-store'
+    );
+
     Route::patch('/{rule}', [BusinessRuleController::class, 'update'])->name(
       'business-rule.update'
     );
 
     Route::delete('/{rule}', [BusinessRuleController::class, 'destroy'])->name(
       'business-rule.destroy'
-    );
-    Route::post('/bulk-store', [BusinessRuleController::class, 'bulk'])->name(
-      'business-rule.bulk-store'
     );
   });
   //rotas para UsageScenarios
