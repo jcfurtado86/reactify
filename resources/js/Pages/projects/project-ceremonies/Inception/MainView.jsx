@@ -2,15 +2,20 @@ import {
   AlertCircle,
   Users,
   Slash,
-  Check,
   CheckCircle,
-  ChevronDown,
   ChevronUp,
   PenLine as EditIcon,
-  X,
   Save,
+  Plus,
+  Minus,
+  Check,
+  X,
+  LoaderCircle,
+  ChevronDown,
+  ChevronsUp,
 } from 'lucide-react'
-
+import GenerateAIButton from '@/Components/GenerateAIButton'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
@@ -157,8 +162,8 @@ const ExpandableCard = ({
         </div>
 
         {/* Card Content */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="text-muted-foreground text-sm transition-all duration-300 flex-1">
+        <div className="flex-1 flex flex-col min-h-0 font-normal">
+          <div className="text-muted-foreground text-sm text-left transition-all duration-300 flex-1">
             {isEditing ? (
               <div className="h-full">
                 <TextareaAutosize
@@ -167,7 +172,7 @@ const ExpandableCard = ({
                   onChange={(e) => setEditableContent(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={placeholder}
-                  className="w-full resize-none bg-background text-foreground rounded-md p-3 border border-border focus:border-primary focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
+                  className="w-full resize-none bg-background  text-sm text-foreground rounded-md p-3 border border-border focus:border-primary focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                   disabled={isSaving}
                 />
                 <div className="text-xs text-muted-foreground/80 mt-2">
