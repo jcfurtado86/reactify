@@ -21,14 +21,134 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
 
 const cardVariants = {
-  primary: 'border-t-primary text-primary',
   destructive: 'border-t-destructive text-destructive',
   warning: 'border-t-orange-400 text-orange-400',
+  accent: 'border-t-indigo-500 text-indigo-500',
   success: 'border-t-emerald-500 text-emerald-500',
   info: 'border-t-cyan-500 text-cyan-500',
   secondary: 'border-t-rose-500 text-rose-500',
-  accent: 'border-t-indigo-500 text-indigo-500',
+  primary: 'border-t-primary text-primary',
   main: '',
+}
+
+const GeneratedItemsModal = ({
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+}) => {
+  return (
+    <div
+      className={`
+          transition-all duration-300 z-50
+          ${
+            isModalMinimized
+              ? 'fixed bottom-4 right-4 w-[400px]'
+              : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
+          }
+        `}
+    >
+      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'Goals Geradas por IA'}
+            {isModalMinimized && 'Goals Geradas'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              size="icon"
+              variant="secondary"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+
+        {!isModalMinimized && (
+          <>
+            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+              <span className="text-foreground font-medium text-lg">
+                {generatedItems.filter((j) => j.selected).length} de{' '}
+                {generatedItems.length} selecionadas
+              </span>
+              <Button
+                onClick={toggleAllItems}
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+              >
+                {generatedItems.every((story) => story.selected)
+                  ? 'Desmarcar Todas'
+                  : 'Selecionar Todas'}
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              <div className="space-y-2 pb-4">
+                {generatedItems.map((item, index) => (
+                  <div
+                    key={'temp-' + index}
+                    className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                      item.selected
+                        ? 'bg-muted border-primary'
+                        : 'bg-muted/50 border-border hover:border-muted-foreground'
+                    }`}
+                  >
+                    <label className="flex items-center justify-between cursor-pointer flex-1 gap-4 text-xs">
+                      <Badge
+                        variant="none"
+                        className={`${Object.values(cardVariants)[index]}`}
+                      >
+                        {item.label}
+                      </Badge>
+                      <div className="flex items-center gap-2 flex-1 text-left">
+                        {item.value}
+                      </div>
+                      <Checkbox
+                        checked={item.selected}
+                        onCheckedChange={() => toggleItemSelection(index)}
+                      />
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-border flex-shrink-0">
+              <Button
+                onClick={cancelGeneratedItems}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmGeneratedItems}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+                disabled={
+                  Object.values(generatedItems).filter((j) => j.selected)
+                    .length === 0
+                }
+              >
+                <Check className="mr-2" size={16} />
+                Confirmar e Adicionar (
+                {Object.values(generatedItems).filter((j) => j.selected).length}
+                )
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
 }
 
 const ExpandableCard = ({
@@ -238,6 +358,52 @@ const ExpandableCard = ({
 }
 
 const MainView = ({ project = {}, setProject }) => {
+  //ia states
+  const [aiGeneratedProductCanvas, setAiGeneratedProductCanvas] = useState([
+    // {
+    //   key: 'issues',
+    //   label: ' Problems',
+    //   value: 'pao',
+    //   selected: true,
+    // },
+    // {
+    //   key: 'solutions',
+    //   label: 'Solutions',
+    //   value: 'raccoon',
+    //   selected: true,
+    // },
+    // {
+    //   key: 'personas',
+    //   label: 'Personas',
+    //   value:
+    //     'Leon Cardoso - Administrador da plataforma.\n      Thiago Guimarães - Usuário.',
+    //   selected: true,
+    // },
+    // {
+    //   key: 'restrictions',
+    //   label: 'Restrictions',
+    //   value:
+    //     'A plataforma deve funcionar em qualquer navegador web baseado no Chromium, no Opera, no Safari e no Mozilla Firefox. \nA plataforma deve exigir um cadastro do usuário.\n      A plataforma deve exigir uma assinatura semestral ou anual para acesso ilimitado ao catálogo.',
+    //   selected: true,
+    // },
+    // {
+    //   key: 'product_is',
+    //   label: 'Product is',
+    //   value:
+    //     'É uma plataforma web.\n      É otimizada para navegadores desktop e mobile.\n      A plataforma oferece uma comunidade para interação entre usuários.',
+    //   selected: true,
+    // },
+    // {
+    //   key: 'product_is_not',
+    //   label: 'Product is not',
+    //   value: 'Não é um sistema desktop.\n\nNão é um aplicativo móvel.',
+    //   selected: true,
+    // },
+  ])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
+  //
   const updateProductCanvas = async (prop, newContent) => {
     const productCanvasId = project.product_canvas.id
     if (!productCanvasId) return
@@ -258,10 +424,138 @@ const MainView = ({ project = {}, setProject }) => {
     )
   }
 
+  //rotas relacionadas ao modal de IA
+  const generateProductCanvas = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post('/api/product-canvas/generate', {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      const productCanvasWithSelection = data.product_canvas.map((canvas) => ({
+        ...canvas,
+        selected: true,
+      }))
+
+      setAiGeneratedProductCanvas(productCanvasWithSelection)
+      setShowAiModal(true)
+      toast.success(
+        'Product Canvas gerado com sucesso a partir das entrevistas mais recentes.',
+      )
+    } catch (error) {
+      console.error('Erro ao gerar Product Canvas:', error)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data
+
+        if (errorData.status === 'warning') {
+          toast.warning(errorData.message)
+        } else {
+          toast.error(
+            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
+          )
+        }
+      } else {
+        toast.error(
+          'Não foi possível conectar ao servidor. Verifique sua internet.',
+        )
+      }
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+  const confirmGeneratedProductCanvas = () => {
+    const selectedProductCanvas = aiGeneratedProductCanvas.filter(
+      (canvas) => canvas.selected,
+    )
+    const remainingProductCanvas = aiGeneratedProductCanvas.filter(
+      (canvas) => !canvas.selected,
+    )
+
+    if (selectedProductCanvas.length === 0) {
+      toast.warning('Selecione pelo menos um item para adicionar.')
+      return
+    }
+
+    const productCanvasForBackend = selectedProductCanvas.reduce(
+      (acc, currentItem) => {
+        acc[currentItem.key] = currentItem.value
+        return acc
+      },
+      {},
+    )
+    setProject((prevProject) => ({
+      ...prevProject,
+      product_canvas: prevProject?.product_canvas
+        ? { ...prevProject.product_canvas, ...productCanvasForBackend }
+        : productCanvasForBackend,
+    }))
+
+    console.log(selectedProductCanvas, productCanvasForBackend)
+    const productCanvasId = project.product_canvas.id
+    router.patch(
+      route('product-canvas.update', productCanvasId),
+      productCanvasForBackend,
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedProductCanvas.length} item(s) adicionado(s) com sucesso!`,
+          )
+          setAiGeneratedProductCanvas(remainingProductCanvas)
+          if (remainingProductCanvas.length === 0) {
+            setShowAiModal(false)
+            setIsModalMinimized(false)
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar as goals.')
+          console.error('Erro do backend:', errors)
+        },
+      },
+    )
+  }
+
+  const cancelGeneratedtedProductCanvas = () => {
+    setShowAiModal(false)
+    setAiGeneratedProductCanvas([])
+    setIsModalMinimized(false)
+  }
+
+  const toggleProductCanvasSelection = (index) => {
+    setAiGeneratedProductCanvas((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, selected: !item.selected } : item,
+      ),
+    )
+  }
+
+  const toggleAllProductCanvas = () => {
+    const allSelected = aiGeneratedProductCanvas.every((item) => item.selected)
+    setAiGeneratedProductCanvas((prev) =>
+      prev.map((item) => ({ ...item, selected: !allSelected })),
+    )
+  }
+
   return (
     <div className="w-full text-foreground p-4">
+      {showAiModal && (
+        <GeneratedItemsModal
+          isModalMinimized={isModalMinimized}
+          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+          cancelGeneratedItems={cancelGeneratedtedProductCanvas}
+          generatedItems={aiGeneratedProductCanvas}
+          toggleItemSelection={toggleProductCanvasSelection}
+          confirmGeneratedItems={confirmGeneratedProductCanvas}
+          toggleAllItems={toggleAllProductCanvas}
+        />
+      )}
       {/* Main Dashboard - Responsive Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-2">
         <ExpandableCard
           title="Problems"
           content={project?.product_canvas?.issues}
@@ -321,6 +615,12 @@ const MainView = ({ project = {}, setProject }) => {
           }
         />
       </div>
+      <GenerateAIButton
+        isGenerating={isGenerating}
+        onClick={generateProductCanvas}
+        // tooltip={tooltipInfo.aiGeneratedStory}
+        className="w-1/2"
+      />
     </div>
   )
 }

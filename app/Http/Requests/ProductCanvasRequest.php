@@ -28,7 +28,6 @@ class ProductCanvasRequest extends FormRequest
       'restrictions' => 'nullable|string',
       'product_is' => 'nullable|string',
       'product_is_not' => 'nullable|string',
-
     ];
   }
 }
