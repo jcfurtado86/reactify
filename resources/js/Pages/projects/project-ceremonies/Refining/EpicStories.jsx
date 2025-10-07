@@ -455,15 +455,15 @@ const EpicStories = ({ project, setProject }) => {
         onError: (errors) => {
           toast.error('Ocorreu um erro ao salvar as stories.')
           console.error('Erro do backend:', errors)
-          setProject((prevProject) => {
-            const epicStoriesToAddIds = epicStoriesToAdd.map((g) => g.id)
-            return {
-              ...prevProject,
-              epic_stories: prevProject.epic_stories.filter(
-                (story) => !epicStoriesToAddIds.includes(story.id),
-              ),
-            }
-          })
+          // setProject((prevProject) => {
+          //   const epicStoriesToAddIds = epicStoriesToAdd.map((g) => g.id)
+          //   return {
+          //     ...prevProject,
+          //     epic_stories: prevProject.epic_stories.filter(
+          //       (story) => !epicStoriesToAddIds.includes(story.id),
+          //     ),
+          //   }
+          // })
         },
       },
     )

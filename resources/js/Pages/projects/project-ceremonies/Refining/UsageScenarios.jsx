@@ -1,15 +1,21 @@
 import React, { useMemo, useState } from 'react'
 import { router } from '@inertiajs/react'
 import {
-  CornerDownRight,
-  ArrowRight,
-  Check,
-  X,
   Pencil,
   Trash2,
+  ArrowRight,
+  CornerDownRight,
+  Plus,
+  Minus,
+  Check,
+  X,
+  LoaderCircle,
+  ChevronDown,
+  ChevronsUp,
 } from 'lucide-react'
 import { isTemporary } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
+import GenerateAIButton from '@/Components/GenerateAIButton'
 import { storyVariants } from '../StoryDiscovery/Stories' // Assuming this path is correct
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
@@ -19,6 +25,177 @@ import { Input } from '@/components/ui/input'
  * Its primary purpose is to display story info and provide an "add scenario" action.
  * @param {{ story: object, addScenario: () => void }} props
  */
+
+const GeneratedItemsModal = ({
+  allStories,
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+}) => {
+  return (
+    <div
+      className={`
+            transition-all duration-300 z-50
+            ${
+              isModalMinimized
+                ? 'fixed bottom-4 right-4 w-[400px]'
+                : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
+            }
+          `}
+    >
+      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'Epic Stories por IA'}
+            {isModalMinimized && 'Epic Stories Geradas'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              size="icon"
+              variant="secondary"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+
+        {!isModalMinimized && (
+          <>
+            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+              <span className="text-foreground font-medium">
+                {generatedItems.filter((j) => j.selected).length} de{' '}
+                {generatedItems.length} selecionadas
+              </span>
+              <Button
+                onClick={toggleAllItems}
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+              >
+                {generatedItems.every((story) => story.selected)
+                  ? 'Desmarcar Todas'
+                  : 'Selecionar Todas'}
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              <div className="space-y-2 pb-4">
+                {generatedItems.map((scenario, index) => {
+                  const story = allStories.find(
+                    (s) => s.id === scenario.story_id,
+                  )
+                  const selectedVariant =
+                    storyVariants[story.type] || storyVariants.user
+                  return (
+                    <div
+                      key={'temp-' + index}
+                      className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                        scenario.selected
+                          ? 'bg-muted border-primary'
+                          : 'bg-muted/50 border-border hover:border-muted-foreground'
+                      }`}
+                    >
+                      <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                        <Checkbox
+                          checked={scenario.selected}
+                          onCheckedChange={() => toggleItemSelection(index)}
+                        />
+                        <div className="w-full bg-card rounded-lg p-2 shadow-sm">
+                          {/* 1. Cabeçalho (O que antes era o AccordionTrigger) */}
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant="outline"
+                              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                            >
+                              {`${story.type === 'user' ? 'US' : 'SS'}${story.id}`.toUpperCase()}
+                            </Badge>
+                          </div>
+                          <ul className="space-y-2 text-sm font-normal text-left mt-3 pl-1">
+                            <li>
+                              <span className="font-bold text-primary">AS</span>{' '}
+                              {scenario.description.as}
+                            </li>
+                            <li>
+                              <span className="font-bold text-primary">
+                                GIVEN
+                              </span>{' '}
+                              {scenario.description.given}
+                            </li>
+                            <li>
+                              <span className="font-bold text-primary">
+                                WHEN
+                              </span>{' '}
+                              {scenario.description.when}
+                            </li>
+                            <li>
+                              <span className="font-bold text-primary">
+                                THEN
+                              </span>{' '}
+                              {scenario.description.then_1}
+                            </li>
+
+                            {/* ✨ Melhoria: Só renderiza o 'AND' se ele existir */}
+                            {scenario.description.and && (
+                              <li>
+                                <span className="font-bold text-primary">
+                                  AND
+                                </span>{' '}
+                                {scenario.description.and}
+                              </li>
+                            )}
+
+                            {/* ✨ Melhoria: Só renderiza o segundo 'THEN' se ele existir */}
+                            {scenario.description.then_2 && (
+                              <li>
+                                <span className="font-bold text-primary">
+                                  THEN
+                                </span>{' '}
+                                {scenario.description.then_2}
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      </label>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 pt-4 border-t border-border flex-shrink-0">
+              <Button
+                onClick={cancelGeneratedItems}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmGeneratedItems}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+                disabled={generatedItems.filter((j) => j.selected).length === 0}
+              >
+                <Check className="mr-2" size={16} />
+                Confirmar e Adicionar (
+                {generatedItems.filter((j) => j.selected).length})
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const StoryCard = ({ story, addScenario }) => {
   const selectedVariant = storyVariants[story.type] || storyVariants.user
 
@@ -128,7 +305,7 @@ const ScenarioCard = ({ scenario, story, lastElement = false, setProject }) => {
     setIsExpanded(!isExpanded)
   }
   return (
-    <section className="flex flex-1 items-center max-w-md md:max-w-4xl gap-1 h-full">
+    <section className="flex flex-1 items-center max-w-md md:max-w-4xl gap-2 h-full">
       {lastElement ? (
         <CornerDownRight className="text-primary size-5" />
       ) : (
@@ -310,6 +487,24 @@ const ScenarioCard = ({ scenario, story, lastElement = false, setProject }) => {
  * @param {{ project: object, setProject: (project: object) => void }} props
  */
 const UsageScenarios = ({ project, setProject }) => {
+  //ia states
+  const [aiGeneratedUsageScenarios, setAiGeneratedUsageScenarios] = useState([
+    // {
+    //   story_id: 3,
+    //   project_id: 1,
+    //   description: {
+    //     as: '...',
+    //     and: null,
+    //     when: '...',
+    //     given: '...',
+    //     then_1: '...',
+    //     then_2: null,
+    //   },
+    // },
+  ])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
   // Memoize scenarios grouped by their parent `story_id`.
   const scenariosByStoryId = useMemo(() => {
     if (!project?.usage_scenarios) return new Map()
@@ -352,8 +547,151 @@ const UsageScenarios = ({ project, setProject }) => {
     })
   }
 
+  //rotas relacionadas ao modal de IA
+  const generateUsageScenarios = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post(route('usage-scenario.generate'), {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      const usageScenariosWithSelection = data.usage_scenarios.map(
+        (scenario) => ({ ...scenario, selected: true }),
+      )
+
+      if (usageScenariosWithSelection.length === 0) {
+        toast.info('Nenhum cenário foi gerado.')
+        setIsGenerating(false)
+        return
+      }
+
+      setAiGeneratedUsageScenarios(usageScenariosWithSelection)
+      setShowAiModal(true)
+      toast.success(
+        `${usageScenariosWithSelection.length} estórias menores foram sugeridas.`,
+      )
+    } catch (error) {
+      console.error('Erro ao gerar epic stories:', error)
+      if (error.response && error.response.data) {
+        toast.error(
+          error.response.data.message ||
+            'Ocorreu um erro desconhecido no servidor.',
+        )
+      } else {
+        toast.error(
+          'Não foi possível conectar ao servidor. Verifique sua internet.',
+        )
+      }
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const confirmGeneratedUsageScenarios = () => {
+    const selectedUsageScenarios = aiGeneratedUsageScenarios.filter(
+      (usage_scenario) => usage_scenario.selected,
+    )
+    const remainingUsageScenarios = aiGeneratedUsageScenarios.filter(
+      (usage_scenario) => !usage_scenario.selected,
+    )
+
+    if (selectedUsageScenarios.length === 0) {
+      toast.warning('Selecione pelo menos um cenário de uso para adicionar.')
+      return
+    }
+
+    // O backend espera 'title', 'story_id' (o ID do épico original) e 'project_id'
+    const usageScenariosForBackend = selectedUsageScenarios.map(
+      ({ project_id, description, story_id }) => ({
+        description,
+        story_id,
+        project_id: project.id,
+      }),
+    )
+
+    setProject((prevProject) => {
+      const updatedProject = { ...prevProject }
+      updatedProject.usage_scenarios = [
+        ...updatedProject.usage_scenarios,
+        ...usageScenariosForBackend,
+      ]
+      setIsModalMinimized(true)
+      return updatedProject
+    })
+
+    // router.post(
+    //   route('usage-scenarios.bulk-store'),
+    //   { usage_scenarios: usageScenariosForBackend },
+    //   {
+    //     preserveState: true,
+    //     preserveScroll: true,
+    //     onSuccess: () => {
+    //       toast.success(
+    //         `${selectedUsageScenarios.length} cenários de uso adicionados com sucesso!`,
+    //       )
+    //       setAiGeneratedUsageScenarios(remainingUsageScenarios)
+    //       if (remainingUsageScenarios.length === 0) {
+    //         setShowAiModal(false)
+    //         setIsModalMinimized(false)
+    //       }
+    //     },
+    //     onError: (errors) => {
+    //       toast.error('Ocorreu um erro ao salvar os cenários de uso.')
+    //       console.error('Erro do backend:', errors)
+    //       // setProject((prevProject) => {
+    //       //   const usageScenariosToAddIds = usageScenariosToAdd.map((g) => g.id)
+    //       //   return {
+    //       //     ...prevProject,
+    //       //     epic_stories: prevProject.epic_stories.filter(
+    //       //       (story) => !usageScenariosToAddIds.includes(story.id),
+    //       //     ),
+    //       //   }
+    //       // })
+    //     },
+    //   },
+    // )
+  }
+
+  const cancelGeneratedUsageScenarios = () => {
+    setShowAiModal(false)
+    setAiGeneratedUsageScenarios([])
+    setIsModalMinimized(false)
+  }
+
+  const toggleUsageScenarioSelection = (index) => {
+    setAiGeneratedUsageScenarios((prev) =>
+      prev.map((scenario, i) =>
+        i === index ? { ...scenario, selected: !scenario.selected } : scenario,
+      ),
+    )
+  }
+
+  const toggleAllUsageScenarios = () => {
+    const allSelected = aiGeneratedUsageScenarios.every(
+      (scenario) => scenario.selected,
+    )
+    setAiGeneratedUsageScenarios((prev) =>
+      prev.map((scenario) => ({ ...scenario, selected: !allSelected })),
+    )
+  }
   return (
     <section className="p-2 flex flex-col">
+      {showAiModal && (
+        <GeneratedItemsModal
+          allStories={project?.stories}
+          isModalMinimized={isModalMinimized}
+          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+          cancelGeneratedItems={cancelGeneratedUsageScenarios}
+          generatedItems={aiGeneratedUsageScenarios}
+          toggleItemSelection={toggleUsageScenarioSelection}
+          confirmGeneratedItems={confirmGeneratedUsageScenarios}
+          toggleAllItems={toggleAllUsageScenarios}
+        />
+      )}
       {project?.stories
         ?.filter((story) => story.type === 'user')
         .map((story) => {
@@ -412,6 +750,12 @@ const UsageScenarios = ({ project, setProject }) => {
             </section>
           )
         })}
+      <GenerateAIButton
+        isGenerating={isGenerating}
+        onClick={generateUsageScenarios}
+        // tooltip={tooltipInfo.aiGeneratedStory}
+        className="w-1/2"
+      />
     </section>
   )
 }
