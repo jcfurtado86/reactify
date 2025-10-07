@@ -89,20 +89,45 @@ class GoalGeneratorControllerGemini extends Controller
         {
             "goals": [
                 {
-                    "title": "Permitir que os usuários criem playlists de filmes para organizar o que querem assistir.",
+                    "title": "Oferecer o serviço a preço acessível.",
                     "type": "bg",
                     "priority": "high"
                 },
                 {
-                    "title": "Garantir que a plataforma não tenha anúncios intrusivos que atrapalhem a experiência.",
-                    "type": "cg",
+                    "title": "Alcançar 10.000 assinantes em até um ano.",
+                    "type": "bg",
+                    "priority": "high"
+                },
+                {
+                    "title": "Criar uma comunidade virtual ativa em torno dos filmes da plataforma.",
+                    "type": "bg",
                     "priority": "medium"
                 },
                 {
-                    "title": "O sistema deve carregar um filme em menos de 3 segundos.",
+                    "title": "Estabelecer parcerias estratégicas com anunciantes, instituições educacionais ou outros colaboradores para criar oportunidades de receitas financeiras.",
+                    "type": "bg",
+                    "priority": "medium"
+                },
+                {
+                    "title": "Atendimento às leis de direitos autorais e relacionadas a conteúdo em domínio público.",
                     "type": "cg",
                     "priority": "high"
-                }
+                },
+                {
+                    "title": "Atendimento às leis de proteção de dados pessoais.",
+                    "type": "cg",
+                    "priority": "high"
+                },
+                {
+                    "title": "Atendimento às leis de proteção do consumidor.c",
+                    "type": "cg",
+                    "priority": "high"
+                },
+                {
+                    "title": "Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.",
+                    "type": "cg",
+                    "priority": "high"
+                },
             ]
         }
 
