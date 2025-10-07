@@ -139,7 +139,7 @@ class StoryGeneratorController extends Controller
         Fim do exemplo de User Story:
 
         Exemplo de System Story:
-          "title": "Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência"
+          "title": "Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência"
           "type": "system"
         Fim do exemplo de System Story
 
