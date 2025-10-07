@@ -54,8 +54,8 @@ const GeneratedItemsModal = ({
       <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between p-3 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'Goals Geradas por IA'}
-            {isModalMinimized && 'Goals Geradas'}
+            {!isModalMinimized && 'Definições Geradas por IA'}
+            {isModalMinimized && 'Definições Geradas'}
           </h3>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="secondary" onClick={changeModalState}>

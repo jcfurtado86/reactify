@@ -12,6 +12,7 @@ use App\Http\Controllers\EpicStoryGeneratorControllerGemini;
 use App\Http\Controllers\BusinessRuleGeneratorControllerGemini;
 use App\Http\Controllers\UsageScenarioGeneratorControllerGemini;
 use App\Http\Controllers\SystemInterfaceGeneratorControllerGemini;
+use App\Http\Controllers\ProductCanvasGeneratorControllerGemini;
 
 Route::post('/stories/generate', [StoryGeneratorControllerGemini::class, 'generateStories'])->name('story.generate');
 
@@ -30,3 +31,5 @@ Route::post('/business-rules/generate', [BusinessRuleGeneratorControllerGemini::
 Route::post('/usage-scenarios/generate', [UsageScenarioGeneratorControllerGemini::class, 'generate'])->name('usage-scenario.generate');
 
 Route::post('/system-interfaces/generate', [SystemInterfaceGeneratorControllerGemini::class, 'generate'])->name('system-interface.generate');
+
+Route::post('/product-canvas/generate', [ProductCanvasGeneratorControllerGemini::class, 'generate'])->name('product-canvas.generate');
