@@ -176,10 +176,9 @@ class ProjectSeeder extends Seeder
     // Criar Goal Sketch
     DB::table('goal_sketches')->insert([
       [
-        'title' =>
-          'Atendimento às leis de direitos autorais e relacionadas à conteúdo em domínio público.',
+        'title' => 'Atendimento às leis de direitos autorais e relacionadas à conteúdo em domínio público.',
         'type' => 'cg',
-        'priority' => 'medium',
+        'priority' => 'high', 
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
@@ -187,7 +186,7 @@ class ProjectSeeder extends Seeder
       [
         'title' => 'Atendimento às leis de proteção do consumidor.',
         'type' => 'cg',
-        'priority' => 'medium',
+        'priority' => 'high',
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
@@ -195,7 +194,7 @@ class ProjectSeeder extends Seeder
       [
         'title' => 'Conformidade com padrões de segurança da informação.',
         'type' => 'cg',
-        'priority' => 'low',
+        'priority' => 'high',
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
@@ -203,20 +202,75 @@ class ProjectSeeder extends Seeder
       [
         'title' => 'Atendimento às leis de proteção de dados pessoais.',
         'type' => 'cg',
-        'priority' => 'low',
-        'project_id' => $projectId,
-        'created_at' => now(),
-        'updated_at' => now(),
-      ],
-      [
-        'title' =>
-          'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
-        'type' => 'cg',
         'priority' => 'high',
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
       ],
+      [
+        'title' => 'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
+        'type' => 'cg', 
+        'priority' => 'high',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+      [
+        'title' => 'Oferecer o serviço a preço acessível.',
+        'type' => 'bg',
+        'priority' => 'high',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+      [
+        'title' => 'Alcançar 10.000 assinantes em até um ano.',
+        'type' => 'bg',
+        'priority' => 'high',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+      [
+        'title' => 'Alcançar 500.000 assinantes em até quatro anos.',
+        'type' => 'bg',
+        'priority' => 'high',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+       [
+        'title' => 'Auferir receitas com anúncios que não sejam invasivos.',
+        'type' => 'bg',
+        'priority' => 'high',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+      [
+        'title' => 'Criar uma comunidade virtual ativa em torno dos filmes da plataforma.',
+        'type' => 'bg',
+        'priority' => 'medium',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ], 
+      [
+        'title' => 'Estabelecer parcerias estratégicas com anunciantes, instituições educacionais ou outros colaboradores para criar oportunidades de receitas financeiras.',
+        'type' => 'bg',
+        'priority' => 'medium',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ], 
+      [
+        'title' => 'Oferecer a venda de produtos temáticos na plataforma.',
+        'type' => 'bg',
+        'priority' => 'low',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],            
     ]);
 
     // Criar Stories
