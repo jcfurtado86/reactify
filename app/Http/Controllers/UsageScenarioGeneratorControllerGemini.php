@@ -64,7 +64,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
         return <<<PROMPT
         Sua tarefa é criar Cenários de Uso para a Story fornecida, representando-os como Cenários de Aceitação no padrão GIVEN-WHEN-THEN. Os cenários de uso são os comportamentos que o produto possuirá a partir da interação com os usuários finais. Isso garante o refinamento das funcionalidades por meio de exemplos reais do negócio e a criação de cenários para testes de aceitação.
 
-        Story: "- Story: {$story->title}; Tipo: {$story->title}"
+        Story: "- Story: {$story->title}; Tipo: {$story->type}"
 
         O cenário deve seguir a estrutura:
         - 'as': O papel do usuário (extraído da estória).

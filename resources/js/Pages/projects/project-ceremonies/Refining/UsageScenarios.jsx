@@ -564,18 +564,18 @@ const UsageScenarios = ({ project, setProject }) => {
       )
 
       if (usageScenariosWithSelection.length === 0) {
-        toast.info('Nenhum cenário foi gerado.')
-        setIsGenerating(false)
-        return
+        toast.info('Nenhum cenário de uso foi gerado para as estórias existentes.');
+        setIsGenerating(false);
+        return;
       }
 
       setAiGeneratedUsageScenarios(usageScenariosWithSelection)
       setShowAiModal(true)
       toast.success(
-        `${usageScenariosWithSelection.length} estórias menores foram sugeridas.`,
-      )
+        `${usageScenariosWithSelection.length} cenários de uso foram sugeridos.`,
+      );
     } catch (error) {
-      console.error('Erro ao gerar epic stories:', error)
+      console.error('Erro ao gerar cenários de uso:', error);
       if (error.response && error.response.data) {
         toast.error(
           error.response.data.message ||
@@ -623,37 +623,37 @@ const UsageScenarios = ({ project, setProject }) => {
       return updatedProject
     })
 
-    // router.post(
-    //   route('usage-scenarios.bulk-store'),
-    //   { usage_scenarios: usageScenariosForBackend },
-    //   {
-    //     preserveState: true,
-    //     preserveScroll: true,
-    //     onSuccess: () => {
-    //       toast.success(
-    //         `${selectedUsageScenarios.length} cenários de uso adicionados com sucesso!`,
-    //       )
-    //       setAiGeneratedUsageScenarios(remainingUsageScenarios)
-    //       if (remainingUsageScenarios.length === 0) {
-    //         setShowAiModal(false)
-    //         setIsModalMinimized(false)
-    //       }
-    //     },
-    //     onError: (errors) => {
-    //       toast.error('Ocorreu um erro ao salvar os cenários de uso.')
-    //       console.error('Erro do backend:', errors)
-    //       // setProject((prevProject) => {
-    //       //   const usageScenariosToAddIds = usageScenariosToAdd.map((g) => g.id)
-    //       //   return {
-    //       //     ...prevProject,
-    //       //     epic_stories: prevProject.epic_stories.filter(
-    //       //       (story) => !usageScenariosToAddIds.includes(story.id),
-    //       //     ),
-    //       //   }
-    //       // })
-    //     },
-    //   },
-    // )
+    router.post(
+      route('usage-scenarios.bulk-store'),
+      { usage_scenarios: usageScenariosForBackend },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedUsageScenarios.length} cenários de uso adicionados com sucesso!`,
+          )
+          setAiGeneratedUsageScenarios(remainingUsageScenarios)
+          if (remainingUsageScenarios.length === 0) {
+            setShowAiModal(false)
+            setIsModalMinimized(false)
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar os cenários de uso.');
+          console.error('Erro do backend:', errors)
+          // setProject((prevProject) => {
+          //   const usageScenariosToAddIds = usageScenariosToAdd.map((g) => g.id)
+          //   return {
+          //     ...prevProject,
+          //     epic_stories: prevProject.epic_stories.filter(
+          //       (story) => !usageScenariosToAddIds.includes(story.id),
+          //     ),
+          //   }
+          // })
+        },
+      },
+    )
   }
 
   const cancelGeneratedUsageScenarios = () => {
