@@ -50,8 +50,8 @@ const GeneratedItemsModal = ({
       <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between p-3 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'Epic Stories por IA'}
-            {isModalMinimized && 'Epic Stories Geradas'}
+            {!isModalMinimized && 'Usage Scenarios gerados por IA'}
+            {isModalMinimized && 'Usage Scenarios gerados'}
           </h3>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="secondary" onClick={changeModalState}>
@@ -488,20 +488,7 @@ const ScenarioCard = ({ scenario, story, lastElement = false, setProject }) => {
  */
 const UsageScenarios = ({ project, setProject }) => {
   //ia states
-  const [aiGeneratedUsageScenarios, setAiGeneratedUsageScenarios] = useState([
-    // {
-    //   story_id: 3,
-    //   project_id: 1,
-    //   description: {
-    //     as: '...',
-    //     and: null,
-    //     when: '...',
-    //     given: '...',
-    //     then_1: '...',
-    //     then_2: null,
-    //   },
-    // },
-  ])
+  const [aiGeneratedUsageScenarios, setAiGeneratedUsageScenarios] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
@@ -560,22 +547,28 @@ const UsageScenarios = ({ project, setProject }) => {
       const data = response.data
 
       const usageScenariosWithSelection = data.usage_scenarios.map(
-        (scenario) => ({ ...scenario, selected: true }),
+        (scenario) => ({
+          ...scenario,
+          selected: true,
+          id: `temp-${Date.now()}`,
+        }),
       )
 
       if (usageScenariosWithSelection.length === 0) {
-        toast.info('Nenhum cenário de uso foi gerado para as estórias existentes.');
-        setIsGenerating(false);
-        return;
+        toast.info(
+          'Nenhum cenário de uso foi gerado para as estórias existentes.',
+        )
+        setIsGenerating(false)
+        return
       }
 
       setAiGeneratedUsageScenarios(usageScenariosWithSelection)
       setShowAiModal(true)
       toast.success(
         `${usageScenariosWithSelection.length} cenários de uso foram sugeridos.`,
-      );
+      )
     } catch (error) {
-      console.error('Erro ao gerar cenários de uso:', error);
+      console.error('Erro ao gerar cenários de uso:', error)
       if (error.response && error.response.data) {
         toast.error(
           error.response.data.message ||
@@ -591,6 +584,7 @@ const UsageScenarios = ({ project, setProject }) => {
     }
   }
 
+  useEffect(() => console.log(project), [project])
   const confirmGeneratedUsageScenarios = () => {
     const selectedUsageScenarios = aiGeneratedUsageScenarios.filter(
       (usage_scenario) => usage_scenario.selected,
@@ -604,9 +598,8 @@ const UsageScenarios = ({ project, setProject }) => {
       return
     }
 
-    // O backend espera 'title', 'story_id' (o ID do épico original) e 'project_id'
     const usageScenariosForBackend = selectedUsageScenarios.map(
-      ({ project_id, description, story_id }) => ({
+      ({ description, story_id }) => ({
         description,
         story_id,
         project_id: project.id,
@@ -617,7 +610,7 @@ const UsageScenarios = ({ project, setProject }) => {
       const updatedProject = { ...prevProject }
       updatedProject.usage_scenarios = [
         ...updatedProject.usage_scenarios,
-        ...usageScenariosForBackend,
+        ...selectedUsageScenarios,
       ]
       setIsModalMinimized(true)
       return updatedProject
@@ -640,7 +633,7 @@ const UsageScenarios = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar os cenários de uso.');
+          toast.error('Ocorreu um erro ao salvar os cenários de uso.')
           console.error('Erro do backend:', errors)
           // setProject((prevProject) => {
           //   const usageScenariosToAddIds = usageScenariosToAdd.map((g) => g.id)
