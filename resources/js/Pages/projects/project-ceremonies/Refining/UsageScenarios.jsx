@@ -617,7 +617,7 @@ const UsageScenarios = ({ project, setProject }) => {
     })
 
     router.post(
-      route('usage-scenarios.bulk-store'),
+      route('usage-scenario.bulk-store'),
       { usage_scenarios: usageScenariosForBackend },
       {
         preserveState: true,
