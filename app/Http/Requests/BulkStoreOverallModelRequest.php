@@ -16,8 +16,8 @@ class BulkStoreOverallModelRequest extends FormRequest
         return [
             'crc_cards' => 'required|array',
             'crc_cards.*.class' => 'required|string|max:90',
-            'crc_cards.*.responsabilities' => 'required|array',
-            'crc_cards.*.collaborators' => 'required|array',
+            'crc_cards.*.responsabilities' => 'nullable|array',
+            'crc_cards.*.collaborators' => 'nullable|array',
             'crc_cards.*.project_id' => 'required|exists:projects,id',
         ];
     }

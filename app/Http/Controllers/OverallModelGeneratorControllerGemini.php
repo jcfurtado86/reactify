@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Story; // Importa o modelo Story
+use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
@@ -30,9 +30,7 @@ class OverallModelGeneratorControllerGemini extends Controller
                 ], 422);
             }
 
-            $storyContext = $stories->map(function ($story) {
-                return "- ({$story->type}): {$story->title}";
-            })->implode("\n");
+            $storyContext = $stories->map(fn($story) => "- ({$story->type}): {$story->title}")->implode("\n");
 
             $prompt = $this->createPrompt($storyContext);
             $modelName = config('gemini.model');
@@ -45,8 +43,8 @@ class OverallModelGeneratorControllerGemini extends Controller
 
             return response()->json([
                 'status' => 'sucesso',
-                'project_id' => $validated['project_id'],
-                'crc_cards' => $parsedData['crc_cards'] ?? []
+                'crc_cards' => $parsedData['crc_cards'] ?? [],
+                'overall_model_classes' => $parsedData['overall_model_classes'] ?? [],
             ]);
 
         } catch (\Exception $e) {
@@ -58,7 +56,9 @@ class OverallModelGeneratorControllerGemini extends Controller
     private function createPrompt(string $storyContext): string
     {
         return <<<PROMPT
-        Analise a lista de User Stories e System Stories de um projeto fornecida abaixo. Sua tarefa é identificar as classes principais e modelá-las como CRC (Class-Responsibility-Collaborator) Cards.
+        Sua tarefa tem duas partes:
+        1.  Analise a lista de estórias de um projeto e modele-as como CRC (Class-Responsibility-Collaborator) Cards.
+        2.  Liste de forma única todas as classes que você identificou (tanto as classes principais quanto as colaboradoras).
 
         Estórias do Projeto:
         {$storyContext}
@@ -67,17 +67,26 @@ class OverallModelGeneratorControllerGemini extends Controller
         - 'class': O nome da classe (um substantivo, ex: "Filme", "Usuário").
         - 'responsabilities': Uma lista de ações que a classe deve executar (verbo + substantivo, ex: "Salvar informações", "Calcular nota").
         - 'collaborators': Uma lista de outras classes com as quais ela precisa interagir para cumprir suas responsabilidades.
+        - 'overall_model_classes': Todas as classes do sistema
+
+        O formato de resposta requerido é um JSON com duas chaves principais: "crc_cards" e "overall_model_classes".
 
         Formato de resposta requerido (JSON):
         {
             "crc_cards": [
                 {
-                    "class": "NomeDaClasse",
+                    "class": "Nome Da Classe",
                     "responsabilities": ["Fazer algo", "Gerenciar aquilo"],
-                    "collaborators": ["OutraClasse", "ServicoExterno"]
+                    "collaborators": ["Outra Classe", "Servico Externo"]
                 }
+            ],
+            "overall_model_classes": [
+                { "name": "Nome Da Classe" },
+                { "name": "Outra Classe" },
+                { "name": "Servico Externo" }
             ]
         }
+
 
         Exemplo de resposta:
         {
@@ -97,10 +106,17 @@ class OverallModelGeneratorControllerGemini extends Controller
                     "responsabilities": ["Adicionar filme", "Remover filme", "Listar filmes"],
                     "collaborators": ["Filme"]
                 }
+            ],
+            "overall_model_classes": [
+                { "name": "Filme" },
+                { "name": "Usuario" },
+                { "name": "Playlist" },
+                { "name": "Avaliacao" },
+                { "name": "Comentario" }
             ]
         }
 
-        IMPORTANTE: Baseie-se exclusivamente nas estórias fornecidas. Retorne apenas o JSON.
+        IMPORTANTE: A lista 'overall_model_classes' deve conter todos os nomes de classes de forma única, sem repetição. IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }
 
@@ -108,10 +124,9 @@ class OverallModelGeneratorControllerGemini extends Controller
     {
         try {
             $cleanedContent = preg_replace('/```json\s*(.*?)\s*```/s', '$1', $content);
-            $cleanedContent = trim($cleanedContent);
-            $data = json_decode($cleanedContent, true, 512, JSON_THROW_ON_ERROR);
-            if (!isset($data['crc_cards']) || !is_array($data['crc_cards'])) {
-                throw new \Exception("A resposta da IA não contém um array 'crc_cards' válido.");
+            $data = json_decode(trim($cleanedContent), true, 512, JSON_THROW_ON_ERROR);
+            if (!isset($data['crc_cards']) || !isset($data['overall_model_classes'])) {
+                throw new \Exception("A resposta da IA não contém 'crc_cards' e 'overall_model_classes'.");
             }
             return $data;
         } catch (\Exception $e) {

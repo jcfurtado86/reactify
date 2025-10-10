@@ -13,6 +13,7 @@ use App\Http\Controllers\BusinessRuleGeneratorControllerGemini;
 use App\Http\Controllers\UsageScenarioGeneratorControllerGemini;
 use App\Http\Controllers\SystemInterfaceGeneratorControllerGemini;
 use App\Http\Controllers\ProductCanvasGeneratorControllerGemini;
+use App\Http\Controllers\SystemInterfaceController;
 
 Route::post('/stories/generate', [StoryGeneratorControllerGemini::class, 'generateStories'])->name('story.generate');
 
@@ -22,7 +23,7 @@ Route::post('/personas/generate', [PersonaGeneratorControllerGemini::class, 'gen
 
 Route::post('/goals/generate', [GoalGeneratorControllerGemini::class, 'generateGoals'])->name('goal.generate');
 
-Route::post('/overall-models/generate', [OverallModelGeneratorControllerGemini::class, 'generate'])->name('overall-model.generate');
+Route::post('/overall-model/generate', [OverallModelGeneratorControllerGemini::class, 'generate'])->name('overall-model.generate');
 
 Route::post('/epic-stories/generate-decomposition', [EpicStoryGeneratorControllerGemini::class, 'generate'])->name('epic-story.generate-decomposition');
 
