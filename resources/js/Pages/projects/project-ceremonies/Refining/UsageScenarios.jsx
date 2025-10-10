@@ -1,16 +1,12 @@
 import React, { useMemo, useState } from 'react'
 import { router } from '@inertiajs/react'
 import {
-  Pencil,
-  Trash2,
   ArrowRight,
   CornerDownRight,
-  Plus,
   Minus,
   Check,
   X,
   LoaderCircle,
-  ChevronDown,
   ChevronsUp,
 } from 'lucide-react'
 import { isTemporary } from '@/lib/utils'
@@ -18,7 +14,6 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { storyVariants } from '../StoryDiscovery/Stories' // Assuming this path is correct
 import { toast } from 'sonner'
-import { Input } from '@/components/ui/input'
 
 /**
  * Renders the parent Story card on the left.
@@ -584,7 +579,6 @@ const UsageScenarios = ({ project, setProject }) => {
     }
   }
 
-  useEffect(() => console.log(project), [project])
   const confirmGeneratedUsageScenarios = () => {
     const selectedUsageScenarios = aiGeneratedUsageScenarios.filter(
       (usage_scenario) => usage_scenario.selected,
@@ -635,15 +629,6 @@ const UsageScenarios = ({ project, setProject }) => {
         onError: (errors) => {
           toast.error('Ocorreu um erro ao salvar os cenários de uso.')
           console.error('Erro do backend:', errors)
-          // setProject((prevProject) => {
-          //   const usageScenariosToAddIds = usageScenariosToAdd.map((g) => g.id)
-          //   return {
-          //     ...prevProject,
-          //     epic_stories: prevProject.epic_stories.filter(
-          //       (story) => !usageScenariosToAddIds.includes(story.id),
-          //     ),
-          //   }
-          // })
         },
       },
     )

@@ -1,7 +1,232 @@
 import { router, usePage } from '@inertiajs/react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import { Plus, Check, X, Edit, Trash2 } from 'lucide-react'
+import {
+  Plus,
+  ArrowRight,
+  CornerDownRight,
+  Minus,
+  Check,
+  X,
+  LoaderCircle,
+  ChevronsUp,
+} from 'lucide-react'
+import GenerateAIButton from '@/Components/GenerateAIButton'
+import { toast } from 'sonner'
 
+const GeneratedItemsModal = ({
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  generatedClasses,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+  toggleAllClasses,
+  toggleClassSelection,
+}) => {
+  return (
+    <div
+      className={`
+              transition-all duration-300 z-50
+              ${
+                isModalMinimized
+                  ? 'fixed bottom-4 right-4 w-[400px]'
+                  : 'fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center'
+              }
+            `}
+    >
+      <div className="bg-card rounded-lg max-w-7xl w-full max-h-[95vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'CRC Cards gerados por IA'}
+            {isModalMinimized && 'CRC Cards gerados'}
+          </h3>
+          <div className="flex items-center gap-2">
+            {!isModalMinimized && (
+              <h3 className="text-xl font-bold text-foreground flex items-center">
+                Classes geradas por IA
+              </h3>
+            )}
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              size="icon"
+              variant="secondary"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+        {!isModalMinimized && (
+          <main className="flex ">
+            <section className="w-1/2">
+              <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+                <span className="text-foreground font-medium">
+                  {generatedItems.filter((j) => j.selected).length} de{' '}
+                  {generatedItems.length} selecionados
+                </span>
+                <Button
+                  onClick={toggleAllItems}
+                  className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+                >
+                  {generatedItems.every((item) => item.selected)
+                    ? 'Desmarcar Todos'
+                    : 'Selecionar Todos'}
+                </Button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-6 min-h-0">
+                <div className="space-y-2 pb-4">
+                  {generatedItems.map((card, index) => {
+                    return (
+                      <div
+                        key={'temp-' + index}
+                        className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                          card.selected
+                            ? 'bg-muted border-primary'
+                            : 'bg-muted/50 border-border hover:border-muted-foreground'
+                        }`}
+                      >
+                        <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                          <Checkbox
+                            checked={card.selected}
+                            onCheckedChange={() => toggleItemSelection(index)}
+                          />
+                          <div className="w-full bg-card rounded-lg shadow-sm">
+                            {/* INÍCIO DA ALTERAÇÃO: Exibição do CRC Card */}
+
+                            {/* Título do Card */}
+                            <h3 className="text-lg font-semibold my-2">
+                              {card.class}
+                            </h3>
+                            <Separator />
+
+                            {/* Container Flex para as duas colunas */}
+                            <div className="flex">
+                              {/* Coluna da Esquerda: Responsabilidades */}
+                              <div className="w-1/2 px-3 flex flex-col gap-2">
+                                <h5 className="font-semibold text-sm text-center text-primary my-2">
+                                  Responsabilidades
+                                </h5>
+                                {card.responsabilities.map((res, index) => (
+                                  <div
+                                    key={index}
+                                    className="text-sm text-center p-2 border border-border rounded-md shadow-sm"
+                                  >
+                                    {res}
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Coluna da Direita: Colaboradores */}
+                              <div className="w-1/2 px-3 border-l border-border flex flex-col gap-2">
+                                <h5 className="font-semibold text-sm text-center text-primary my-2">
+                                  Colaboradores
+                                </h5>
+                                {card.collaborators.map(
+                                  (collaborator, collaboratorIndex) => (
+                                    <div
+                                      key={collaboratorIndex}
+                                      className="text-sm text-center p-2 border border-border rounded-md shadow-sm"
+                                    >
+                                      {collaborator}
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            </div>
+
+                            {/* FIM DA ALTERAÇÃO */}
+                          </div>
+                        </label>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </section>
+            <section className="w-1/2">
+              <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+                <span className="text-foreground font-medium">
+                  {generatedClasses.filter((j) => j.selected).length} de{' '}
+                  {generatedClasses.length} selecionados
+                </span>
+                <Button
+                  onClick={toggleAllClasses}
+                  className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+                >
+                  {generatedClasses.every((item) => item.selected)
+                    ? 'Desmarcar Todos'
+                    : 'Selecionar Todos'}
+                </Button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-6 min-h-0">
+                <div className="space-y-2 pb-4">
+                  {generatedClasses.map((card_class, index) => {
+                    return (
+                      <div
+                        key={'temp-' + index}
+                        className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                          card_class.selected
+                            ? 'bg-muted border-primary'
+                            : 'bg-muted/50 border-border hover:border-muted-foreground'
+                        }`}
+                      >
+                        <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                          <Checkbox
+                            checked={card_class.selected}
+                            onCheckedChange={() => toggleClassSelection(index)}
+                          />
+                          <div className="w-full bg-card rounded-lg p-3 shadow-sm">
+                            <h4 className="text-lg font-bold text-foreground mb-3">
+                              {card_class.name}
+                            </h4>
+                          </div>
+                        </label>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </section>
+          </main>
+        )}
+        {!isModalMinimized && (
+          <div className="flex justify-end gap-3 p-6 pt-4 border-t border-border flex-shrink-0">
+            <Button
+              onClick={cancelGeneratedItems}
+              className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={confirmGeneratedItems}
+              className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+              disabled={
+                generatedItems.filter((j) => j.selected).length === 0 &&
+                generatedClasses.filter((j) => j.selected).length === 0
+              }
+            >
+              <Check className="mr-2" size={16} />
+              Confirmar e Adicionar (
+              {generatedItems.filter((j) => j.selected).length +
+                generatedClasses.filter((j) => j.selected).length}
+              )
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 // Componente para a lista de Responsabilidades (com Input)
 const EditableListItem = ({
   item,
@@ -270,6 +495,36 @@ const CRCCard = ({
 }
 
 const OverallModel = ({ project, setProject }) => {
+  //ia states
+  const [aiGeneratedCRCCards, setAiGeneratedCRCCards] = useState([
+    // {
+    //   selected: true,
+    //   id: 'temp-' + Date.now(),
+    //   project_id: 1,
+    //   class: 'Filme',
+    //   collaborators: ['Categoria de Filme', 'Legenda'],
+    //   responsabilities: [
+    //     'Ficha Técnica',
+    //     'Média de notas dos usuários',
+    //     'Resenhas e comentários dos usuários',
+    //   ],
+    //   created_at: '2025-10-05T19:45:21.000000Z',
+    //   updated_at: '2025-10-05T19:45:21.000000Z',
+    // },
+  ])
+  const [aiGeneratedClasses, setAiGeneratedClasses] = useState([
+    // {
+    //   selected: true,
+    //   id: 'temp-' + Date.now(),
+    //   name: 'Filme',
+    //   project_id: 1,
+    //   created_at: '2025-10-05T19:45:21.000000Z',
+    //   updated_at: '2025-10-05T19:45:21.000000Z',
+    // },
+  ])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
   const [editingField, setEditingField] = useState({
     cardId: null,
     field: null,
@@ -366,7 +621,9 @@ const OverallModel = ({ project, setProject }) => {
       c.id === cardId ? { ...c, [field]: updatedArray } : c,
     )
     setProject({ ...project, crc_cards: updatedCards })
-    // router.patch(...)
+    router.patch(route('overall.update', { id: cardId }), {
+      [field]: updatedArray,
+    })
   }
 
   const confirmDeleteCard = (cardId) => {
@@ -408,8 +665,168 @@ const OverallModel = ({ project, setProject }) => {
     )
   }
 
+  //rotas relacionadas ao modal de IA
+  const generateCRCCards = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post(route('crc-card.generate'), {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      const classesWithSelection = data.overall_model_classes.map((c) => ({
+        ...c,
+        selected: false,
+        id: `temp-${Date.now()}`,
+      }))
+
+      const CRCCardsWithSelection = data.crc_cards.map((card) => ({
+        ...card,
+        selected: false,
+        id: `temp-${Date.now()}`,
+      }))
+
+      if (CRCCardsWithSelection.length === 0) {
+        toast.info('Nenhum CRC Card foi gerado para as estórias existentes.')
+        setIsGenerating(false)
+        return
+      }
+
+      setAiGeneratedCRCCards(CRCCardsWithSelection)
+      setShowAiModal(true)
+      toast.success(`${CRCCardsWithSelection.length} cards foram sugeridos.`)
+    } catch (error) {
+      console.error('Erro ao gerar cards:', error)
+      if (error.response && error.response.data) {
+        toast.error(
+          error.response.data.message ||
+            'Ocorreu um erro desconhecido no servidor.',
+        )
+      } else {
+        toast.error(
+          'Não foi possível conectar ao servidor. Verifique sua internet.',
+        )
+      }
+    }
+  }
+
+  const confirmGeneratedCards = () => {
+    const selectedCards = aiGeneratedCRCCards.filter((card) => card.selected)
+    const remainingCards = aiGeneratedCRCCards.filter((card) => !card.selected)
+    const selectedClasses = aiGeneratedClasses.filter(
+      (crc_class) => crc_class.selected,
+    )
+    const remainingClasses = aiGeneratedClasses.filter(
+      (crc_class) => !crc_class.selected,
+    )
+
+    if (selectedCards.length === 0 && selectedClasses.length === 0) {
+      toast.warning('Selecione pelo menos um card para adicionar.')
+      return
+    }
+
+    const cardsForBackend = selectedCards.map((card) => ({
+      collaborators: card.collaborators,
+      responsabilities: card.responsabilities,
+      class: card.class,
+      project_id: project.id,
+    }))
+
+    const classesForBackend = selectedClasses.map(({ name }) => ({
+      name: name,
+      project_id: project.id,
+    }))
+
+    setProject((prevProject) => {
+      const updatedProject = { ...prevProject }
+      updatedProject.crc_cards = [...updatedProject.crc_cards, ...selectedCards]
+      updatedProject.overall_model_classes = [
+        ...updatedProject.overall_model_classes,
+        ...classesForBackend,
+      ]
+      setIsModalMinimized(true)
+      return updatedProject
+    })
+
+    // router.post(
+    //   route('usage-scenario.bulk-store'),
+    //   { usage_scenarios: cardsForBackend },
+    //   {
+    //     preserveState: true,
+    //     preserveScroll: true,
+    //     onSuccess: () => {
+    //       toast.success(
+    //         `${selectedCards.length} cards adicionados com sucesso!`,
+    //       )
+    //       setAiGeneratedCRCCards(remainingCards)
+    //       if (remainingCards.length === 0) {
+    //         setShowAiModal(false)
+    //         setIsModalMinimized(false)
+    //       }
+    //     },
+    //     onError: (errors) => {
+    //       toast.error('Ocorreu um erro ao salvar os cards.')
+    //       console.error('Erro do backend:', errors)
+    //     },
+    //   },
+    // )
+  }
+
+  const cancelGeneratedItems = () => {
+    setShowAiModal(false)
+    setAiGeneratedCRCCards([])
+    setAiGeneratedClasses([])
+    setIsModalMinimized(false)
+  }
+
+  const toggleCardSelection = (index) => {
+    setAiGeneratedCRCCards((prev) =>
+      prev.map((card, i) =>
+        i === index ? { ...card, selected: !card.selected } : card,
+      ),
+    )
+  }
+  const toggleClassSelection = (index) => {
+    setAiGeneratedClasses((prev) =>
+      prev.map((card, i) =>
+        i === index ? { ...card, selected: !card.selected } : card,
+      ),
+    )
+  }
+
+  const toggleAllCards = () => {
+    const allSelected = aiGeneratedCRCCards.every((card) => card.selected)
+    setAiGeneratedCRCCards((prev) =>
+      prev.map((card) => ({ ...card, selected: !allSelected })),
+    )
+  }
+
+  const toggleAllClasses = () => {
+    const allSelected = aiGeneratedClasses.every((card) => card.selected)
+    setAiGeneratedClasses((prev) =>
+      prev.map((card) => ({ ...card, selected: !allSelected })),
+    )
+  }
+
   return (
     <div className="p-4 flex flex-col gap-6">
+      {showAiModal && (
+        <GeneratedItemsModal
+          isModalMinimized={isModalMinimized}
+          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+          cancelGeneratedItems={cancelGeneratedItems}
+          generatedItems={aiGeneratedCRCCards}
+          generatedClasses={aiGeneratedClasses}
+          toggleItemSelection={toggleCardSelection}
+          toggleClassSelection={toggleClassSelection}
+          confirmGeneratedItems={confirmGeneratedCards}
+          toggleAllItems={toggleAllCards}
+          toggleAllClasses={toggleAllClasses}
+        />
+      )}
       <section className="flex gap-2 ">
         <Accordion
           type="single"
@@ -521,6 +938,12 @@ const OverallModel = ({ project, setProject }) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <GenerateAIButton
+        isGenerating={isGenerating}
+        onClick={generateCRCCards}
+        // tooltip={tooltipInfo.aiGeneratedStory}
+        className="w-1/2"
+      />
     </div>
   )
 }
