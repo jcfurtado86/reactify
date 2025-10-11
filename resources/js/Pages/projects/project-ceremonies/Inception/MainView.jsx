@@ -424,49 +424,48 @@ const MainView = ({ project = {}, setProject }) => {
     )
   }
 
-  //rotas relacionadas ao modal de IA
   const generateProductCanvas = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
+    setIsGenerating(true);
+    setIsModalMinimized(false);
 
     try {
-      const response = await axios.post('/api/product-canvas/generate', {
+      const response = await axios.post(route('product-canvas.generate'), {
         project_id: project.id,
-      })
+      });
 
-      const data = response.data
+      const data = response.data;
 
-      const productCanvasWithSelection = data.product_canvas.map((canvas) => ({
-        ...canvas,
-        selected: true,
-      }))
+      if (data.status === 'sucesso') {
+        const productCanvasWithSelection = data.product_canvas.map((canvas) => ({
+          ...canvas,
+          selected: true,
+        }));
 
-      setAiGeneratedProductCanvas(productCanvasWithSelection)
-      setShowAiModal(true)
-      toast.success(
-        'Product Canvas gerado com sucesso a partir das entrevistas mais recentes.',
-      )
-    } catch (error) {
-      console.error('Erro ao gerar Product Canvas:', error)
-      if (error.response && error.response.data) {
-        const errorData = error.response.data
-
-        if (errorData.status === 'warning') {
-          toast.warning(errorData.message)
-        } else {
-          toast.error(
-            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
-          )
+        if (productCanvasWithSelection.length === 0) {
+          toast.info("A IA não gerou sugestões para o Product Canvas.");
+          return;
         }
+
+        setAiGeneratedProductCanvas(productCanvasWithSelection);
+        setShowAiModal(true);
+        toast.success(
+          'Sugestões para o Product Canvas foram geradas com sucesso.',
+        );
       } else {
-        toast.error(
-          'Não foi possível conectar ao servidor. Verifique sua internet.',
-        )
+        if (data.status === 'warning') {
+          toast.warning(data.message);
+        } else {
+          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+        }
       }
+    } catch (error) {
+      console.error('Erro ao gerar Product Canvas:', error);
+      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
+
   const confirmGeneratedProductCanvas = () => {
     const selectedProductCanvas = aiGeneratedProductCanvas.filter(
       (canvas) => canvas.selected,

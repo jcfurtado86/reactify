@@ -452,47 +452,46 @@ const Personas = ({ project, setProject }) => {
     }
   }
 
-  //rotas relacionadas ao modal de IA
   const generatePersonas = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
+    setIsGenerating(true);
+    setIsModalMinimized(false);
 
     try {
-      const response = await axios.post('/api/personas/generate', {
+      const response = await axios.post(route('persona.generate'), {
         project_id: project.id,
-      })
+      });
 
-      const data = response.data
+      const data = response.data;
 
-      const personasWithSelection = data.personas.map((persona) => ({
-        ...persona,
-        selected: true,
-      }))
+      if (data.status === 'sucesso') {
+        const personasWithSelection = data.personas.map((persona) => ({
+          ...persona,
+          selected: true,
+        }));
 
-      setAiGeneratedPersonas(personasWithSelection)
-      setShowAiModal(true)
-      toast.success('Personas geradas com sucesso.')
-    } catch (error) {
-      console.error('Erro ao gerar personas:', error)
-      if (error.response && error.response.data) {
-        const errorData = error.response.data
-
-        if (errorData.status === 'warning') {
-          toast.warning(errorData.message)
-        } else {
-          toast.error(
-            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
-          )
+        if (personasWithSelection.length === 0) {
+          toast.info("A IA não gerou novas personas com base nas entrevistas.");
+          return;
         }
+
+        setAiGeneratedPersonas(personasWithSelection);
+        setShowAiModal(true);
+        toast.success('Personas geradas com sucesso.');
       } else {
-        toast.error(
-          'Não foi possível conectar ao servidor. Verifique sua internet.',
-        )
+        if (data.status === 'warning') {
+          toast.warning(data.message);
+        } else {
+          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+        }
       }
+    } catch (error) {
+      console.error('Erro ao gerar personas:', error);
+      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
+  
   const confirmGeneratedPersonas = () => {
     const selectedPersonas = aiGeneratedPersonas.filter(
       (persona) => persona.selected,

@@ -88,37 +88,49 @@ const GeneratedItemsModal = ({
 
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
               <div className="space-y-2 pb-4">
-                {generatedItems.map((story, index) => (
-                  <div
-                    key={'temp-' + index}
-                    className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
-                      story.selected
-                        ? 'bg-muted border-primary'
-                        : 'bg-muted/50 border-border hover:border-muted-foreground'
-                    }`}
-                  >
-                    <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
-                      <div className="flex items-center gap-2 text-left">
-                        <Badge
-                          className={`border-none text-primary-foreground font-bold ${
-                            story.type === 'system'
-                              ? 'bg-secondary'
-                              : 'bg-primary'
-                          }`}
-                        >
-                          {story.type === 'system' ? 'SS' : 'US'}
-                        </Badge>
-                        <span className="text-sm text-foreground">
-                          {story.title}
-                        </span>
-                      </div>
-                      <Checkbox
-                        checked={story.selected}
-                        onCheckedChange={() => toggleItemSelection(index)}
-                      />
-                    </label>
-                  </div>
-                ))}
+                {generatedItems.map((goal, index) => {
+                  const selectedType = typeColors[goal.type] || typeColors.bg;
+                  const selectedPriority = priorityColors[goal.priority] || priorityColors.medium;
+
+                  return (
+                    <div
+                      key={'temp-' + index}
+                      className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                        goal.selected
+                          ? 'bg-muted border-primary'
+                          : 'bg-muted/50 border-border hover:border-muted-foreground'
+                      }`}
+                    >
+                      <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                        <div className="flex items-center gap-2 text-left">
+                          <Badge
+                            className={cn(
+                              'border-transparent text-background font-bold',
+                              selectedType.color,
+                            )}
+                          >
+                            {goal.type.toUpperCase()}
+                          </Badge>
+                          <Badge
+                            className={cn(
+                              'border-transparent text-background font-bold',
+                              selectedPriority.color,
+                            )}
+                          >
+                            {goal.priority.toUpperCase()}
+                          </Badge>
+                          <span className="text-sm text-foreground">
+                            {goal.title}
+                          </span>
+                        </div>
+                        <Checkbox
+                          checked={goal.selected}
+                          onCheckedChange={() => toggleItemSelection(index)}
+                        />
+                      </label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -481,47 +493,46 @@ const Goals = ({ project, setProject }) => {
     router.delete(route('goal.delete', goalId))
   }
 
-  //rotas relacionadas ao modal de IA
   const generateGoals = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
+    setIsGenerating(true);
+    setIsModalMinimized(false);
 
     try {
-      const response = await axios.post('/api/goals/generate', {
+      const response = await axios.post(route('goal.generate'), {
         project_id: project.id,
       });
 
-      const data = response.data
+      const data = response.data;
 
-      const goalsWithSelection = data.goals.map((goal) => ({
-        ...goal,
-        selected: true,
-      }))
+      if (data.status === 'sucesso') {
+        const goalsWithSelection = data.goals.map((goal) => ({
+          ...goal,
+          selected: true,
+        }));
 
-      setAiGeneratedGoals(goalsWithSelection)
-      setShowAiModal(true)
-      toast.success('Goals geradas com sucesso a partir das entrevistas mais recentes.');
-    } catch (error) {
-      console.error('Erro ao gerar goals:', error)
-      if (error.response && error.response.data) {
-        const errorData = error.response.data
-
-        if (errorData.status === 'warning') {
-          toast.warning(errorData.message)
-        } else {
-          toast.error(
-            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
-          )
+        if (goalsWithSelection.length === 0) {
+          toast.info("A IA não gerou novas goals com base nas entrevistas.");
+          return;
         }
+
+        setAiGeneratedGoals(goalsWithSelection);
+        setShowAiModal(true);
+        toast.success('Goals geradas com sucesso.');
       } else {
-        toast.error(
-          'Não foi possível conectar ao servidor. Verifique sua internet.',
-        )
+        if (data.status === 'warning') {
+          toast.warning(data.message);
+        } else {
+          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+        }
       }
+    } catch (error) {
+      console.error('Erro ao gerar goals:', error);
+      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
+
   const confirmGeneratedGoals = () => {
     const selectedGoals = aiGeneratedGoals.filter((goal) => goal.selected)
     const remainingGoals = aiGeneratedGoals.filter((goal) => !goal.selected)
