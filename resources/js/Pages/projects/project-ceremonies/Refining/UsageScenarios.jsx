@@ -529,55 +529,44 @@ const UsageScenarios = ({ project, setProject }) => {
     })
   }
 
-  //rotas relacionadas ao modal de IA
   const generateUsageScenarios = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
+    setIsGenerating(true);
+    setIsModalMinimized(false);
 
     try {
       const response = await axios.post(route('usage-scenario.generate'), {
         project_id: project.id,
-      })
+      });
 
-      const data = response.data
+      const data = response.data;
 
-      const usageScenariosWithSelection = data.usage_scenarios.map(
-        (scenario) => ({
-          ...scenario,
-          selected: true,
-          id: `temp-${Date.now()}`,
-        }),
-      )
+      if (data.status === 'sucesso') {
+        const usageScenariosWithSelection = data.usage_scenarios.map(
+          (scenario) => ({ ...scenario, selected: true }),
+        );
 
-      if (usageScenariosWithSelection.length === 0) {
-        toast.info(
-          'Nenhum cenário de uso foi gerado para as estórias existentes.',
-        )
-        setIsGenerating(false)
-        return
-      }
+        if (usageScenariosWithSelection.length === 0) {
+          toast.info('Nenhum cenário de uso foi gerado para as estórias existentes.');
+          return;
+        }
 
-      setAiGeneratedUsageScenarios(usageScenariosWithSelection)
-      setShowAiModal(true)
-      toast.success(
-        `${usageScenariosWithSelection.length} cenários de uso foram sugeridos.`,
-      )
-    } catch (error) {
-      console.error('Erro ao gerar cenários de uso:', error)
-      if (error.response && error.response.data) {
-        toast.error(
-          error.response.data.message ||
-            'Ocorreu um erro desconhecido no servidor.',
-        )
+        setAiGeneratedUsageScenarios(usageScenariosWithSelection);
+        setShowAiModal(true);
+        toast.success(`${usageScenariosWithSelection.length} cenários de uso foram sugeridos.`);
       } else {
-        toast.error(
-          'Não foi possível conectar ao servidor. Verifique sua internet.',
-        )
+        if (data.status === 'warning') {
+          toast.warning(data.message);
+        } else {
+          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+        }
       }
+    } catch (error) {
+      console.error('Erro ao gerar cenários de uso:', error);
+      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
   const confirmGeneratedUsageScenarios = () => {
     const selectedUsageScenarios = aiGeneratedUsageScenarios.filter(

@@ -20,7 +20,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
             $stories = Story::where('project_id', $validated['project_id'])->get();
 
             if($stories->isEmpty()) {
-                return response()->json(['status' => 'error', 'message' => 'Nenhuma Story foi encontrada no projeto para análise.'], 404);
+                return response()->json(['status' => 'warning', 'message' => 'Nenhuma Story foi encontrada no projeto para análise.'], 404);
             }
 
             $allUsageScenarios = [];
