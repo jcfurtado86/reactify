@@ -230,35 +230,26 @@ const Journeys = ({ project, setProject }) => {
     setIsModalMinimized(false)
 
     try {
-      const response = await fetch('/api/journeys/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-TOKEN':
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute('content') || '',
-        },
-        body: JSON.stringify({
-          project_id: project.id,
-        }),
-      })
+      const response = await axios.post(route('journey.generate'), {
+        project_id: project.id,
+      });
 
-      const data = await response.json()
+      const data = response.data;
 
       if (data.status === 'sucesso') {
-        console.log(data.journeys)
         const journeysWithSelection = data.journeys.map((journey) => ({
           ...journey,
-          selected: true, // Por padrão, todas vêm selecionadas
-        }))
-        setGeneratedJourneys(journeysWithSelection)
-        setShowConfirmModal(true)
-        toast.success('Journeys geradas com sucesso.')
+          selected: true,
+        }));
+        setGeneratedJourneys(journeysWithSelection);
+        setShowConfirmModal(true);
+        toast.success('Journeys geradas com sucesso.');
       } else {
-        if (data.status == 'warning') toast.warning(data.message)
-        else toast.error(data.message)
+        if (data.status === 'warning') {
+          toast.warning(data.message);
+        } else {
+          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+        }
       }
     } catch (error) {
       toast.error('Erro ao comunicar com o servidor')
@@ -576,8 +567,8 @@ const Journeys = ({ project, setProject }) => {
           <div className="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-border">
             <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
               <h3 className="text-xl font-bold text-foreground flex items-center">
-                {!isModalMinimized && 'AI Generated Journeys'}
-                {isModalMinimized && 'Generated Journeys'}
+                {!isModalMinimized && 'Journeys geradas com IA'}
+                {isModalMinimized && 'Journeys geradas'}
               </h3>
               <div className="flex items-center gap-2">
                 <Button
