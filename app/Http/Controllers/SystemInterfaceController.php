@@ -15,7 +15,17 @@ class SystemInterfaceController extends Controller
 
       DB::transaction(function () use ($validatedData) {
           foreach ($validatedData['system_interfaces'] as $interfaceData) {
-              SystemInterface::create($interfaceData);
+              $newInterface = SystemInterface::create([
+                  'title' => $interfaceData['title'],
+                  'input' => $interfaceData['input'],
+                  'output' => $interfaceData['output'],
+                  'type' => $interfaceData['type'],
+                  'project_id' => $interfaceData['project_id'],
+              ]);
+
+              if (!empty($interfaceData['overall_model_class_ids'])) {
+                  $newInterface->overallModelClasses()->sync($interfaceData['overall_model_class_ids']);
+              }
           }
       });
 

@@ -20,6 +20,8 @@ class BulkStoreSystemInterfaceRequest extends FormRequest
             'system_interfaces.*.output' => 'required|string|max:255',
             'system_interfaces.*.type' => 'required|string|in:internal,external',
             'system_interfaces.*.project_id' => 'required|integer|exists:projects,id',
+            'system_interfaces.*.overall_model_class_ids' => 'nullable|array',
+            'system_interfaces.*.overall_model_class_ids.*' => 'integer|exists:overall_model_classes,id'
         ];
     }
 }

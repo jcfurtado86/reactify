@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CrcCard;
 use App\Models\Story;
+use App\Models\OverallModelClass;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
@@ -11,16 +12,17 @@ use Illuminate\Support\Facades\Log;
 
 class SystemInterfaceGeneratorControllerGemini extends Controller
 {
-    public function generate(Request $request): JsonResponse
+public function generate(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate([
                 'project_id' => 'required|integer|exists:projects,id',
             ]);
 
-            // 1. Buscar o contexto: CRC Cards e Estórias do projeto
-            $crcCards = CrcCard::where('project_id', $validated['project_id'])->get();
-            $stories = Story::where('project_id', $validated['project_id'])->get();
+            $projectId = $validated['project_id'];
+
+            $crcCards = CrcCard::where('project_id', $projectId)->get();
+            $stories = Story::where('project_id', $projectId)->get();
 
             if ($crcCards->isEmpty() || $stories->isEmpty()) {
                 return response()->json([
@@ -29,51 +31,76 @@ class SystemInterfaceGeneratorControllerGemini extends Controller
                 ], 422);
             }
 
-            // 2. Formatar o contexto para o prompt
-            $context = "CRC Cards do Projeto:\n";
-            foreach ($crcCards as $card) {
-                $context .= "- Classe: {$card->class}, Colaboradores: " . implode(', ', json_decode($card->collaborators)) . "\n";
-            }
-            $context .= "\nEstórias do Projeto:\n";
-            foreach ($stories as $story) {
-                $context .= "- {$story->title}\n";
-            }
+            $classMap = OverallModelClass::where('project_id', $projectId)->pluck('id', 'name');
 
-            // 3. Criar prompt, chamar a IA e fazer o parsing
-            $prompt = $this->createPrompt($context);
+            $context = "CRC Cards do Projeto:\n";
+            $crcCards->each(function ($card) use (&$context) {
+                $collaborators = is_string($card->collaborators) ? json_decode($card->collaborators) : $card->collaborators;
+                $collaboratorsString = is_array($collaborators) ? implode(', ', $collaborators) : '';
+                
+                $context .= "- Classe: {$card->class}, Colaboradores: " . $collaboratorsString . "\n";
+            });
+            $context .= "\nEstórias do Projeto:\n";
+            $stories->each(function ($story) use (&$context) {
+                $context .= "- {$story->title}\n";
+            });
+
+            $prompt = $this->createPrompt($context, $crcCards->pluck('class')->toArray());
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
 
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
-            $responseText = $result->text();
+            $responseText = $result->text(); 
+
             $parsedData = $this->parseResponse($responseText);
+            
+            $interfacesWithIds = array_map(function($interface) use ($classMap) {
+                $classIds = [];
+                if (!empty($interface['related_classes'])) {
+                    foreach($interface['related_classes'] as $className) {
+                        if (isset($classMap[$className])) {
+                            $classIds[] = $classMap[$className];
+                        }
+                    }
+                }
+                $interface['overall_model_class_ids'] = $classIds;
+                unset($interface['related_classes']);
+                return $interface;
+            }, $parsedData['system_interfaces']);
 
             return response()->json([
                 'status' => 'sucesso',
-                'system_interfaces' => $parsedData['system_interfaces'] ?? []
+                'system_interfaces' => $interfacesWithIds
             ]);
 
         } catch (\Exception $e) {
             Log::error('Erro ao gerar Interfaces de Sistema: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Ocorreu um erro no servidor ao gerar as interfaces.'], 500);
+            return response()->json(['status' => 'error', 'message' => 'Ocorreu um erro no servidor ao gerar as interfaces: '.$e->getMessage()], 500);
         }
     }
 
-    private function createPrompt(string $context): string
+    private function createPrompt(string $context, array $availableClasses): string
     {
+        $classList = implode('", "', $availableClasses);
+
         return <<<PROMPT
-        Analise o Overall Model (CRC Cards) e as Estórias de um projeto listados abaixo. Sua tarefa é identificar e definir as Interfaces de Sistema necessárias.
+        Sua tarefa é identificar as interfaces internas e externas do produto com base no Overall Model (CRC Cards) e nas Estórias do projeto.
+
+        **Definições e Instruções de Análise:**
+        - **Interfaces Internas:** São os pontos de comunicação entre os diversos módulos ou componentes dentro do sistema. **Você deve identificá-las principalmente ao analisar a relação entre uma "Classe" e seus "Colaboradores" nos CRC Cards.** Uma colaboração quase sempre exige uma interface interna.
+        - **Interfaces Externas:** São os pontos de comunicação entre o sistema e o ambiente externo. **Você deve identificá-las principalmente ao analisar as "Estórias do Projeto" que descrevem interações com sistemas de terceiros (APIs, redes sociais, gateways de pagamento, etc.).**
 
         Contexto do Projeto:
         {$context}
 
-        Para cada interface, defina:
         - 'title': Um nome claro para a interface (ex: "API de Pagamento", "Serviço de Autenticação").
         - 'input': Os dados que a interface recebe (ex: "ID do usuário, senha").
         - 'output': Os dados que a interface retorna (ex: "Token de acesso, dados do usuário").
         - 'type': O tipo de interface:
             - "external": Se a comunicação é com um sistema fora da aplicação (ex: API de terceiros, outro microserviço).
             - "internal": Se a comunicação é entre componentes principais dentro da mesma aplicação (ex: Módulo de Pedidos falando com Módulo de Estoque).
+        - 'related_classes': Uma lista com os nomes das classes do Overall Model que estão envolvidas nesta interface. Escolha apenas a partir da seguinte lista de classes disponíveis: "{$classList}".
+
 
         Formato de resposta requerido (JSON):
         {
@@ -82,25 +109,42 @@ class SystemInterfaceGeneratorControllerGemini extends Controller
                     "title": "Nome da Interface",
                     "input": "Dados de entrada",
                     "output": "Dados de saída",
-                    "type": "internal" | "external"
+                    "type": "internal" | "external",
+                    "related_classes": ["NomeDaClasse1", "NomeDaClasse2"]
                 }
             ]
         }
 
-        Exemplo de resposta:
+        Exemplo de resposta para um projeto de streaming:
         {
             "system_interfaces": [
                 {
-                    "title": "Gateway de Pagamento",
-                    "input": "Dados do cartão, valor da compra",
-                    "output": "Status da transação (aprovada/recusada)",
-                    "type": "external"
+                    "title": "Interface de Integração com Instagram",
+                    "input": "permissão de acesso à conta de usuário.",
+                    "output": "publicação de "story" no perfil do usuário, publicação de "post" no perfil do usuário.",
+                    "type": "external",
+                    "related_classes": []
                 },
                 {
-                    "title": "Serviço de Notificação por Email",
-                    "input": "Email do destinatário, assunto, corpo da mensagem",
-                    "output": "Status do envio (enviado/falhou)",
-                    "type": "internal"
+                    "title": "Interface de Integração com a Receita Federal",
+                    "input": "CPF do usuário",
+                    "output": "validação do CPF, validação de dados pessoais",
+                    "type": "external",
+                    "related_classes": []
+                },
+                {
+                    "title": "Interface de Exibição de Filmes",
+                    "input": "seleção de exibição de um filme do catálogo",
+                    "output": "exibição do filme",
+                    "type": "internal",
+                    "related_classes": ["Filme", "Player de Vídeo"]
+                },
+                {
+                    "title": "Exibição de Legendas",
+                    "input": "seleção de exibição da legenda em português ou em outro idioma",
+                    "output": "exibição da legenda no player de vídeo",
+                    "type": "internal",
+                    "related_classes": ["Filme", "Legenda"]
                 }
             ]
         }

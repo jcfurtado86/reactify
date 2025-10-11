@@ -31,6 +31,6 @@ Route::post('/business-rules/generate', [BusinessRuleGeneratorControllerGemini::
 
 Route::post('/usage-scenarios/generate', [UsageScenarioGeneratorControllerGemini::class, 'generate'])->name('usage-scenario.generate');
 
-Route::post('/system-interfaces/generate', [SystemInterfaceGeneratorControllerGemini::class, 'generate'])->name('system-interface.generate');
+Route::post('/system-interface/generate', [SystemInterfaceGeneratorControllerGemini::class, 'generate'])->name('system-interface.generate');
 
 Route::post('/product-canvas/generate', [ProductCanvasGeneratorControllerGemini::class, 'generate'])->name('product-canvas.generate');
