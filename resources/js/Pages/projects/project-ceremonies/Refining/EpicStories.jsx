@@ -359,60 +359,49 @@ const EpicStories = ({ project, setProject }) => {
     }))
   }
 
-  //rotas relacionadas ao modal de IA
   const generateEpicStories = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
+    setIsGenerating(true);
+    setIsModalMinimized(false);
 
     try {
-      const response = await axios.post(
-        route('epic-story.generate-decomposition'),
-        {
-          project_id: project.id,
-        },
-      )
+      const response = await axios.post(route('epic-story.generate'), {
+        project_id: project.id,
+      });
 
-      const data = response.data
+      const data = response.data;
+      
+      if (data.status === 'sucesso') {
+        const epicStoriesWithSelection = data.decomposed_epics.flatMap((epic) =>
+          epic.new_stories.map((newStory, index) => ({
+            ...newStory,
+            story_id: epic.original_epic_id,
+            selected: true,
+            new_epic_identifier: `${epic.original_epic_id}.${index + 1}`,
+          })),
+        );
 
-      // Usamos flatMap para achatar o array de 'new_stories' de cada épico decomposto
-      const epicStoriesWithSelection = data.decomposed_epics.flatMap((epic) =>
-        epic.new_stories.map((newStory, index) => ({
-          ...newStory,
-          story_id: epic.original_epic_id, // Guardamos o ID do épico original
-          selected: true,
-          new_epic_identifier: `${epic.original_epic_id}.${index + 1}`,
-        })),
-      )
+        if (epicStoriesWithSelection.length === 0) {
+          toast.info('Nenhuma estória foi identificada como um épico para decomposição.');
+          return;
+        }
 
-      if (epicStoriesWithSelection.length === 0) {
-        toast.info(
-          'Nenhuma estória foi identificada como um épico para decomposição.',
-        )
-        setIsGenerating(false)
-        return
-      }
-
-      setAiGeneratedEpicStories(epicStoriesWithSelection)
-      setShowAiModal(true)
-      toast.success(
-        `${epicStoriesWithSelection.length} estórias menores foram sugeridas.`,
-      )
-    } catch (error) {
-      console.error('Erro ao gerar epic stories:', error)
-      if (error.response && error.response.data) {
-        toast.error(
-          error.response.data.message ||
-            'Ocorreu um erro desconhecido no servidor.',
-        )
+        setAiGeneratedEpicStories(epicStoriesWithSelection);
+        setShowAiModal(true);
+        toast.success(`${epicStoriesWithSelection.length} estórias menores foram sugeridas.`);
       } else {
-        toast.error(
-          'Não foi possível conectar ao servidor. Verifique sua internet.',
-        )
+        if (data.status === 'warning') {
+          toast.warning(data.message);
+        } else {
+          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+        }
       }
+    } catch (error) {
+      console.error('Erro ao gerar epic stories:', error);
+      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };  
 
   const confirmGeneratedEpicStories = () => {
     const selectedEpicStories = aiGeneratedEpicStories.filter(

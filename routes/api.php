@@ -25,7 +25,7 @@ Route::post('/goals/generate', [GoalGeneratorControllerGemini::class, 'generateG
 
 Route::post('/overall-model/generate', [OverallModelGeneratorControllerGemini::class, 'generate'])->name('overall-model.generate');
 
-Route::post('/epic-stories/generate-decomposition', [EpicStoryGeneratorControllerGemini::class, 'generate'])->name('epic-story.generate-decomposition');
+Route::post('/epic-stories/generate', [EpicStoryGeneratorControllerGemini::class, 'generate'])->name('epic-story.generate');
 
 Route::post('/business-rules/generate', [BusinessRuleGeneratorControllerGemini::class, 'generate'])->name('business-rule.generate');
 
