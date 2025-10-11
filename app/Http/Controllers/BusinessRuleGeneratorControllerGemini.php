@@ -20,7 +20,7 @@ class BusinessRuleGeneratorControllerGemini extends Controller
             $stories = Story::where('project_id', $validated['project_id'])->get();
 
             if($stories->isEmpty()) {
-                return response()->json(['status' => 'error', 'message' => 'Nenhuma estória válida foi encontrada.'], 404);
+                return response()->json(['status' => 'warning', 'message' => 'Nenhuma estória válida foi encontrada.'], 404);
             }
 
             $allBusinessRules = [];

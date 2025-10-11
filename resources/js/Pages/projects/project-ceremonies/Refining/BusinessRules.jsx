@@ -105,11 +105,23 @@ const GeneratedItemsModal = ({
                     >
                       <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
                         <div className="flex items-center gap-2 text-left">
+                          {/* Badge que mostra a Story Pai */}
                           <Badge
                             variant="outline"
                             className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
                           >
-                            {`BR`.toUpperCase()}
+                            {`${storyType === 'system' ? 'SS' : 'US'}${story.story_id}`.toUpperCase()}
+                          </Badge>
+
+                          {/* Seta para indicar a relação */}
+                          <ArrowRight className="h-4 w-4 text-muted-foreground" />
+
+                          {/* Badge da Business Rule */}
+                          <Badge
+                              variant="secondary"
+                              className="border-transparent font-bold w-fit"
+                          >
+                            BR
                           </Badge>
 
                           <span className="text-sm text-foreground">
@@ -352,51 +364,48 @@ const BusinessRules = ({ project, setProject }) => {
     }))
   }
 
-  //rotas relacionadas ao modal de IA
   const generateBusinessRules = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
+    setIsGenerating(true);
+    setIsModalMinimized(false);
 
     try {
       const response = await axios.post(route('business-rule.generate'), {
         project_id: project.id,
-      })
+      });
 
-      const data = response.data
+      const data = response.data;
 
-      const businessRulesWithSelection = data.business_rules.map(
-        (business_rule) => ({
-          ...business_rule,
-          selected: true,
-        }),
-      )
-
-      setAiGeneratedBusinessRules(businessRulesWithSelection)
-      setShowAiModal(true)
-      toast.success(
-        'Business Rules geradas com sucesso a partir das entrevistas mais recentes.',
-      )
-    } catch (error) {
-      console.error('Erro ao gerar Business Rules:', error)
-      if (error.response && error.response.data) {
-        const errorData = error.response.data
-
-        if (errorData.status === 'warning') {
-          toast.warning(errorData.message)
-        } else {
-          toast.error(
-            errorData.message || 'Ocorreu um erro desconhecido no servidor.',
-          )
+      if (data.status === 'sucesso') {
+        const businessRulesWithSelection = data.business_rules.map(
+          (business_rule) => ({
+            ...business_rule,
+            selected: true,
+          }),
+        );
+        
+        if (businessRulesWithSelection.length === 0) {
+          toast.info("A IA não gerou novas Regras de Negócio com base nas estórias.");
+          return;
         }
+
+        setAiGeneratedBusinessRules(businessRulesWithSelection);
+        setShowAiModal(true);
+        toast.success('Regras de Negócio geradas com sucesso.');
       } else {
-        toast.error(
-          'Não foi possível conectar ao servidor. Verifique sua internet.',
-        )
+        if (data.status === 'warning') {
+          toast.warning(data.message);
+        } else {
+          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+        }
       }
+    } catch (error) {
+      console.error('Erro ao gerar Business Rules:', error);
+      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
+
   const confirmGeneratedBusinessRules = () => {
     const selectedBusinessRules = aiGeneratedBusinessRules.filter(
       (business_rule) => business_rule.selected,
