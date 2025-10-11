@@ -601,8 +601,8 @@ const Journeys = ({ project, setProject }) => {
                   </span>
                   <Button onClick={toggleAllJourneys} size="sm">
                     {generatedJourneys.every((j) => j.selected)
-                      ? 'Deselect All'
-                      : 'Select All'}
+                      ? 'Desmarcar Todas'
+                      : 'Selecionar Todas'}
                   </Button>
                 </div>
                 <div className="flex-1 overflow-y-auto px-6 min-h-0">

@@ -65,8 +65,8 @@ const GeneratedItemsModal = ({
           </div>
         </div>
         {!isModalMinimized && (
-          <main className="flex ">
-            <section className="w-1/2">
+          <main className="flex flex-1 min-h-0">
+            <section className="w-1/2 flex flex-col">
               <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
                 <span className="text-foreground font-medium">
                   {generatedItems.filter((j) => j.selected).length} de{' '}
@@ -152,7 +152,7 @@ const GeneratedItemsModal = ({
                 </div>
               </div>
             </section>
-            <section className="w-1/2">
+            <section className="w-1/2 flex flex-col">
               <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
                 <span className="text-foreground font-medium">
                   {generatedClasses.filter((j) => j.selected).length} de{' '}
@@ -642,58 +642,55 @@ const OverallModel = ({ project, setProject }) => {
     )
   }
 
-  //rotas relacionadas ao modal de IA
   const generateCRCCards = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
+    setIsGenerating(true);
+    setIsModalMinimized(false);
 
     try {
       const response = await axios.post(route('overall-model.generate'), {
         project_id: project.id,
-      })
+      });
 
-      const data = response.data
+      const data = response.data;
 
-      const classesWithSelection = data.overall_model_classes.map((c) => ({
-        ...c,
-        selected: true, 
-        requiredBy: new Set(),
-      }));
+      if (data.status === 'sucesso') {
+        const classesWithSelection = data.overall_model_classes.map((c) => ({
+          ...c,
+          selected: true,
+          requiredBy: new Set(),
+        }));
 
-      const CRCCardsWithSelection = data.crc_cards.map((card, index) => ({
-        ...card,
-        tempId: `card-${index}`, 
-        selected: true,
-      }));
+        const CRCCardsWithSelection = data.crc_cards.map((card, index) => ({
+          ...card,
+          tempId: `card-${index}`,
+          selected: true,
+        }));
 
-      const updatedClasses = syncClassSelections(CRCCardsWithSelection, classesWithSelection);
+        const updatedClasses = syncClassSelections(CRCCardsWithSelection, classesWithSelection);
 
-      if (CRCCardsWithSelection.length === 0) {
-        toast.info('Nenhum CRC Card foi gerado para as estórias existentes.');
-        return;
-      }
+        if (CRCCardsWithSelection.length === 0) {
+          toast.info('Nenhum CRC Card foi gerado para as estórias existentes.');
+          return;
+        }
 
-      setAiGeneratedClasses(updatedClasses);
-      setAiGeneratedCRCCards(CRCCardsWithSelection);
-      setShowAiModal(true);
-      toast.success(`${CRCCardsWithSelection.length} cards foram sugeridos.`);
-
-    } catch (error) {
-      console.error('Erro ao gerar cards:', error)
-      if (error.response && error.response.data) {
-        toast.error(
-          error.response.data.message ||
-            'Ocorreu um erro desconhecido no servidor.',
-        )
+        setAiGeneratedClasses(updatedClasses);
+        setAiGeneratedCRCCards(CRCCardsWithSelection);
+        setShowAiModal(true);
+        toast.success(`${CRCCardsWithSelection.length} cards foram sugeridos.`);
       } else {
-        toast.error(
-          'Não foi possível conectar ao servidor. Verifique sua internet.',
-        )
+        if (data.status === 'warning') {
+          toast.warning(data.message);
+        } else {
+          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+        }
       }
+    } catch (error) {
+      console.error('Erro ao gerar cards:', error);
+      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
     } finally {
       setIsGenerating(false);
     }
-  }
+  };
 
   const confirmGeneratedCards = () => {
     const selectedCards = aiGeneratedCRCCards.filter((card) => card.selected);
