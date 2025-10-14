@@ -29,6 +29,7 @@ const GeneratedItemsModal = ({
   confirmGeneratedItems,
   toggleAllItems,
 }) => {
+  console.log(generatedItems)
   return (
     <div
       className={`
@@ -83,37 +84,38 @@ const GeneratedItemsModal = ({
 
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
               <div className="space-y-2 pb-4">
-                {generatedItems.map((story, index) => (
-                  <div
-                    key={'temp-' + index}
-                    className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
-                      story.selected
-                        ? 'bg-muted border-primary'
-                        : 'bg-muted/50 border-border hover:border-muted-foreground'
-                    }`}
-                  >
-                    <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
-                      <div className="flex items-center gap-2 text-left">
-                        <Badge
-                          className={`border-none text-primary-foreground font-bold ${
-                            story.type === 'system'
-                              ? 'bg-secondary'
-                              : 'bg-primary'
-                          }`}
-                        >
-                          {story.type === 'system' ? 'SS' : 'US'}
-                        </Badge>
-                        <span className="text-sm text-foreground">
-                          {story.title}
-                        </span>
-                      </div>
-                      <Checkbox
-                        checked={story.selected}
-                        onCheckedChange={() => toggleItemSelection(index)}
-                      />
-                    </label>
-                  </div>
-                ))}
+                {generatedItems.map((story, index) => {
+                  const selectedVariant =
+                    storyVariants[story.type] || storyVariants.user
+                  return (
+                    <div
+                      key={'temp-' + index}
+                      className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                        story.selected
+                          ? 'bg-muted border-primary'
+                          : 'bg-muted/50 border-border hover:border-muted-foreground'
+                      }`}
+                    >
+                      <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
+                        <div className="flex items-center gap-2 text-left">
+                          <Badge
+                            variant="outline"
+                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                          >
+                            {story.type === 'system' ? 'SS' : 'US'}
+                          </Badge>
+                          <span className="text-sm text-foreground">
+                            {story.title}
+                          </span>
+                        </div>
+                        <Checkbox
+                          checked={story.selected}
+                          onCheckedChange={() => toggleItemSelection(index)}
+                        />
+                      </label>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
@@ -383,32 +385,38 @@ const Stories = ({ project, setProject }) => {
         const storiesWithSelection = data.message.stories.map((story) => ({
           ...story,
           selected: true,
-        }));
+        }))
 
         if (storiesWithSelection.length === 0) {
-            toast.info("A IA não gerou novas estórias com base no contexto atual.");
-            setIsGenerating(false);
-            return;
+          toast.info(
+            'A IA não gerou novas estórias com base no contexto atual.',
+          )
+          setIsGenerating(false)
+          return
         }
 
-        setAiGeneratedStories(storiesWithSelection);
-        setShowAiModal(true);
-        toast.success('Histórias geradas com sucesso.');
-
+        setAiGeneratedStories(storiesWithSelection)
+        setShowAiModal(true)
+        toast.success('Histórias geradas com sucesso.')
       } else {
         if (data.status === 'warning') {
-          toast.warning(data.message);
+          toast.warning(data.message)
         } else {
-          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
         }
       }
     } catch (error) {
-      console.error('Erro ao gerar stories:', error);
-      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
+      console.error('Erro ao gerar stories:', error)
+      toast.error(
+        error.response?.data?.message ||
+          'Não foi possível conectar ao servidor.',
+      )
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
+  }
 
   const toggleStorySelection = (index) => {
     setAiGeneratedStories((prev) =>
