@@ -61,7 +61,7 @@ class AIAssistantServiceGemini
       $context .= "\n==== FIM DA BASE DE CONHECIMENTO DA METODOLOGIA ====\n\n";
 
       $userRole = $project->users()->find($user->id)->pivot->role;
-      $context .= "Contexto do Usuário:\n- Nome: {$user->name}\n- Papel no Projeto: {$userRole}\n\n";
+      $context .= "Contexto do Usuário:\n- Nome: {$user->name}\n- Papel no Projeto: {$userRole->value()}\n\n";
       $context .= "Contexto do Projeto '{$project->title}':\n- Status Atual: {$project->status->value}\n- Descrição: {$project->description}\n\n";
       $context .= "Contexto da Página Atual: '{$pageContext['page']}'\n";
       $context .= "Contexto do Artefato Atual: '{$pageContext['artifact']}'\n";
