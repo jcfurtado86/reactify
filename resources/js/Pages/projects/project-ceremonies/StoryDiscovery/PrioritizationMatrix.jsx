@@ -116,13 +116,13 @@ const StoryCard = ({
       {...listeners}
       {...attributes}
       className={`
-         flex flex-col flex-1 w-full min-w-24 max-w-60 items-center justify-start p-1 text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
+         flex flex-col flex-1 w-full min-w-24 max-w-60 text-left p-2 items-center justify-start text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
     >
       {!story.isTemporary && (
         <div className="mr-auto">
           <Badge
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer mb-2 ${selectedVariant.bg}`}
           >
             {`${story.story_type === 'system' ? 'SS' : 'US'}${isTemporary ? '' : story.story_id}`.toUpperCase()}
           </Badge>
@@ -141,7 +141,7 @@ const GoalCard = ({ goal }) => {
   return (
     <Card className="bg-card  border border-border transition-all duration-300 ease-in-out p-0 h-40 w-full rounded-md">
       <CardContent className="p-2 h-full text-xs flex flex-col gap-2">
-        <div className="gap-2 flex w-full items-center justify-center">
+        <div className="gap-2 flex w-full items-center justify-start">
           <Badge
             variant="outline"
             className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedType.color}`}

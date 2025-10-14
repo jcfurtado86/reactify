@@ -195,7 +195,7 @@ const StoryCard = ({ story, addScenario }) => {
   const selectedVariant = storyVariants[story.type] || storyVariants.user
 
   return (
-    <div className="relative group w-52 flex-shrink-0">
+    <div className="relative group w-52 flex-shrink-0 text-left">
       <MotionDivOptions isHovered={true} onAdd={addScenario} />
 
       <div className="flex flex-col h-full items-center justify-start p-2 gap-1 text-xs font-normal text-foreground border border-border bg-card rounded-md shadow-sm ">
@@ -207,7 +207,7 @@ const StoryCard = ({ story, addScenario }) => {
             {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
           </Badge>
         </div>
-        <p className="text-sm text-center">{story.title}</p>
+        <p className="text-sm ">{story.title}</p>
       </div>
     </div>
   )
@@ -530,43 +530,52 @@ const UsageScenarios = ({ project, setProject }) => {
   }
 
   const generateUsageScenarios = async () => {
-    setIsGenerating(true);
-    setIsModalMinimized(false);
+    setIsGenerating(true)
+    setIsModalMinimized(false)
 
     try {
       const response = await axios.post(route('usage-scenario.generate'), {
         project_id: project.id,
-      });
+      })
 
-      const data = response.data;
+      const data = response.data
 
       if (data.status === 'sucesso') {
         const usageScenariosWithSelection = data.usage_scenarios.map(
           (scenario) => ({ ...scenario, selected: true }),
-        );
+        )
 
         if (usageScenariosWithSelection.length === 0) {
-          toast.info('Nenhum cenário de uso foi gerado para as estórias existentes.');
-          return;
+          toast.info(
+            'Nenhum cenário de uso foi gerado para as estórias existentes.',
+          )
+          return
         }
 
-        setAiGeneratedUsageScenarios(usageScenariosWithSelection);
-        setShowAiModal(true);
-        toast.success(`${usageScenariosWithSelection.length} cenários de uso foram sugeridos.`);
+        setAiGeneratedUsageScenarios(usageScenariosWithSelection)
+        setShowAiModal(true)
+        toast.success(
+          `${usageScenariosWithSelection.length} cenários de uso foram sugeridos.`,
+        )
       } else {
         if (data.status === 'warning') {
-          toast.warning(data.message);
+          toast.warning(data.message)
         } else {
-          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
         }
       }
     } catch (error) {
-      console.error('Erro ao gerar cenários de uso:', error);
-      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
+      console.error('Erro ao gerar cenários de uso:', error)
+      toast.error(
+        error.response?.data?.message ||
+          'Não foi possível conectar ao servidor.',
+      )
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
+  }
 
   const confirmGeneratedUsageScenarios = () => {
     const selectedUsageScenarios = aiGeneratedUsageScenarios.filter(

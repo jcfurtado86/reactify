@@ -153,13 +153,13 @@ const StoryCard = ({ story, addEpicStory }) => {
   const selectedVariant = storyVariants[story.type] || storyVariants.user
 
   return (
-    <div className="relative group">
+    <div className="relative group text-left">
       <MotionDivOptions isHovered={true} onAdd={addEpicStory} />
 
       {/* Este é o corpo do card, com o estilo que você solicitou. */}
       <div
         className={`
-          flex flex-col h-full w-52 items-center justify-start p-2 gap-1 text-xs font-normal text-foreground
+          flex flex-col h-full w-52 items-center justify-start p-2 gap-1 text-sm font-normal text-foreground
           border border-border bg-card rounded-md shadow-sm transition-opacity duration-300 min-h-16
         `}
       >
@@ -172,7 +172,7 @@ const StoryCard = ({ story, addEpicStory }) => {
           </Badge>
         </div>
 
-        <p className="text-sm text-center">{story.title}</p>
+        <p className="text-sm">{story.title}</p>
       </div>
     </div>
   )

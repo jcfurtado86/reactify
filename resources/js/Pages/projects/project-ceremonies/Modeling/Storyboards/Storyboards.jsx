@@ -24,17 +24,19 @@ const StoryCard = ({
     <div
       onClick={onSelect}
       className={`
-          flex items-start p-2 gap-1 cursor-pointer text-sm font-normal text-foreground
-          border-2 rounded-md shadow-sm transition-opacity duration-300 bg-card ${isSelected ? ' border-primary' : 'border-accent'}
+        flex flex-col h-full items-center justify-start p-2 gap-1 text-sm font-normal text-foreground cursor-pointer
+        border border-border bg-card rounded-md shadow-sm transition-opacity duration-300 ${isSelected ? ' border-primary' : 'border-accent'}
         `}
     >
       {story && (
-        <Badge
-          variant="outline"
-          className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg} `}
-        >
-          {`${story?.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
-        </Badge>
+        <div className="mr-auto">
+          <Badge
+            variant="outline"
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+          >
+            {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
+          </Badge>
+        </div>
       )}
       {!isCollapsed && (
         <p className="text-left">{story?.title || 'Selecione uma story'}</p>
@@ -308,8 +310,17 @@ const Storyboards = ({ project }) => {
           className="relative z-40 w-[--width] h-full"
         >
           <SidebarHeader
-            className={`${open ? 'items-end' : 'items-center'} w-full `}
+            className={`${open ? 'items-end flex-row justify-between' : 'items-center'}  w-full `}
           >
+            {!open ? (
+              <></>
+            ) : (
+              <>
+                <p></p>
+                <p className="text-2xl"> Stories</p>
+              </>
+            )}
+
             <SidebarTrigger />
           </SidebarHeader>
           <SidebarContent>

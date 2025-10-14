@@ -89,8 +89,9 @@ const GeneratedItemsModal = ({
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
               <div className="space-y-2 pb-4">
                 {generatedItems.map((goal, index) => {
-                  const selectedType = typeColors[goal.type] || typeColors.bg;
-                  const selectedPriority = priorityColors[goal.priority] || priorityColors.medium;
+                  const selectedType = typeColors[goal.type] || typeColors.bg
+                  const selectedPriority =
+                    priorityColors[goal.priority] || priorityColors.medium
 
                   return (
                     <div
@@ -129,7 +130,7 @@ const GeneratedItemsModal = ({
                         />
                       </label>
                     </div>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -494,44 +495,49 @@ const Goals = ({ project, setProject }) => {
   }
 
   const generateGoals = async () => {
-    setIsGenerating(true);
-    setIsModalMinimized(false);
+    setIsGenerating(true)
+    setIsModalMinimized(false)
 
     try {
       const response = await axios.post(route('goal.generate'), {
         project_id: project.id,
-      });
+      })
 
-      const data = response.data;
+      const data = response.data
 
       if (data.status === 'sucesso') {
         const goalsWithSelection = data.goals.map((goal) => ({
           ...goal,
           selected: true,
-        }));
+        }))
 
         if (goalsWithSelection.length === 0) {
-          toast.info("A IA não gerou novas goals com base nas entrevistas.");
-          return;
+          toast.info('A IA não gerou novas goals com base nas entrevistas.')
+          return
         }
 
-        setAiGeneratedGoals(goalsWithSelection);
-        setShowAiModal(true);
-        toast.success('Goals geradas com sucesso.');
+        setAiGeneratedGoals(goalsWithSelection)
+        setShowAiModal(true)
+        toast.success('Goals geradas com sucesso.')
       } else {
         if (data.status === 'warning') {
-          toast.warning(data.message);
+          toast.warning(data.message)
         } else {
-          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
         }
       }
     } catch (error) {
-      console.error('Erro ao gerar goals:', error);
-      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
+      console.error('Erro ao gerar goals:', error)
+      toast.error(
+        error.response?.data?.message ||
+          'Não foi possível conectar ao servidor.',
+      )
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
+  }
 
   const confirmGeneratedGoals = () => {
     const selectedGoals = aiGeneratedGoals.filter((goal) => goal.selected)

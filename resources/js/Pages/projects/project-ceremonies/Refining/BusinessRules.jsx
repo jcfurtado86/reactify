@@ -167,7 +167,7 @@ const StoryCard = ({ story, addBusinessRule }) => {
   const selectedVariant = storyVariants[story.type] || storyVariants.user
 
   return (
-    <div className="relative group">
+    <div className="relative group text-left">
       {/* O onAdd agora chama a função para adicionar uma regra de negócio */}
       <MotionDivOptions isHovered={true} onAdd={addBusinessRule} />
 
@@ -186,7 +186,7 @@ const StoryCard = ({ story, addBusinessRule }) => {
           </Badge>
         </div>
 
-        <p className="text-sm text-center">{story.title}</p>
+        <p className="text-sm ">{story.title}</p>
       </div>
     </div>
   )
