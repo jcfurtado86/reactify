@@ -1,12 +1,9 @@
 import {
   ArrowRight,
   CornerDownRight,
-  Plus,
   Minus,
   Check,
   X,
-  LoaderCircle,
-  ChevronDown,
   ChevronsUp,
 } from 'lucide-react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
@@ -89,6 +86,7 @@ const GeneratedItemsModal = ({
 
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
               <div className="space-y-2 pb-4">
+                .
                 {generatedItems.map((story, index) => {
                   const storyType = allStories.find(
                     (s) => s.id === story.story_id,
@@ -358,18 +356,18 @@ const EpicStories = ({ project, setProject }) => {
       ],
     }))
   }
-
+  // ai functions
   const generateEpicStories = async () => {
-    setIsGenerating(true);
-    setIsModalMinimized(false);
+    setIsGenerating(true)
+    setIsModalMinimized(false)
 
     try {
       const response = await axios.post(route('epic-story.generate'), {
         project_id: project.id,
-      });
+      })
 
-      const data = response.data;
-      
+      const data = response.data
+
       if (data.status === 'sucesso') {
         const epicStoriesWithSelection = data.decomposed_epics.flatMap((epic) =>
           epic.new_stories.map((newStory, index) => ({
@@ -378,30 +376,39 @@ const EpicStories = ({ project, setProject }) => {
             selected: true,
             new_epic_identifier: `${epic.original_epic_id}.${index + 1}`,
           })),
-        );
+        )
 
         if (epicStoriesWithSelection.length === 0) {
-          toast.info('Nenhuma estória foi identificada como um épico para decomposição.');
-          return;
+          toast.info(
+            'Nenhuma estória foi identificada como um épico para decomposição.',
+          )
+          return
         }
 
-        setAiGeneratedEpicStories(epicStoriesWithSelection);
-        setShowAiModal(true);
-        toast.success(`${epicStoriesWithSelection.length} estórias menores foram sugeridas.`);
+        setAiGeneratedEpicStories(epicStoriesWithSelection)
+        setShowAiModal(true)
+        toast.success(
+          `${epicStoriesWithSelection.length} estórias menores foram sugeridas.`,
+        )
       } else {
         if (data.status === 'warning') {
-          toast.warning(data.message);
+          toast.warning(data.message)
         } else {
-          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
         }
       }
     } catch (error) {
-      console.error('Erro ao gerar epic stories:', error);
-      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
+      console.error('Erro ao gerar epic stories:', error)
+      toast.error(
+        error.response?.data?.message ||
+          'Não foi possível conectar ao servidor.',
+      )
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };  
+  }
 
   const confirmGeneratedEpicStories = () => {
     const selectedEpicStories = aiGeneratedEpicStories.filter(

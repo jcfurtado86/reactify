@@ -1,14 +1,212 @@
 import { useForm, router } from '@inertiajs/react'
+import { Plus, Minus, Check, X, ChevronsUp } from 'lucide-react'
+import GenerateAIButton from '@/Components/GenerateAIButton'
+import { toast } from 'sonner'
+
 import MotionDivOptions from '@/Components/MotionDivOptions'
 /**
  * Componente para gerenciar as interfaces de um projeto (criação e edição).
  *
  * @param {{ project: object }} props
  */
+
+const GeneratedItemsModal = ({
+  allClassModels,
+  isModalMinimized,
+  changeModalState,
+  cancelGeneratedItems,
+  generatedItems,
+  toggleItemSelection,
+  confirmGeneratedItems,
+  toggleAllItems,
+}) => {
+  const formatType = (type) => {
+    if (!type) return 'Não definido'
+    return type.charAt(0).toUpperCase() + type.slice(1)
+  }
+
+  return (
+    <div
+      className={`
+            transition-all duration-300 z-50
+            ${
+              isModalMinimized
+                ? 'fixed bottom-4 right-4 w-[400px]'
+                : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
+            }
+          `}
+    >
+      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between p-3 flex-shrink-0">
+          <h3 className="text-xl font-bold text-foreground flex items-center">
+            {!isModalMinimized && 'Interfaces por IA'}
+            {isModalMinimized && 'Interfaces Geradas'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button size="icon" variant="secondary" onClick={changeModalState}>
+              {isModalMinimized ? (
+                <ChevronsUp size={20} />
+              ) : (
+                <Minus size={20} />
+              )}
+            </Button>
+            <Button
+              onClick={cancelGeneratedItems}
+              size="icon"
+              variant="secondary"
+            >
+              <X size={24} />
+            </Button>
+          </div>
+        </div>
+
+        {!isModalMinimized && (
+          <>
+            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
+              <span className="text-foreground font-medium">
+                {generatedItems.filter((item) => item.selected).length} de{' '}
+                {generatedItems.length} selecionadas
+              </span>
+              <Button
+                onClick={toggleAllItems}
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+              >
+                {generatedItems.every((item) => item.selected)
+                  ? 'Desmarcar Todas'
+                  : 'Selecionar Todas'}
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 min-h-0">
+              <div className="space-y-2 pb-4">
+                {generatedItems.map((item, index) => {
+                  const relatedIds = item.overall_model_class_ids || []
+                  const idsToString =
+                    relatedIds.length > 0 ? `C${relatedIds.join('-C')}` : ''
+                  // Busca os dados completos das classes relacionadas usando a lista `allClassModels`
+                  const relatedClasses = relatedIds
+                    .map((id) =>
+                      allClassModels.find((model) => model.id === id),
+                    )
+                    .filter(Boolean) // .filter(Boolean) remove quaisquer resultados nulos se um ID não for encontrado
+
+                  console.log(relatedClasses)
+                  return (
+                    <div
+                      key={item.id}
+                      className={`rounded-lg p-3 border-2 transition-colors ${
+                        item.selected
+                          ? 'bg-muted border-primary'
+                          : 'bg-muted/50 border-border hover:border-muted-foreground'
+                      }`}
+                    >
+                      {/* 1. CABEÇALHO DO CARD (imita o estilo da sua lista de 'story') */}
+                      <label className="flex items-center justify-between cursor-pointer flex-1 gap-4 ">
+                        {/* 2. DIVISÓRIA E CORPO DO CARD (sempre visível) */}
+                        <section className="grid grid-cols-2 gap-3 w-full">
+                          <div className="w-full col-span-2 border-b border-border text-lg text-foreground font-semibold text-left">
+                            {item.title}
+                          </div>
+                          <div className="grid gap-1 text-left text-muted-foreground text-sm">
+                            <p className="">Tipo: {formatType(item.type)}</p>
+                            <p className="">Input: {item.input}</p>
+                            <p className="">Output: {item.output}</p>
+                            <p className="text-muted-foreground">
+                              Related Classes:
+                            </p>
+                          </div>
+                          <div className="grid gap-1 w-full text-left text-muted-foreground text-sm">
+                            {relatedClasses.map((classData) => (
+                              <div
+                                key={classData.id}
+                                className="border p-3 rounded-lg bg-muted/50"
+                              >
+                                <h4 className="font-semibold text-sm">
+                                  {/* Usando a propriedade 'name' como no seu código anterior */}
+                                  {classData.id}: {classData.name}
+                                </h4>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                        <Checkbox
+                          checked={item.selected}
+                          onCheckedChange={() => toggleItemSelection(index)}
+                        />
+                      </label>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 pt-4 border-t border-border flex-shrink-0">
+              <Button
+                onClick={cancelGeneratedItems}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmGeneratedItems}
+                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
+                disabled={generatedItems.filter((j) => j.selected).length === 0}
+              >
+                <Check className="mr-2" size={16} />
+                Confirmar e Adicionar (
+                {generatedItems.filter((j) => j.selected).length})
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const Interfaces = ({ project, setProject }) => {
   // A lista de todas as classes disponíveis para o formulário.
   const allClassModels = project.overall_model_classes || []
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  //ia states
+  const [aiGeneratedInterfaces, setAiGeneratedInterfaces] = useState([
+    // {
+    //   id: 'temp-1',
+    //   title: 'titulo',
+    //   type: 'internal',
+    //   input: 'input',
+    //   output: 'output',
+    //   project_id: 1,
+    //   created_at: '2025-10-13T22:09:17.000000Z',
+    //   updated_at: '2025-10-13T22:09:17.000000Z',
+    //   overall_model_class_ids: [3, 5, 8],
+    // },
+    // {
+    //   id: 'temp-2',
+    //   title: 'titulo',
+    //   type: 'external',
+    //   input: 'input',
+    //   output: 'output',
+    //   project_id: 1,
+    //   created_at: '2025-10-13T22:11:07.000000Z',
+    //   updated_at: '2025-10-13T22:11:07.000000Z',
+    //   overall_model_class_ids: [],
+    // },
+    // {
+    //   id: 'temp-3',
+    //   title: 'titulo',
+    //   type: 'internal',
+    //   input: 'rac',
+    //   output: 'coon',
+    //   project_id: 1,
+    //   created_at: '2025-10-13T22:28:26.000000Z',
+    //   updated_at: '2025-10-13T22:28:26.000000Z',
+    //   overall_model_class_ids: [5, 7, 9, 13],
+    // },
+  ])
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [isModalMinimized, setIsModalMinimized] = useState(false)
 
   // Hook `useForm` do Inertia para gerenciar o estado completo do formulário.
   const {
@@ -70,7 +268,6 @@ const Interfaces = ({ project, setProject }) => {
     const onSuccess = () => setIsDialogOpen(false)
 
     if (data.id) {
-      // MODO EDIÇÃO: Envia uma requisição PUT para a rota de update.
       patch(route('system-interface.update', { interface: data.id }), {
         preserveScroll: true, // Mantém a posição do scroll na página após a resposta.
         onSuccess,
@@ -190,9 +387,174 @@ const Interfaces = ({ project, setProject }) => {
     )
   }
 
+  // ai functions
+  const generateInterfaces = async () => {
+    setIsGenerating(true)
+    setIsModalMinimized(false)
+
+    try {
+      const response = await axios.post(route('interface.generate'), {
+        project_id: project.id,
+      })
+
+      const data = response.data
+
+      if (data.status === 'sucesso') {
+        const interfacesWithSelection = data.decomposed_interfaces.flatMap(
+          (ai_interface) =>
+            ai_interface.new_interfaces.map((newInterface, index) => ({
+              ...newInterface,
+              interface_id: ai_interface.original_interface_id,
+              selected: true,
+              new_interface_identifier: `${ai_interface.original_interface_id}.${index + 1}`,
+            })),
+        )
+
+        if (interfacesWithSelection.length === 0) {
+          toast.info(
+            'Nenhuma interface foi identificada como uma interface para decomposição.',
+          )
+          return
+        }
+
+        setAiGeneratedInterfaces(interfacesWithSelection)
+        setShowAiModal(true)
+        toast.success(
+          `${interfacesWithSelection.length} interface${interfacesWithSelection.length > 1 ? 's' : ''} menores foram sugeridas.`,
+        )
+      } else {
+        if (data.status === 'warning') {
+          toast.warning(data.message)
+        } else {
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao gerar interfaces:', error)
+      toast.error(
+        error.response?.data?.message ||
+          'Não foi possível conectar ao servidor.',
+      )
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const confirmGeneratedInterfaces = () => {
+    const selectedInterfaces = aiGeneratedInterfaces.filter(
+      (ai_interface) => ai_interface.selected,
+    )
+    const remainingInterfaces = aiGeneratedInterfaces.filter(
+      (ai_interface) => !ai_interface.selected,
+    )
+
+    if (selectedInterfaces.length === 0) {
+      toast.warning('Selecione pelo menos uma interface para adicionar.')
+      return
+    }
+
+    // O backend espera 'title', 'story_id' (o ID do épico original) e 'project_id'
+    const interfacesForBackend = selectedInterfaces.map(
+      ({
+        title,
+        input,
+        output,
+        overall_model_class_ids,
+        project_id,
+        type,
+      }) => ({
+        title,
+        input,
+        output,
+        overall_model_class_ids,
+        project_id,
+        type,
+      }),
+    )
+
+    setProject((prevProject) => ({
+      ...prevProject,
+      system_interfaces: [
+        ...prevProject.system_interfaces,
+        ...selectedInterfaces,
+      ],
+    }))
+    // router.post(
+    //   route('interface.bulk-store'),
+    //   { interfaces: interfacesForBackend },
+    //   {
+    //     preserveState: true,
+    //     preserveScroll: true,
+    //     onSuccess: () => {
+    //       toast.success(
+    //         `${selectedInterfaces.length} Interfaces adicionada com sucesso!`,
+    //       )
+    //       setAiGeneratedInterfaces(remainingInterfaces)
+    //       if (remainingInterfaces.length === 0) {
+    //         setShowAiModal(false)
+    //         setIsModalMinimized(false)
+    //       }
+    //     },
+    //     onError: (errors) => {
+    //       toast.error('Ocorreu um erro ao salvar as interfaces.')
+    //       console.error('Erro do backend:', errors)
+    //       // setProject((prevProject) => {
+    //       //   const epicStoriesToAddIds = epicStoriesToAdd.map((g) => g.id)
+    //       //   return {
+    //       //     ...prevProject,
+    //       //     epic_stories: prevProject.epic_stories.filter(
+    //       //       (story) => !epicStoriesToAddIds.includes(story.id),
+    //       //     ),
+    //       //   }
+    //       // })
+    //     },
+    //   },
+    // )
+  }
+
+  const cancelGeneratedInterfaces = () => {
+    setShowAiModal(false)
+    setAiGeneratedInterfaces([])
+    setIsModalMinimized(false)
+  }
+
+  const toggleInterfaceSelection = (index) => {
+    setAiGeneratedInterfaces((prev) =>
+      prev.map((ai_interface, i) =>
+        i === index
+          ? { ...ai_interface, selected: !ai_interface.selected }
+          : ai_interface,
+      ),
+    )
+  }
+
+  const toggleAllInterfaces = () => {
+    const allSelected = aiGeneratedInterfaces.every(
+      (ai_interface) => ai_interface.selected,
+    )
+    setAiGeneratedInterfaces((prev) =>
+      prev.map((ai_interface) => ({ ...ai_interface, selected: !allSelected })),
+    )
+  }
+
   return (
-    <div className="p-4">
-      <div className="mb-2">
+    <div className="p-4 grid md:grid-cols-2 gap-2">
+      <div className="md:col-span-2">
+        {showAiModal && (
+          <GeneratedItemsModal
+            allClassModels={allClassModels}
+            isModalMinimized={isModalMinimized}
+            changeModalState={() => setIsModalMinimized(!isModalMinimized)}
+            cancelGeneratedItems={cancelGeneratedInterfaces}
+            generatedItems={aiGeneratedInterfaces}
+            toggleItemSelection={toggleInterfaceSelection}
+            confirmGeneratedItems={confirmGeneratedInterfaces}
+            toggleAllItems={toggleAllInterfaces}
+          />
+        )}
+        {/* dialog for adding interface*/}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <Button onClick={handleOpenForCreate}>ADICIONAR INTERFACE</Button>
           <DialogContent>
@@ -322,33 +684,42 @@ const Interfaces = ({ project, setProject }) => {
           </DialogContent>
         </Dialog>
       </div>
+      <section>
+        <h3 className="text-2xl font-bold mb-4">Interfaces Internas</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {project?.system_interfaces
+            ?.filter((i) => i.type === 'internal')
+            .map((item) => (
+              <InterfaceCard
+                key={`internal-${item.id}`}
+                data={item}
+                onDelete={() => handleDelete(item)}
+                onClick={() => handleOpenForEdit(item)}
+              />
+            ))}
+        </div>
+      </section>
 
-      <h3 className="text-2xl font-bold mb-4 mt-6">Interfaces Internas</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {project?.system_interfaces
-          ?.filter((i) => i.type === 'internal')
-          .map((item) => (
-            <InterfaceCard
-              key={`internal-${item.id}`}
-              data={item}
-              onDelete={() => handleDelete(item)}
-              onClick={() => handleOpenForEdit(item)}
-            />
-          ))}
-      </div>
-
-      <h3 className="text-2xl font-bold mb-4">Interfaces Externas</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {project?.system_interfaces
-          ?.filter((i) => i.type === 'external')
-          .map((item) => (
-            <InterfaceCard
-              key={`external-${item.id}`}
-              data={item}
-              onClick={() => handleOpenForEdit(item)}
-            />
-          ))}
-      </div>
+      <section className="border-l border-border pl-2">
+        <h3 className="text-2xl font-bold mb-4">Interfaces Externas</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {project?.system_interfaces
+            ?.filter((i) => i.type === 'external')
+            .map((item) => (
+              <InterfaceCard
+                key={`external-${item.id}`}
+                data={item}
+                onClick={() => handleOpenForEdit(item)}
+              />
+            ))}
+        </div>
+      </section>
+      <GenerateAIButton
+        isGenerating={isGenerating}
+        onClick={generateInterfaces}
+        // tooltip={tooltipInfo.aiGeneratedStory}
+        className="md:col-span-2 w-1/2"
+      />
     </div>
   )
 }

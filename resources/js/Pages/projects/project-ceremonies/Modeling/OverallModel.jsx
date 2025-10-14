@@ -1,15 +1,6 @@
 import { router, usePage } from '@inertiajs/react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import {
-  Plus,
-  ArrowRight,
-  CornerDownRight,
-  Minus,
-  Check,
-  X,
-  LoaderCircle,
-  ChevronsUp,
-} from 'lucide-react'
+import { Plus, Minus, Check, X, ChevronsUp } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { toast } from 'sonner'
 
@@ -184,7 +175,10 @@ const GeneratedItemsModal = ({
                           <Checkbox
                             checked={card_class.selected}
                             onCheckedChange={() => toggleClassSelection(index)}
-                            disabled={card_class.requiredBy && card_class.requiredBy.size > 0}
+                            disabled={
+                              card_class.requiredBy &&
+                              card_class.requiredBy.size > 0
+                            }
                           />
                           <div className="w-full bg-card rounded-lg p-3 shadow-sm">
                             <h4 className="text-lg font-bold text-foreground mb-3">
@@ -643,62 +637,70 @@ const OverallModel = ({ project, setProject }) => {
   }
 
   const generateCRCCards = async () => {
-    setIsGenerating(true);
-    setIsModalMinimized(false);
+    setIsGenerating(true)
+    setIsModalMinimized(false)
 
     try {
       const response = await axios.post(route('overall-model.generate'), {
         project_id: project.id,
-      });
+      })
 
-      const data = response.data;
+      const data = response.data
 
       if (data.status === 'sucesso') {
         const classesWithSelection = data.overall_model_classes.map((c) => ({
           ...c,
           selected: true,
           requiredBy: new Set(),
-        }));
+        }))
 
         const CRCCardsWithSelection = data.crc_cards.map((card, index) => ({
           ...card,
           tempId: `card-${index}`,
           selected: true,
-        }));
+        }))
 
-        const updatedClasses = syncClassSelections(CRCCardsWithSelection, classesWithSelection);
+        const updatedClasses = syncClassSelections(
+          CRCCardsWithSelection,
+          classesWithSelection,
+        )
 
         if (CRCCardsWithSelection.length === 0) {
-          toast.info('Nenhum CRC Card foi gerado para as estórias existentes.');
-          return;
+          toast.info('Nenhum CRC Card foi gerado para as estórias existentes.')
+          return
         }
 
-        setAiGeneratedClasses(updatedClasses);
-        setAiGeneratedCRCCards(CRCCardsWithSelection);
-        setShowAiModal(true);
-        toast.success(`${CRCCardsWithSelection.length} cards foram sugeridos.`);
+        setAiGeneratedClasses(updatedClasses)
+        setAiGeneratedCRCCards(CRCCardsWithSelection)
+        setShowAiModal(true)
+        toast.success(`${CRCCardsWithSelection.length} cards foram sugeridos.`)
       } else {
         if (data.status === 'warning') {
-          toast.warning(data.message);
+          toast.warning(data.message)
         } else {
-          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
         }
       }
     } catch (error) {
-      console.error('Erro ao gerar cards:', error);
-      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
+      console.error('Erro ao gerar cards:', error)
+      toast.error(
+        error.response?.data?.message ||
+          'Não foi possível conectar ao servidor.',
+      )
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
+  }
 
   const confirmGeneratedCards = () => {
-    const selectedCards = aiGeneratedCRCCards.filter((card) => card.selected);
-    const selectedClasses = aiGeneratedClasses.filter((c) => c.selected);
+    const selectedCards = aiGeneratedCRCCards.filter((card) => card.selected)
+    const selectedClasses = aiGeneratedClasses.filter((c) => c.selected)
 
     if (selectedCards.length === 0 && selectedClasses.length === 0) {
-      toast.warning('Selecione pelo menos um item para adicionar.');
-      return;
+      toast.warning('Selecione pelo menos um item para adicionar.')
+      return
     }
 
     // Prepara os dados para o backend (ambas as listas)
@@ -707,64 +709,81 @@ const OverallModel = ({ project, setProject }) => {
       responsabilities: card.responsabilities,
       collaborators: card.collaborators,
       project_id: project.id,
-    }));
+    }))
 
     const classesForBackend = selectedClasses.map(({ name }) => ({
       name: name,
       project_id: project.id,
-    }));
+    }))
 
     // Função auxiliar para salvar os cards (será chamada após salvar as classes)
     const saveCards = () => {
       if (cardsForBackend.length > 0) {
-        router.post(route('overall.bulk-store'), { crc_cards: cardsForBackend }, {
+        router.post(
+          route('overall.bulk-store'),
+          { crc_cards: cardsForBackend },
+          {
+            preserveScroll: true,
+            onSuccess: () => {
+              toast.success(
+                `${cardsForBackend.length} CRC Card(s) salvo(s) com sucesso!`,
+              )
+              setShowAiModal(false) // Fecha o modal no final de tudo
+            },
+            onError: (errors) => {
+              toast.error('Ocorreu um erro ao salvar os CRC Cards.')
+              console.error(errors)
+            },
+          },
+        )
+      } else {
+        setShowAiModal(false) // Se não há cards, apenas fecha o modal
+      }
+    }
+
+    if (classesForBackend.length > 0) {
+      router.post(
+        route('overall-model-class.bulk-store'),
+        { classes: classesForBackend },
+        {
           preserveScroll: true,
           onSuccess: () => {
-            toast.success(`${cardsForBackend.length} CRC Card(s) salvo(s) com sucesso!`);
-            setShowAiModal(false); // Fecha o modal no final de tudo
+            toast.success(
+              `${classesForBackend.length} classe(s) salva(s) com sucesso!`,
+            )
+            saveCards()
           },
           onError: (errors) => {
-            toast.error('Ocorreu um erro ao salvar os CRC Cards.');
-            console.error(errors);
-          }
-        });
-      } else {
-        setShowAiModal(false); // Se não há cards, apenas fecha o modal
-      }
-    };
-    
-    if (classesForBackend.length > 0) {
-      router.post(route('overall-model-class.bulk-store'), { classes: classesForBackend }, {
-        preserveScroll: true,
-        onSuccess: () => {
-          toast.success(`${classesForBackend.length} classe(s) salva(s) com sucesso!`);
-          saveCards();
+            toast.error('Ocorreu um erro ao salvar as classes.')
+            console.error(errors)
+          },
         },
-        onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as classes.');
-          console.error(errors);
-        }
-      });
+      )
     } else {
-      saveCards();
+      saveCards()
     }
-  };
+  }
 
   // Função auxiliar para salvar os cards, chamada após salvar as classes
   const saveCards = (cardsForBackend) => {
-    router.post(route('overall.bulk-store'), { crc_cards: cardsForBackend }, {
-      preserveScroll: true,
-      onSuccess: () => {
-        toast.success(`${cardsForBackend.length} CRC Card(s) salvo(s) com sucesso!`);
-        setShowAiModal(false); // Fecha o modal após o sucesso
+    router.post(
+      route('overall.bulk-store'),
+      { crc_cards: cardsForBackend },
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${cardsForBackend.length} CRC Card(s) salvo(s) com sucesso!`,
+          )
+          setShowAiModal(false) // Fecha o modal após o sucesso
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar os CRC Cards.')
+          console.error(errors)
+        },
       },
-      onError: (errors) => {
-        toast.error('Ocorreu um erro ao salvar os CRC Cards.');
-        console.error(errors);
-      }
-    });
+    )
   }
-
 
   const cancelGeneratedItems = () => {
     setShowAiModal(false)
@@ -774,47 +793,53 @@ const OverallModel = ({ project, setProject }) => {
   }
 
   const syncClassSelections = (cards, classes) => {
-    const newClasses = classes.map(c => ({ ...c, requiredBy: new Set() }));
-    cards.filter(card => card.selected).forEach(card => {
-        const requiredClassNames = [card.class, ...card.collaborators];
-        newClasses.forEach(classItem => {
-            if (requiredClassNames.includes(classItem.name)) {
-                classItem.requiredBy.add(card.tempId);
-            }
-        });
-    });
-    newClasses.forEach(classItem => {
-        if (classItem.requiredBy.size > 0) {
-            classItem.selected = true;
-        }
-    });
+    const newClasses = classes.map((c) => ({ ...c, requiredBy: new Set() }))
+    cards
+      .filter((card) => card.selected)
+      .forEach((card) => {
+        const requiredClassNames = [card.class, ...card.collaborators]
+        newClasses.forEach((classItem) => {
+          if (requiredClassNames.includes(classItem.name)) {
+            classItem.requiredBy.add(card.tempId)
+          }
+        })
+      })
+    newClasses.forEach((classItem) => {
+      if (classItem.requiredBy.size > 0) {
+        classItem.selected = true
+      }
+    })
 
-    return newClasses;
-  };
+    return newClasses
+  }
 
   const toggleCardSelection = (index) => {
     const updatedCards = aiGeneratedCRCCards.map((card, i) =>
-      i === index ? { ...card, selected: !card.selected } : card
-    );
-    const updatedClasses = syncClassSelections(updatedCards, aiGeneratedClasses);
-    
-    setAiGeneratedCRCCards(updatedCards);
-    setAiGeneratedClasses(updatedClasses);
-  };
+      i === index ? { ...card, selected: !card.selected } : card,
+    )
+    const updatedClasses = syncClassSelections(updatedCards, aiGeneratedClasses)
+
+    setAiGeneratedCRCCards(updatedCards)
+    setAiGeneratedClasses(updatedClasses)
+  }
 
   const toggleClassSelection = (index) => {
-    const targetClass = aiGeneratedClasses[index];
+    const targetClass = aiGeneratedClasses[index]
     if (targetClass.requiredBy.size > 0) {
-        toast.info(`A classe "${targetClass.name}" é requerida por um CRC Card selecionado e não pode ser desmarcada.`);
-        return;
+      toast.info(
+        `A classe "${targetClass.name}" é requerida por um CRC Card selecionado e não pode ser desmarcada.`,
+      )
+      return
     }
 
     setAiGeneratedClasses((prev) =>
       prev.map((classItem, i) =>
-        i === index ? { ...classItem, selected: !classItem.selected } : classItem
-      )
-    );
-  };
+        i === index
+          ? { ...classItem, selected: !classItem.selected }
+          : classItem,
+      ),
+    )
+  }
 
   const toggleAllCards = () => {
     const allSelected = aiGeneratedCRCCards.every((card) => card.selected)
