@@ -387,133 +387,106 @@ const Interfaces = ({ project, setProject }) => {
     )
   }
 
-  // ai functions
   const generateInterfaces = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
+    setIsGenerating(true);
+    setIsModalMinimized(false);
 
     try {
-      const response = await axios.post(route('interface.generate'), {
+      const response = await axios.post(route('system-interface.generate'), {
         project_id: project.id,
-      })
+      });
 
-      const data = response.data
+      const data = response.data;
 
       if (data.status === 'sucesso') {
-        const interfacesWithSelection = data.decomposed_interfaces.flatMap(
-          (ai_interface) =>
-            ai_interface.new_interfaces.map((newInterface, index) => ({
-              ...newInterface,
-              interface_id: ai_interface.original_interface_id,
-              selected: true,
-              new_interface_identifier: `${ai_interface.original_interface_id}.${index + 1}`,
-            })),
-        )
+        const interfacesWithSelection = data.system_interfaces.map(
+          (item) => ({
+            ...item,
+            selected: true,
+          }),
+        );
 
         if (interfacesWithSelection.length === 0) {
           toast.info(
-            'Nenhuma interface foi identificada como uma interface para decomposição.',
-          )
-          return
+            'Nenhuma interface foi gerada com base no contexto atual.',
+          );
+          return;
         }
 
-        setAiGeneratedInterfaces(interfacesWithSelection)
-        setShowAiModal(true)
+        setAiGeneratedInterfaces(interfacesWithSelection);
+        setShowAiModal(true);
         toast.success(
-          `${interfacesWithSelection.length} interface${interfacesWithSelection.length > 1 ? 's' : ''} menores foram sugeridas.`,
-        )
+          `${interfacesWithSelection.length} interface(s) foram sugeridas.`,
+        );
       } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
-        }
+        toast[data.status] ? toast[data.status](data.message) : toast.error(data.message);
       }
     } catch (error) {
-      console.error('Erro ao gerar interfaces:', error)
+      console.error('Erro ao gerar interfaces:', error);
       toast.error(
         error.response?.data?.message ||
           'Não foi possível conectar ao servidor.',
-      )
+      );
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
   const confirmGeneratedInterfaces = () => {
     const selectedInterfaces = aiGeneratedInterfaces.filter(
-      (ai_interface) => ai_interface.selected,
-    )
+      (item) => item.selected,
+    );
     const remainingInterfaces = aiGeneratedInterfaces.filter(
-      (ai_interface) => !ai_interface.selected,
-    )
+      (item) => !item.selected,
+    );
 
     if (selectedInterfaces.length === 0) {
-      toast.warning('Selecione pelo menos uma interface para adicionar.')
-      return
+      toast.warning('Selecione pelo menos uma interface para adicionar.');
+      return;
     }
 
-    // O backend espera 'title', 'story_id' (o ID do épico original) e 'project_id'
     const interfacesForBackend = selectedInterfaces.map(
       ({
         title,
         input,
         output,
-        overall_model_class_ids,
-        project_id,
         type,
+        overall_model_class_ids,
       }) => ({
         title,
         input,
         output,
-        overall_model_class_ids,
-        project_id,
         type,
+        project_id: project.id, // Adiciona o project_id
+        overall_model_class_ids,
       }),
-    )
+    );
+    
+    router.post(
+      route('system-interface.bulk-store'),
+      { system_interfaces: interfacesForBackend },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success(
+            `${selectedInterfaces.length} interface(s) adicionada(s) com sucesso!`,
+          );
+          setAiGeneratedInterfaces(remainingInterfaces);
 
-    setProject((prevProject) => ({
-      ...prevProject,
-      system_interfaces: [
-        ...prevProject.system_interfaces,
-        ...selectedInterfaces,
-      ],
-    }))
-    // router.post(
-    //   route('interface.bulk-store'),
-    //   { interfaces: interfacesForBackend },
-    //   {
-    //     preserveState: true,
-    //     preserveScroll: true,
-    //     onSuccess: () => {
-    //       toast.success(
-    //         `${selectedInterfaces.length} Interfaces adicionada com sucesso!`,
-    //       )
-    //       setAiGeneratedInterfaces(remainingInterfaces)
-    //       if (remainingInterfaces.length === 0) {
-    //         setShowAiModal(false)
-    //         setIsModalMinimized(false)
-    //       }
-    //     },
-    //     onError: (errors) => {
-    //       toast.error('Ocorreu um erro ao salvar as interfaces.')
-    //       console.error('Erro do backend:', errors)
-    //       // setProject((prevProject) => {
-    //       //   const epicStoriesToAddIds = epicStoriesToAdd.map((g) => g.id)
-    //       //   return {
-    //       //     ...prevProject,
-    //       //     epic_stories: prevProject.epic_stories.filter(
-    //       //       (story) => !epicStoriesToAddIds.includes(story.id),
-    //       //     ),
-    //       //   }
-    //       // })
-    //     },
-    //   },
-    // )
-  }
-
+          if (remainingInterfaces.length === 0) {
+            setShowAiModal(false);
+            setIsModalMinimized(false);
+          }
+        },
+        onError: (errors) => {
+          toast.error('Ocorreu um erro ao salvar as interfaces.');
+          console.error('Erro do backend:', errors);
+        },
+      },
+    );
+  };
+  
   const cancelGeneratedInterfaces = () => {
     setShowAiModal(false)
     setAiGeneratedInterfaces([])
