@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
+use App\Models\Interview;
 
 class OverallModelGeneratorControllerGemini extends Controller
 {
@@ -19,9 +20,14 @@ class OverallModelGeneratorControllerGemini extends Controller
             $validated = $request->validate([
                 'project_id' => 'required|integer|exists:projects,id',
             ]);
+            $projectId = $validated['project_id'];
 
             // 1. Buscar todas as User Stories e System Stories do projeto
             $stories = Story::where('project_id', $validated['project_id'])->get();
+            $interviews = Interview::where('project_id', $projectId)
+                ->whereNotNull('transcript')
+                ->where('transcript', '!=', '')
+                ->get();
 
             if ($stories->isEmpty()) {
                 return response()->json([
@@ -29,10 +35,15 @@ class OverallModelGeneratorControllerGemini extends Controller
                     'message' => 'Nenhuma estória (User ou System Story) foi encontrada para servir de base para a geração do modelo.'
                 ], 422);
             }
+            if ($interviews->isEmpty()) {
+                return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
+            }
 
             $storyContext = $stories->map(fn($story) => "- ({$story->type}): {$story->title}")->implode("\n");
+            $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
-            $prompt = $this->createPrompt($storyContext);
+            $prompt = $this->createPrompt($storyContext, $combinedTranscripts);
+            Log::info("PROMPT PARA OVERALL MODEL: \n\n{$prompt}:");
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos.' . $prompt;
 
@@ -53,15 +64,20 @@ class OverallModelGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(string $storyContext): string
+    private function createPrompt(string $storyContext, string $interviewContext): string
     {
         return <<<PROMPT
         Sua tarefa tem duas partes:
         1.  Analise a lista de estórias de um projeto e modele-as como CRC (Class-Responsibility-Collaborator) Cards.
         2.  Liste de forma única todas as classes que você identificou (tanto as classes principais quanto as colaboradoras).
 
-        Estórias do Projeto:
+
+        ESTÓRIAS DO PROJETO (Foco principal para classes e responsabilidades):
         {$storyContext}
+
+        Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):
+        {$interviewContext}
+        **Fim do contexto da entrevista**
 
         Para cada classe que você identificar, defina:
         - 'class': O nome da classe (um substantivo, ex: "Filme", "Usuário").
@@ -86,7 +102,7 @@ class OverallModelGeneratorControllerGemini extends Controller
                 { "name": "Servico Externo" }
             ]
         }
-
+        **Fim do formato requerido**
 
         Exemplo de resposta:
         {
@@ -115,8 +131,10 @@ class OverallModelGeneratorControllerGemini extends Controller
                 { "name": "Comentario" }
             ]
         }
+        **Fim do exemplo**
 
-        IMPORTANTE: A lista 'overall_model_classes' deve conter todos os nomes de classes de forma única, sem repetição. IMPORTANTE: Retorne apenas o JSON.
+        IMPORTANTE: A lista 'overall_model_classes' deve conter todos os nomes de classes de forma única, sem repetição. 
+        IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }
 
