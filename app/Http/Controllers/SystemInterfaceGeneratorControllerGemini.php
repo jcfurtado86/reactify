@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
+use App\Models\Interview;
 
 class SystemInterfaceGeneratorControllerGemini extends Controller
 {
@@ -18,11 +19,14 @@ public function generate(Request $request): JsonResponse
             $validated = $request->validate([
                 'project_id' => 'required|integer|exists:projects,id',
             ]);
-
             $projectId = $validated['project_id'];
 
             $crcCards = CrcCard::where('project_id', $projectId)->get();
             $stories = Story::where('project_id', $projectId)->get();
+            $interviews = Interview::where('project_id', $projectId)
+                ->whereNotNull('transcript')
+                ->where('transcript', '!=', '')
+                ->get();
 
             if ($crcCards->isEmpty() || $stories->isEmpty()) {
                 return response()->json([
@@ -30,8 +34,12 @@ public function generate(Request $request): JsonResponse
                     'message' => 'É necessário ter ao menos um CRC Card e uma Estória cadastrados para gerar as interfaces.'
                 ], 422);
             }
+            if ($interviews->isEmpty()) {
+                return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
+            }
 
             $classMap = OverallModelClass::where('project_id', $projectId)->pluck('id', 'name');
+            $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
             $context = "CRC Cards do Projeto:\n";
             $crcCards->each(function ($card) use (&$context) {
@@ -44,8 +52,10 @@ public function generate(Request $request): JsonResponse
             $stories->each(function ($story) use (&$context) {
                 $context .= "- {$story->title}\n";
             });
+            $context .= "\nContexto das Entrevistas:\n" . $combinedTranscripts;
 
             $prompt = $this->createPrompt($context, $crcCards->pluck('class')->toArray());
+            Log::info("PROMPT PARA SYSTEM INTERFACES: \n\n{$prompt}:");
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
 
@@ -90,7 +100,7 @@ public function generate(Request $request): JsonResponse
         - **Interfaces Internas:** São os pontos de comunicação entre os diversos módulos ou componentes dentro do sistema. **Você deve identificá-las principalmente ao analisar a relação entre uma "Classe" e seus "Colaboradores" nos CRC Cards.** Uma colaboração quase sempre exige uma interface interna.
         - **Interfaces Externas:** São os pontos de comunicação entre o sistema e o ambiente externo. **Você deve identificá-las principalmente ao analisar as "Estórias do Projeto" que descrevem interações com sistemas de terceiros (APIs, redes sociais, gateways de pagamento, etc.).**
 
-        Contexto do Projeto:
+        Contexto do Projeto (CRC Cards, Estórias e Entrevistas):
         {$context}
 
         - 'title': Um nome claro para a interface (ex: "API de Pagamento", "Serviço de Autenticação").
@@ -114,6 +124,7 @@ public function generate(Request $request): JsonResponse
                 }
             ]
         }
+        **Fim do formato requerido**
 
         Exemplo de resposta para um projeto de streaming:
         {
@@ -148,6 +159,7 @@ public function generate(Request $request): JsonResponse
                 }
             ]
         }
+        **Fim do exemplo**
 
         IMPORTANTE: Baseie-se exclusivamente no contexto fornecido. Retorne apenas o JSON.
         PROMPT;
