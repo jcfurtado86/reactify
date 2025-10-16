@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Pencil, Trash } from 'lucide-react'
+import { Plus, Pencil, Trash, ChartArea } from 'lucide-react'
 
 const MotionDivOptions = ({
   isHovered,
@@ -7,6 +7,7 @@ const MotionDivOptions = ({
   isTemporary = false,
   onAdd,
   onEdit,
+  onInspect,
   onDelete,
 }) => {
   return (
@@ -21,6 +22,24 @@ const MotionDivOptions = ({
             transition={{ duration: 0.2 }}
             className="z-50 absolute right-0 top-0 flex items-center rounded-md bg-card border border-border shadow-lg"
           >
+            {/* Botão Inspecionar com Tooltip */}
+            {onInspect && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="motiondiv"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={onInspect}
+                  >
+                    <ChartArea className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Inspecionar (INVEST Card)</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
             {/* Botão Adicionar com Tooltip */}
             {onAdd && (
               <Tooltip>

@@ -8,11 +8,13 @@ import {
   ChevronsUp,
   Minus,
   ChevronDown,
+  ArrowRight,
 } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import axios from 'axios'
 import { toast } from 'sonner'
+import { isTemporary } from '@/lib/utils'
 import InfoButton from '@/Components/InfoButton'
 import { tooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
@@ -20,6 +22,8 @@ export const storyVariants = {
   user: { bg: 'bg-purple-600', title: 'user' },
   system: { bg: 'bg-orange-600', title: 'system' },
 }
+import InvestCard from '../Inspection/InvestCard'
+
 const GeneratedItemsModal = ({
   isModalMinimized,
   changeModalState,
@@ -29,7 +33,6 @@ const GeneratedItemsModal = ({
   confirmGeneratedItems,
   toggleAllItems,
 }) => {
-  console.log(generatedItems)
   return (
     <div
       className={`
@@ -152,6 +155,7 @@ const StoryItem = ({
   onSave,
   onCancel,
   onDelete,
+  onInspect,
   isTemporary,
   textareaRef,
   typeSelectId,
@@ -174,6 +178,7 @@ const StoryItem = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="relative group"
+      data-card-id={story.id}
     >
       <Card className="bg-card border-0 transition-all duration-300 ease-in-out rounded">
         <CardContent className="p-2 flex items-center justify-between gap-2">
@@ -257,6 +262,7 @@ const StoryItem = ({
             isTemporary={isTemporary}
             onEdit={onEdit}
             onDelete={onDelete}
+            onInspect={onInspect}
           />
         </CardContent>
       </Card>
@@ -265,10 +271,15 @@ const StoryItem = ({
 }
 
 const Stories = ({ project, setProject }) => {
+  // inspection states
+  const [inspectionId, setInspectionId] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
+  //
   const [editingId, setEditingId] = useState(null)
   const [editValue, setEditValue] = useState('')
   const textareaRef = useRef(null)
   const [typeSelectId, setTypeSelectId] = useState(null)
+  // ai states
   const [aiGeneratedStories, setAiGeneratedStories] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
@@ -282,7 +293,6 @@ const Stories = ({ project, setProject }) => {
   }
 
   const toggleTypeSelect = (storyId) => {
-    console.log(storyId)
     if (typeSelectId === storyId) {
       setTypeSelectId(null)
     } else {
@@ -313,7 +323,17 @@ const Stories = ({ project, setProject }) => {
       { preserveState: true, preserveScroll: true },
     )
   }
-
+  // inspection function
+  const inspectStory = (story) => {
+    if (inspectionId === story.id) {
+      setInspectionId(null)
+      setAnchorEl(null)
+    } else {
+      const element = document.querySelector(`[data-card-id="${story.id}"]`)
+      setAnchorEl(element)
+      setInspectionId(story.id)
+    }
+  }
   const editStory = (story) => {
     if (editingId === story.id) {
       if (story.title !== editValue) {
@@ -370,6 +390,7 @@ const Stories = ({ project, setProject }) => {
     router.delete(route('story.delete', storyId))
   }
 
+  //ai functions
   const generateStories = async () => {
     setIsGenerating(true)
     setIsModalMinimized(false)
@@ -514,6 +535,16 @@ const Stories = ({ project, setProject }) => {
           toggleAllItems={toggleAllStories}
         />
       )}
+      {inspectionId && (
+        <InvestCard
+          itemCategory={'stories'}
+          itemId={inspectionId}
+          anchorEl={anchorEl}
+          project={project}
+          setProject={setProject}
+          setInspectionId={setInspectionId}
+        />
+      )}
 
       <div className="flex flex-col gap-2 ">
         <InfoButton
@@ -536,6 +567,7 @@ const Stories = ({ project, setProject }) => {
                   isEditing={editingId === story.id}
                   editValue={editValue}
                   onValueChange={handleInputChange}
+                  onInspect={(e) => inspectStory(story)}
                   onEdit={() => editStory(story)}
                   onSave={() => editStory(story)}
                   onDelete={() => deleteStory(story.id)}
@@ -596,6 +628,7 @@ const Stories = ({ project, setProject }) => {
                   isEditing={editingId === story.id}
                   editValue={editValue}
                   onValueChange={handleInputChange}
+                  onInspect={() => inspectStory(story)}
                   onEdit={() => editStory(story)}
                   onSave={() => editStory(story)}
                   onDelete={() => deleteStory(story.id)}

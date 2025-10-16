@@ -22,7 +22,7 @@ import Storyboards from './project-ceremonies/Modeling/Storyboards/Storyboards.j
 //
 import ProductBacklog from './project-ceremonies/ProductBacklog/ProductBacklog.jsx'
 //components
-import { ArrowLeft, PenLine, X } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 
 import MainLayout from '@/Layouts/MainLayout'
@@ -32,7 +32,6 @@ import {
 } from '@/Context/PermissionContext.jsx'
 import Sprint from './project-ceremonies/Sprint/Sprint'
 import { tooltipInfo } from '@/lib/projectData.js'
-import Inspection from './project-ceremonies/Inspection/Inspection.jsx'
 //chatbot
 import ChatBot from './ChatBot.jsx'
 import { ProjectSettings } from '@/Components/ProjectSettings.jsx'
@@ -206,7 +205,6 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
         return activeRefiningMenu
       case 'modeling':
         return activeModelingMenu
-      case 'inspection':
       case 'productBacklog':
         // Para estes casos, o nome do artefato é o mesmo nome da página.
         return page
@@ -236,7 +234,6 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
       'Use Scenarios': 'usage_scenarios',
       'Internal and External Interfaces': 'system_interfaces',
       Storyboards: 'storyboards',
-      //Inspection: '',
       //'Product Backlog': 'stories',
       Sprint: 'sprints.stories',
     }),
@@ -478,7 +475,6 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
               <TabsTrigger value="storyDiscovery">Story Discovery</TabsTrigger>
               <TabsTrigger value="refining">Refining</TabsTrigger>
               <TabsTrigger value="modeling">Modeling</TabsTrigger>
-              <TabsTrigger value="inspection">Inspection</TabsTrigger>
               {can('productBacklog.create') && (
                 <TabsTrigger value="productBacklog">
                   Product Backlog
@@ -531,9 +527,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
             />
             {renderModelingContent()}
           </TabsContent>
-          <TabsContent value="inspection">
-            <Inspection project={project} setProject={setProject} />
-          </TabsContent>
+
           <TabsContent value="productBacklog">
             <ProductBacklog project={project} setProject={setProject} />
           </TabsContent>

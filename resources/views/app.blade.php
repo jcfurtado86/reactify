@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="bg-background"
+<html class="bg-background transition-colors"
   lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>

@@ -36,7 +36,6 @@ const ceremonies = [
   'storyDiscovery',
   'refining',
   'modeling',
-  'inspection',
   'productBacklog',
   'sprint',
 ]
