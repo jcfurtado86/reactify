@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
+use App\Models\Interview;
 
 class UsageScenarioGeneratorControllerGemini extends Controller
 {
@@ -16,13 +17,23 @@ class UsageScenarioGeneratorControllerGemini extends Controller
             $validated = $request->validate([
                 'project_id' => 'required|exists:projects,id',
             ]);
+            $projectId = $validated['project_id'];
 
             $stories = Story::where('project_id', $validated['project_id'])->get();
+            $interviews = Interview::where('project_id', $projectId)
+                ->whereNotNull('transcript')
+                ->where('transcript', '!=', '')
+                ->get();
 
             if($stories->isEmpty()) {
                 return response()->json(['status' => 'warning', 'message' => 'Nenhuma Story foi encontrada no projeto para análise.'], 404);
             }
-
+            if ($interviews->isEmpty()) {
+                return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
+            }
+            
+            $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
+            
             $allUsageScenarios = [];
             $modelName = config('gemini.model');
             $fullPromptPrefix = 'Você é um especialista em engenharia de software e análise de requisitos. ';
@@ -30,7 +41,8 @@ class UsageScenarioGeneratorControllerGemini extends Controller
             // Itera sobre cada estória e gera os cenários separadamente
             foreach ($stories as $story) {
                 try {
-                    $prompt = $this->createPrompt($story);
+                    $prompt = $this->createPrompt($story, $combinedTranscripts);
+                    Log::info("PROMPT PARA USAGE SCENARIOS: \n\n{$prompt}:");
                     $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPromptPrefix . $prompt);
                     $responseText = $result->text();
                     $parsedData = $this->parseResponse($responseText);
@@ -59,12 +71,18 @@ class UsageScenarioGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(Story $story): string
+    private function createPrompt(Story $story, string $interviewContext): string
     {
         return <<<PROMPT
         Sua tarefa é criar Cenários de Uso para a Story fornecida, representando-os como Cenários de Aceitação no padrão GIVEN-WHEN-THEN. Os cenários de uso são os comportamentos que o produto possuirá a partir da interação com os usuários finais. Isso garante o refinamento das funcionalidades por meio de exemplos reais do negócio e a criação de cenários para testes de aceitação.
 
-        Story: "- Story: {$story->title}; Tipo: {$story->type}"
+        STORY (Foco principal):
+        "Tipo: {$story->type} story"
+        "Descrição: {$story->title}"
+
+        Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):
+        {$interviewContext}\
+        **Fim do contexto da entrevista**   
 
         O cenário deve seguir a estrutura:
         - 'as': O papel do usuário (extraído da estória).
@@ -89,6 +107,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
                 }
             ]
         }
+        **Fim do formato requerido**
 
         Exemplo de um Cenário de Aceitação do projeto de streaming de filmes:
         Se a Story for "Eu como Leon Cardoso quero uma opção de exclusão de filmes do catálogo da plataforma no painel de controle administrativo para remover um filme do catálogo.", a resposta poderia ser:
@@ -106,6 +125,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
                 }
             ]
         }
+        **Fim do exemplo**
 
         IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
