@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
-// use OpenAI\Laravel\Facades\OpenAI;
+use App\Models\Interview;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreStoryRequest;
@@ -22,15 +22,18 @@ class StoryGeneratorControllerGemini extends Controller
       $request->validate([
         'project_id' => 'required|integer|min:1'
       ]);
-
       $projectId = $request->input('project_id');
 
+      $interviews = $this->getInterviewsFromDatabase($projectId);
       $personas = $this->getPersonasFromDatabase($projectId);
       $journeys = $this->getJourneysFromDatabase($projectId);
       $productConstraints = $this->getProductConstraintsFromDatabase($projectId);
       $constraintGoals = $this->getConstraintGoalsFromDatabase($projectId);
 
       $missingItems = [];
+      if (empty($interviews)) { 
+        $missingItems[] = 'Entrevista com transcrição'; 
+      }
       if (!$this->hasContentfulPersonas($personas)) {
         $missingItems[] = 'Objetivo de Persona';
       }
@@ -54,16 +57,12 @@ class StoryGeneratorControllerGemini extends Controller
       }
 
 
-      $prompt = $this->createPrompt($personas, $journeys, $productConstraints, $constraintGoals);
-
+      $prompt = $this->createPrompt($interviews, $personas, $journeys, $productConstraints, $constraintGoals);
+      Log::info("PROMPT PARA STORY: \n\n{$prompt}:");
       $modelName = config('gemini.model');
-
       $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
-
       $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
-
       $responseText = $result->text();
-
       $parsedResponse = $this->parseResponse($responseText);
 
       return response()->json([
@@ -157,8 +156,9 @@ class StoryGeneratorControllerGemini extends Controller
     }
   }
 
-  private function createPrompt(array $personas, array $journeys, array $productConstraints, array $constraintGoals): string
+  private function createPrompt(array $interviews, array $personas, array $journeys, array $productConstraints, array $constraintGoals): string
   {
+    $interviewsText = $this->formatInterviewsForPrompt($interviews);
     $personasText = $this->formatPersonasForPrompt($personas);
     $journeysText = $this->formatJourneysForPrompt($journeys);
     $constraintsText = $this->formatConstraintsForPrompt($productConstraints);
@@ -166,6 +166,9 @@ class StoryGeneratorControllerGemini extends Controller
 
     return <<<PROMPT
         Com base nos dados fornecidos do sistema, gere user stories e system stories no formato especificado abaixo:
+
+        CONTEXTO PRINCIPAL (Use como base de conhecimento):
+          - Transcrições de Entrevistas: {$interviewsText}
 
         CONTEXTO PARA USER STORIES:
           - Goals das Personas do Produto: $personasText
@@ -376,4 +379,26 @@ class StoryGeneratorControllerGemini extends Controller
     return implode("\n\n", $formatted);
   }
 
+  private function getInterviewsFromDatabase(int $projectId): array
+  {
+    try {
+      return Interview::where('project_id', $projectId)
+                ->whereNotNull('transcript')
+                ->where('transcript', '!=', '')
+                ->pluck('transcript')
+                ->toArray();
+    } catch (\Exception $e) {
+      Log::error('Erro ao buscar entrevistas: ' . $e->getMessage());
+      throw new \Exception('Erro ao buscar entrevistas: ' . $e->getMessage());
+    }
+  }
+
+  private function formatInterviewsForPrompt(array $interviews): string
+  {
+      if (empty($interviews)) {
+          return "Nenhuma transcrição de entrevista fornecida.";
+      }
+      // Simplesmente junta todas as transcrições
+      return implode("\n\n---\n\n", $interviews);
+  }
 }
