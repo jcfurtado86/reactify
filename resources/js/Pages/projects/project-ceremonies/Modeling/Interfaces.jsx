@@ -90,7 +90,6 @@ const GeneratedItemsModal = ({
                     )
                     .filter(Boolean) // .filter(Boolean) remove quaisquer resultados nulos se um ID não for encontrado
 
-                  console.log(relatedClasses)
                   return (
                     <div
                       key={item.id}
@@ -116,10 +115,10 @@ const GeneratedItemsModal = ({
                             </p>
                           </div>
                           <div className="grid gap-1 w-full text-left text-muted-foreground text-sm">
-                            {relatedClasses.map((classData) => (
+                            {relatedClasses.map((classData, index) => (
                               <div
-                                key={classData.id}
-                                className="border p-3 rounded-lg bg-muted/50"
+                                key={index}
+                                className="border p-3 rounded-lg bg-muted/50 flex items-center"
                               >
                                 <h4 className="font-semibold text-sm">
                                   {/* Usando a propriedade 'name' como no seu código anterior */}
@@ -388,71 +387,63 @@ const Interfaces = ({ project, setProject }) => {
   }
 
   const generateInterfaces = async () => {
-    setIsGenerating(true);
-    setIsModalMinimized(false);
+    setIsGenerating(true)
+    setIsModalMinimized(false)
 
     try {
       const response = await axios.post(route('system-interface.generate'), {
         project_id: project.id,
-      });
+      })
 
-      const data = response.data;
+      const data = response.data
 
       if (data.status === 'sucesso') {
-        const interfacesWithSelection = data.system_interfaces.map(
-          (item) => ({
-            ...item,
-            selected: true,
-          }),
-        );
+        const interfacesWithSelection = data.system_interfaces.map((item) => ({
+          ...item,
+          selected: true,
+        }))
 
         if (interfacesWithSelection.length === 0) {
-          toast.info(
-            'Nenhuma interface foi gerada com base no contexto atual.',
-          );
-          return;
+          toast.info('Nenhuma interface foi gerada com base no contexto atual.')
+          return
         }
 
-        setAiGeneratedInterfaces(interfacesWithSelection);
-        setShowAiModal(true);
+        setAiGeneratedInterfaces(interfacesWithSelection)
+        setShowAiModal(true)
         toast.success(
           `${interfacesWithSelection.length} interface(s) foram sugeridas.`,
-        );
+        )
       } else {
-        toast[data.status] ? toast[data.status](data.message) : toast.error(data.message);
+        toast[data.status]
+          ? toast[data.status](data.message)
+          : toast.error(data.message)
       }
     } catch (error) {
-      console.error('Erro ao gerar interfaces:', error);
+      console.error('Erro ao gerar interfaces:', error)
       toast.error(
         error.response?.data?.message ||
           'Não foi possível conectar ao servidor.',
-      );
+      )
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
+  }
 
   const confirmGeneratedInterfaces = () => {
     const selectedInterfaces = aiGeneratedInterfaces.filter(
       (item) => item.selected,
-    );
+    )
     const remainingInterfaces = aiGeneratedInterfaces.filter(
       (item) => !item.selected,
-    );
+    )
 
     if (selectedInterfaces.length === 0) {
-      toast.warning('Selecione pelo menos uma interface para adicionar.');
-      return;
+      toast.warning('Selecione pelo menos uma interface para adicionar.')
+      return
     }
 
     const interfacesForBackend = selectedInterfaces.map(
-      ({
-        title,
-        input,
-        output,
-        type,
-        overall_model_class_ids,
-      }) => ({
+      ({ title, input, output, type, overall_model_class_ids }) => ({
         title,
         input,
         output,
@@ -460,8 +451,8 @@ const Interfaces = ({ project, setProject }) => {
         project_id: project.id, // Adiciona o project_id
         overall_model_class_ids,
       }),
-    );
-    
+    )
+
     router.post(
       route('system-interface.bulk-store'),
       { system_interfaces: interfacesForBackend },
@@ -471,22 +462,22 @@ const Interfaces = ({ project, setProject }) => {
         onSuccess: () => {
           toast.success(
             `${selectedInterfaces.length} interface(s) adicionada(s) com sucesso!`,
-          );
-          setAiGeneratedInterfaces(remainingInterfaces);
+          )
+          setAiGeneratedInterfaces(remainingInterfaces)
 
           if (remainingInterfaces.length === 0) {
-            setShowAiModal(false);
-            setIsModalMinimized(false);
+            setShowAiModal(false)
+            setIsModalMinimized(false)
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as interfaces.');
-          console.error('Erro do backend:', errors);
+          toast.error('Ocorreu um erro ao salvar as interfaces.')
+          console.error('Erro do backend:', errors)
         },
       },
-    );
-  };
-  
+    )
+  }
+
   const cancelGeneratedInterfaces = () => {
     setShowAiModal(false)
     setAiGeneratedInterfaces([])
