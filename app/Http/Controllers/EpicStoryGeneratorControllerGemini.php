@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
+use App\Models\Interview;
 
 class EpicStoryGeneratorControllerGemini extends Controller
 {
@@ -19,8 +20,13 @@ class EpicStoryGeneratorControllerGemini extends Controller
             $validated = $request->validate([
                 'project_id' => 'required|integer|exists:projects,id',
             ]);
+            $projectId = $validated['project_id'];
 
             $stories = Story::where('project_id', $validated['project_id'])->get();
+            $interviews = Interview::where('project_id', $projectId)
+                ->whereNotNull('transcript')
+                ->where('transcript', '!=', '')
+                ->get();
 
             if ($stories->isEmpty()) {
                 return response()->json([
@@ -28,8 +34,13 @@ class EpicStoryGeneratorControllerGemini extends Controller
                     'message' => 'Nenhuma Story foi encontrada no projeto para analisar.'
                 ], 422);
             }
+            // if ($interviews->isEmpty()) {
+            //     return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
+            // }
+            $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
-            $prompt = $this->createPrompt($stories);
+            $prompt = $this->createPrompt($stories, $combinedTranscripts);
+            Log::info("PROMPT PARA EPIC STORIES: \n\n{$prompt}:");
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
             
@@ -47,19 +58,26 @@ class EpicStoryGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(\Illuminate\Database\Eloquent\Collection $stories): string
+    private function createPrompt(\Illuminate\Database\Eloquent\Collection $stories, string $interviewContext): string
     {
         $storyContext = $stories->map(function ($story) {
-            return "- ID {$story->id}; \"{$story->title}\"; \"{$story->type}\"";
+            return "- ID {$story->id}; \"{$story->title}\"; \"{$story->type} story\"";
         })->implode("\n");
 
         return <<<PROMPT
-        Sua primeira e mais importante tarefa é analisar CUIDADOSAMENTE cada User Story para determinar se ela é, de fato, um "Épico". Um épico é uma estória que é claramente grande demais, que abrange múltiplas funcionalidades distintas ou que não poderia ser concluída em um único ciclo de desenvolvimento (sprint).
+        Sua primeira e mais importante tarefa é analisar CUIDADOSAMENTE cada User Story para determinar se ela é, de fato, um "Épico". 
+        Um épico é uma estória que é claramente grande demais, que abrange múltiplas funcionalidades distintas ou que não poderia ser concluída em um único ciclo de desenvolvimento (sprint).
 
-        REGRA: Se uma estória descreve uma única ação ou um fluxo contínuo e coeso, ela NÃO é um épico e NÃO deve ser decomposta. Apenas depois de justificar internamente que uma estória é um épico, você deve prosseguir para a sua decomposição.
+        REGRA: Se uma estória descreve uma única ação ou um fluxo contínuo e coeso, ela NÃO é um épico e NÃO deve ser decomposta. 
+        Apenas depois de justificar internamente que uma estória é um épico, você deve prosseguir para a sua decomposição.
 
         Lista de Stories para Análise:
         {$storyContext}
+        
+        Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):
+        {$interviewContext}
+
+        **Fim do contexto da entrevista**
 
         O formato de resposta requerido é um JSON contendo os épicos identificados e suas respectivas estórias decompostas.
 
@@ -76,8 +94,10 @@ class EpicStoryGeneratorControllerGemini extends Controller
                 }
             ]
         }
+        **Fim do formato requerido**
 
-        Exemplo: Se a lista contiver a estória "ID 10: Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", a resposta poderia ser:
+        Exemplo: Se a lista contiver a estória "ID 10: Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe estatísticas, 
+        gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", a resposta poderia ser:
         {
             "decomposed_epics": [
                 {
@@ -90,8 +110,9 @@ class EpicStoryGeneratorControllerGemini extends Controller
                 }
             ]
         }
+        **Fim do exemplo**
 
-        Se nenhuma estória for considerada um épico, retorne um array "decomposed_epics" vazio.
+        IMPORTANTE: Se nenhuma estória for considerada um épico, retorne um array "decomposed_epics" vazio.
         IMPORTANTE: As novas estórias decompostas devem obrigatoriamente manter o mesmo 'type' ('user' ou 'system') da estória épica original da qual elas se originaram.
         IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
