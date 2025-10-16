@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
+use App\Models\Interview;
 
 class BusinessRuleGeneratorControllerGemini extends Controller
 {
@@ -16,12 +17,22 @@ class BusinessRuleGeneratorControllerGemini extends Controller
             $validated = $request->validate([
                 'project_id' => 'required|exists:projects,id',
             ]);
+            $projectId = $validated['project_id'];
 
             $stories = Story::where('project_id', $validated['project_id'])->get();
+            $interviews = Interview::where('project_id', $projectId)
+                ->whereNotNull('transcript')
+                ->where('transcript', '!=', '')
+                ->get();
 
             if($stories->isEmpty()) {
                 return response()->json(['status' => 'warning', 'message' => 'Nenhuma estória válida foi encontrada.'], 404);
             }
+            if ($interviews->isEmpty()) {
+                return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
+            }
+            
+            $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
             $allBusinessRules = [];
             $modelName = config('gemini.model');
@@ -30,7 +41,8 @@ class BusinessRuleGeneratorControllerGemini extends Controller
             // 3. Itera sobre cada estória e gera as regras separadamente
             foreach ($stories as $story) {
                 try {
-                    $prompt = $this->createPrompt($story);
+                    $prompt = $this->createPrompt($story, $combinedTranscripts);
+                    Log::info("PROMPT PARA BUSINESS RULES: \n\n{$prompt}:");
                     $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPromptPrefix . $prompt);
                     $responseText = $result->text();
                     $parsedData = $this->parseResponse($responseText);
@@ -59,16 +71,25 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(Story $story): string
+    private function createPrompt(Story $story, string $interviewContext): string
     {
         return <<<PROMPT
-        Sua tarefa é extrair as Regras de Negócio (Business Rules) que estão implícitas ou são necessárias para que as funcionalidades descritas nas Stories abaixo existam.
+        Sua tarefa é extrair as Regras de Negócio (Business Rules) que estão implícitas ou são necessárias 
+        para que as funcionalidades descritas nas Stories abaixo existam.
 
-        **Definição de Regra de Negócio**: As regras de negócio são informações que evidenciam o contexto de negócio do cliente e como ele opera. Em termos gerais, as regras de negócio são declarações que definem ou restringem alguma parte do negócio e refletem políticas, procedimentos e práticas do negócio do cliente.
+        **Definição de Regra de Negócio**: As regras de negócio são informações que evidenciam o contexto de 
+        negócio do cliente e como ele opera. Em termos gerais, as regras de negócio são declarações que definem 
+        ou restringem alguma parte do negócio e refletem políticas, procedimentos e práticas do negócio do cliente.
 
-        Stories para Análise:
-        "{$story->title}"
-
+        **Story para Análise:**
+        "Tipo: {$story->type} story"
+        "Descrição: {$story->title}"
+        
+        **Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):**
+        {$interviewContext}
+        
+        **Fim do contexto da entrevista**
+        
         Formato de resposta requerido (JSON):
         {
             "business_rules": [
@@ -76,9 +97,12 @@ class BusinessRuleGeneratorControllerGemini extends Controller
                 { "title": "Título da segunda regra de negócio." }
             ]
         }
+        **Fim do formato requerido**
 
         Exemplo aplicado a um projeto de streaming de filmes:
-        Se a Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", a resposta poderia ser:
+        Se a Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe 
+        estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", 
+        a resposta poderia ser:
         {
             "business_rules": [
                 { "title": "A seção de estatísticas, gráficos ou tabelas de vistas deve estar disponível apenas no painel de controle administrativo, garantindo que apenas usuários autorizados, como administradores, tenham acesso a essas informações." },
@@ -86,8 +110,10 @@ class BusinessRuleGeneratorControllerGemini extends Controller
                 { "title": "As estatísticas, gráficos ou tabelas devem ser apresentados de forma clara e compreensível para os administradores." }
             ]
         }
+        **Fim do exemplo**
 
-        IMPORTANTE: Analise todas as estórias fornecidas para extrair as regras. Retorne apenas o JSON.
+        IMPORTANTE: Analise todas as estórias fornecidas para extrair as regras. 
+        IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }
 
