@@ -133,7 +133,13 @@ const InvestCard = ({
     <TooltipProvider delayDuration={100}>
       <Popover open={true}>
         <PopoverAnchor virtualRef={{ current: anchorEl }}></PopoverAnchor>
-        <PopoverContent className="bg-card border border-border rounded-md shadow-sm max-w-3xl w-72 lg:w-80">
+        <PopoverContent
+          side="bottom"
+          align="end"
+          sticky="always" // 3. ✨ A MÁGICA: Impede que ele "flipe" para 'top'
+          sideOffset={8}
+          className="bg-card border border-border rounded-md shadow-sm max-w-3xl w-72 lg:w-80"
+        >
           <Button
             variant="outline"
             className="size-3 absolute top-0 right-0 p-3"

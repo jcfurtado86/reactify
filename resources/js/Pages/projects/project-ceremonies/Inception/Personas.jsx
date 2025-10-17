@@ -194,7 +194,6 @@ const PersonaCard = ({
 
   return (
     <Card
-      data-card-id={persona.id}
       key={persona.id}
       className="group relative col-span-1 bg-card border-0 animate-fade-in rounded"
       onMouseEnter={() => setIsHovered(true)}
@@ -215,7 +214,9 @@ const PersonaCard = ({
               autoFocus
             />
           ) : (
-            <CardTitle className="ml-3 text-xl">{persona.name}</CardTitle>
+            <CardTitle data-card-id={persona.id} className="ml-3 text-xl">
+              {persona.name}
+            </CardTitle>
           )}
         </div>
         {/* <div className="flex items-center gap-1">
