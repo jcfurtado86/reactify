@@ -324,16 +324,17 @@ const Stories = ({ project, setProject }) => {
     )
   }
   // inspection function
-  const inspectStory = (story) => {
-    if (inspectionId === story.id) {
+  const inspectStory = (storyId) => {
+    if (inspectionId === storyId) {
       setInspectionId(null)
       setAnchorEl(null)
     } else {
-      const element = document.querySelector(`[data-card-id="${story.id}"]`)
+      const element = document.querySelector(`[data-card-id="${storyId}"]`)
       setAnchorEl(element)
-      setInspectionId(story.id)
+      setInspectionId(storyId)
     }
   }
+
   const editStory = (story) => {
     if (editingId === story.id) {
       if (story.title !== editValue) {
@@ -567,7 +568,7 @@ const Stories = ({ project, setProject }) => {
                   isEditing={editingId === story.id}
                   editValue={editValue}
                   onValueChange={handleInputChange}
-                  onInspect={(e) => inspectStory(story)}
+                  onInspect={(e) => inspectStory(story.id)}
                   onEdit={() => editStory(story)}
                   onSave={() => editStory(story)}
                   onDelete={() => deleteStory(story.id)}

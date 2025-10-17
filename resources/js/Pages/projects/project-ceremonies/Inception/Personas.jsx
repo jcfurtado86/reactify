@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import TextareaAutosize from 'react-textarea-autosize'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import InvestCard from '../Inspection/InvestCard'
 
 const GeneratedItemsModal = ({
   isModalMinimized,
@@ -169,7 +170,144 @@ const GeneratedItemsModal = ({
     </div>
   )
 }
+const PersonaCard = ({
+  persona,
+  addNewItem,
+  editingPersona,
+  saveEditField,
+  editPersonaName,
+  saveEditPersona,
+  startEditPersona,
+  inspectPersona,
+  personaFieldVariants,
+  getFieldTitle,
+  editingField,
+  editValue,
+  setEditValue,
+  setEditPersonaName,
+  startEditField,
+  textareaRef,
+  confirmDeleteItem,
+  confirmDeletePersona,
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
 
+  return (
+    <Card
+      data-card-id={persona.id}
+      key={persona.id}
+      className="group relative col-span-1 bg-card border-0 animate-fade-in rounded"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <CardHeader className="flex-row items-center justify-between">
+        <div className="flex items-center gap-3 w-full">
+          <UserCircle2 className=" shrink-0 size-8 text-primary" />
+          {editingPersona === persona.id ? (
+            <Input
+              type="text"
+              value={editPersonaName}
+              onChange={(e) => setEditPersonaName(e.target.value)}
+              onKeyUp={(e) => {
+                if (e.key === 'Enter') saveEditPersona()
+              }}
+              className="!text-xl font-bold"
+              autoFocus
+            />
+          ) : (
+            <CardTitle className="ml-3 text-xl">{persona.name}</CardTitle>
+          )}
+        </div>
+        {/* <div className="flex items-center gap-1">
+        {editingPersona === persona.id ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={saveEditPersona}
+          >
+            <Check className="h-4 w-4 text-green-500" />
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => startEditPersona(persona.id)}
+          >
+            <Edit className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-destructive/80 hover:text-destructive"
+          onClick={() => confirmDeletePersona(persona.id)}
+        >
+          <Trash className="h-4 w-4" />
+        </Button>
+      </div>*/}
+        <MotionDivOptions
+          isHovered={isHovered}
+          onEdit={() => startEditPersona(persona.id)}
+          onDelete={() => confirmDeletePersona(persona.id)}
+          onInspect={() => inspectPersona(persona.id)}
+        />
+      </CardHeader>
+
+      <CardContent className="persona grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
+        {['profile', 'expectations', 'goals'].map((field) => (
+          <div
+            key={field}
+            className="flex flex-col gap-2 p-3 rounded-lg bg-card border-border border-2"
+          >
+            <div className="flex items-center justify-between">
+              <h4
+                className={`font-semibold text-sm ${personaFieldVariants[field].text}`}
+              >
+                {getFieldTitle(field)}
+              </h4>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6"
+                onClick={() => addNewItem(persona.id, field)}
+              >
+                <Plus className="size-4" />
+              </Button>
+            </div>
+            <Separator />
+            <div className="flex flex-col gap-2">
+              {persona[field].map((item, itemIndex) => (
+                <PersonaItem
+                  key={itemIndex}
+                  item={item}
+                  isEditing={
+                    editingField.personaId === persona.id &&
+                    editingField.field === field &&
+                    editingField.itemIndex === itemIndex
+                  }
+                  editValue={editValue}
+                  onValueChange={(e) => setEditValue(e.target.value)}
+                  onEdit={() => startEditField(persona.id, field, itemIndex)}
+                  onSave={saveEditField}
+                  onDelete={() =>
+                    confirmDeleteItem(persona.id, field, itemIndex)
+                  }
+                  textareaRef={
+                    editingField.personaId === persona.id &&
+                    editingField.field === field &&
+                    editingField.itemIndex === itemIndex
+                      ? textareaRef
+                      : null
+                  }
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  )
+}
 const PersonaItem = ({
   item,
   isEditing,
@@ -246,6 +384,9 @@ const PersonaItem = ({
 }
 
 const Personas = ({ project, setProject }) => {
+  // inspection states
+  const [inspectionId, setInspectionId] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
   const textareaRef = useRef(null)
   const [editingField, setEditingField] = useState({
     personaId: null,
@@ -343,8 +484,7 @@ const Personas = ({ project, setProject }) => {
     setEditingPersona(null)
 
     router.patch(route('persona.update', personaId), {
-      [field]: updatedArray,
-      project_id: project.id,
+      name: editPersonaName,
     })
   }
 
@@ -452,46 +592,63 @@ const Personas = ({ project, setProject }) => {
     }
   }
 
+  // inspection function
+  const inspectPersona = (personaId) => {
+    if (inspectionId === personaId) {
+      setInspectionId(null)
+      setAnchorEl(null)
+    } else {
+      const element = document.querySelector(`[data-card-id="${personaId}"]`)
+      setAnchorEl(element)
+      setInspectionId(personaId)
+    }
+  }
+  //ia functions
   const generatePersonas = async () => {
-    setIsGenerating(true);
-    setIsModalMinimized(false);
+    setIsGenerating(true)
+    setIsModalMinimized(false)
 
     try {
       const response = await axios.post(route('persona.generate'), {
         project_id: project.id,
-      });
+      })
 
-      const data = response.data;
+      const data = response.data
 
       if (data.status === 'sucesso') {
         const personasWithSelection = data.personas.map((persona) => ({
           ...persona,
           selected: true,
-        }));
+        }))
 
         if (personasWithSelection.length === 0) {
-          toast.info("A IA não gerou novas personas com base nas entrevistas.");
-          return;
+          toast.info('A IA não gerou novas personas com base nas entrevistas.')
+          return
         }
 
-        setAiGeneratedPersonas(personasWithSelection);
-        setShowAiModal(true);
-        toast.success('Personas geradas com sucesso.');
+        setAiGeneratedPersonas(personasWithSelection)
+        setShowAiModal(true)
+        toast.success('Personas geradas com sucesso.')
       } else {
         if (data.status === 'warning') {
-          toast.warning(data.message);
+          toast.warning(data.message)
         } else {
-          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
         }
       }
     } catch (error) {
-      console.error('Erro ao gerar personas:', error);
-      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
+      console.error('Erro ao gerar personas:', error)
+      toast.error(
+        error.response?.data?.message ||
+          'Não foi possível conectar ao servidor.',
+      )
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
-  
+  }
+
   const confirmGeneratedPersonas = () => {
     const selectedPersonas = aiGeneratedPersonas.filter(
       (persona) => persona.selected,
@@ -591,6 +748,16 @@ const Personas = ({ project, setProject }) => {
           toggleAllItems={toggleAllPersonas}
         />
       )}
+      {inspectionId && (
+        <InvestCard
+          itemCategory={'stories'}
+          itemId={inspectionId}
+          anchorEl={anchorEl}
+          project={project}
+          setProject={setProject}
+          setInspectionId={setInspectionId}
+        />
+      )}
       <Button
         variant="secondary"
         onClick={addNewPersona}
@@ -604,116 +771,31 @@ const Personas = ({ project, setProject }) => {
       {project.personas && project.personas.length > 0 ? (
         project.personas
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-          .map((persona) => (
-            <Card
-              key={persona.id}
-              className="col-span-1 bg-card border-0 animate-fade-in rounded"
-            >
-              <CardHeader className="flex-row items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <UserCircle2 className=" shrink-0 size-8 text-primary" />
-                  {editingPersona === persona.id ? (
-                    <Input
-                      type="text"
-                      value={editPersonaName}
-                      onChange={(e) => setEditPersonaName(e.target.value)}
-                      onKeyUp={(e) => {
-                        if (e.key === 'Enter') saveEditPersona()
-                      }}
-                      className="!text-xl font-bold"
-                      autoFocus
-                    />
-                  ) : (
-                    <CardTitle className="ml-3 text-xl">
-                      {persona.name}
-                    </CardTitle>
-                  )}
-                </div>
-                <div className="flex items-center gap-1">
-                  {editingPersona === persona.id ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={saveEditPersona}
-                    >
-                      <Check className="h-4 w-4 text-green-500" />
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => startEditPersona(persona.id)}
-                    >
-                      <Edit className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive/80 hover:text-destructive"
-                    onClick={() => confirmDeletePersona(persona.id)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent className="persona grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
-                {['profile', 'expectations', 'goals'].map((field) => (
-                  <div
-                    key={field}
-                    className="flex flex-col gap-2 p-3 rounded-lg bg-card border-border border-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h4
-                        className={`font-semibold text-sm ${personaFieldVariants[field].text}`}
-                      >
-                        {getFieldTitle(field)}
-                      </h4>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-6"
-                        onClick={() => addNewItem(persona.id, field)}
-                      >
-                        <Plus className="size-4" />
-                      </Button>
-                    </div>
-                    <Separator />
-                    <div className="flex flex-col gap-2">
-                      {persona[field].map((item, itemIndex) => (
-                        <PersonaItem
-                          key={itemIndex}
-                          item={item}
-                          isEditing={
-                            editingField.personaId === persona.id &&
-                            editingField.field === field &&
-                            editingField.itemIndex === itemIndex
-                          }
-                          editValue={editValue}
-                          onValueChange={(e) => setEditValue(e.target.value)}
-                          onEdit={() =>
-                            startEditField(persona.id, field, itemIndex)
-                          }
-                          onSave={saveEditField}
-                          onDelete={() =>
-                            confirmDeleteItem(persona.id, field, itemIndex)
-                          }
-                          textareaRef={
-                            editingField.personaId === persona.id &&
-                            editingField.field === field &&
-                            editingField.itemIndex === itemIndex
-                              ? textareaRef
-                              : null
-                          }
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))
+          .map((persona) => {
+            return (
+              <PersonaCard
+                key={persona.id}
+                textareaRef={textareaRef}
+                persona={persona}
+                getFieldTitle={getFieldTitle}
+                editingField={editingField}
+                editingPersona={editingPersona}
+                editValue={editValue}
+                setEditValue={setEditValue}
+                setEditPersonaName={setEditPersonaName}
+                startEditField={startEditField}
+                saveEditField={saveEditField}
+                editPersonaName={editPersonaName}
+                saveEditPersona={saveEditPersona}
+                startEditPersona={startEditPersona}
+                confirmDeleteItem={confirmDeleteItem}
+                confirmDeletePersona={confirmDeletePersona}
+                inspectPersona={inspectPersona}
+                personaFieldVariants={personaFieldVariants}
+                addNewItem={addNewItem}
+              />
+            )
+          })
       ) : (
         <div className="col-span-1 flex flex-col items-center justify-center p-10 bg-muted/50 border-dashed border rounded-lg text-center">
           <UserCircle2 size={40} className="mb-4 text-primary" />

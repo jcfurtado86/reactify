@@ -11,64 +11,59 @@ use Illuminate\Support\Facades\Log;
 
 class PersonaController extends Controller
 {
-    public function bulk(BulkStorePersonaRequest $request)
-    {
-        $validatedData = $request->validated();
+  public function bulk(BulkStorePersonaRequest $request)
+  {
+    $validatedData = $request->validated();
 
-        DB::transaction(function () use ($validatedData) {
-            foreach ($validatedData['personas'] as $personaData) {
-                Persona::create($personaData);
-            }
-        });
+    DB::transaction(function () use ($validatedData) {
+      foreach ($validatedData['personas'] as $personaData) {
+        Persona::create($personaData);
+      }
+    });
 
-        Log::info('Bulk personas created successfully', [
-            'count' => count($validatedData['personas'])
-        ]);
+    Log::info('Bulk personas created successfully', [
+      'count' => count($validatedData['personas']),
+    ]);
 
-        return back()->with('success', 'Personas adicionadas com sucesso.');
-    }
+    return back()->with('success', 'Personas adicionadas com sucesso.');
+  }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'profile' => 'nullable|array',
-            'expectations' => 'nullable|array',
-            'goals' => 'nullable|array',
-            'project_id' => 'required|exists:projects,id',
+  public function store(Request $request)
+  {
+    $validated = $request->validate([
+      'name' => 'required|string|max:255',
+      'profile' => 'nullable|array',
+      'expectations' => 'nullable|array',
+      'goals' => 'nullable|array',
+      'project_id' => 'required|exists:projects,id',
+    ]);
 
-        ]);
+    $persona = Persona::create($validated);
 
-        $persona = Persona::create($validated);
+    return back()->with('success', 'Persona atualizada.');
+  }
 
-        return back()->with('success', 'Persona atualizada.');
-    }
+  public function update(Request $request, Persona $persona)
+  {
+    $validated = $request->validate([
+      'name' => 'sometimes|string|max:255', // Opcional, se enviado, valida como string
+      'profile' => 'nullable|array',
+      'expectations' => 'nullable|array',
+      'goals' => 'nullable|array',
+    ]);
 
-    public function update(Request $request, Persona $persona)
-    {
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255', // Opcional, se enviado, valida como string
-            'profile' => 'nullable|array',
-            'expectations' => 'nullable|array',
-            'goals' => 'nullable|array',
-            'project_id' => 'required|exists:projects,id',
+    $persona->update($validated);
 
-        ]);
+    return back()->with('success', 'Persona atualizada.');
+  }
 
-        $persona->update($validated);
+  /**
+   * Remove uma persona.
+   */
+  public function destroy(Persona $persona)
+  {
+    $persona->delete();
 
-        return back()->with('success', 'Persona atualizada.');
-
-    }
-
-    /**
-     * Remove uma persona.
-     */
-    public function destroy(Persona $persona)
-    {
-        $persona->delete();
-
-        return back()->with('success', 'Persona deletada.');
-
-    }
+    return back()->with('success', 'Persona deletada.');
+  }
 }
