@@ -10,15 +10,18 @@ return new class extends Migration {
    */
   public function up(): void
   {
-    Schema::create("stories", function (Blueprint $table) {
+    Schema::create('stories', function (Blueprint $table) {
       $table->id();
-      $table->text("title");
-      $table->enum("type", ["user", "system"]); // Tipo fixo
-      $table->enum('status', ['draft', 'prioritized', 'in_progress', 'done'])->default('draft');
+      $table->text('title');
+      $table->jsonb('invest_card');
+      $table->enum('type', ['user', 'system']); // Tipo fixo
       $table
-        ->foreignId("project_id")
-        ->constrained("projects")
-        ->onDelete("cascade"); // Chave estrangeira
+        ->enum('status', ['draft', 'prioritized', 'in_progress', 'done'])
+        ->default('draft');
+      $table
+        ->foreignId('project_id')
+        ->constrained('projects')
+        ->onDelete('cascade'); // Chave estrangeira
       $table->timestamps();
       $table->softDeletes();
     });
@@ -29,6 +32,6 @@ return new class extends Migration {
    */
   public function down(): void
   {
-    Schema::dropIfExists("stories");
+    Schema::dropIfExists('stories');
   }
 };

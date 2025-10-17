@@ -16,8 +16,13 @@ class Story extends Model
     'type',
     'project_id',
     'parent_id',
+    'invest_card',
     'value',
     'complexity',
+  ];
+
+  protected $casts = [
+    'invest_card' => 'array',
   ];
 
   public function project()

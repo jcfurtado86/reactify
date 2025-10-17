@@ -305,6 +305,14 @@ class ProjectSeeder extends Seeder
         // Adicione os dados que são comuns a todos, se necessário
         $dataToCreate = array_merge($storyData, [
           'project_id' => $projectId,
+          'invest_card' => json_encode([
+            'independent' => 'no',
+            'negotiable' => 'no',
+            'valuable' => 'no',
+            'estimable' => 'no',
+            'small' => 'no',
+            'testable' => 'no',
+          ]),
         ]);
 
         // Execute a action com os dados combinados

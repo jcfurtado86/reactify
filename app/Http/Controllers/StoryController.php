@@ -15,11 +15,21 @@ class StoryController extends Controller
   public function store(StoreStoryRequest $request)
   {
     $validated = $request->validated();
-
+    $validated['invest_card'] = [
+      'independent' => 'no',
+      'negotiable' => 'no',
+      'valuable' => 'no',
+      'estimable' => 'no',
+      'small' => 'no',
+      'testable' => 'no',
+    ];
     Story::create($validated);
 
     Log::info('Story created');
-    return back();
+    return back()->with([
+      'message' => 'Story created successfully',
+      'status' => 'success',
+    ]);
   }
 
   public function bulk(BulkStoreStoryRequest $request)
@@ -30,6 +40,14 @@ class StoryController extends Controller
 
     DB::transaction(function () use ($validated) {
       foreach ($validated['stories'] as $story) {
+        $story['invest_card'] = [
+          'independent' => 'no',
+          'negotiable' => 'no',
+          'valuable' => 'no',
+          'estimable' => 'no',
+          'small' => 'no',
+          'testable' => 'no',
+        ];
         Story::create($story);
       }
     });

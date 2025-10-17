@@ -5,24 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\UsageScenario;
 use Illuminate\Http\Request;
 use App\Http\Requests\BulkStoreUsageScenarioRequest;
-use Illuminate\Support\Facades\DB;  
+use Illuminate\Support\Facades\DB;
 
 class UsageScenarioController extends Controller
 {
   public function bulk(BulkStoreUsageScenarioRequest $request)
   {
-      $validatedData = $request->validated();
-      DB::transaction(function () use ($validatedData) {
-          foreach ($validatedData['usage_scenarios'] as $scenarioData) {
-              UsageScenario::create($scenarioData);
-          }
-      });
-      return back()->with('success', 'Cenários de uso adicionados com sucesso.');
+    $validatedData = $request->validated();
+    DB::transaction(function () use ($validatedData) {
+      foreach ($validatedData['usage_scenarios'] as $scenarioData) {
+        UsageScenario::create($scenarioData);
+      }
+    });
+    return back()->with('success', 'Cenários de uso adicionados com sucesso.');
   }
 
   public function store(Request $request)
   {
-
     $validated = $request->validate([
       'description' => 'required|array',
       'description.as' => 'required|string',
@@ -37,7 +36,10 @@ class UsageScenarioController extends Controller
 
     $usageScenario = UsageScenario::create($validated);
 
-    return back()->with(['status' => 'success', 'message' => 'Usage scenario created successfully']);
+    return back()->with([
+      'status' => 'success',
+      'message' => 'Usage scenario created successfully',
+    ]);
   }
 
   public function update(Request $request, UsageScenario $scenario)
@@ -55,13 +57,19 @@ class UsageScenarioController extends Controller
 
     $scenario->update($validated);
 
-    return back()->with(['status' => 'success', 'message' => 'Usage scenario updated successfully']);
+    return back()->with([
+      'status' => 'success',
+      'message' => 'Usage scenario updated successfully',
+    ]);
   }
 
   public function destroy(UsageScenario $scenario)
   {
     $scenario->delete();
 
-    return back()->with(['status' => 'success', 'message' => 'Usage scenario deleted successfully']);
+    return back()->with([
+      'status' => 'success',
+      'message' => 'Usage scenario deleted successfully',
+    ]);
   }
 }
