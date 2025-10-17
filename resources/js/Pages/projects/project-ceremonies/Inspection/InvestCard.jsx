@@ -9,25 +9,56 @@ const routerNames = {
   system_interfaces: 'system_interface',
 }
 
+const IndicatorBadge = ({ status }) => {
+  let message = ''
+  let element = null
+
+  switch (status) {
+    case 'validated':
+      message = 'Critérios aceitos'
+      element = <Check className="text-green-500" />
+      break
+    case 'pending':
+      message = 'Avaliação pendente'
+      element = <LoaderCircle className="text-blue-500" />
+      break
+    case 'rejected':
+      message = 'Critérios recusados'
+      element = <X className="text-red-500" />
+      break
+    default:
+      return null
+      break
+  }
+
+  return (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger>{element}</TooltipTrigger>
+        <TooltipContent>{message}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
 const InvestCard = ({
   itemId,
   itemCategory,
   anchorEl,
   project,
-  setProject,
   setInspectionId,
 }) => {
   const item = project[itemCategory]?.find((element) => element.id === itemId)
   const [investState, setInvestState] = useState({
-    independent: item?.invest_card?.independent || 'na',
-    negotiable: item?.invest_card?.negotiable || 'na',
-    valuable: item?.invest_card?.valuable || 'na',
-    estimable: item?.invest_card?.estimable || 'na',
-    small: item?.invest_card?.small || 'na',
-    testable: item?.invest_card?.testable || 'na',
+    independent: item?.invest_card?.independent || 'no',
+    negotiable: item?.invest_card?.negotiable || 'no',
+    valuable: item?.invest_card?.valuable || 'no',
+    estimable: item?.invest_card?.estimable || 'no',
+    small: item?.invest_card?.small || 'no',
+    testable: item?.invest_card?.testable || 'no',
   })
   const [isLoading, setIsLoading] = useState(false)
-
+  const [investStatus, setInvestStatus] = useState('rejected')
   // Lista de critérios para renderização dinâmica
   const investOptions = [
     'independent',
@@ -40,7 +71,26 @@ const InvestCard = ({
 
   // Sincroniza o estado interno se a prop externa mudar
   useEffect(() => {
-    console.log(investState)
+    // Pega todos os valores do objeto
+    const values = Object.values(investState)
+
+    if (values.length === 0) {
+      setInvestStatus('pending') // ou 'idle'
+      return
+    }
+    const allAreYes = values.every((value) => value === 'yes')
+    if (allAreYes) {
+      setInvestStatus('validated')
+      return // A validação para aqui
+    }
+
+    const anyIsNo = values.some((value) => value === 'no')
+    if (anyIsNo) {
+      setInvestStatus('rejected')
+      return // A validação para aqui
+    }
+
+    setInvestStatus('pending')
   }, [investState])
 
   /**
@@ -84,9 +134,6 @@ const InvestCard = ({
       <Popover open={true}>
         <PopoverAnchor virtualRef={{ current: anchorEl }}></PopoverAnchor>
         <PopoverContent className="bg-card border border-border rounded-md shadow-sm max-w-3xl w-72 lg:w-80">
-          <LoaderCircle
-            className={`${isLoading ? 'animate-spin' : 'hidden'} text-foreground`}
-          />
           <Button
             variant="outline"
             className="size-3 absolute top-0 right-0 p-3"
@@ -95,15 +142,20 @@ const InvestCard = ({
             <X />
           </Button>
           <section className="investCard flex flex-col flex-1 items-center justify-end gap-2 ">
-            <div className="flex flex-col flex-1 gap-4 text-normal font-normal text-foreground ">
+            <section className="flex gap-2 w-full">
+              <IndicatorBadge status={investStatus} />
+              <LoaderCircle
+                className={`${isLoading ? 'animate-spin' : 'hidden'} text-foreground`}
+              />
+            </section>
+            <div className="flex flex-col w-full gap-4 text-normal font-normal text-foreground ">
               {/* Cabeçalho */}
+
               <div className="grid grid-cols-[1fr_auto_auto_auto] items-center text-normal font-semibold  text-muted-foreground gap-x-2">
                 <h3 className="font-bold uppercase text-foreground">
                   Check Card
                 </h3>
-                {isTemporary(item.id) && (
-                  <LoaderCircle className="animate-spin text-foreground" />
-                )}
+
                 <span className=" ">SIM</span>
                 <span className="">NÃO</span>
                 <span className="">N/A</span>
