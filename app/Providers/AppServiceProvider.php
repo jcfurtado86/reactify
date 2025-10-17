@@ -16,7 +16,6 @@ use App\Observers\PrioritizationObserver;
 use App\Observers\MatrixPriorityObserver;
 
 use App\Observers\ChangeRequestObserver;
-use App\Observers\InvestCardObserver;
 use App\Observers\BusinessRuleObserver;
 use App\Observers\SystemInterfaceObserver;
 use App\Observers\InterviewObserver;
@@ -35,7 +34,6 @@ use App\Models\Storyboard;
 
 use App\Models\MatrixPriority;
 use App\Models\ChangeRequest;
-use App\Models\InvestCard;
 use App\Models\BusinessRule;
 use App\Models\SystemInterface;
 use App\Models\Interview;
@@ -73,7 +71,6 @@ class AppServiceProvider extends ServiceProvider
 
     Prioritization::observe(PrioritizationObserver::class);
     ChangeRequest::observe(ChangeRequestObserver::class);
-    InvestCard::observe(InvestCardObserver::class);
     BusinessRule::observe(BusinessRuleObserver::class);
     SystemInterface::observe(SystemInterfaceObserver::class);
     Interview::observe(InterviewObserver::class);

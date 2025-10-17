@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Actions\CreateStoryWithInvestCard;
 use App\Notifications\UserInvitedToProject;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -176,9 +175,10 @@ class ProjectSeeder extends Seeder
     // Criar Goal Sketch
     DB::table('goal_sketches')->insert([
       [
-        'title' => 'Atendimento às leis de direitos autorais e relacionadas à conteúdo em domínio público.',
+        'title' =>
+          'Atendimento às leis de direitos autorais e relacionadas à conteúdo em domínio público.',
         'type' => 'cg',
-        'priority' => 'high', 
+        'priority' => 'high',
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
@@ -208,8 +208,9 @@ class ProjectSeeder extends Seeder
         'updated_at' => now(),
       ],
       [
-        'title' => 'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
-        'type' => 'cg', 
+        'title' =>
+          'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
+        'type' => 'cg',
         'priority' => 'high',
         'project_id' => $projectId,
         'created_at' => now(),
@@ -239,7 +240,7 @@ class ProjectSeeder extends Seeder
         'created_at' => now(),
         'updated_at' => now(),
       ],
-       [
+      [
         'title' => 'Auferir receitas com anúncios que não sejam invasivos.',
         'type' => 'bg',
         'priority' => 'high',
@@ -248,21 +249,23 @@ class ProjectSeeder extends Seeder
         'updated_at' => now(),
       ],
       [
-        'title' => 'Criar uma comunidade virtual ativa em torno dos filmes da plataforma.',
+        'title' =>
+          'Criar uma comunidade virtual ativa em torno dos filmes da plataforma.',
         'type' => 'bg',
         'priority' => 'medium',
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
-      ], 
+      ],
       [
-        'title' => 'Estabelecer parcerias estratégicas com anunciantes, instituições educacionais ou outros colaboradores para criar oportunidades de receitas financeiras.',
+        'title' =>
+          'Estabelecer parcerias estratégicas com anunciantes, instituições educacionais ou outros colaboradores para criar oportunidades de receitas financeiras.',
         'type' => 'bg',
         'priority' => 'medium',
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
-      ], 
+      ],
       [
         'title' => 'Oferecer a venda de produtos temáticos na plataforma.',
         'type' => 'bg',
@@ -270,7 +273,7 @@ class ProjectSeeder extends Seeder
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
-      ],            
+      ],
     ]);
 
     // Criar Stories
@@ -291,17 +294,13 @@ class ProjectSeeder extends Seeder
         'type' => 'system',
       ],
       [
-        'title' => 'Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência',
+        'title' =>
+          'Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência',
         'type' => 'system',
       ],
     ];
 
     DB::transaction(function () use ($storiesData, $projectId) {
-      // 2. Obtenha uma instância da sua Action.
-      //    Usar app() é a melhor prática, pois o Service Container do Laravel resolverá quaisquer dependências que a Action possa ter.
-      $createStoryAction = app(CreateStoryWithInvestCard::class);
-
-      // 3. Itere sobre o array e execute a Action para cada story.
       foreach ($storiesData as $storyData) {
         // Adicione os dados que são comuns a todos, se necessário
         $dataToCreate = array_merge($storyData, [
@@ -309,7 +308,7 @@ class ProjectSeeder extends Seeder
         ]);
 
         // Execute a action com os dados combinados
-        $createStoryAction->execute($dataToCreate);
+        DB::table('stories')->insert($dataToCreate);
       }
     });
     //inserir cards
@@ -582,14 +581,15 @@ class ProjectSeeder extends Seeder
     ]);
 
     DB::table('interviews')->insert([
-        [
-            'project_id' => $projectId,
-            'file_name' => 'classicflix.pdf', 
-            'file_path' => 'https://res.cloudinary.com/dlbpjcsvm/image/upload/v1759674129/reactify/interviews/1/classicflix.pdf',
-            'public_id' => 'reactify/interviews/1/classicflix',
-            'resource_type' => 'image',
-            'extraction_status' => 'completed',
-            'transcript' => 'Bom dia. Obrigado por reservar este tempo. O objetivo hoje é começarmos a desenhar o que
+      [
+        'project_id' => $projectId,
+        'file_name' => 'classicflix.pdf',
+        'file_path' =>
+          'https://res.cloudinary.com/dlbpjcsvm/image/upload/v1759674129/reactify/interviews/1/classicflix.pdf',
+        'public_id' => 'reactify/interviews/1/classicflix',
+        'resource_type' => 'image',
+        'extraction_status' => 'completed',
+        'transcript' => 'Bom dia. Obrigado por reservar este tempo. O objetivo hoje é começarmos a desenhar o que
 será o Classiflix. Quero entender sua visão, os objetivos, quem vai usar a plataforma e o que
 ela precisa fazer. Podemos começar?
 Bom dia! Com certeza. Estou animado para tirar essa ideia do papel. O Classiflix é mais que
@@ -662,9 +662,9 @@ ferramenta de ensino seria a maior recompensa. Poderíamos medir isso com pesqui
 de satisfação.
 Perfeito. Isso me dá uma base excelente para começar a detalhar os requisitos.
 Exatamente. Você capturou a essência do que precisamos para começar.',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ],
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
     ]);
   }
 }

@@ -26,7 +26,6 @@ use App\Http\Controllers\SprintController;
 
 use App\Http\Controllers\StorySprintController;
 use App\Http\Controllers\ChangeRequestController;
-use App\Http\Controllers\InvestCardController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\StoryboardController;
 use App\Http\Controllers\SystemInterfaceController;
@@ -224,7 +223,8 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
       'overall.store'
     );
     Route::post('/bulk-store', [OverallModelController::class, 'bulk'])->name(
-      'overall.bulk-store');
+      'overall.bulk-store'
+    );
     Route::patch('/{model}', [OverallModelController::class, 'update'])->name(
       'overall.update'
     );
@@ -280,8 +280,10 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('/', [OverallModelClassController::class, 'store'])->name(
       'overall-model-class.store'
     );
-    Route::post('/bulk-store', [OverallModelClassController::class, 'bulk'])->name(
-      'overall-model-class.bulk-store');
+    Route::post('/bulk-store', [
+      OverallModelClassController::class,
+      'bulk',
+    ])->name('overall-model-class.bulk-store');
     Route::delete('/{class}', [
       OverallModelClassController::class,
       'destroy',
@@ -374,20 +376,6 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
       ProductCanvasController::class,
       'destroy',
     ])->name('product-canvas.destroy');
-  });
-
-  Route::prefix('invest-card')->group(function () {
-    Route::post('/', [InvestCardController::class, 'store'])->name(
-      'invest-card.store'
-    );
-    Route::patch('/{investCard}', [
-      InvestCardController::class,
-      'update',
-    ])->name('invest-card.update');
-    Route::delete('/{investCard}', [
-      InvestCardController::class,
-      'destroy',
-    ])->name('invest-card.destroy');
   });
 
   // pagina para system interfaces
