@@ -14,14 +14,12 @@ class Persona extends Model
         'project_id',
         'profile',
         'expectations',
-        'restrictions', 
         'goals'
     ];
 
     protected $casts = [
         'profile' => 'array',
         'expectations' => 'array',
-        'restrictions' => 'array',
         'goals' => 'array'
     ];
 
