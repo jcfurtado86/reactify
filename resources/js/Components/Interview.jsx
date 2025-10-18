@@ -17,6 +17,15 @@ import { toast } from 'sonner'
 const InterviewListItem = ({ interview }) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
 
+  const formattedDate = new Date(interview.created_at).toLocaleDateString(
+    'pt-BR',
+    {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    },
+  )
+
   const handleDelete = (e) => {
     e.preventDefault()
     setShowConfirmDelete(true)
@@ -64,6 +73,10 @@ const InterviewListItem = ({ interview }) => {
       </a>
 
       <div className="flex items-center gap-4">
+        {/* Exibe a data formatada. Ajuste as classes de estilo se desejar. */}
+        <span className="w-20 flex-shrink-0 text-right text-xs font-medium text-muted-foreground">
+          {formattedDate}
+        </span>
         {interview.extraction_status === 'processing' && (
           <div className="flex items-center gap-2 text-xs text-blue-500">
             <Loader2 className="h-4 w-4 animate-spin" />
