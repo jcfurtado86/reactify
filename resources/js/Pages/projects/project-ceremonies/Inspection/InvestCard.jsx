@@ -6,6 +6,7 @@ import { isTemporary } from '@/lib/utils'
 const routerNames = {
   // local state name -> route name
   stories: 'story',
+  goal_sketches: 'goal',
   system_interfaces: 'system_interface',
 }
 

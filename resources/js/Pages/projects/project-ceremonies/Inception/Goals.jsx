@@ -15,6 +15,8 @@ import { tooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { toast } from 'sonner'
+import InvestCard from '../Inspection/InvestCard'
+
 export const typeColors = {
   bg: { color: '!bg-orange-600', title: 'bg' },
   cg: { color: '!bg-purple-600', title: 'cg' },
@@ -169,6 +171,7 @@ const GoalItem = ({
   onSave,
   onCancel,
   onDelete,
+  onInspect,
   textareaRef,
   typeSelectId,
   onToggleTypeSelect,
@@ -193,6 +196,7 @@ const GoalItem = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="relative group"
+      data-card-id={goal.id}
     >
       <Card className="bg-card border-0 transition-all duration-300 ease-in-out rounded">
         <CardContent className="p-2 flex flex-col gap-2">
@@ -210,7 +214,7 @@ const GoalItem = ({
                       selectedType.color,
                     )}
                   >
-                    {goal.type.toUpperCase()}
+                    {goal.type.toUpperCase()} {goal.id}
                     <ChevronDown className="ml-1 size-3" />
                   </Badge>
                 </PopoverTrigger>
@@ -322,11 +326,16 @@ const GoalItem = ({
         isTemporary={isTemporary}
         onEdit={onEdit}
         onDelete={onDelete}
+        onInspect={onInspect}
       />
     </div>
   )
 }
 const Goals = ({ project, setProject }) => {
+  // inspection states
+  const [inspectionId, setInspectionId] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
+  //states
   const [editingId, setEditingId] = useState(null)
   const [editValue, setEditValue] = useState('')
   const textareaRef = useRef(null)
@@ -338,6 +347,18 @@ const Goals = ({ project, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
+
+  // inspection function
+  const inspectGoal = (goalId) => {
+    if (inspectionId === goalId) {
+      setInspectionId(null)
+      setAnchorEl(null)
+    } else {
+      const element = document.querySelector(`[data-card-id="${goalId}"]`)
+      setAnchorEl(element)
+      setInspectionId(goalId)
+    }
+  }
 
   const isTemporary = (goal) =>
     typeof goal.id === 'string' && goal.id.startsWith('temp-')
@@ -622,7 +643,7 @@ const Goals = ({ project, setProject }) => {
   }
 
   return (
-    <div className="goalSketches rounded grid grid-cols-2 gap-2 w-full p-4 cursor-pointer items-start">
+    <div className="goalSketches rounded grid grid-cols-2 gap-2 w-full p-4 items-start">
       {/* --- Column 1: Constraint Goals --- */}
       {showAiModal && (
         <GeneratedItemsModal
@@ -635,7 +656,16 @@ const Goals = ({ project, setProject }) => {
           toggleAllItems={toggleAllGoals}
         />
       )}
-
+      {inspectionId && (
+        <InvestCard
+          itemCategory={'goal_sketches'}
+          itemId={inspectionId}
+          anchorEl={anchorEl}
+          project={project}
+          setProject={setProject}
+          setInspectionId={setInspectionId}
+        />
+      )}
       <div className="flex flex-col gap-2">
         <InfoButton
           data={tooltipInfo.constraintGoal}
@@ -661,6 +691,7 @@ const Goals = ({ project, setProject }) => {
                 onSave={() => editGoal(goal)}
                 onCancel={() => setEditingId(null)}
                 onDelete={() => deleteGoal(goal.id)}
+                onInspect={() => inspectGoal(goal.id)}
                 textareaRef={editingId === goal.id ? textareaRef : null}
                 typeSelectId={typeSelectId}
                 onToggleTypeSelect={() => toggleTypeSelect(goal.id)}
@@ -730,6 +761,7 @@ const Goals = ({ project, setProject }) => {
               onSave={() => editGoal(goal)}
               onCancel={() => setEditingId(null)}
               onDelete={() => deleteGoal(goal.id)}
+              onInspect={() => inspectGoal(goal.id)}
               textareaRef={editingId === goal.id ? textareaRef : null}
               typeSelectId={typeSelectId}
               onToggleTypeSelect={() => toggleTypeSelect(goal.id)}
