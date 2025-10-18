@@ -8,6 +8,7 @@ use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Persona;
+use App\Models\Interview;
 
 class JourneyGeneratorControllerGemini extends Controller
 {
@@ -18,33 +19,31 @@ class JourneyGeneratorControllerGemini extends Controller
             $request->validate([
                 'project_id' => 'required|integer|min:1'
             ]);
+            $projectId = $request->input('project_id');
+            
+            $interviews = Interview::where('project_id', $projectId)
+                ->whereNotNull('transcript')
+                ->where('transcript', '!=', '')
+                ->get();
+            
+            $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
-            // Buscar personas do projeto
-            $personas = $this->getPersonasByProject($request->input('project_id'));
-
+            $personas = $this->getPersonasByProject($projectId);
             if ($personas->isEmpty()) {
-                return response()->json([
-                    'status' => 'warning',
-                    'message' => 'Nenhuma persona encontrada para este projeto'
-                ], 404);
+                return response()->json(['status' => 'warning', 'message' => 'Nenhuma persona encontrada para este projeto'], 404);
             }
 
-            // Verificar se existem personas com goals válidos
             $personasWithGoals = $this->filterPersonasWithValidGoals($personas);
 
             if ($personasWithGoals->isEmpty()) {
-                return response()->json([
-                    'status' => 'warning',
-                    'message' => 'Nenhuma persona com goals válidos encontrada para este projeto'
-                ], 404);
+                return response()->json(['status' => 'warning', 'message' => 'Nenhuma persona com goals válidos encontrada para este projeto'], 404);
             }
 
-            // Gerar journeys para personas que possuem goals
-            $allJourneys = $this->generateJourneysForPersonas($personasWithGoals);
+            $allJourneys = $this->generateJourneysForPersonas($personasWithGoals, $combinedTranscripts);
 
             return response()->json([
                 'status' => 'sucesso',
-                'project_id' => $request->input('project_id'),
+                'project_id' => $projectId,
                 'journeys' => $allJourneys
             ]);
 
@@ -67,7 +66,7 @@ class JourneyGeneratorControllerGemini extends Controller
     private function getPersonasByProject(int $projectId)
     {
         try {
-            // MODIFICAÇÃO: Adicionado whereNull para ignorar soft deletes e corrigido o select.
+            // Adicionado whereNull para ignorar soft deletes e corrigido o select.
             return Persona::where('project_id', $projectId)
                 ->whereNull('deleted_at')
                 ->select('id', 'name', 'goals') // Selecionando id e name para uso nos logs.
@@ -127,7 +126,7 @@ class JourneyGeneratorControllerGemini extends Controller
         return false;
     }
 
-    private function generateJourneysForPersonas($personas): array
+    private function generateJourneysForPersonas($personas, string $interviewContext): array
     {
         $allJourneys = [];
 
@@ -139,7 +138,7 @@ class JourneyGeneratorControllerGemini extends Controller
                     continue;
                 }
 
-                $journeys = $this->generateJourneyForPersona($persona);
+                $journeys = $this->generateJourneyForPersona($persona, $interviewContext);
                 $allJourneys = array_merge($allJourneys, $journeys);
             } catch (\Exception $e) {
                 Log::error("Erro ao gerar journey para persona {$persona->id}: " . $e->getMessage());
@@ -151,22 +150,17 @@ class JourneyGeneratorControllerGemini extends Controller
         return $allJourneys;
     }
 
-    private function generateJourneyForPersona(Persona $persona): array
+    private function generateJourneyForPersona(Persona $persona, string $interviewContext): array
     {
         try {
-            $prompt = $this->createPrompt($persona);
-            
+            $prompt = $this->createPrompt($persona, $interviewContext);
+            Log::info("PROMPT PARA JOURNEYS: \n\n{$prompt}:");
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
-
             $modelName = config('gemini.model');
-
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
-
             $responseText = $result->text();
-            
             // Fazer parsing da resposta
             $parsedData = $this->parseResponse($responseText);
-
             // Formatar journeys com dados da persona
             return $this->formatJourneys($parsedData, $persona);
 
@@ -175,7 +169,7 @@ class JourneyGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(Persona $persona): string
+    private function createPrompt(Persona $persona, string $interviewContext): string
     {
         // Garantir que goals seja um array válido para o JSON
         $goals = is_string($persona->goals) ? json_decode($persona->goals, true) : $persona->goals;
@@ -190,7 +184,13 @@ class JourneyGeneratorControllerGemini extends Controller
                 
         Crie journeys para as goals de uma persona listados abaixo:
         
-        Goals: {$goalsJson}
+        - Persona: {$persona->name}
+        - Goals: {$goalsJson}
+
+        Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):
+        {$interviewContext}
+
+        **Fim do contexto da entrevista**
         
         Formato requerido:
         Inicio do formato requerido
@@ -204,7 +204,7 @@ class JourneyGeneratorControllerGemini extends Controller
                 }
             ]
         }
-        Fim do formato requerido
+        **Fim do formato requerido**
 
         Exemplo de journey:
         {
@@ -230,8 +230,8 @@ class JourneyGeneratorControllerGemini extends Controller
                 }
             ]
         }
-        Fim do exemplo
-        Retorne apenas o JSON e não use \ para escapar caracteres especiais.
+        **Fim do exemplo**
+        IMPORTANTE: Retorne apenas o JSON e não use \ para escapar caracteres especiais.
         IMPORTANTE: Caso não haja goal para a persona da vez, não gere ou invente uma journey(title, steps)
         IMPORTANTE: Caso o texto da goal não faça sentido, não gere ou invente uma journey(title, steps)
         PROMPT;
