@@ -7,14 +7,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Goal extends Model
 {
   use SoftDeletes;
-  
+
   protected $fillable = [
     'title',
     'type',
     'priority',
-    'project_id'
+    'project_id',
+    'invest_card',
   ];
-
+  protected $casts = [
+    'invest_card' => 'array',
+  ];
   protected $table = 'goal_sketches';
 
   public function project()

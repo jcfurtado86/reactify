@@ -13,7 +13,7 @@ return new class extends Migration {
     Schema::create('stories', function (Blueprint $table) {
       $table->id();
       $table->text('title');
-      $table->jsonb('invest_card');
+      $table->jsonb('invest_card')->nullable();
       $table->enum('type', ['user', 'system']); // Tipo fixo
       $table
         ->enum('status', ['draft', 'prioritized', 'in_progress', 'done'])

@@ -29,7 +29,6 @@ const IndicatorBadge = ({ status }) => {
       break
     default:
       return null
-      break
   }
 
   return (
