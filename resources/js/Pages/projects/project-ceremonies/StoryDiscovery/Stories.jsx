@@ -629,7 +629,7 @@ const Stories = ({ project, setProject }) => {
                   isEditing={editingId === story.id}
                   editValue={editValue}
                   onValueChange={handleInputChange}
-                  onInspect={() => inspectStory(story)}
+                  onInspect={() => inspectStory(story.id)}
                   onEdit={() => editStory(story)}
                   onSave={() => editStory(story)}
                   onDelete={() => deleteStory(story.id)}
