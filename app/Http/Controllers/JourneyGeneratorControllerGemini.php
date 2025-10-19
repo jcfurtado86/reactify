@@ -206,9 +206,10 @@ class JourneyGeneratorControllerGemini extends Controller
         }
         **Fim do formato requerido**
 
-        Exemplo de journey:
+        Exemplos de journeys:
         {
-            "journeys": [
+            "journeys": 
+            [
                 {
                     "title": "Assistir um filme",
                     "steps": [
@@ -226,6 +227,32 @@ class JourneyGeneratorControllerGemini extends Controller
                         {"description": "Selecionar “iniciar filme”", "is_touchpoint": true},
                         {"description": "Abrir player de vídeo", "is_touchpoint": false},
                         {"description": "Iniciar exibição do filme", "is_touchpoint": false}
+                    ]
+                },
+                {
+                    "title": "Escrever uma resenha ou comentário sobre o filme que assistir",
+                    "steps": [
+                        {"description": "Usuário acessa a página do filme", "is_touchpoint": false},
+                        {"description": "O sistema exibe sinopse, ficha técnica, notas de outros usuários e opções de interação (como iniciar o filme, escrever comentário, assistir depois)", "is_touchpoint": false},
+                        {"description": "Usuário seleciona a opção 'Escrever um comentário/resenha'", "is_touchpoint": true},
+                        {"description": "O sistema abre um formulário de texto para a resenha e um campo para dar nota", "is_touchpoint": false},
+                        {"description": "Usuário digita a resenha e insere a nota", "is_touchpoint": true},
+                        {"description": "Usuário clica em "Publicar"", "is_touchpoint": true},
+                        {"description": "O sistema exibe mensagem de sucesso e atualiza a seção de comentários do filme com a nova resenha e nota.", "is_touchpoint": false}
+                    ]
+                },
+                {
+                    "title": "Adicionar e categorizar filmes no catálogo",
+                    "steps": [
+                        {"description": "Usuário administrador acessa o painel administrativo", "is_touchpoint": true},
+                        {"description": "O sistema exibe o painel de controle e menus de gestão de conteúdo", "is_touchpoint": false},
+                        {"description": "Administrador seleciona a opção 'Gerenciamento de Conteúdo'", "is_touchpoint": true},
+                        {"description": " O sistema exibe a lista de filmes existentes e a opção 'Adicionar Novo Filme'", "is_touchpoint": false},
+                        {"description": "Logan seleciona 'Adicionar Novo Filme'", "is_touchpoint": true},
+                        {"description": "O sistema exibe um formulário solicitando dados do filme (título, sinopse, ficha técnica, arquivos de vídeo e legenda)", "is_touchpoint": false},
+                        {"description": "Administrador insere todos os dados e seleciona as categorias relevantes", "is_touchpoint": true},
+                        {"description": "Administrador clica em "Salvar e Publicar" ", "is_touchpoint": true},
+                        {"description": "O sistema processa o upload e a categorização, exibe uma mensagem de sucesso, e o novo filme fica disponível no catálogo.", "is_touchpoint": false}
                     ]
                 }
             ]

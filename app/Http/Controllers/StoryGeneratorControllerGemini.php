@@ -165,69 +165,96 @@ class StoryGeneratorControllerGemini extends Controller
     $constraintGoalsText = $this->formatConstraintGoalsForPrompt($constraintGoals);
 
     return <<<PROMPT
-        Com base nos dados fornecidos do sistema, gere user stories e system stories no formato especificado abaixo:
+    Com base nos dados fornecidos do sistema, gere user stories e system stories no formato especificado abaixo:
 
-        CONTEXTO PRINCIPAL (Use como base de conhecimento):
-          - Transcrições de Entrevistas: {$interviewsText}
+    CONTEXTO PRINCIPAL (Use como base de conhecimento):
+    - Transcrições de Entrevistas: {$interviewsText}
 
-        CONTEXTO PARA USER STORIES:
-          - Goals das Personas do Produto: $personasText
+    CONTEXTO PARA USER STORIES:
+    - Goals das Personas do Produto: $personasText
 
-          - Journeys do Produto: $journeysText
+    - Journeys do Produto: $journeysText
 
-        CONTEXTO PARA SYSTEM STORIES:
-          - Restrições do Produto: $constraintsText
+    CONTEXTO PARA SYSTEM STORIES:
+    - Restrições do Produto: $constraintsText
 
-          - Constraint Goals do Produto: $constraintGoalsText
+    - Constraint Goals do Produto: $constraintGoalsText
 
-        INSTRUÇÕES:
-          1. Para USER STORIES: Use as Goals das Personas e Journeys como contexto para criar histórias centradas no usuário.
+    INSTRUÇÕES:
+    1. Para USER STORIES: Use as Goals das Personas e Journeys como contexto para criar histórias centradas no usuário.
 
-          2. Para SYSTEM STORIES: Use as Restrições do Produto e Constraint Goals como contexto para criar histórias do sistema. Também acrescente atributos de qualidade na descrição das system stories.
+    2. Para SYSTEM STORIES: Use as Restrições do Produto e Constraint Goals como contexto para criar histórias do sistema. Também acrescente atributos de qualidade na descrição das system stories.
 
-            FORMATO REQUERIDO:
-            INÍCIO DO FORMATO REQUERIDO
-              {
-                "stories":
-                  [
-                    {
-                      "title":"texto da story",
-                      "type":"user|system"
-                    }
-                  ]
-              }
-            FIM DO FORMATO REQUERIDO
+    FORMATO REQUERIDO:
+    INÍCIO DO FORMATO REQUERIDO
+      {
+        "stories":
+          [
+            {
+              "title":"texto da story",
+              "type":"user|system"
+            }
+          ]
+      }
+    FIM DO FORMATO REQUERIDO
 
-            EXEMPLO DE USER STORY:
-              {
-                "title":"Eu como Thiago Guimarães quero criar listas e adicionar a elas obras disponíveis na plataforma para criar playlists de filmes.",
-                "type":"user"
-              }
-            FIM DO EXEMPLO DE USER STORY:
+    EXEMPLO DE USER STORY:
+      {
+        "title":"Eu como Thiago Guimarães quero criar listas e adicionar a elas obras disponíveis na plataforma para criar playlists de filmes.",
+        "type":"user"
+      }
+    FIM DO EXEMPLO DE USER STORY:
 
-            EXEMPLO DE SYSTEM STORY:
-              {
-                "title": "Título: Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência"
-                "type": "system"
-              }
-            FIM DO EXEMPLO DE SYSTEM STORY
+    EXEMPLO DE SYSTEM STORY:
+      {
+        "title": "Título: Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência"
+        "type": "system"
+      }
+    FIM DO EXEMPLO DE SYSTEM STORY
 
-          3. Após escrever as stories, deve verificar e validar esses requisitos.
-            Avalie se as stories produzidas estão corretas, testáveis, pequenas o suficiente.
-            Essa inspeção é feita com o uso dos critérios INVEST listados abaixo:
+    3. Após escrever as stories, deve verificar e validar esses requisitos.
+    Essa validação é feita com o uso dos critérios INVEST descritos abaixo:
 
-            Critérios INVEST:
-            - INDEPENDENT
-            - NEGOTIABLE
-            - VALUABLE
-            - ESTIMABLE
-            - SMALL
-            - TESTABLE
+    Os critérios INVEST são um acrônimo utilizado para avaliar a viabilidade e a qualidade dos requisitos elicitados durante a cerimônia de *Inspection* do método REACT.
 
-        IMPORTANTE: Retorne apenas o JSON e não use \ para escapar caracteres especiais.
-        IMPORTANTE: Caso não haja dados suficientes para um tipo de story, não gere ou invente stories.
-        IMPORTANTE: Gere stories baseadas totalmente nos exemplos e informações fornecidos acima.
-        PROMPT;
+    Os seis critérios que compõem o INVEST são:
+
+    *   **I (Independent / Independente):**
+        *   Representa a independência do requisito.
+        *   O requisito deve ser **independente de outros requisitos para ser implementado** ou possuir a menor dependência possível.
+        *   Este critério avalia a capacidade de um requisito ser implementado ou modificado sem gerar grandes impactos em demais requisitos.
+
+    *   **N (Negotiable / Negociável):**
+        *   Representa a negociação do requisito.
+        *   Diz respeito a se aquele requisito foi **negociado ou não com o principal interessado** nele.
+        *   O requisito deve estar **priorizado pelo Customer**.
+
+    *   **V (Valuable / Valioso):**
+        *   Representa o valor daquele requisito para o cliente.
+        *   Deve **atender um ou mais objetivos definidos nas Personas**.
+        *   Busca avaliar se o requisito representa valor para o cliente.
+
+    *   **E (Estimable / Estimável):**
+        *   Representa a **possibilidade de estimar o esforço** daquele requisito.
+        *   Deve ser **possível estimar o esforço para a implementação**.
+
+    *   **S (Sized-Apropriately / Tamanho Adequado ou Small / Pequeno):**
+        *   O requisito deve ter um **tamanho apropriado**.
+        *   Deve ser **pequeno o suficiente para ser implementado em uma iteração**.
+
+    *   **T (Testable / Testável):**
+        *   Representa a **possibilidade de testá-lo**.
+        *   Deve ser **possível gerar cenários de teste de aceitação**.
+        *   Avalia a capacidade de determinado requisito ser testado na prática.
+
+    
+    Seu trabalho então é inspecionar cada story gerada e garantir que esta esteja 
+    de acordo com os critérios INVEST. Retorne sua resposta final apenas depois de passar por esses 3 passos.
+
+    IMPORTANTE: Retorne apenas o JSON e não use \ para escapar caracteres especiais.
+    IMPORTANTE: Caso não haja dados suficientes para um tipo de story, não gere ou invente stories.
+    IMPORTANTE: Gere stories baseadas totalmente nos exemplos e informações fornecidos acima.
+    PROMPT;
   }
 
   // Métodos auxiliares para buscar dados do banco de dados (mantendo o filtro de soft-delete)

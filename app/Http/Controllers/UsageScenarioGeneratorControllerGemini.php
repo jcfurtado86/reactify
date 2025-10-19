@@ -89,8 +89,10 @@ class UsageScenarioGeneratorControllerGemini extends Controller
         - 'given': A pré-condição ou o contexto inicial.
         - 'when': A ação que o usuário realiza.
         - 'then_1': O resultado esperado principal.
-        - 'and': (Opcional) Uma verificação adicional no resultado.
-        - 'then_2': (Opcional) Outro resultado esperado.
+        - 'and': (Opcional junto de then_x) Uma verificação adicional no resultado.
+        - 'then_2': (Opcional junto de and_x) Outro resultado esperado.
+
+        REGRA: Um 'and' em hipótese alguma deve existir sem um 'then' logo apos ele. Essa é sua principal regra e nunca deve ser quebrada.
 
         Formato de resposta requerido (JSON):
         {
@@ -109,8 +111,8 @@ class UsageScenarioGeneratorControllerGemini extends Controller
         }
         **Fim do formato requerido**
 
-        Exemplo de um Cenário de Aceitação do projeto de streaming de filmes:
-        Se a Story for "Eu como Leon Cardoso quero uma opção de exclusão de filmes do catálogo da plataforma no painel de controle administrativo para remover um filme do catálogo.", a resposta poderia ser:
+        Exemplos de um Cenários de Aceitaçãos do projeto de streaming de filmes:
+        Se a Story for "Eu como usuário adminsitrador quero uma opção de exclusão de filmes do catálogo da plataforma no painel de controle administrativo para remover um filme do catálogo.", a resposta poderia ser:
         {
             "usage_scenarios": [
                 {
@@ -121,6 +123,33 @@ class UsageScenarioGeneratorControllerGemini extends Controller
                         "then_1": "o sistema exibe uma mensagem de confirmação solicitando a confirmação da exclusão.",
                         "and": "o Administrador Cardoso confirma a exclusão.",
                         "then_2": "uma mensagem é exibida indicando que o filme foi removido com sucesso."
+                    }
+                }
+            ]
+        }
+
+        Se a Story for "Como usuário, eu quero ter uma opção de seleção de idioma de legenda dentro do player de vídeo, para atingir o objetivo de escolher o idioma da legenda do filme que assistir", a resposta poderia ser:
+        {
+            "usage_scenarios": [
+                {
+                    "description": {
+                        "as": "Usuário",
+                        "given": "que usuário possui um cadastro ativo, está logado na plataforma e um filme está sendo reproduzido.",
+                        "when": "o usuário acessa as configurações do player de vídeo e seleciona a opção de idioma "Português" para as legendas.",
+                        "then_1": "o sistema exibe imediatamente as legendas do filme no idioma Português, permitindo que o usuário assista ao filme conforme sua preferência de idioma"
+                    }
+                }
+            ]
+        }
+
+        Se a Story for "É necessário garantir que as informações de cadastro e login do usuário sejam armazenadas com segurança, por meio da implementação de criptografia de dados em trânsito e em repouso, para cumprir as restrições de segurança da informação e de proteção de dados pessoais", a resposta poderia ser:
+        {
+            "usage_scenarios": [
+                {
+                    "description": {
+                        "given": "que um novo usuário realiza o cadastro na plataforma, inserindo seu e-mail e senha.",
+                        "when": "o sistema processa a informação de senha para armazenamento no banco de dados.",
+                        "then_1": "o sistema armazena a senha do usuário utilizando uma função hash criptográfica robusta para proteger os dados do usuário e aderir aos padrões legais."
                     }
                 }
             ]

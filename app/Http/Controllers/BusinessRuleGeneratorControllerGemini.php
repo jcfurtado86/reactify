@@ -99,7 +99,7 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         }
         **Fim do formato requerido**
 
-        Exemplo aplicado a um projeto de streaming de filmes:
+        Exemplos aplicado a um projeto de streaming de filmes:
         Se a Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe 
         estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", 
         a resposta poderia ser:
@@ -108,6 +108,27 @@ class BusinessRuleGeneratorControllerGemini extends Controller
                 { "title": "A seção de estatísticas, gráficos ou tabelas de vistas deve estar disponível apenas no painel de controle administrativo, garantindo que apenas usuários autorizados, como administradores, tenham acesso a essas informações." },
                 { "title": "As informações de visitas à plataforma devem ser protegidas e acessíveis apenas para usuários autorizados. É necessário garantir que os dados dos usuários sejam tratados de acordo com as leis de privacidade de dados aplicáveis e as políticas de segurança da empresa." },
                 { "title": "As estatísticas, gráficos ou tabelas devem ser apresentados de forma clara e compreensível para os administradores." }
+            ]
+        }
+
+        Se a Story for "Como Usuário, eu quero ter uma opção de seleção de idioma de legenda dentro do player de vídeo, para atingir o objetivo de escolher o idioma da legenda do filme que assistir.", 
+        a resposta poderia ser:
+        {
+            "business_rules": [
+                { "title": "O player de vídeo deve oferecer no mínimo os idiomas Português e Inglês como opções de legenda, dada a restrição do produto de streaming para filmes em domínio público com legendas em português e inglês." },
+                { "title": "O sistema deve aplicar imediatamente a legenda selecionada pelo usuário durante a reprodução do filme, sem exigir o reinício da reprodução." },
+                { "title": "A seleção de legenda deve estar disponível apenas para usuários autenticados e com plano de assinatura ativo." }
+            ]
+        }
+
+        Se a Story for "É necessário garantir que as informações de cadastro e login do usuário sejam armazenadas com segurança, por meio da implementação de criptografia de dados em trânsito e em repouso, para cumprir as restrições de segurança da informação e de proteção de dados pessoais.", 
+        a resposta poderia ser:
+        {
+            "business_rules": [
+                { "title": "Todos os dados pessoais sensíveis dos usuários (incluindo senhas e informações de cadastro) devem ser criptografados antes de serem armazenados no banco de dados." },
+                { "title": "O sistema deve utilizar protocolos de segurança (como SSL/TLS) para garantir a criptografia de dados em trânsito durante o processo de login e cadastro." },
+                { "title": "O tratamento de dados do usuário deve ser realizado em conformidade com as leis de privacidade de dados aplicáveis e as políticas de segurança da empresa." }
+                { "title": "Senhas de usuários não podem ser armazenadas em texto simples (plain text); deve ser utilizado um método de hash criptográfico robusto." }
             ]
         }
         **Fim do exemplo**
