@@ -104,7 +104,6 @@ const InvestCard = ({
    * @param {string} value O novo valor ('true', 'false', ou 'null')
    */
   const handleValueChange = (field, value) => {
-    console.log(value)
     if (isTemporary(item.id)) return
     // 1. Atualização Otimista do Estado Local
     setInvestState((prevState) => ({

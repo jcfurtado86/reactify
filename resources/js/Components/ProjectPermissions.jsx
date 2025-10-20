@@ -84,8 +84,6 @@ export function ProjectPermissions({ project }) {
       },
       {
         onSuccess: () => {
-          // setNewUserEmail('') // Limpa o input
-          // fetchPermissions() // Recarrega a lista de usuários
           normalizeProjectUsers(project?.users)
         },
         onError: (error) => {
@@ -105,16 +103,13 @@ export function ProjectPermissions({ project }) {
         id: memberId,
       },
       {
-        onSuccess: () => {
-          // fetchPermissions() // Recarrega a lista de usuários
-        },
+        onSuccess: () => {},
         onError: (error) => {
           // toast.error('Failed to remove user')
         },
       },
     )
     setIsLoading(false)
-    // await fetchPermissions() // Recarrega a lista de usuários
   }
 
   // Função para alterar o papel de um usuário
@@ -133,7 +128,7 @@ export function ProjectPermissions({ project }) {
       <SheetTrigger asChild>
         <Button variant="outline">Permissões</Button>
       </SheetTrigger>
-      <SheetContent className="w-[370px] sm:w-[450px] md:w-[470px]">
+      <SheetContent className="max-w-[370px] sm:max-w-[450px] md:max-w-[470px]">
         <SheetHeader>
           <SheetTitle className="text-foreground">
             Gerenciar Permissões : {currentUserRole?.toUpperCase()}
@@ -148,7 +143,7 @@ export function ProjectPermissions({ project }) {
           {isLoading && <p className="text-muted-foreground">Carregando...</p>}
           {!isLoading &&
             users
-              .filter((user) => user.id !== auth.user.id)
+              // .filter((user) => user.id !== auth.user.id)
               .map((user) => {
                 const isOwner =
                   user.id == auth.user.id && user.role === 'administrator'
@@ -158,55 +153,59 @@ export function ProjectPermissions({ project }) {
                     className="flex w-full items-center justify-between"
                   >
                     <div className="flex flex-col">
-                      <p className="font-medium text-foreground">{user.name}</p>
+                      <p className="font-medium text-foreground">
+                        {user.name}
+                        {isOwner ? ' (You)' : ''}
+                      </p>
                       <p className="text-sm text-muted-foreground">
                         {user.email}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Select
-                        value={user.role}
-                        onValueChange={(newRole) =>
-                          handleRoleChange(user.id, newRole)
-                        }
-                        disabled={!canManagePermissions || isOwner}
-                      >
-                        <SelectTrigger className="w-20">
-                          <SelectValue placeholder="Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="customer">Customer</SelectItem>
-                          <SelectItem value="domain_expert">
-                            Domain Expert
-                          </SelectItem>
-                          <SelectItem value="team">Team</SelectItem>
-                          <SelectItem value="facilitator">
-                            Facilitator
-                          </SelectItem>
-                          <SelectItem value="administrator">
-                            Administrator
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveUser(user.id)}
-                        disabled={!canManagePermissions || isOwner}
-                      >
-                        <X className="size-4 text-foreground" />
-                      </Button>
-                    </div>
+                    {!isOwner ? (
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={user.role}
+                          onValueChange={(newRole) =>
+                            handleRoleChange(user.id, newRole)
+                          }
+                          disabled={!canManagePermissions || isOwner}
+                        >
+                          <SelectTrigger className="w-24">
+                            <SelectValue placeholder="Role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="customer">Customer</SelectItem>
+                            <SelectItem value="domain_expert">
+                              Domain Expert
+                            </SelectItem>
+                            <SelectItem value="team">Team</SelectItem>
+                            <SelectItem value="facilitator">
+                              Facilitator
+                            </SelectItem>
+                            <SelectItem value="administrator">
+                              Administrator
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveUser(user.id)}
+                          disabled={!canManagePermissions || isOwner}
+                        >
+                          <X className="size-4 text-foreground" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground mr-12">
+                        {user.role}
+                      </p>
+                    )}
                   </div>
                 )
               })}
           {/* Seção de ações principais */}
           <div className="flex flex-col w-full gap-2 pt-4">
-            <SheetClose asChild>
-              <Button variant="outline" className="text-muted-foreground">
-                Cancelar
-              </Button>
-            </SheetClose>
             <Button
               variant="default"
               onClick={handleSaveChanges}
