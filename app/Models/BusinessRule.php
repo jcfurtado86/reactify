@@ -8,29 +8,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BusinessRule extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-     protected $fillable = [
-       'title',
-       'story_id',
-       'project_id',
+  /**
+   * The attributes that are mass assignable.
+   *
+   * @var array<int, string>
+   */
+  protected $fillable = ['title', 'story_id', 'project_id', 'invest_card'];
+  protected $casts = [
+    'invest_card' => 'array',
+  ];
+  /**
+   * Get the story that owns the business rule.
+   */
+  public function story()
+  {
+    return $this->belongsTo(Story::class);
+  }
 
-     ];
-    /**
-     * Get the story that owns the business rule.
-     */
-     public function story()
-     {
-       return $this->belongsTo(Story::class);
-     }
-
-     public function project()
-     {
-       return $this->belongsTo(Project::class);
-     }
+  public function project()
+  {
+    return $this->belongsTo(Project::class);
+  }
 }

@@ -15,8 +15,7 @@ import React, { useMemo, useState } from 'react' // Adicionei useState que estav
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import { isTemporary } from '@/lib/utils'
-import InfoButton from '@/Components/InfoButton'
-import { tooltipInfo } from '@/lib/projectData'
+import InvestCard from '../Inspection/InvestCard'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 /**
@@ -197,6 +196,7 @@ const BusinessRuleCard = ({
   businessRule,
   lastElement = false,
   setProject,
+  onInspect,
 }) => {
   // ✨ ESTADOS PARA CONTROLE DA EDIÇÃO
   const [isHovered, setIsHovered] = useState(false)
@@ -268,12 +268,14 @@ const BusinessRuleCard = ({
         onMouseEnter={() => !isEditing && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className="relative group flex w-full h-full"
+        data-card-id={businessRule.id}
       >
         <MotionDivOptions
           isHovered={isHovered}
           isEditing={isEditing}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onInspect={onInspect}
         />
 
         <div
@@ -322,11 +324,15 @@ const BusinessRuleCard = ({
  * @param {{ project: object, setProject: (project: object) => void }} props
  */
 const BusinessRules = ({ project, setProject }) => {
+  // inspection states
+  const [inspectionId, setInspectionId] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
   //ia states
   const [aiGeneratedBusinessRules, setAiGeneratedBusinessRules] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
+
   // Memoriza o estado das business_rules
   const businessRulesByStoryId = useMemo(() => {
     if (!project?.business_rules) return new Map()
@@ -340,6 +346,18 @@ const BusinessRules = ({ project, setProject }) => {
       return acc
     }, new Map())
   }, [project?.business_rules]) // Dependência atualizada
+
+  // inspection function
+  const inspectRule = (ruleId) => {
+    if (inspectionId === ruleId) {
+      setInspectionId(null)
+      setAnchorEl(null)
+    } else {
+      const element = document.querySelector(`[data-card-id="${ruleId}"]`)
+      setAnchorEl(element)
+      setInspectionId(ruleId)
+    }
+  }
 
   const addBusinessRule = (storyId) => {
     router.post(route('business-rule.store'), {
@@ -517,6 +535,16 @@ const BusinessRules = ({ project, setProject }) => {
           toggleAllItems={toggleAllBusinessRules}
         />
       )}
+      {inspectionId && (
+        <InvestCard
+          itemCategory={'business_rules'}
+          itemId={inspectionId}
+          anchorEl={anchorEl}
+          project={project}
+          setProject={setProject}
+          setInspectionId={setInspectionId}
+        />
+      )}
       {/* user stories*/}
       {project?.stories
         ?.filter((story) => story.type === 'user')
@@ -542,6 +570,7 @@ const BusinessRules = ({ project, setProject }) => {
                         index === array.length - 1 && array.length > 1
                       }
                       setProject={setProject}
+                      onInspect={() => inspectRule(businessRule.id)}
                     />
                   ))}
               </div>

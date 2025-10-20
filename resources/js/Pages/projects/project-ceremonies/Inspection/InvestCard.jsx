@@ -10,6 +10,7 @@ const routerNames = {
   journeys: 'journey',
   system_interfaces: 'system_interface',
   crc_cards: 'overall',
+  business_rules: 'business-rule',
 }
 
 const IndicatorBadge = ({ status }) => {
