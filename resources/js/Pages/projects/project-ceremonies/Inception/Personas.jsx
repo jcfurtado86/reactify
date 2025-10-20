@@ -199,7 +199,10 @@ const PersonaCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <CardHeader className="flex-row items-center justify-between">
+      <CardHeader
+        data-card-id={persona.id}
+        className="flex-row items-center justify-between"
+      >
         <div className="flex items-center gap-3 w-full">
           <UserCircle2 className=" shrink-0 size-8 text-primary" />
           {editingPersona === persona.id ? (
@@ -214,9 +217,7 @@ const PersonaCard = ({
               autoFocus
             />
           ) : (
-            <CardTitle data-card-id={persona.id} className="ml-3 text-xl">
-              {persona.name}
-            </CardTitle>
+            <CardTitle className="ml-3 text-xl">{persona.name}</CardTitle>
           )}
         </div>
         {/* <div className="flex items-center gap-1">

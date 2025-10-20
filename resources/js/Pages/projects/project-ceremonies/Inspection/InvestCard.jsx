@@ -140,7 +140,7 @@ const InvestCard = ({
           side="bottom"
           align="end"
           sticky="always" // 3. ✨ A MÁGICA: Impede que ele "flipe" para 'top'
-          sideOffset={8}
+          sideOffset={0}
           className="bg-card border border-border rounded-md shadow-sm max-w-3xl w-72 lg:w-80"
         >
           <Button
