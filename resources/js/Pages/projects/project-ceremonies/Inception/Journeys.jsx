@@ -576,7 +576,7 @@ const Journeys = ({ project, setProject }) => {
     <div className="flex flex-col gap-4 p-4 w-full">
       {inspectionId && (
         <InvestCard
-          itemCategory={'goal_sketches'}
+          itemCategory={'journeys'}
           itemId={inspectionId}
           anchorEl={anchorEl}
           project={project}
