@@ -9,6 +9,7 @@ const routerNames = {
   goal_sketches: 'goal',
   journeys: 'journey',
   system_interfaces: 'system_interface',
+  crc_cards: 'overall',
 }
 
 const IndicatorBadge = ({ status }) => {

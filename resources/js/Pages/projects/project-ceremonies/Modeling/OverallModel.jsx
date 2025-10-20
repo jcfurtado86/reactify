@@ -2,6 +2,8 @@ import { router, usePage } from '@inertiajs/react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { Plus, Minus, Check, X, ChevronsUp } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import InvestCard from '../Inspection/InvestCard'
+
 import { toast } from 'sonner'
 
 const GeneratedItemsModal = ({
@@ -347,6 +349,7 @@ const CRCCard = ({
   cancelEditTitle,
   reusableClasses,
   handleCollaboratorChange,
+  onInspect,
 }) => {
   const [isHeaderHovered, setIsHeaderHovered] = useState(false)
   const titleInputRef = useRef(null)
@@ -387,6 +390,7 @@ const CRCCard = ({
         onMouseEnter={() => setIsHeaderHovered(true)}
         onMouseLeave={() => setIsHeaderHovered(false)}
         className="relative flex justify-between items-center text-foreground bg-muted p-3 rounded-t-lg border-border border-b"
+        data-card-id={card.id}
       >
         {editingTitleId === card.id ? (
           <div className="flex items-center gap-2 w-full">
@@ -423,6 +427,7 @@ const CRCCard = ({
               isHovered={isHeaderHovered}
               onEdit={() => startEditTitle(card)}
               onDelete={() => confirmDeleteCard(card.id)}
+              onInspect={onInspect}
             />
           </>
         )}
@@ -490,6 +495,9 @@ const CRCCard = ({
 }
 
 const OverallModel = ({ project, setProject }) => {
+  // inspection states
+  const [inspectionId, setInspectionId] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
   //ia states
   const [aiGeneratedCRCCards, setAiGeneratedCRCCards] = useState([])
   const [aiGeneratedClasses, setAiGeneratedClasses] = useState([])
@@ -507,6 +515,20 @@ const OverallModel = ({ project, setProject }) => {
   const [deleteConfirmCardId, setDeleteConfirmCardId] = useState(null)
 
   const { errors } = usePage().props
+
+  // inspection function
+  const inspectOverallModel = (modelId) => {
+    console.log(modelId)
+    if (inspectionId === modelId) {
+      setInspectionId(null)
+      setAnchorEl(null)
+    } else {
+      const element = document.querySelector(`[data-card-id="${modelId}"]`)
+      setAnchorEl(element)
+      setInspectionId(modelId)
+    }
+  }
+
   const handleAddReusableName = () => {
     if (!newReusableName.trim()) return
     const currentNames = project.overall_model_classes || []
@@ -871,6 +893,16 @@ const OverallModel = ({ project, setProject }) => {
           toggleAllClasses={toggleAllClasses}
         />
       )}
+      {inspectionId && (
+        <InvestCard
+          itemCategory={'crc_cards'}
+          itemId={inspectionId}
+          anchorEl={anchorEl}
+          project={project}
+          setProject={setProject}
+          setInspectionId={setInspectionId}
+        />
+      )}
       <section className="flex gap-2 ">
         <Accordion
           type="single"
@@ -958,6 +990,7 @@ const OverallModel = ({ project, setProject }) => {
               setEditValue={setEditValue}
               reusableClasses={project?.overall_model_classes || []}
               handleCollaboratorChange={handleCollaboratorChange}
+              onInspect={() => inspectOverallModel(card.id)}
             />
           ))}
       </div>
