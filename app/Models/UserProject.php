@@ -10,7 +10,7 @@ class UserProject extends Pivot
 {
   protected $table = 'user_project';
 
-  protected $fillable = ['user_id', 'project_id'];
+  protected $fillable = ['user_id', 'project_id', 'role'];
 
   protected $casts = ['role' => UserRoleEnum::class];
 

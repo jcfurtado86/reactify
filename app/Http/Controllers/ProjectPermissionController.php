@@ -79,10 +79,11 @@ class ProjectPermissionController extends Controller
     }
 
     $changedUsersModels = User::whereIn('id', $changedUserIds)->get();
+
     if (!empty($changedUsers)) {
       $syncData = $newRoles
         ->mapWithKeys(function ($role, $userId) {
-          return [$userId => ['role' => $role]];
+          return [$userId => ['role' => UserRole::from($role)]];
         })
         ->all();
 
