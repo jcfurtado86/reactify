@@ -153,7 +153,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     ...(can('usageScenario.create')
       ? [
           {
-            label: 'Use Scenarios',
+            label: 'Usage Scenarios',
             value: false,
             tooltip: tooltipInfo.usageScenarios,
           },
@@ -231,7 +231,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
       'Change Log': 'change_requests',
       'Epic Stories': 'epic_stories',
       'Business Rules': 'business_rules',
-      'Use Scenarios': 'usage_scenarios',
+      'Usage Scenarios': 'usage_scenarios',
       'Internal and External Interfaces': 'system_interfaces',
       Storyboards: 'storyboards',
       //'Product Backlog': 'stories',
@@ -398,7 +398,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
             <BusinessRules project={project} setProject={setProject} />
           )
         )
-      case 'Use Scenarios':
+      case 'Usage Scenarios':
         return (
           can('usageScenario.create') && (
             <UsageScenarios project={project} setProject={setProject} />
