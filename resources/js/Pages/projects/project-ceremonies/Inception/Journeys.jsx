@@ -25,6 +25,7 @@ import {
   ChevronRight,
   Minus,
   ChevronsUp,
+  ChartArea,
 } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
@@ -32,6 +33,8 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { cn } from '@/lib/utils'
 import { tooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
+import InvestCard from '../Inspection/InvestCard'
 
 const SortableJourneyStepItem = (props) => {
   const {
@@ -163,6 +166,9 @@ const JourneyStepItem = ({
 }
 
 const Journeys = ({ project, setProject }) => {
+  // inspection states
+  const [inspectionId, setInspectionId] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
   const [expandedJourney, setExpandedJourney] = useState(null)
   const [editingStep, setEditingStep] = useState({
     journeyId: null,
@@ -206,7 +212,19 @@ const Journeys = ({ project, setProject }) => {
       },
     }),
   )
-
+  // inspection function
+  const inspectJourney = (e, journeyId) => {
+    e.stopPropagation()
+    if (inspectionId === journeyId) {
+      setInspectionId(null)
+      setAnchorEl(null)
+    } else {
+      const element = document.querySelector(`[data-card-id="${journeyId}"]`)
+      console.log(element)
+      setAnchorEl(element)
+      setInspectionId(journeyId)
+    }
+  }
   // Função que será chamada quando o arrasto terminar
   const handleDragEnd = (event, journeyId) => {
     const { active, over } = event
@@ -232,23 +250,25 @@ const Journeys = ({ project, setProject }) => {
     try {
       const response = await axios.post(route('journey.generate'), {
         project_id: project.id,
-      });
+      })
 
-      const data = response.data;
+      const data = response.data
 
       if (data.status === 'sucesso') {
         const journeysWithSelection = data.journeys.map((journey) => ({
           ...journey,
           selected: true,
-        }));
-        setGeneratedJourneys(journeysWithSelection);
-        setShowConfirmModal(true);
-        toast.success('Journeys geradas com sucesso.');
+        }))
+        setGeneratedJourneys(journeysWithSelection)
+        setShowConfirmModal(true)
+        toast.success('Journeys geradas com sucesso.')
       } else {
         if (data.status === 'warning') {
-          toast.warning(data.message);
+          toast.warning(data.message)
         } else {
-          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
         }
       }
     } catch (error) {
@@ -554,6 +574,16 @@ const Journeys = ({ project, setProject }) => {
 
   return (
     <div className="flex flex-col gap-4 p-4 w-full">
+      {inspectionId && (
+        <InvestCard
+          itemCategory={'goal_sketches'}
+          itemId={inspectionId}
+          anchorEl={anchorEl}
+          project={project}
+          setProject={setProject}
+          setInspectionId={setInspectionId}
+        />
+      )}
       {/* AI Generated Journeys Modal */}
       {showConfirmModal && (
         <div
@@ -689,6 +719,7 @@ const Journeys = ({ project, setProject }) => {
             >
               <div
                 className="flex items-center justify-between py-2 px-3 cursor-pointer bg-card hover:bg-accent/50 transition-colors"
+                data-card-id={journey.id}
                 onClick={() => toggleJourney(journey.id)}
               >
                 <div className="flex items-center text-2xl">
@@ -711,20 +742,31 @@ const Journeys = ({ project, setProject }) => {
                   )}
                 </div>
                 <div className="flex items-center">
+                  <ButtonWithTooltip
+                    tooltipContent="Inspecionar (INVEST Card)"
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={(e) => inspectJourney(e, journey.id)}
+                  >
+                    <ChartArea size={20} />
+                  </ButtonWithTooltip>
                   {editingJourney === journey.id ? (
-                    <Button
-                      variant="ghost"
+                    <ButtonWithTooltip
+                      tooltipContent={'Salvar titulo'}
+                      variant="success"
                       size="icon"
-                      className="text-success hover:bg-success/10"
+                      className=""
                       onClick={(e) => {
                         e.stopPropagation()
                         saveEditJourney()
                       }}
                     >
                       <Check size={20} />
-                    </Button>
+                    </ButtonWithTooltip>
                   ) : (
-                    <Button
+                    <ButtonWithTooltip
+                      tooltipContent={'Editar titulo'}
                       variant="ghost"
                       size="icon"
                       className="text-muted-foreground hover:text-foreground"
@@ -734,18 +776,19 @@ const Journeys = ({ project, setProject }) => {
                       }}
                     >
                       <Edit size={20} />
-                    </Button>
+                    </ButtonWithTooltip>
                   )}
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button
+                      <ButtonWithTooltip
+                        tooltipContent={'Deletar journey'}
                         variant="ghost"
                         size="icon"
                         className="text-destructive/80 hover:text-destructive"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Trash size={20} />
-                      </Button>
+                      </ButtonWithTooltip>
                     </PopoverTrigger>
                     <PopoverContent
                       className="w-60 bg-popover border-border text-popover-foreground"

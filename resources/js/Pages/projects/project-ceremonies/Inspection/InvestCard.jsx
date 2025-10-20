@@ -7,6 +7,7 @@ const routerNames = {
   // local state name -> route name
   stories: 'story',
   goal_sketches: 'goal',
+  journeys: 'journey',
   system_interfaces: 'system_interface',
 }
 
