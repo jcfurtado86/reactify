@@ -19,8 +19,8 @@ class UsageScenario extends Model
     'story_id',
     'project_id',
     'description',
+    'invest_card',
   ];
-
   /**
    * The attributes that should be cast.
    *
@@ -28,6 +28,7 @@ class UsageScenario extends Model
    */
   protected $casts = [
     'description' => 'array',
+    'invest_card' => 'array',
   ];
 
   /**

@@ -12,6 +12,7 @@ import {
 import { isTemporary } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import InvestCard from '../Inspection/InvestCard'
 import { storyVariants } from '../StoryDiscovery/Stories' // Assuming this path is correct
 import { toast } from 'sonner'
 
@@ -218,7 +219,14 @@ const StoryCard = ({ story, addScenario }) => {
  * The internal logic of this component remains unchanged as it's already robust.
  * @param {{ scenario: object, story: object, lastElement: boolean, setProject: Function }} props
  */
-const ScenarioCard = ({ scenario, story, lastElement = false, setProject }) => {
+const ScenarioCard = ({
+  scenario,
+  story,
+  lastElement = false,
+  setProject,
+  onInspect,
+}) => {
+  //
   const [isHovered, setIsHovered] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isExpanded, setIsExpanded] = useState(
@@ -300,7 +308,10 @@ const ScenarioCard = ({ scenario, story, lastElement = false, setProject }) => {
     setIsExpanded(!isExpanded)
   }
   return (
-    <section className="flex flex-1 items-center max-w-md md:max-w-4xl gap-2 h-full">
+    <section
+      data-card-id={scenario.id}
+      className="flex flex-1 items-center max-w-md md:max-w-4xl gap-2 h-full"
+    >
       {lastElement ? (
         <CornerDownRight className="text-primary size-5" />
       ) : (
@@ -317,9 +328,9 @@ const ScenarioCard = ({ scenario, story, lastElement = false, setProject }) => {
             isEditing={isEditing}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onInspect={onInspect}
           />
         )}
-
         <div className="flex-1  border border-border bg-card rounded-md shadow-sm p-3">
           {isEditing ? (
             <div className="w-full flex flex-col text-left font-normal items-center gap-1">
@@ -482,6 +493,9 @@ const ScenarioCard = ({ scenario, story, lastElement = false, setProject }) => {
  * @param {{ project: object, setProject: (project: object) => void }} props
  */
 const UsageScenarios = ({ project, setProject }) => {
+  // inspection states
+  const [inspectionId, setInspectionId] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
   //ia states
   const [aiGeneratedUsageScenarios, setAiGeneratedUsageScenarios] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -500,6 +514,18 @@ const UsageScenarios = ({ project, setProject }) => {
       return acc
     }, new Map())
   }, [project?.usage_scenarios])
+
+  // inspection function
+  const inspectScenario = (scenarioId) => {
+    if (inspectionId === scenarioId) {
+      setInspectionId(null)
+      setAnchorEl(null)
+    } else {
+      const element = document.querySelector(`[data-card-id="${scenarioId}"]`)
+      setAnchorEl(element)
+      setInspectionId(scenarioId)
+    }
+  }
 
   const addScenario = (storyId) => {
     const newScenarioData = {
@@ -668,6 +694,16 @@ const UsageScenarios = ({ project, setProject }) => {
           toggleAllItems={toggleAllUsageScenarios}
         />
       )}
+      {inspectionId && (
+        <InvestCard
+          itemCategory={'usage_scenarios'}
+          itemId={inspectionId}
+          anchorEl={anchorEl}
+          project={project}
+          setProject={setProject}
+          setInspectionId={setInspectionId}
+        />
+      )}
       {project?.stories
         ?.filter((story) => story.type === 'user')
         .map((story) => {
@@ -691,6 +727,7 @@ const UsageScenarios = ({ project, setProject }) => {
                       lastElement={
                         index === array.length - 1 && array.length > 1
                       }
+                      onInspect={() => inspectScenario(scenario.id)}
                     />
                   ))}
               </div>
@@ -720,6 +757,7 @@ const UsageScenarios = ({ project, setProject }) => {
                       lastElement={
                         index === array.length - 1 && array.length > 1
                       }
+                      onInspect={() => inspectScenario(scenario.id)}
                     />
                   ))}
               </div>
