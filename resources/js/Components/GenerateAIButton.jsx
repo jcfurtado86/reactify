@@ -8,7 +8,7 @@ const GenerateAIButton = ({
 }) => {
   return (
     <div
-      className={`relative w-20 ml-auto flex items-center justify-center rounded-full shadow-md transition-colors hover:bg-accent ${className} ${
+      className={`fixed w-20 bottom-16 right-2 flex items-center justify-center rounded-full shadow-md transition-colors hover:bg-accent ${className} ${
         isGenerating
           ? 'bg-muted text-muted-foreground'
           : 'bg-card text-foreground'
