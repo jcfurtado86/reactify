@@ -12,6 +12,7 @@ const routerNames = {
   crc_cards: 'overall',
   business_rules: 'business-rule',
   usage_scenarios: 'usage-scenario',
+  system_interfaces: 'system-interface',
 }
 
 const IndicatorBadge = ({ status }) => {
@@ -140,8 +141,8 @@ const InvestCard = ({
         <PopoverContent
           side="bottom"
           align="end"
-          sticky="always" // 3. ✨ A MÁGICA: Impede que ele "flipe" para 'top'
-          sideOffset={0}
+          sticky="always"
+          sideOffset={5}
           className="bg-card border border-border rounded-md shadow-sm max-w-3xl w-72 lg:w-80"
         >
           <Button

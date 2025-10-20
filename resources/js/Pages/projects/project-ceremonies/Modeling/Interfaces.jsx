@@ -1,6 +1,7 @@
 import { useForm, router } from '@inertiajs/react'
-import { Plus, Minus, Check, X, ChevronsUp } from 'lucide-react'
+import { Minus, Check, X, ChevronsUp } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
 
 import MotionDivOptions from '@/Components/MotionDivOptions'
@@ -164,45 +165,14 @@ const GeneratedItemsModal = ({
 }
 
 const Interfaces = ({ project, setProject }) => {
+  // inspection states
+  const [inspectionId, setInspectionId] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
   // A lista de todas as classes disponíveis para o formulário.
   const allClassModels = project.overall_model_classes || []
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   //ia states
-  const [aiGeneratedInterfaces, setAiGeneratedInterfaces] = useState([
-    // {
-    //   id: 'temp-1',
-    //   title: 'titulo',
-    //   type: 'internal',
-    //   input: 'input',
-    //   output: 'output',
-    //   project_id: 1,
-    //   created_at: '2025-10-13T22:09:17.000000Z',
-    //   updated_at: '2025-10-13T22:09:17.000000Z',
-    //   overall_model_class_ids: [3, 5, 8],
-    // },
-    // {
-    //   id: 'temp-2',
-    //   title: 'titulo',
-    //   type: 'external',
-    //   input: 'input',
-    //   output: 'output',
-    //   project_id: 1,
-    //   created_at: '2025-10-13T22:11:07.000000Z',
-    //   updated_at: '2025-10-13T22:11:07.000000Z',
-    //   overall_model_class_ids: [],
-    // },
-    // {
-    //   id: 'temp-3',
-    //   title: 'titulo',
-    //   type: 'internal',
-    //   input: 'rac',
-    //   output: 'coon',
-    //   project_id: 1,
-    //   created_at: '2025-10-13T22:28:26.000000Z',
-    //   updated_at: '2025-10-13T22:28:26.000000Z',
-    //   overall_model_class_ids: [5, 7, 9, 13],
-    // },
-  ])
+  const [aiGeneratedInterfaces, setAiGeneratedInterfaces] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
@@ -227,6 +197,21 @@ const Interfaces = ({ project, setProject }) => {
     project_id: project.id,
     overall_model_class_ids: [],
   })
+
+  // inspection function
+  const inspectInterface = (interfaceId) => {
+    if (inspectionId === interfaceId) {
+      setInspectionId(null)
+      setAnchorEl(null)
+    } else {
+      const element = document.querySelector(
+        `[data-card-interface-id="${interfaceId}"]`,
+      )
+      setAnchorEl(element)
+      setInspectionId(interfaceId)
+      console.log(element, interfaceId)
+    }
+  }
 
   // Abre o dialog para criar uma NOVA interface.
   const handleOpenForCreate = () => {
@@ -310,7 +295,7 @@ const Interfaces = ({ project, setProject }) => {
     )
   }
 
-  const InterfaceCard = ({ data, onClick, onDelete }) => {
+  const InterfaceCard = ({ data, onClick, onDelete, onInspect }) => {
     const [isHovered, setIsHovered] = useState(false)
 
     const relatedIds = data.overall_model_class_ids || []
@@ -319,7 +304,6 @@ const Interfaces = ({ project, setProject }) => {
     const relatedClasses = relatedIds
       .map((id) => allClassModels.find((model) => model.id === id))
       .filter(Boolean) // .filter(Boolean) remove quaisquer resultados nulos se um ID não for encontrado
-
     return (
       <div
         className="relative group border border-border bg-card text-card-foreground rounded-lg shadow-md p-4 flex flex-col justify-between text-left transition-all duration-200"
@@ -327,10 +311,18 @@ const Interfaces = ({ project, setProject }) => {
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* O componente com os botões de editar/excluir que aparece no hover */}
-        <MotionDivOptions isHovered={isHovered} onDelete={onDelete} />
+        <MotionDivOptions
+          isHovered={isHovered}
+          onDelete={onDelete}
+          onInspect={onInspect}
+        />
 
         {/* Área principal do card, que também pode ser usada para edição */}
-        <div className="cursor-pointer" onClick={() => onClick(data)}>
+        <div
+          data-card-interface-id={data.id}
+          className="cursor-pointer"
+          onClick={() => onClick(data)}
+        >
           <h4 className="font-bold text-sm mb-2">{data.title}</h4>
           <p>
             <span className="font-bold text-sm">Input: </span>
@@ -518,6 +510,16 @@ const Interfaces = ({ project, setProject }) => {
             toggleAllItems={toggleAllInterfaces}
           />
         )}
+        {inspectionId && (
+          <InvestCard
+            itemCategory={'system_interfaces'}
+            itemId={inspectionId}
+            anchorEl={anchorEl}
+            project={project}
+            setProject={setProject}
+            setInspectionId={setInspectionId}
+          />
+        )}
         {/* dialog for adding interface*/}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <Button onClick={handleOpenForCreate}>ADICIONAR INTERFACE</Button>
@@ -659,6 +661,7 @@ const Interfaces = ({ project, setProject }) => {
                 data={item}
                 onDelete={() => handleDelete(item)}
                 onClick={() => handleOpenForEdit(item)}
+                onInspect={() => inspectInterface(item.id)}
               />
             ))}
         </div>
@@ -673,7 +676,9 @@ const Interfaces = ({ project, setProject }) => {
               <InterfaceCard
                 key={`external-${item.id}`}
                 data={item}
+                onDelete={() => handleDelete(item)}
                 onClick={() => handleOpenForEdit(item)}
+                onInspect={() => inspectInterface(item.id)}
               />
             ))}
         </div>

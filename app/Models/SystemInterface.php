@@ -13,14 +13,22 @@ class SystemInterface extends Model
     'output',
     'type',
     'overall_model_class_id',
-    'project_id'
+    'project_id',
+    'invest_card',
+  ];
+
+  protected $casts = [
+    'invest_card' => 'array',
   ];
 
   protected $appends = ['overall_model_class_ids'];
 
   public function overallModelClasses(): BelongsToMany
   {
-    return $this->belongsToMany(OverallModelClass::class, 'overall_model_class_system_interface')->using(OverallClassSystemInterfacePivot::class);
+    return $this->belongsToMany(
+      OverallModelClass::class,
+      'overall_model_class_system_interface'
+    )->using(OverallClassSystemInterfacePivot::class);
   }
 
   public function project()
