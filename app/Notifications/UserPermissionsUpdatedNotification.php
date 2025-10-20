@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Enums\UserRole;
 
 class UserPermissionsUpdatedNotification extends Notification
 {
@@ -37,10 +38,21 @@ class UserPermissionsUpdatedNotification extends Notification
   public function toMail(object $notifiable): MailMessage
   {
     $currentRole = $this->getRoleForNotifiable($notifiable);
-    return (new MailMessage)
+    return (new MailMessage())
       ->greeting('Hello ' . $notifiable->name . ',')
-      ->subject($this->editorUser->name . ' updated your permissions in ' . $this->project->title)
-      ->line('[' . $this->editorUser->name . '](mailto:' . $this->editorUser->email . ') updated your permissions in ' . $this->project->title)
+      ->subject(
+        $this->editorUser->name .
+          ' updated your permissions in ' .
+          $this->project->title
+      )
+      ->line(
+        '[' .
+          $this->editorUser->name .
+          '](mailto:' .
+          $this->editorUser->email .
+          ') updated your permissions in ' .
+          $this->project->title
+      )
       ->line('Now your current role is ' . $currentRole . '.');
   }
 
@@ -53,12 +65,22 @@ class UserPermissionsUpdatedNotification extends Notification
   {
     $currentRole = $this->getRoleForNotifiable($notifiable);
     return [
-      'message' => ($this->editorUser->name . ' updated your permissions in ' . $this->project->title . '. Current role: ' . $currentRole . '.'),
+      'message' =>
+        $this->editorUser->name .
+        ' updated your permissions in ' .
+        $this->project->title .
+        '. Current role: ' .
+        $currentRole .
+        '.',
     ];
   }
 
   private function getRoleForNotifiable(object $notifiable): string
   {
-    return $this->project->users()->find($notifiable->id)?->pivot?->role ?? '';
+    $userRole =
+      $this->project->users()->find($notifiable->id)?->pivot?->role->value ??
+      '';
+
+    return $userRole;
   }
 }

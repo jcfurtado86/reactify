@@ -13,8 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Enums\UserRole;
 use Illuminate\Validation\Rules\Enum as EnumRule; // Regra de validação para Enums
-
-
+use Log;
 class ProjectPermissionController extends Controller
 {
   /**
@@ -60,7 +59,7 @@ class ProjectPermissionController extends Controller
     $changedUsersModels = [];
 
     $oldRoles = $project->users->mapWithKeys(function ($user) {
-      return [$user->id => $user->pivot->role];
+      return [$user->id => $user->pivot->role->value];
     });
 
     $newRoles = collect($validated['users'])->mapWithKeys(function ($user) {
@@ -69,7 +68,6 @@ class ProjectPermissionController extends Controller
 
     foreach ($newRoles as $userId => $newRole) {
       $oldRole = $oldRoles->get($userId);
-
       if ($oldRole !== null && $oldRole !== $newRole) {
         $changedUserIds[] = $userId;
         $changedUsers[] = [
@@ -79,16 +77,21 @@ class ProjectPermissionController extends Controller
         ];
       }
     }
-    $changedUsersModels = User::whereIn('id', $changedUserIds)->get();
 
+    $changedUsersModels = User::whereIn('id', $changedUserIds)->get();
     if (!empty($changedUsers)) {
-      $syncData = $newRoles->mapWithKeys(function ($role, $userId) {
-        return [$userId => ['role' => $role]];
-      })->all();
+      $syncData = $newRoles
+        ->mapWithKeys(function ($role, $userId) {
+          return [$userId => ['role' => $role]];
+        })
+        ->all();
 
       $project->users()->sync($syncData);
 
-      Notification::send($changedUsersModels, new UserPermissionsUpdatedNotification($project, $editorUser));
+      Notification::send(
+        $changedUsersModels,
+        new UserPermissionsUpdatedNotification($project, $editorUser)
+      );
 
       return back()->with([
         'message' => 'Permissions updated successfully.',
@@ -105,7 +108,7 @@ class ProjectPermissionController extends Controller
   public function addMember(Request $request, Project $project)
   {
     $validated = $request->validate([
-      'role' =>  ['required', new EnumRule(UserRole::class)],
+      'role' => ['required', new EnumRule(UserRole::class)],
       'email' => 'required|email|exists:users,email',
     ]);
 
