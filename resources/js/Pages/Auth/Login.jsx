@@ -33,15 +33,24 @@ const Login = ({ status, canResetPassword }) => {
         )}
         <div className="mb-6 text-center flex flex-col gap-4">
           <Button className="w-full">
-            <Computer />
+            <img
+              alt="Google Logo"
+              src="https://img.icons8.com/?size=100&id=Mhl1TfJLdkh5&format=png&color=000000"
+              className="size-8"
+            />
+
             <a disabled={processing} href={'/auth/github/redirect'}>
-              Log in com GitHub
+              Continue with GitHub
             </a>
           </Button>
           <Button className="w-full">
-            <Computer />
+            <img
+              alt="Google Logo"
+              src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000"
+              className="size-8"
+            />
             <a disabled={processing} href={'/auth/google/redirect'}>
-              Log in com Google
+              Continue with Google
             </a>
           </Button>
 
