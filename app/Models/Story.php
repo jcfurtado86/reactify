@@ -15,7 +15,7 @@ class Story extends Model
     'title',
     'type',
     'project_id',
-    'parent_id',
+    'epic_id',
     'invest_card',
     'value',
     'complexity',
@@ -69,16 +69,8 @@ class Story extends Model
   /**
    * Get the parent story (the epic).
    */
-  public function parent()
-  {
-    return $this->belongsTo(Story::class, 'parent_id');
-  }
 
   /**
    * Get the child stories.
    */
-  public function children()
-  {
-    return $this->hasMany(Story::class, 'parent_id');
-  }
 }

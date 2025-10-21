@@ -61,11 +61,39 @@ class StoryController extends Controller
   {
     $validated = $request->validated();
 
-    $story->update($validated);
+    $oldType = $story->type;
 
-    Log::info('Story updated', ['id' => $story->id]);
+    try {
+      DB::transaction(function () use ($story, $validated, $oldType) {
+        $story->update($validated);
 
-    return back();
+        if (isset($validated['type']) && $oldType !== $validated['type']) {
+          $newType = $validated['type'];
+
+          Story::where('epic_id', $story->id)->update(['type' => $newType]);
+        }
+      });
+    } catch (\Exception $e) {
+      Log::error('Failed to update story and its children', [
+        'story_id' => $story->id,
+        'error' => $e->getMessage(),
+      ]);
+
+      return back()->with([
+        'message' => 'An error occurred while updating. Please try again.',
+        'status' => 'error',
+      ]);
+    }
+
+    // 6. Sucesso!
+    Log::info('Story and children (if applicable) updated', [
+      'id' => $story->id,
+    ]);
+
+    return back()->with([
+      'message' => 'Story updated successfully.',
+      'status' => 'success',
+    ]);
   }
 
   public function prioritize(Request $request, Story $story)

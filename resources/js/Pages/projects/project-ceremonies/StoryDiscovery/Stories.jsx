@@ -148,6 +148,7 @@ const GeneratedItemsModal = ({
 
 const StoryItem = ({
   story,
+  epicStoryId = null,
   isEditing,
   editValue,
   onValueChange,
@@ -172,7 +173,7 @@ const StoryItem = ({
   }
 
   const selectedVariant = storyVariants[story.type] || storyVariants.user
-
+  const storyId = epicStoryId || story.id
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -183,39 +184,55 @@ const StoryItem = ({
       <Card className="bg-card border-0 transition-all duration-300 ease-in-out rounded">
         <CardContent className="p-2 flex items-center justify-between gap-2">
           <div className="flex flex-col items-start justify-between gap-2 flex-1 min-w-0">
-            <Popover
-              open={typeSelectId === story.id}
-              onOpenChange={onToggleTypeSelect}
-            >
-              <PopoverTrigger className="flex">
-                <Badge
-                  variant="outline"
-                  className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
-                >
-                  {`${story.type === 'system' ? 'SS' : 'US'}${isTemporary ? '' : story.id}`.toUpperCase()}
-                  <ChevronDown className="ml-1 size-3" />
-                </Badge>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto bg-popover border-border p-1">
-                <div className="flex flex-col gap-1">
-                  {Object.values(storyVariants).map((variant, i) => (
-                    <Button
-                      key={`temp-${i}`}
-                      variant="ghost"
-                      className="h-auto p-2 justify-start "
-                      onClick={() => onChangeStoryType(story.id, variant.title)}
-                    >
-                      <Badge
-                        variant="outline"
-                        className={`border-transparent text-primary-foreground font-bold w-full cursor-pointer ${variant.bg}`}
+            {/* exibe o popover apenas se a story nao for filha*/}
+            {story.epic_id === null ? (
+              <Popover
+                open={typeSelectId === story.id}
+                onOpenChange={onToggleTypeSelect}
+              >
+                <PopoverTrigger className="flex">
+                  <Badge
+                    variant="outline"
+                    className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                  >
+                    {`${story.type === 'system' ? 'SS' : 'US'}
+                    ${story.epic_id ? `${story.epic_id}.` : ''}
+                  ${isTemporary ? '' : story.id}`.toUpperCase()}
+                    <ChevronDown className="ml-1 size-3" />
+                  </Badge>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto bg-popover border-border p-1">
+                  <div className="flex flex-col gap-1">
+                    {Object.values(storyVariants).map((variant, i) => (
+                      <Button
+                        key={`temp-${i}`}
+                        variant="ghost"
+                        className="h-auto p-2 justify-start "
+                        onClick={() =>
+                          onChangeStoryType(story.id, variant.title)
+                        }
                       >
-                        {`${variant.title === 'system' ? 'ss' : 'us'}`.toUpperCase()}
-                      </Badge>
-                    </Button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+                        <Badge
+                          variant="outline"
+                          className={`border-transparent text-primary-foreground font-bold w-full cursor-pointer ${variant.bg}`}
+                        >
+                          {`${variant.title === 'system' ? 'ss' : 'us'}`.toUpperCase()}
+                        </Badge>
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <Badge
+                variant="outline"
+                className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+              >
+                {`${story.type === 'system' ? 'SS' : 'US'}
+                ${story.epic_id ? `${story.epic_id}.` : ''}
+              ${isTemporary ? '' : storyId}`.toUpperCase()}
+              </Badge>
+            )}
 
             {isEditing ? (
               <div className="flex w-full items-center gap-2">
@@ -555,52 +572,73 @@ const Stories = ({ project, setProject }) => {
             0
           }
         />
-
-        {project?.stories?.length > 0 ? (
+        {project?.stories?.length > 0 &&
           project?.stories
-            .filter((story) => story.type === 'user')
+            .filter((story) => story.type === 'user' && !story.epic_id)
             .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
             .map((story, i) => {
               return (
-                <StoryItem
-                  key={story.id}
-                  story={story}
-                  isEditing={editingId === story.id}
-                  editValue={editValue}
-                  onValueChange={handleInputChange}
-                  onInspect={(e) => inspectStory(story.id)}
-                  onEdit={() => editStory(story)}
-                  onSave={() => editStory(story)}
-                  onDelete={() => deleteStory(story.id)}
-                  onCancel={() => setEditingId(null)}
-                  isTemporary={isTemporary(story)}
-                  textareaRef={editingId === story.id ? textareaRef : null}
-                  typeSelectId={typeSelectId}
-                  onToggleTypeSelect={() => toggleTypeSelect(story.id)}
-                  onChangeStoryType={changeStoryType}
-                />
+                <React.Fragment key={story.id}>
+                  <StoryItem
+                    story={story}
+                    isEditing={editingId === story.id}
+                    editValue={editValue}
+                    onValueChange={handleInputChange}
+                    onInspect={() => inspectStory(story.id)}
+                    onEdit={() => editStory(story)}
+                    onSave={() => editStory(story)}
+                    onDelete={() => deleteStory(story.id)}
+                    onCancel={() => setEditingId(null)}
+                    isTemporary={isTemporary(story)}
+                    textareaRef={editingId === story.id ? textareaRef : null}
+                    typeSelectId={typeSelectId}
+                    onToggleTypeSelect={() => toggleTypeSelect(story.id)}
+                    onChangeStoryType={changeStoryType}
+                  />
+                  {project?.stories?.length > 0 &&
+                    project?.stories
+                      .filter(
+                        (currentStory) =>
+                          currentStory.type === 'user' &&
+                          currentStory.epic_id === story.id,
+                      )
+                      .sort(
+                        (a, b) =>
+                          new Date(a.created_at) - new Date(b.created_at),
+                      )
+                      .map((currentStory, index) => {
+                        return (
+                          <React.Fragment key={currentStory.id}>
+                            <StoryItem
+                              epicStoryId={index + 1}
+                              story={currentStory}
+                              isEditing={editingId === currentStory.id}
+                              editValue={editValue}
+                              onValueChange={handleInputChange}
+                              onInspect={() => inspectStory(currentStory.id)}
+                              onEdit={() => editStory(currentStory)}
+                              onSave={() => editStory(currentStory)}
+                              onDelete={() => deleteStory(currentStory.id)}
+                              onCancel={() => setEditingId(null)}
+                              isTemporary={isTemporary(currentStory)}
+                              textareaRef={
+                                editingId === currentStory.id
+                                  ? textareaRef
+                                  : null
+                              }
+                              typeSelectId={typeSelectId}
+                              onToggleTypeSelect={() =>
+                                toggleTypeSelect(currentStory.id)
+                              }
+                              onChangeStoryType={changeStoryType}
+                            />
+                          </React.Fragment>
+                        )
+                      })}
+                </React.Fragment>
               )
-            })
-        ) : (
-          <div className="bg-card rounded-lg p-4 shadow-md">
-            <div className="flex items-center mb-2">
-              <div className="bg-primary text-primary-foreground text-xs font-medium py-1 px-3 rounded-full">
-                Em andamento
-              </div>
-            </div>
-            <div className="text-foreground text-base font-medium mb-4">
-              criar get da tela de edição update e delete dos psr
-            </div>
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-foreground">
-                E
-              </div>
-              <span className="ml-2 text-muted-foreground text-sm">
-                Eduardo Rodrigues
-              </span>
-            </div>
-          </div>
-        )}
+            })}
+
         <Button
           className="flex items-center justify-center py-1 bg-card hover:bg-muted text-primary rounded-lg transition-colors shadow-md"
           onClick={() => addNewStory('user')}
@@ -619,27 +657,68 @@ const Stories = ({ project, setProject }) => {
         />
         {project?.stories?.length > 0 &&
           project?.stories
-            .filter((story) => story.type === 'system')
+            .filter((story) => story.type === 'system' && !story.epic_id)
             .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
             .map((story, i) => {
               return (
-                <StoryItem
-                  key={story.id}
-                  story={story}
-                  isEditing={editingId === story.id}
-                  editValue={editValue}
-                  onValueChange={handleInputChange}
-                  onInspect={() => inspectStory(story.id)}
-                  onEdit={() => editStory(story)}
-                  onSave={() => editStory(story)}
-                  onDelete={() => deleteStory(story.id)}
-                  onCancel={() => setEditingId(null)}
-                  isTemporary={isTemporary(story)}
-                  textareaRef={editingId === story.id ? textareaRef : null}
-                  typeSelectId={typeSelectId}
-                  onToggleTypeSelect={() => toggleTypeSelect(story.id)}
-                  onChangeStoryType={changeStoryType}
-                />
+                <React.Fragment key={story.id}>
+                  <StoryItem
+                    story={story}
+                    isEditing={editingId === story.id}
+                    editValue={editValue}
+                    onValueChange={handleInputChange}
+                    onInspect={() => inspectStory(story.id)}
+                    onEdit={() => editStory(story)}
+                    onSave={() => editStory(story)}
+                    onDelete={() => deleteStory(story.id)}
+                    onCancel={() => setEditingId(null)}
+                    isTemporary={isTemporary(story)}
+                    textareaRef={editingId === story.id ? textareaRef : null}
+                    typeSelectId={typeSelectId}
+                    onToggleTypeSelect={() => toggleTypeSelect(story.id)}
+                    onChangeStoryType={changeStoryType}
+                  />
+                  {project?.stories?.length > 0 &&
+                    project?.stories
+                      .filter(
+                        (currentStory) =>
+                          currentStory.type === 'system' &&
+                          currentStory.epic_id === story.id,
+                      )
+                      .sort(
+                        (a, b) =>
+                          new Date(a.created_at) - new Date(b.created_at),
+                      )
+                      .map((currentStory, index) => {
+                        return (
+                          <React.Fragment key={currentStory.id}>
+                            <StoryItem
+                              epicStoryId={index + 1}
+                              story={currentStory}
+                              isEditing={editingId === currentStory.id}
+                              editValue={editValue}
+                              onValueChange={handleInputChange}
+                              onInspect={() => inspectStory(currentStory.id)}
+                              onEdit={() => editStory(currentStory)}
+                              onSave={() => editStory(currentStory)}
+                              onDelete={() => deleteStory(currentStory.id)}
+                              onCancel={() => setEditingId(null)}
+                              isTemporary={isTemporary(currentStory)}
+                              textareaRef={
+                                editingId === currentStory.id
+                                  ? textareaRef
+                                  : null
+                              }
+                              typeSelectId={typeSelectId}
+                              onToggleTypeSelect={() =>
+                                toggleTypeSelect(currentStory.id)
+                              }
+                              onChangeStoryType={changeStoryType}
+                            />
+                          </React.Fragment>
+                        )
+                      })}
+                </React.Fragment>
               )
             })}
         <Button

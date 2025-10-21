@@ -297,6 +297,7 @@ class ProjectSeeder extends Seeder
         'title' =>
           'Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência',
         'type' => 'system',
+        'epic_id' => 3,
       ],
     ];
 

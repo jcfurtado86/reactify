@@ -22,6 +22,11 @@ return new class extends Migration {
         ->foreignId('project_id')
         ->constrained('projects')
         ->onDelete('cascade'); // Chave estrangeira
+      $table
+        ->foreignId('epic_id')
+        ->nullable()
+        ->constrained('stories')
+        ->onDelete('set null'); // Chave estrangeira
       $table->timestamps();
       $table->softDeletes();
     });
