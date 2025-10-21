@@ -131,7 +131,7 @@ export function ProjectPermissions({ project }) {
       <SheetContent className="max-w-[370px] sm:max-w-[450px] md:max-w-[470px]">
         <SheetHeader>
           <SheetTitle className="text-foreground">
-            Gerenciar Permissões : {currentUserRole?.toUpperCase()}
+            Gerenciar Permissões
           </SheetTitle>
           <SheetDescription className="text-muted-foreground">
             {canManagePermissions
@@ -198,7 +198,7 @@ export function ProjectPermissions({ project }) {
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground mr-12">
-                        {user.role}
+                        {user.role.toUpperCase()}
                       </p>
                     )}
                   </div>
