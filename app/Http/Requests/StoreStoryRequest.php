@@ -24,7 +24,8 @@ class StoreStoryRequest extends FormRequest
     return [
       'title' => 'required|string',
       'type' => 'required|in:user,system',
-      'project_id' => 'required|exists:projects,id'
+      'project_id' => 'required|exists:projects,id',
+      'epic_id' => 'nullable|exists:stories,id',
     ];
   }
 }

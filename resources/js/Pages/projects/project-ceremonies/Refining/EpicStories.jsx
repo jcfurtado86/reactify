@@ -168,7 +168,7 @@ const StoryCard = ({ story, addEpicStory }) => {
             variant="outline"
             className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
           >
-            {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
+            {`${story.type === 'system' ? 'SS' : 'US'}${isTemporary(story.id) ? 'Temp-Id' : story.id}`.toUpperCase()}
           </Badge>
         </div>
 
@@ -181,6 +181,7 @@ const StoryCard = ({ story, addEpicStory }) => {
 const EpicStoryCard = ({
   story,
   epicStory,
+  epicStoryId,
   lastElement = false,
   setProject,
 }) => {
@@ -218,7 +219,7 @@ const EpicStoryCard = ({
     }))
 
     router.patch(
-      route('epic-story.update', epicStory.id),
+      route('story.update', epicStory.id),
       { title: editValue },
       {
         preserveScroll: true,
@@ -257,7 +258,7 @@ const EpicStoryCard = ({
 
         <div
           className={`
-            flex  flex-1 items-start justify-start p-2 gap-2 text-xs font-normal text-foreground bg-card
+            flex flex-1 items-start justify-start p-2 gap-2 text-xs font-normal text-foreground bg-card text-left
             border border-border rounded-md shadow-sm transition-opacity duration-300 min-h-16
           `}
         >
@@ -266,7 +267,7 @@ const EpicStoryCard = ({
             className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${story.id}.${
-              isTemporary(epicStory.id) ? '' : epicStory.id
+              isTemporary(epicStory.id) ? '' : epicStoryId
             }`.toUpperCase()}
           </Badge>
 
@@ -303,7 +304,7 @@ const EpicStoryCard = ({
               </div>*/}
             </div>
           ) : (
-            <p className="text-sm text-center w-full min-h-[32px] flex items-center justify-start">
+            <p className="text-sm w-full min-h-[32px] flex items-center justify-start">
               {epicStory.title}
             </p>
           )}
@@ -323,34 +324,45 @@ const EpicStories = ({ project, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
-  // memoriza o estado das epic_stories
-  const epicsByStoryId = useMemo(() => {
-    if (!project?.epic_stories) return new Map()
+  // memoriza o estado das stories derivadas
+  const childrenByEpicId = useMemo(() => {
+    if (!project?.stories) {
+      return new Map()
+    }
 
-    return project.epic_stories.reduce((acc, epicStory) => {
-      const storyId = epicStory.story_id
-      if (!acc.has(storyId)) {
-        acc.set(storyId, [])
+    return project.stories.reduce((acc, story) => {
+      const epicId = story.epic_id
+
+      if (!epicId) {
+        return acc
       }
-      acc.get(storyId).push(epicStory)
+
+      if (!acc.has(epicId)) {
+        acc.set(epicId, [])
+      }
+
+      acc.get(epicId).push(story)
+
       return acc
     }, new Map())
-  }, [project?.epic_stories])
+  }, [project?.stories])
 
-  const addEpicStory = (storyId) => {
-    router.post(route('epic-story.store'), {
-      story_id: storyId,
+  const addEpicStory = (story) => {
+    router.post(route('story.store'), {
+      epic_id: story.id,
+      type: story.type,
       project_id: project.id,
-      title: 'Nova Story',
+      title: 'Nova Story Derivada',
     })
     setProject((prevProject) => ({
       ...prevProject,
-      epic_stories: [
-        ...prevProject.epic_stories,
+      stories: [
+        ...prevProject.stories,
         {
-          story_id: storyId,
+          epic_id: story.id,
+          type: story.type,
           project_id: project.id,
-          title: 'Nova Story',
+          title: 'Nova Story Derivada',
           id: `temp-${new Date()}`,
         },
       ],
@@ -502,14 +514,14 @@ const EpicStories = ({ project, setProject }) => {
       )}
       {/* user stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'user')
+        ?.filter((story) => story.type === 'user' && !story.epic_id)
         .map((story, i) => {
-          const relatedEpics = epicsByStoryId.get(story.id) || []
+          const relatedEpics = childrenByEpicId.get(story.id) || []
           return (
             <section className="py-1 flex items-stretch" key={story.id}>
               <StoryCard
                 story={story}
-                addEpicStory={() => addEpicStory(story.id)}
+                addEpicStory={() => addEpicStory(story)}
               />
 
               <div className="flex flex-col gap-1 w-full">
@@ -517,6 +529,7 @@ const EpicStories = ({ project, setProject }) => {
                   .sort((a, b) => a.id - b.id)
                   .map((epicStory, index, array) => (
                     <EpicStoryCard
+                      epicStoryId={index + 1}
                       key={epicStory.id}
                       story={story}
                       epicStory={epicStory}
@@ -532,14 +545,14 @@ const EpicStories = ({ project, setProject }) => {
         })}
       {/* system stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'system')
+        ?.filter((story) => story.type === 'system' && !story.epic_id)
         .map((story, i) => {
-          const relatedEpics = epicsByStoryId.get(story.id) || []
+          const relatedEpics = childrenByEpicId.get(story.id) || []
           return (
             <section className="py-1 flex gap-1 items-stretch" key={story.id}>
               <StoryCard
                 story={story}
-                addEpicStory={() => addEpicStory(story.id)}
+                addEpicStory={() => addEpicStory(story)}
               />
 
               <div className="flex flex-col gap-1 w-full">
@@ -549,6 +562,7 @@ const EpicStories = ({ project, setProject }) => {
                     <EpicStoryCard
                       key={epicStory.id}
                       story={story}
+                      epicStoryId={index + 1}
                       epicStory={epicStory}
                       lastElement={
                         index === array.length - 1 && array.length > 1
