@@ -1,10 +1,8 @@
 <?php
 
 use App\Http\Controllers\StoryController;
-use App\Http\Controllers\EpicStoryController;
 use App\Http\Controllers\BusinessRuleController;
 use App\Http\Controllers\UsageScenarioController;
-use App\Http\Controllers\StoryCardController;
 
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\JourneyController;
@@ -164,22 +162,6 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
       StoryboardController::class,
       'destroy',
     ])->name('storyboard.destroy');
-  });
-  // Rotas para epic stories
-  Route::prefix('epic')->group(function () {
-    Route::post('/', [EpicStoryController::class, 'store'])->name(
-      'epic-story.store'
-    );
-    Route::post('/bulk-store', [EpicStoryController::class, 'bulk'])->name(
-      'epic-story.bulk-store'
-    );
-    Route::patch('/{story}', [EpicStoryController::class, 'update'])->name(
-      'epic-story.update'
-    );
-
-    Route::delete('/{story}', [EpicStoryController::class, 'destroy'])->name(
-      'epic-story.destroy'
-    );
   });
 
   //rotas para business rules

@@ -59,11 +59,6 @@ class Project extends Model
     return $this->hasMany(Interview::class);
   }
 
-  public function epic_stories(): HasMany
-  {
-    return $this->hasMany(EpicStory::class);
-  }
-
   public function business_rules(): HasMany
   {
     return $this->hasMany(BusinessRule::class);

@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Observers\StoryObserver;
-use App\Observers\EpicStoryObserver;
 use App\Observers\UsageScenarioObserver;
 use App\Observers\ProductCanvasObserver;
 use App\Observers\GoalSketchObserver;
@@ -21,7 +20,6 @@ use App\Observers\SystemInterfaceObserver;
 use App\Observers\InterviewObserver;
 
 use App\Models\Story;
-use App\Models\EpicStory;
 use App\Models\UsageScenario;
 use App\Models\ProductCanvas;
 use App\Models\Goal;
@@ -58,7 +56,6 @@ class AppServiceProvider extends ServiceProvider
   {
     Vite::prefetch(concurrency: 3);
     Story::observe(StoryObserver::class);
-    EpicStory::observe(EpicStoryObserver::class);
     UsageScenario::observe(UsageScenarioObserver::class);
     Storyboard::observe(StoryboardObserver::class);
 

@@ -33,10 +33,6 @@ class Story extends Model
   {
     return $this->hasMany(Storyboard::class);
   }
-  public function epicStories()
-  {
-    return $this->hasMany(EpicStory::class);
-  }
 
   public function businessRules()
   {

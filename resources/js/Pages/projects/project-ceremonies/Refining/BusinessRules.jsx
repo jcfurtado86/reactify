@@ -185,7 +185,7 @@ const StoryCard = ({ story, addBusinessRule }) => {
           </Badge>
         </div>
 
-        <p className="text-sm ">{story.title}</p>
+        <p className="text-sm w-full">{story.title}</p>
       </div>
     </div>
   )

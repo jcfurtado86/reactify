@@ -172,7 +172,7 @@ const StoryCard = ({ story, addEpicStory }) => {
           </Badge>
         </div>
 
-        <p className="text-sm">{story.title}</p>
+        <p className="text-sm w-full">{story.title}</p>
       </div>
     </div>
   )
