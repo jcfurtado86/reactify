@@ -27,6 +27,7 @@ class BulkStoreStoryRequest extends FormRequest
       'stories.*.title' => 'required|string',
       'stories.*.type' => 'required|in:user,system',
       'stories.*.project_id' => 'required|exists:projects,id',
+      'stories.*.epic_id' => 'required|exists:stories,id'
     ];
   }
 }

@@ -436,17 +436,18 @@ const EpicStories = ({ project, setProject }) => {
     }
 
     // O backend espera 'title', 'story_id' (o ID do épico original) e 'project_id'
-    const epicStoriesForBackend = selectedEpicStories.map(
-      ({ title, story_id }) => ({
+    const storiesForBackend = selectedEpicStories.map(
+      ({ title, story_id, type }) => ({
         title,
-        story_id,
+        epic_id: story_id, // Renomeie 'story_id' para 'epic_id'
         project_id: project.id,
+        type: type,
       }),
     )
 
     router.post(
-      route('epic-story.bulk-store'),
-      { epic_stories: epicStoriesForBackend },
+      route('story.bulk-store'),
+      { stories: storiesForBackend },
       {
         preserveState: true,
         preserveScroll: true,
