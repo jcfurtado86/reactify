@@ -706,19 +706,11 @@ const Goals = ({ project, setProject }) => {
         ) : (
           <Card className="bg-card p-4 shadow-md">
             <div className="flex items-center mb-2 gap-2">
-              <Badge
-                className={cn(
-                  'text-background',
-                  typeColors.find((c) => c.title === 'cg')?.color,
-                )}
-              >
+              <Badge className={cn('text-background', typeColors.bg.color)}>
                 CG
               </Badge>
               <Badge
-                className={cn(
-                  'text-background',
-                  priorityColors.find((c) => c.title === 'med')?.color,
-                )}
+                className={cn('text-background', priorityColors.medium.color)}
               >
                 MED
               </Badge>
