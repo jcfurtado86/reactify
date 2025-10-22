@@ -233,7 +233,7 @@ const EpicStoryCard = ({
       stories: project.stories.filter((s) => s.id !== epicStory.id),
     }))
 
-    router.delete(route('story.destroy', epicStory.id), {
+    router.delete(route('story.delete', epicStory.id), {
       preserveScroll: true,
     })
   }
