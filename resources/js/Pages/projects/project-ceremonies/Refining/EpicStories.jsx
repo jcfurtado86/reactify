@@ -210,7 +210,7 @@ const EpicStoryCard = ({
 
     setProject((project) => ({
       ...project,
-      epic_stories: project.epic_stories.map((story) => {
+      stories: project.stories.map((story) => {
         if (story.id === epicStory.id) {
           return { ...story, title: editValue }
         }
@@ -230,10 +230,10 @@ const EpicStoryCard = ({
   const handleDelete = () => {
     setProject((project) => ({
       ...project,
-      epic_stories: project.epic_stories.filter((s) => s.id !== epicStory.id),
+      stories: project.stories.filter((s) => s.id !== epicStory.id),
     }))
 
-    router.delete(route('epic-story.destroy', epicStory.id), {
+    router.delete(route('story.destroy', epicStory.id), {
       preserveScroll: true,
     })
   }

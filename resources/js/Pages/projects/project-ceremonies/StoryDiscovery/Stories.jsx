@@ -575,7 +575,8 @@ const Stories = ({ project, setProject }) => {
         {project?.stories?.length > 0 &&
           project?.stories
             .filter((story) => story.type === 'user' && !story.epic_id)
-            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            // .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            .sort((a, b) => a.id - b.id)
             .map((story, i) => {
               return (
                 <React.Fragment key={story.id}>
@@ -602,10 +603,7 @@ const Stories = ({ project, setProject }) => {
                           currentStory.type === 'user' &&
                           currentStory.epic_id === story.id,
                       )
-                      .sort(
-                        (a, b) =>
-                          new Date(a.created_at) - new Date(b.created_at),
-                      )
+                      .sort((a, b) => a.id - b.id)
                       .map((currentStory, index) => {
                         return (
                           <React.Fragment key={currentStory.id}>
@@ -658,7 +656,7 @@ const Stories = ({ project, setProject }) => {
         {project?.stories?.length > 0 &&
           project?.stories
             .filter((story) => story.type === 'system' && !story.epic_id)
-            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            .sort((a, b) => a.id - b.id)
             .map((story, i) => {
               return (
                 <React.Fragment key={story.id}>
@@ -685,10 +683,7 @@ const Stories = ({ project, setProject }) => {
                           currentStory.type === 'system' &&
                           currentStory.epic_id === story.id,
                       )
-                      .sort(
-                        (a, b) =>
-                          new Date(a.created_at) - new Date(b.created_at),
-                      )
+                      .sort((a, b) => a.id - b.id)
                       .map((currentStory, index) => {
                         return (
                           <React.Fragment key={currentStory.id}>
