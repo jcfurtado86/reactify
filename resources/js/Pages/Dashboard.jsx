@@ -160,11 +160,12 @@ const Dashboard = ({ project, setProject }) => {
     <main className="grid md:grid-cols-[auto,auto] lg:grid-cols-[16rem,auto,auto] xl:grid-cols-[22rem,16rem,auto,auto] gap-4 p-4 w-full ">
       <Head title={project.title || 'Project Title'} />
       {/* progresso de conclusao*/}
-      <section className="bg-card rounded-lg flex flex-col justify-between text-muted-foreground p-2 gap-2 w-full h-full">
-        <div className=" flex flex-col items-start gap-2">
-          <span className="text-center flex gap-2 w-full justify-between text-xl text-foreground p-0 border-0 m-0 cursor-default">
+      <section className="bg-card rounded-lg flex flex-col text-muted-foreground p-2 gap-2 w-full h-full ">
+        <div className=" flex flex-col gap-2 w-full">
+          <span className=" flex-1 break-words text-lg text-foreground p-0 border-0 m-0 cursor-default z-10">
             {project.title}
             <Badge
+              className="ml-2"
               variant={`${project.status === 'active' ? 'secondary' : 'destructive'}`}
             >
               {project.status.toUpperCase()}
@@ -276,7 +277,7 @@ const Dashboard = ({ project, setProject }) => {
         editable={false}
         defaultExpanded={true}
         placeholder="Describe your project..."
-        className="xl:row-start-3 xl:col-span-3 min-w-full"
+        className="xl:row-start-3 xl:col-span-3 min-w-full "
         // onContentUpdate={(content) => updateProject('description', content)}
       />
       <Interview

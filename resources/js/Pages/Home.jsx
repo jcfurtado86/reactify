@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { Link, router, usePage, Head } from '@inertiajs/react'
 import MainLayout from '@/Layouts/MainLayout'
+import { comma } from 'postcss/lib/list'
 
 const ProjectCard = ({ project, toggleActiveProject, deleteProject }) => {
   return (
@@ -15,15 +16,13 @@ const ProjectCard = ({ project, toggleActiveProject, deleteProject }) => {
       <Card className="flex flex-col rounded justify-between h-52 w-64 hover:shadow-md">
         {/* CABEÇALHO: Título do projeto e menu de ações */}
 
-        <CardHeader className="flex-row items-center justify-between">
-          <span />
+        <CardHeader className="flex-row items-center justify-between w-full">
           <CardTitle className="text-md">
             <Link
               href={route('project.show', project.id)}
-              className="flex items-center gap-2 hover:underline"
+              className="flex hover:underline max-w-48 "
             >
-              {/* <div className={`size-2.5 shrink-0 rounded-full ${color}`}></div>*/}
-              {project.title}
+              <p className="truncate w-full"> {project.title}</p>
             </Link>
           </CardTitle>
 
@@ -109,6 +108,7 @@ const Dashboard = ({}) => {
   const [currentProjects, setCurrentProjects] = useState(projects)
   const [activeFilter, setActiveFilter] = useState('Todos')
   const commandInputRef = useRef(null)
+  const [search, setSearch] = useState('')
   const today = new Date()
   const [newProject, setNewProject] = useState({
     title: '',
@@ -225,8 +225,9 @@ const Dashboard = ({}) => {
   }, [])
 
   useEffect(() => {
+    console.log(commandInputRef.current.value)
     // console.log(currentProjects?.product_canvas)
-  }, [currentProjects])
+  }, [commandInputRef])
 
   useEcho(`projects`, 'ProjectUpdated', (e) => {
     let newProjectList = []
@@ -244,16 +245,16 @@ const Dashboard = ({}) => {
   })
 
   return (
-    <div className="bg-background text-white p-6 w-full mx-auto ">
+    <div className="bg-background text-white p-6 flex-1 mx-auto w-full">
       <Head title="Home" />
       {/* Header */}
-      <div className="flex  justify-stretch items-stretch gap-2">
-        <div className=" flex flex-col w-1/5">
+      <div className="flex items-start gap-2">
+        <div className=" flex flex-col ">
           <Dialog>
             <DialogTrigger asChild>
               <Button
                 variant="default"
-                className="w-full h-full relative bg-muted text-foreground"
+                className="flex relative items-center justify-center rounded-full shadow-md transition-colors hover:bg-accent bg-card text-foreground"
               >
                 <ShineBorder
                   borderWidth={2}
@@ -319,39 +320,41 @@ const Dashboard = ({}) => {
         </div>
         {/* command */}
 
-        <div className="relative w-4/5 flex flex-col justify-end">
-          <Command className=" relative w-full md:min-w-[250px]">
-            <CommandInput
-              shortcut
-              ref={commandInputRef}
-              placeholder="Buscar Projetos..."
-              className="border-none focus:outline-none focus:ring-0"
-            />
-            <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden">
-              <CommandEmpty className="py-6 text-center text-sm text-zinc-500">
-                Nenhum projeto encontrado.
-              </CommandEmpty>
-              <CommandGroup>
-                {filteredProjects?.map(
-                  (project) =>
-                    project && (
-                      <CommandItem
-                        key={project.id}
-                        value={project.title}
-                        onSelect={() => {
-                          router.visit(route('project.show', project.id))
-                        }}
-                      >
-                        <CheckCircle className="mr-3 size-4 text-foreground" />
-                        <span className="truncate w-full">{project.title}</span>
-                        <CornerDownLeft className="mr-3 size-4 text-zinc-500" />
-                      </CommandItem>
-                    ),
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </div>
+        {/* <div className="relative flex flex-col justify-end">*/}
+        <Command className=" relative w-full md:min-w-[250px] max-w-prose  lg:max-w-screen-lg">
+          <CommandInput
+            shortcut
+            ref={commandInputRef}
+            value={search}
+            onValueChange={setSearch}
+            placeholder="Buscar Projetos..."
+            className="border-none focus:outline-none focus:ring-0"
+          />
+          <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden ">
+            <CommandEmpty className="py-6 text-center text-sm text-zinc-500">
+              Nenhum projeto encontrado.
+            </CommandEmpty>
+            <CommandGroup className={search.length > 0 ? '' : 'hidden'}>
+              {filteredProjects?.map(
+                (project) =>
+                  project && (
+                    <CommandItem
+                      key={project.id}
+                      value={project.title}
+                      onSelect={() => {
+                        router.visit(route('project.show', project.id))
+                      }}
+                    >
+                      <CheckCircle className="mr-3 size-4 text-foreground" />
+                      <span className="truncate w-full">{project.title}</span>
+                      <CornerDownLeft className="mr-3 size-4 text-zinc-500" />
+                    </CommandItem>
+                  ),
+              )}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+        {/* </div>*/}
       </div>
 
       {/* Task Overview */}

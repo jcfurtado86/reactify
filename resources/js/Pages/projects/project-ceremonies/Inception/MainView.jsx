@@ -231,12 +231,12 @@ const ExpandableCard = ({
       <div className="p-4 h-full flex flex-col">
         {/* Card Header */}
         <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center">
+          <div className="flex items-center w-full">
             <IconComponent
               size={20}
               className={cn('mr-2 flex-shrink-0', variantClasses.split(' ')[1])}
             />
-            <h3 className="text-card-foreground font-bold text-lg m-0 truncate">
+            <h3 className="text-card-foreground font-bold text-lg m-0 truncate w-full">
               {title}
             </h3>
           </div>
@@ -359,47 +359,7 @@ const ExpandableCard = ({
 
 const MainView = ({ project = {}, setProject }) => {
   //ia states
-  const [aiGeneratedProductCanvas, setAiGeneratedProductCanvas] = useState([
-    // {
-    //   key: 'issues',
-    //   label: ' Problems',
-    //   value: 'pao',
-    //   selected: true,
-    // },
-    // {
-    //   key: 'solutions',
-    //   label: 'Solutions',
-    //   value: 'raccoon',
-    //   selected: true,
-    // },
-    // {
-    //   key: 'personas',
-    //   label: 'Personas',
-    //   value:
-    //     'Leon Cardoso - Administrador da plataforma.\n      Thiago Guimarães - Usuário.',
-    //   selected: true,
-    // },
-    // {
-    //   key: 'restrictions',
-    //   label: 'Restrictions',
-    //   value:
-    //     'A plataforma deve funcionar em qualquer navegador web baseado no Chromium, no Opera, no Safari e no Mozilla Firefox. \nA plataforma deve exigir um cadastro do usuário.\n      A plataforma deve exigir uma assinatura semestral ou anual para acesso ilimitado ao catálogo.',
-    //   selected: true,
-    // },
-    // {
-    //   key: 'product_is',
-    //   label: 'Product is',
-    //   value:
-    //     'É uma plataforma web.\n      É otimizada para navegadores desktop e mobile.\n      A plataforma oferece uma comunidade para interação entre usuários.',
-    //   selected: true,
-    // },
-    // {
-    //   key: 'product_is_not',
-    //   label: 'Product is not',
-    //   value: 'Não é um sistema desktop.\n\nNão é um aplicativo móvel.',
-    //   selected: true,
-    // },
-  ])
+  const [aiGeneratedProductCanvas, setAiGeneratedProductCanvas] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
@@ -425,46 +385,53 @@ const MainView = ({ project = {}, setProject }) => {
   }
 
   const generateProductCanvas = async () => {
-    setIsGenerating(true);
-    setIsModalMinimized(false);
+    setIsGenerating(true)
+    setIsModalMinimized(false)
 
     try {
       const response = await axios.post(route('product-canvas.generate'), {
         project_id: project.id,
-      });
+      })
 
-      const data = response.data;
+      const data = response.data
 
       if (data.status === 'sucesso') {
-        const productCanvasWithSelection = data.product_canvas.map((canvas) => ({
-          ...canvas,
-          selected: true,
-        }));
+        const productCanvasWithSelection = data.product_canvas.map(
+          (canvas) => ({
+            ...canvas,
+            selected: true,
+          }),
+        )
 
         if (productCanvasWithSelection.length === 0) {
-          toast.info("A IA não gerou sugestões para o Product Canvas.");
-          return;
+          toast.info('A IA não gerou sugestões para o Product Canvas.')
+          return
         }
 
-        setAiGeneratedProductCanvas(productCanvasWithSelection);
-        setShowAiModal(true);
+        setAiGeneratedProductCanvas(productCanvasWithSelection)
+        setShowAiModal(true)
         toast.success(
           'Sugestões para o Product Canvas foram geradas com sucesso.',
-        );
+        )
       } else {
         if (data.status === 'warning') {
-          toast.warning(data.message);
+          toast.warning(data.message)
         } else {
-          toast.error(data.message || 'Ocorreu uma resposta inesperada do servidor.');
+          toast.error(
+            data.message || 'Ocorreu uma resposta inesperada do servidor.',
+          )
         }
       }
     } catch (error) {
-      console.error('Erro ao gerar Product Canvas:', error);
-      toast.error(error.response?.data?.message || 'Não foi possível conectar ao servidor.');
+      console.error('Erro ao gerar Product Canvas:', error)
+      toast.error(
+        error.response?.data?.message ||
+          'Não foi possível conectar ao servidor.',
+      )
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
+  }
 
   const confirmGeneratedProductCanvas = () => {
     const selectedProductCanvas = aiGeneratedProductCanvas.filter(
