@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
 use App\Models\Interview;
+use App\Models\SystemInterface;
 
 class SystemInterfaceGeneratorControllerGemini extends Controller
 {
@@ -38,15 +39,30 @@ public function generate(Request $request): JsonResponse
                 return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
             }
 
+            $existingInterfaces = SystemInterface::where('project_id', $projectId)->get();
+            $existingInterfacesContext = "Nenhuma.";
+            if ($existingInterfaces->isNotEmpty()) {
+                $existingInterfacesContext = $existingInterfaces->map(fn($if) => "- {$if->title} (Tipo: {$if->type})")->implode("\n");
+            }
+
             $classMap = OverallModelClass::where('project_id', $projectId)->pluck('id', 'name');
             $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
             $context = "CRC Cards do Projeto:\n";
+            $context = "CRC Cards do Projeto:\n";
             $crcCards->each(function ($card) use (&$context) {
-                $collaborators = is_string($card->collaborators) ? json_decode($card->collaborators) : $card->collaborators;
-                $collaboratorsString = is_array($collaborators) ? implode(', ', $collaborators) : '';
+                // Decodifica as Responsabilidades
+                $responsibilities = is_string($card->responsabilities) ? json_decode($card->responsabilities, true) : $card->responsabilities;
+                $responsibilitiesString = is_array($responsibilities) ? implode('; ', $responsibilities) : 'Nenhuma';
+
+                // Decodifica os Colaboradores
+                $collaborators = is_string($card->collaborators) ? json_decode($card->collaborators, true) : $card->collaborators;
+                $collaboratorsString = is_array($collaborators) && !empty($collaborators) ? implode(', ', $collaborators) : 'Nenhum';
                 
-                $context .= "- Classe: {$card->class}, Colaboradores: " . $collaboratorsString . "\n";
+                // Adiciona ao contexto com melhor formatação
+                $context .= "- Classe: {$card->class}\n";
+                $context .= "  - Responsabilidades: {$responsibilitiesString}\n";
+                $context .= "  - Colaboradores: {$collaboratorsString}\n";
             });
             $context .= "\nEstórias do Projeto:\n";
             $stories->each(function ($story) use (&$context) {
@@ -54,7 +70,7 @@ public function generate(Request $request): JsonResponse
             });
             $context .= "\nContexto das Entrevistas:\n" . $combinedTranscripts;
 
-            $prompt = $this->createPrompt($context, $crcCards->pluck('class')->toArray());
+            $prompt = $this->createPrompt($context, $crcCards->pluck('class')->toArray(), $existingInterfacesContext);
             Log::info("PROMPT PARA SYSTEM INTERFACES: \n\n{$prompt}:");
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
@@ -89,7 +105,7 @@ public function generate(Request $request): JsonResponse
         }
     }
 
-    private function createPrompt(string $context, array $availableClasses): string
+    private function createPrompt(string $context, array $availableClasses, string $existingInterfacesContext): string
     {
         $classList = implode('", "', $availableClasses);
 
@@ -102,6 +118,9 @@ public function generate(Request $request): JsonResponse
 
         Contexto do Projeto (CRC Cards, Estórias e Entrevistas):
         {$context}
+
+        INTERFACES JÁ EXISTENTES (NÃO REPITA):
+        {$existingInterfacesContext}
 
         - 'title': Um nome claro para a interface (ex: "API de Pagamento", "Serviço de Autenticação").
         - 'input': Os dados que a interface recebe (ex: "ID do usuário, senha").
@@ -161,6 +180,7 @@ public function generate(Request $request): JsonResponse
         }
         **Fim do exemplo**
 
+        IMPORTANTE: Gere apenas interfaces que AINDA NÃO EXISTEM na lista fornecida. Se nenhuma nova interface for encontrada, retorne um array "system_interfaces" vazio.
         IMPORTANTE: Baseie-se exclusivamente no contexto fornecido. Retorne apenas o JSON.
         PROMPT;
     }
