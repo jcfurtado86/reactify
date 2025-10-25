@@ -199,6 +199,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
         IMPORTANTE: Gere apenas cenários que AINDA NÃO EXISTEM na lista fornecida. 
         IMPORTANTE: Se nenhum novo cenário for encontrado, retorne um array "usage_scenarios" vazio.
         IMPORTANTE: Retorne apenas o JSON.
+        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
         PROMPT;
     }
 

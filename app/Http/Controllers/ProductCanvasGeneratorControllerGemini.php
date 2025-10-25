@@ -121,6 +121,7 @@ class ProductCanvasGeneratorControllerGemini extends Controller
 
         IMPORTANTE: Baseie-se nas transcrições para **refinar o canvas atual**.
         IMPORTANTE: Retorne apenas o JSON.
+        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
         PROMPT;
     }
 

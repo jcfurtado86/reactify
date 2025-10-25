@@ -182,6 +182,7 @@ public function generate(Request $request): JsonResponse
 
         IMPORTANTE: Gere apenas interfaces que AINDA NÃO EXISTEM na lista fornecida. Se nenhuma nova interface for encontrada, retorne um array "system_interfaces" vazio.
         IMPORTANTE: Baseie-se exclusivamente no contexto fornecido. Retorne apenas o JSON.
+        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
         PROMPT;
     }
 

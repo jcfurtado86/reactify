@@ -178,6 +178,7 @@ class PersonaGeneratorControllerGemini extends Controller
         IMPORTANTE: Baseie-se **exclusivamente** no conteúdo da transcrição fornecida. Não invente informações.
         IMPORTANTE: Gere apenas personas que AINDA NÃO EXISTEM na lista fornecida. Se nenhuma nova persona for identificada, retorne um array "personas" vazio.
         IMPORTANTE: Retorne apenas o JSON. Não inclua texto adicional, explicações ou marcadores de código como \`\`\`json.
+        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
         PROMPT;
     }
 

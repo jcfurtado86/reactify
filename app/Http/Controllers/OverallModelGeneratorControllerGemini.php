@@ -161,6 +161,7 @@ class OverallModelGeneratorControllerGemini extends Controller
         IMPORTANTE: A lista 'crc_cards' deve conter apenas as **NOVAS** classes identificadas.
         IMPORTANTE: Retorne apenas o JSON.
         IMPORTANTE: Não repita Classes ou CRC Cards em hipótese alguma.
+        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
         PROMPT;
     }
 

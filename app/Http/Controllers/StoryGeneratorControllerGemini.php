@@ -280,10 +280,12 @@ class StoryGeneratorControllerGemini extends Controller
     de acordo com os critérios INVEST. Retorne sua resposta final apenas depois de passar por esses 3 passos.
 
     IMPORTANTE: Retorne apenas o JSON e não use \ para escapar caracteres especiais.
-    IMPORTANTE: Gere apenas stories que AINDA NÃO EXISTEM na lista fornecida. 
-    IMPORTANTE: Se nenhuma nova story for encontrada, retorne um array "stories" vazio.
-    IMPORTANTE: As novas stories não devem ser parecidas com as stories existentes em nenhum grau
+    IMPORTANTE: Não REPITA as stories existentes.
+    IMPORTANTE: Se nenhuma nova story nova for gerada, retorne um array "stories" vazio.
+    IMPORTANTE: As novas stories não devem ser parecidas com as stories existentes em nenhum grau de variância ou significado.
     IMPORTANTE: Gere stories baseadas totalmente nos exemplos e informações fornecidos acima.
+    IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
+    IMPORTANTE: As stories devem acima de tudo seguir os critérios INVEST descritos acima.
     PROMPT;
   }
 
