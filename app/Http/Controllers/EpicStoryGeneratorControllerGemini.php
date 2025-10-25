@@ -23,23 +23,34 @@ class EpicStoryGeneratorControllerGemini extends Controller
             $projectId = $validated['project_id'];
 
             $stories = Story::where('project_id', $validated['project_id'])->get();
+
+            $decomposedEpicIds = Story::where('project_id', $projectId)
+                ->whereNotNull('epic_id')
+                ->distinct()
+                ->pluck('epic_id')
+                ->toArray();
+
+            $storiesToAnalyze = Story::where('project_id', $validated['project_id'])
+                ->whereNull('epic_id') 
+                ->whereNotIn('id', $decomposedEpicIds) 
+                ->get();
+
             $interviews = Interview::where('project_id', $projectId)
                 ->whereNotNull('transcript')
                 ->where('transcript', '!=', '')
                 ->get();
 
-            if ($stories->isEmpty()) {
+            // Validar a lista FILTRADA
+            if ($storiesToAnalyze->isEmpty()) {
                 return response()->json([
                     'status' => 'warning',
-                    'message' => 'Nenhuma Story foi encontrada no projeto para analisar.'
+                    'message' => 'Nenhuma estória (que já não tenha sido decomposta) foi encontrada para analisar.'
                 ], 422);
             }
-            // if ($interviews->isEmpty()) {
-            //     return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
-            // }
+
             $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
-            $prompt = $this->createPrompt($stories, $combinedTranscripts);
+            $prompt = $this->createPrompt($storiesToAnalyze, $combinedTranscripts);
             Log::info("PROMPT PARA EPIC STORIES: \n\n{$prompt}:");
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
@@ -71,13 +82,15 @@ class EpicStoryGeneratorControllerGemini extends Controller
         REGRA: Se uma estória descreve uma única ação ou um fluxo contínuo e coeso, ela NÃO é um épico e NÃO deve ser decomposta. 
         Apenas depois de justificar internamente que uma estória é um épico, você deve prosseguir para a sua decomposição.
 
-        Lista de Stories para Análise:
+        Lista de Stories para Análise (Apenas estórias que ainda não foram decompostas):
         {$storyContext}
         
         Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):
         {$interviewContext}
 
         **Fim do contexto da entrevista**
+
+        REGRA: Analise apenas as estórias da lista principal que **NÃO** estão na lista de "ÉPICOS JÁ DECOMPOSTOS".
 
         O formato de resposta requerido é um JSON contendo os épicos identificados e suas respectivas estórias decompostas.
 
@@ -112,7 +125,7 @@ class EpicStoryGeneratorControllerGemini extends Controller
         }
         **Fim do exemplo**
 
-        IMPORTANTE: Se nenhuma estória for considerada um épico, retorne um array "decomposed_epics" vazio.
+        IMPORTANTE: Se nenhuma estória (que não esteja na lista de já decompostos) for considerada um épico, retorne um array "decomposed_epics" vazio.
         IMPORTANTE: As novas estórias decompostas devem obrigatoriamente manter o mesmo 'type' ('user' ou 'system') da estória épica original da qual elas se originaram.
         IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
