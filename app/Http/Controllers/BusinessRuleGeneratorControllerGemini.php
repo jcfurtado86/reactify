@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Story;
+use App\Models\BusinessRule;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
 use App\Models\Interview;
+use App\Models\Goal;
 
 class BusinessRuleGeneratorControllerGemini extends Controller
 {
@@ -31,6 +33,17 @@ class BusinessRuleGeneratorControllerGemini extends Controller
             if ($interviews->isEmpty()) {
                 return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
             }
+
+            $goals = Goal::where('project_id', $projectId)->get();
+            $goalsContext = "Nenhum goal definido.";
+            if ($goals->isNotEmpty()) {
+                $goalsContext = $goals->map(function($goal) {
+                    return "- \"{$goal->title}\" (Tipo: {$goal->type})";
+                })->implode("\n");
+            }
+
+            $existingRules = BusinessRule::where('project_id', $projectId)->get();
+            $existingRulesByStory = $existingRules->groupBy('story_id');
             
             $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
@@ -41,7 +54,13 @@ class BusinessRuleGeneratorControllerGemini extends Controller
             // 3. Itera sobre cada estória e gera as regras separadamente
             foreach ($stories as $story) {
                 try {
-                    $prompt = $this->createPrompt($story, $combinedTranscripts);
+                    $storyRulesContext = "Nenhuma.";
+                    if (isset($existingRulesByStory[$story->id])) {
+                        $storyRulesContext = $existingRulesByStory[$story->id]
+                            ->map(fn($rule) => "- \"{$rule->title}\"")
+                            ->implode("\n");
+                    }
+                    $prompt = $this->createPrompt($story, $combinedTranscripts, $goalsContext, $storyRulesContext);
                     Log::info("PROMPT PARA BUSINESS RULES: \n\n{$prompt}:");
                     $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPromptPrefix . $prompt);
                     $responseText = $result->text();
@@ -71,17 +90,15 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(Story $story, string $interviewContext): string
+    private function createPrompt(Story $story, string $interviewContext, string $goalsContext, string $existingRulesContext): string
     {
         return <<<PROMPT
-        Sua tarefa é extrair as Regras de Negócio (Business Rules) que estão implícitas ou são necessárias 
-        para que as funcionalidades descritas nas Stories abaixo existam.
+        Sua tarefa agora é extrair as Regras de Negócio (RNs), que são declarações que definem ou restringem alguma parte do negócio. 
+        **Definição de Regra de Negócio**: Elas servem como informações que evidenciam o contexto de negócio do cliente e como ele opera em termos gerais. Elas devem ser procuradas (refinadas) através da análise de cada Story. Para estabelecer regras de negócio mais completas, você deve considerar as Goals do Projeto previamente identificadas.
 
-        **Definição de Regra de Negócio**: As regras de negócio são informações que evidenciam o contexto de 
-        negócio do cliente e como ele opera. Em termos gerais, as regras de negócio são declarações que definem 
-        ou restringem alguma parte do negócio e refletem políticas, procedimentos e práticas do negócio do cliente.
+        **Tarefa**: Analisar as Goals do Projeto juntamente com a Story do Projeto e as Regras de Negócios já existentes para aquela Story e completar a lista de Regras de Negócios com novas regras que possam contribuir para essa fase do projeto. 
 
-        **Story para Análise:**
+        **Story do Projeto para Análise:**
         "Tipo: {$story->type} story"
         "Descrição: {$story->title}"
         
@@ -89,6 +106,12 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         {$interviewContext}
         
         **Fim do contexto da entrevista**
+
+        **Contexto de Goals do Projeto:**
+        {$goalsContext}
+        
+        **Regras de negócios do Projeto já existentes**
+        {$existingRulesContext}
         
         Formato de resposta requerido (JSON):
         {
@@ -100,7 +123,7 @@ class BusinessRuleGeneratorControllerGemini extends Controller
         **Fim do formato requerido**
 
         Exemplos aplicado a um projeto de streaming de filmes:
-        Se a Story for "Eu como Leon Cardoso quero uma seção no painel de controle administrativo que exibe 
+        Se a Story for "Eu como Administrador quero uma seção no painel de controle administrativo que exibe 
         estatísticas, gráficos ou tabelas de visitas à plataforma para consultar o fluxo de visitas à plataforma.", 
         a resposta poderia ser:
         {
@@ -110,31 +133,12 @@ class BusinessRuleGeneratorControllerGemini extends Controller
                 { "title": "As estatísticas, gráficos ou tabelas devem ser apresentados de forma clara e compreensível para os administradores." }
             ]
         }
-
-        Se a Story for "Como Usuário, eu quero ter uma opção de seleção de idioma de legenda dentro do player de vídeo, para atingir o objetivo de escolher o idioma da legenda do filme que assistir.", 
-        a resposta poderia ser:
-        {
-            "business_rules": [
-                { "title": "O player de vídeo deve oferecer no mínimo os idiomas Português e Inglês como opções de legenda, dada a restrição do produto de streaming para filmes em domínio público com legendas em português e inglês." },
-                { "title": "O sistema deve aplicar imediatamente a legenda selecionada pelo usuário durante a reprodução do filme, sem exigir o reinício da reprodução." },
-                { "title": "A seleção de legenda deve estar disponível apenas para usuários autenticados e com plano de assinatura ativo." }
-            ]
-        }
-
-        Se a Story for "É necessário garantir que as informações de cadastro e login do usuário sejam armazenadas com segurança, por meio da implementação de criptografia de dados em trânsito e em repouso, para cumprir as restrições de segurança da informação e de proteção de dados pessoais.", 
-        a resposta poderia ser:
-        {
-            "business_rules": [
-                { "title": "Todos os dados pessoais sensíveis dos usuários (incluindo senhas e informações de cadastro) devem ser criptografados antes de serem armazenados no banco de dados." },
-                { "title": "O sistema deve utilizar protocolos de segurança (como SSL/TLS) para garantir a criptografia de dados em trânsito durante o processo de login e cadastro." },
-                { "title": "O tratamento de dados do usuário deve ser realizado em conformidade com as leis de privacidade de dados aplicáveis e as políticas de segurança da empresa." }
-                { "title": "Senhas de usuários não podem ser armazenadas em texto simples (plain text); deve ser utilizado um método de hash criptográfico robusto." }
-            ]
-        }
         **Fim do exemplo**
 
-        IMPORTANTE: Analise todas as estórias fornecidas para extrair as regras. 
+        IMPORTANTE: Não gere novas regras que contenham o mesmo conteúdo das regras já existestes em nenhum grau.
+        IMPORTANTE: Se nenhuma nova regra for pensada, retorne um array "business_rules" vazio.
         IMPORTANTE: Retorne apenas o JSON.
+        IMPORTANTE: Não gere novas regras que completam as existentes.
         PROMPT;
     }
 
