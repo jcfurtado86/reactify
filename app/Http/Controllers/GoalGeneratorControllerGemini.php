@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Interview;
+use App\Models\Goal;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
@@ -35,11 +36,23 @@ class GoalGeneratorControllerGemini extends Controller
                 ], 422);
             }
 
+            $existingGoals = Goal::where('project_id', $validated['project_id'])
+                ->whereNull('deleted_at')
+                ->get();
+            
+            $existingGoalsContext = "Nenhum.";
+            if ($existingGoals->isNotEmpty()) {
+                $existingGoalsContext = $existingGoals->map(function($goal) {
+                    return "- \"{$goal->title}\" (Tipo: {$goal->type})";
+                })->implode("\n");
+            }
+
             $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
-            $prompt = $this->createPrompt($combinedTranscripts);
+            $prompt = $this->createPrompt($combinedTranscripts, $existingGoalsContext);
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
+            Log::info("PROMPT PARA GOALS: \n\n{$prompt}:");
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();
 
@@ -61,12 +74,15 @@ class GoalGeneratorControllerGemini extends Controller
     /**
      * Cria o prompt para extrair Goals de uma transcrição.
      */
-    private function createPrompt(string $transcript): string
+    private function createPrompt(string $transcript, string $existingGoalsContext): string
     {
         return <<<PROMPT
         Analise a transcrição da entrevista abaixo e extraia os objetivos de negócio (Business Goals) e as restrições (Constraint Goals).
 
         Transcrição: "{$transcript}"
+
+        LISTA DE GOALS JÁ EXISTENTES (NÃO REPITA):
+        {$existingGoalsContext}
 
         Sua tarefa é identificar:
         1.  **Business Goals (type: "bg")**: Objetivos principais que o negócio ou o usuário quer alcançar. O que gera valor? Ex: "Aumentar o engajamento", "Facilitar a busca por filmes".
@@ -131,7 +147,9 @@ class GoalGeneratorControllerGemini extends Controller
             ]
         }
 
-        IMPORTANTE: Baseie-se **exclusivamente** no conteúdo da transcrição. Retorne apenas o JSON.
+        IMPORTANTE: Baseie-se **exclusivamente** no conteúdo da transcrição.
+        IMPORTANTE: Gere apenas goals que AINDA NÃO EXISTEM na lista de "Goals já existentes". Se nenhum novo goal for encontrado, retorne um array "goals" vazio.
+        IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }
 
