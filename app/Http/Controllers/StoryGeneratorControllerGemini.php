@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreStoryRequest;
 use App\Services\StoryService;
+use App\Models\Story;
 
 
 class StoryGeneratorControllerGemini extends Controller
@@ -56,14 +57,35 @@ class StoryGeneratorControllerGemini extends Controller
         ], 422); // 422 (Unprocessable Entity)
       }
 
+      $existingStories = Story::where('project_id', $projectId)
+          ->whereNull('deleted_at')
+          ->get();
+      
+      $existingStoriesContext = "Nenhuma.";
+      if ($existingStories->isNotEmpty()) {
+          $existingStoriesContext = $existingStories->map(function($story) {
+              return "- \"{$story->title}\" Tipo:{$story->type}";
+          })->implode("\n");
+      }
 
-      $prompt = $this->createPrompt($interviews, $personas, $journeys, $productConstraints, $constraintGoals);
-      Log::info("PROMPT PARA STORY: \n\n{$prompt}:");
+      $prompt = $this->createPrompt($interviews, $personas, $journeys, $productConstraints, $constraintGoals, $existingStoriesContext);
       $modelName = config('gemini.model');
       $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
+      Log::info("PROMPT PARA STORY: \n\n{$fullPrompt}:");
       $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
       $responseText = $result->text();
       $parsedResponse = $this->parseResponse($responseText);
+      
+      $storiesWithIds = [];
+      if (isset($parsedResponse['stories']) && is_array($parsedResponse['stories'])) {
+          foreach ($parsedResponse['stories'] as $story) {
+              $story['project_id'] = $projectId;
+              $story['epic_id'] = null; 
+              $storiesWithIds[] = $story;
+          }
+      }
+
+      $parsedResponse['stories'] = $storiesWithIds;
 
       return response()->json([
         'status' => 'sucesso',
@@ -94,6 +116,7 @@ class StoryGeneratorControllerGemini extends Controller
       if (isset($persona->goals)) {
         $goals = is_string($persona->goals) ? json_decode($persona->goals, true) : $persona->goals;
         if (is_array($goals) && !empty($goals)) {
+
           return true; 
         }
       }
@@ -117,9 +140,6 @@ class StoryGeneratorControllerGemini extends Controller
     return false;
   }
 
-  /**
-   * Verifica se existe ao menos um constraint goal com título.
-   */
   private function hasContentfulConstraintGoals(array $constraintGoals): bool
   {
     if (empty($constraintGoals)) {
@@ -156,7 +176,7 @@ class StoryGeneratorControllerGemini extends Controller
     }
   }
 
-  private function createPrompt(array $interviews, array $personas, array $journeys, array $productConstraints, array $constraintGoals): string
+  private function createPrompt(array $interviews, array $personas, array $journeys, array $productConstraints, array $constraintGoals, string $existingStoriesContext): string
   {
     $interviewsText = $this->formatInterviewsForPrompt($interviews);
     $personasText = $this->formatPersonasForPrompt($personas);
@@ -167,49 +187,57 @@ class StoryGeneratorControllerGemini extends Controller
     return <<<PROMPT
     Com base nos dados fornecidos do sistema, gere user stories e system stories no formato especificado abaixo:
 
-    CONTEXTO PRINCIPAL (Use como base de conhecimento):
-    - Transcrições de Entrevistas: {$interviewsText}
+    CONTEXTO PRINCIPAL (Use como base de conhecimento do produto):
+    - Transcrições de Entrevistas: 
+    {$interviewsText}
 
-    CONTEXTO PARA USER STORIES:
-    - Goals das Personas do Produto: $personasText
+    CONTEXTO PARA NOVAS USER STORIES:
+    - Goals das Personas do Produto: 
+    {$personasText}
 
-    - Journeys do Produto: $journeysText
+    - Journeys do Produto: 
+    {$journeysText}
 
-    CONTEXTO PARA SYSTEM STORIES:
-    - Restrições do Produto: $constraintsText
+    CONTEXTO PARA NOVAS SYSTEM STORIES:
+    - Restrições do Produto: 
+    {$constraintsText}
 
-    - Constraint Goals do Produto: $constraintGoalsText
+    - Constraint Goals do Produto: 
+    {$constraintGoalsText}
+
+    STORIES JÁ EXISTENTES:
+    {$existingStoriesContext}
 
     INSTRUÇÕES:
-    1. Para USER STORIES: Use as Goals das Personas e Journeys como contexto para criar histórias centradas no usuário.
+    1. Para **NOVAS** USER STORIES: Use as Goals das Personas e Journeys como contexto para criar histórias centradas no usuário.
 
-    2. Para SYSTEM STORIES: Use as Restrições do Produto e Constraint Goals como contexto para criar histórias do sistema. Também acrescente atributos de qualidade na descrição das system stories.
+    2. Para **NOVAS** SYSTEM STORIES: Use as Restrições do Produto e Constraint Goals como contexto para criar histórias do sistema. Também acrescente atributos de qualidade na descrição das system stories.
 
     FORMATO REQUERIDO:
     INÍCIO DO FORMATO REQUERIDO
-      {
-        "stories":
-          [
-            {
-              "title":"texto da story",
-              "type":"user|system"
-            }
-          ]
-      }
+    {
+      "stories":
+        [
+          {
+            "title":"texto da story",
+            "type":"user|system"
+          }
+        ]
+    }
     FIM DO FORMATO REQUERIDO
 
     EXEMPLO DE USER STORY:
-      {
-        "title":"Eu como Thiago Guimarães quero criar listas e adicionar a elas obras disponíveis na plataforma para criar playlists de filmes.",
-        "type":"user"
-      }
+    {
+      "title":"Eu como Thiago Guimarães quero criar listas e adicionar a elas obras disponíveis na plataforma para criar playlists de filmes.",
+      "type":"user"
+    }
     FIM DO EXEMPLO DE USER STORY:
 
     EXEMPLO DE SYSTEM STORY:
-      {
-        "title": "Título: Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência"
-        "type": "system"
-      }
+    {
+      "title": "Título: Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência"
+      "type": "system"
+    }
     FIM DO EXEMPLO DE SYSTEM STORY
 
     3. Após escrever as stories, deve verificar e validar esses requisitos.
@@ -219,45 +247,46 @@ class StoryGeneratorControllerGemini extends Controller
 
     Os seis critérios que compõem o INVEST são:
 
-    *   **I (Independent / Independente):**
-        *   Representa a independência do requisito.
-        *   O requisito deve ser **independente de outros requisitos para ser implementado** ou possuir a menor dependência possível.
-        *   Este critério avalia a capacidade de um requisito ser implementado ou modificado sem gerar grandes impactos em demais requisitos.
+    ***I (Independent / Independente):**
+      *Representa a independência do requisito.
+      *O requisito deve ser **independente de outros requisitos para ser implementado** ou possuir a menor dependência possível.
+      *Este critério avalia a capacidade de um requisito ser implementado ou modificado sem gerar grandes impactos em demais requisitos.
 
-    *   **N (Negotiable / Negociável):**
-        *   Representa a negociação do requisito.
-        *   Diz respeito a se aquele requisito foi **negociado ou não com o principal interessado** nele.
-        *   O requisito deve estar **priorizado pelo Customer**.
+    ***N (Negotiable / Negociável):**
+      *Representa a negociação do requisito.
+      *Diz respeito a se aquele requisito foi **negociado ou não com o principal interessado** nele.
+      *O requisito deve estar **priorizado pelo Customer**.
 
-    *   **V (Valuable / Valioso):**
-        *   Representa o valor daquele requisito para o cliente.
-        *   Deve **atender um ou mais objetivos definidos nas Personas**.
-        *   Busca avaliar se o requisito representa valor para o cliente.
+    ***V (Valuable / Valioso):**
+      *Representa o valor daquele requisito para o cliente.
+      *Deve **atender um ou mais objetivos definidos nas Personas**.
+      *Busca avaliar se o requisito representa valor para o cliente.
 
-    *   **E (Estimable / Estimável):**
-        *   Representa a **possibilidade de estimar o esforço** daquele requisito.
-        *   Deve ser **possível estimar o esforço para a implementação**.
+    ***E (Estimable / Estimável):**
+      *Representa a **possibilidade de estimar o esforço** daquele requisito.
+      *Deve ser **possível estimar o esforço para a implementação**.
 
-    *   **S (Sized-Apropriately / Tamanho Adequado ou Small / Pequeno):**
-        *   O requisito deve ter um **tamanho apropriado**.
-        *   Deve ser **pequeno o suficiente para ser implementado em uma iteração**.
+    ***S (Sized-Apropriately / Tamanho Adequado ou Small / Pequeno):**
+      *O requisito deve ter um **tamanho apropriado**.
+      *Deve ser **pequeno o suficiente para ser implementado em uma iteração**.
 
-    *   **T (Testable / Testável):**
-        *   Representa a **possibilidade de testá-lo**.
-        *   Deve ser **possível gerar cenários de teste de aceitação**.
-        *   Avalia a capacidade de determinado requisito ser testado na prática.
+    ***T (Testable / Testável):**
+      *Representa a **possibilidade de testá-lo**.
+      *Deve ser **possível gerar cenários de teste de aceitação**.
+      *Avalia a capacidade de determinado requisito ser testado na prática.
 
     
     Seu trabalho então é inspecionar cada story gerada e garantir que esta esteja 
     de acordo com os critérios INVEST. Retorne sua resposta final apenas depois de passar por esses 3 passos.
 
     IMPORTANTE: Retorne apenas o JSON e não use \ para escapar caracteres especiais.
-    IMPORTANTE: Caso não haja dados suficientes para um tipo de story, não gere ou invente stories.
+    IMPORTANTE: Gere apenas stories que AINDA NÃO EXISTEM na lista fornecida. 
+    IMPORTANTE: Se nenhuma nova story for encontrada, retorne um array "stories" vazio.
+    IMPORTANTE: As novas stories não devem ser parecidas com as stories existentes em nenhum grau
     IMPORTANTE: Gere stories baseadas totalmente nos exemplos e informações fornecidos acima.
     PROMPT;
   }
 
-  // Métodos auxiliares para buscar dados do banco de dados (mantendo o filtro de soft-delete)
   private function getPersonasFromDatabase(int $projectId): array
   {
     try {
@@ -321,7 +350,6 @@ class StoryGeneratorControllerGemini extends Controller
     }
   }
 
-  // Métodos para formatar os dados para o prompt (inalterados)
   private function formatPersonasForPrompt(array $personas): string
   {
     if (empty($personas)) {
@@ -334,7 +362,7 @@ class StoryGeneratorControllerGemini extends Controller
 
       if ($goals) {
         $goalsText = is_array($goals) ? implode(', ', $goals) : $goals;
-        $personaText = "\nGoals: " . $goalsText;
+        $personaText = "Goals: " . $goalsText;
       }
 
       $formatted[] = $personaText;
@@ -352,7 +380,7 @@ class StoryGeneratorControllerGemini extends Controller
     foreach ($journeys as $journey) {
       $steps = is_string($journey->steps) ? json_decode($journey->steps, true) : $journey->steps;
 
-      $journeyText = "Journey: " . ($journey->title ?? 'N/A') . " (ID: {$journey->id})";
+      $journeyText = "\nJourney: " . ($journey->title ?? 'N/A');
 
       if (is_array($steps)) {
         $stepsText = [];
@@ -383,7 +411,7 @@ class StoryGeneratorControllerGemini extends Controller
     $formatted = [];
     foreach ($constraints as $constraint) {
       if (!empty($constraint->restrictions)) {
-        $formatted[] = "Restrições do Produto (ID: {$constraint->id}): " . $constraint->restrictions;
+        $formatted[] = "\nRestrições do Produto: " . $constraint->restrictions;
       }
     }
 
@@ -399,9 +427,8 @@ class StoryGeneratorControllerGemini extends Controller
     $formatted = [];
     foreach ($constraintGoals as $constraintGoal) {
       $priorityText = ucfirst($constraintGoal->priority ?? 'N/A');
-      $formatted[] = "Constraint Goal (ID: {$constraintGoal->id}): " . ($constraintGoal->title ?? 'N/A') .
-                    " (Prioridade: " . $priorityText . ")" .
-                    " - Foco em atributos de qualidade como performance, segurança, escalabilidade";
+      $formatted[] = "Constraint Goal: " . ($constraintGoal->title ?? 'N/A') .
+                    " (Prioridade: " . $priorityText . ")";
     }
     return implode("\n\n", $formatted);
   }
