@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Interview;
+use App\Models\Persona;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
@@ -32,11 +33,43 @@ class PersonaGeneratorControllerGemini extends Controller
                 ], 422);
             }
 
+            $existingPersonas = Persona::where('project_id', $validated['project_id'])
+                ->whereNull('deleted_at')
+                ->get();
+            
+            $existingPersonasContext = "Nenhuma.";
+            if ($existingPersonas->isNotEmpty()) {
+                $existingPersonasContext = $existingPersonas->map(function($persona) {
+                    $personaString = "- Nome: {$persona->name} (ID: {$persona->id})\n";
+                    $formatList = function(?array $items, string $label) {
+                        $str = "  {$label}:\n";
+                        if (!empty($items)) {
+                            foreach ($items as $item) {
+                                // Garante que $item seja uma string
+                                $itemText = is_string($item) ? $item : json_encode($item);
+                                $str .= "    - {$itemText}\n";
+                            }
+                        } else {
+                            $str .= "    - (Não definido)\n";
+                        }
+                        return $str;
+                    };
+
+                    $personaString .= $formatList($persona->profile, 'Perfil');
+                    $personaString .= $formatList($persona->expectations, 'Expectativas');
+                    $personaString .= $formatList($persona->goals, 'Objetivos');
+                    
+                    return $personaString;
+
+                })->implode("\n\n"); // Separador com linha dupla para clareza
+            }
+
             $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
-            $prompt = $this->createPrompt($combinedTranscripts);
+            $prompt = $this->createPrompt($combinedTranscripts, $existingPersonasContext);
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
+            Log::info("PROMPT PARA PERSONA MODEL: \n\n{$fullPrompt}:");
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();
 
@@ -56,7 +89,7 @@ class PersonaGeneratorControllerGemini extends Controller
     /**
      * Cria o prompt detalhado para o modelo Gemini.
      */
-    private function createPrompt(string $transcript): string
+    private function createPrompt(string $transcript, string $existingPersonasContext): string
     {
         // A transcrição é escapada para evitar problemas se contiver caracteres especiais de JSON
         $escapedTranscript = json_encode($transcript);
@@ -66,6 +99,9 @@ class PersonaGeneratorControllerGemini extends Controller
 
         Transcrição da Entrevista:
         {$escapedTranscript}
+
+        LISTA DE PERSONAS JÁ EXISTENTES (NÃO REPITA):
+        {$existingPersonasContext}
 
         Sua tarefa é extrair informações do que foi dito na entrevista para preencher os seguintes campos para cada persona:
         - 'name': Crie um nome fictício que represente o perfil do entrevistado.
@@ -140,6 +176,7 @@ class PersonaGeneratorControllerGemini extends Controller
         Fim do exemplo
 
         IMPORTANTE: Baseie-se **exclusivamente** no conteúdo da transcrição fornecida. Não invente informações.
+        IMPORTANTE: Gere apenas personas que AINDA NÃO EXISTEM na lista fornecida. Se nenhuma nova persona for identificada, retorne um array "personas" vazio.
         IMPORTANTE: Retorne apenas o JSON. Não inclua texto adicional, explicações ou marcadores de código como \`\`\`json.
         PROMPT;
     }
