@@ -8,6 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
 use App\Models\Interview;
+use App\Models\CrcCard; 
+use App\Models\OverallModelClass; 
 
 class OverallModelGeneratorControllerGemini extends Controller
 {
@@ -39,10 +41,26 @@ class OverallModelGeneratorControllerGemini extends Controller
                 return response()->json(['status' => 'warning', 'message' => 'Nenhuma entrevista foi encontrada para dar contexto.'], 422);
             }
 
+            $existingCrcCards = CrcCard::where('project_id', $projectId)->get();
+            $existingClasses = OverallModelClass::where('project_id', $projectId)->get();
+
+            $existingCrcContext = "Nenhum CRC Card.";
+            if ($existingCrcCards->isNotEmpty()) {
+                $existingCrcContext = $existingCrcCards->map(function($card) {
+                     $collab = is_string($card->collaborators) ? json_decode($card->collaborators) : $card->collaborators;
+                     $collabStr = is_array($collab) ? implode(', ', $collab) : '';
+                     return "- Classe: {$card->class} (Colaboradores: {$collabStr})";
+                })->implode("\n");
+            }
+
+            $existingClassesContext = "Nenhuma Classe.";
+            if ($existingClasses->isNotEmpty()) {
+                $existingClassesContext = $existingClasses->map(fn($class) => "- {$class->name}")->implode("\n");
+            }
+
             $storyContext = $stories->map(fn($story) => "- ({$story->type}): {$story->title}")->implode("\n");
             $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
-
-            $prompt = $this->createPrompt($storyContext, $combinedTranscripts);
+            $prompt = $this->createPrompt($storyContext, $combinedTranscripts, $existingCrcContext, $existingClassesContext);
             Log::info("PROMPT PARA OVERALL MODEL: \n\n{$prompt}:");
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos.' . $prompt;
@@ -64,7 +82,7 @@ class OverallModelGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(string $storyContext, string $interviewContext): string
+    private function createPrompt(string $storyContext, string $interviewContext, string $existingCrcContext, string $existingClassesContext): string
     {
         return <<<PROMPT
         Sua tarefa tem duas partes:
@@ -79,7 +97,13 @@ class OverallModelGeneratorControllerGemini extends Controller
         {$interviewContext}
         **Fim do contexto da entrevista**
 
-        Para cada classe que você identificar, defina:
+        OVERAL MODEL EXISTENTE: 
+        CRC Cards Atuais:
+        {$existingCrcContext}
+        Classes Atuais:
+        {$existingClassesContext}
+
+        Para cada **NOVA** classe que você identificar, defina:
         - 'class': O nome da classe (um substantivo, ex: "Filme", "Usuário").
         - 'responsabilities': Uma lista de ações que a classe deve executar (verbo + substantivo, ex: "Salvar informações", "Calcular nota").
         - 'collaborators': Uma lista de outras classes com as quais ela precisa interagir para cumprir suas responsabilidades.
@@ -133,8 +157,10 @@ class OverallModelGeneratorControllerGemini extends Controller
         }
         **Fim do exemplo**
 
-        IMPORTANTE: A lista 'overall_model_classes' deve conter todos os nomes de classes de forma única, sem repetição. 
+        IMPORTANTE: A lista 'overall_model_classes' deve conter todos os nomes de classes de forma única (novas + existentes).
+        IMPORTANTE: A lista 'crc_cards' deve conter apenas as **NOVAS** classes identificadas.
         IMPORTANTE: Retorne apenas o JSON.
+        IMPORTANTE: Não repita Classes ou CRC Cards em hipótese alguma.
         PROMPT;
     }
 
