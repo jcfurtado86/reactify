@@ -86,7 +86,6 @@ const GeneratedItemsModal = ({
 
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
               <div className="space-y-2 pb-4">
-                .
                 {generatedItems.map((story, index) => {
                   const storyType = allStories.find(
                     (s) => s.id === story.story_id,
