@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Persona;
 use App\Models\Interview;
+use App\Models\Journey;
 
 class JourneyGeneratorControllerGemini extends Controller
 {
@@ -39,8 +40,32 @@ class JourneyGeneratorControllerGemini extends Controller
                 return response()->json(['status' => 'warning', 'message' => 'Nenhuma persona com goals válidos encontrada para este projeto'], 404);
             }
 
-            $allJourneys = $this->generateJourneysForPersonas($personasWithGoals, $combinedTranscripts);
+            $existingJourneys = Journey::where('project_id', $projectId)
+                ->whereNull('deleted_at')
+                ->get();
+            
+            $existingJourneysContext = "Nenhuma.";
+            if ($existingJourneys->isNotEmpty()) {
+                $existingJourneysContext = $existingJourneys->map(function($journey) {
+                    $journeyString = "- Título: {$journey->title}\n  Passos:\n";
 
+                    $steps = is_string($journey->steps) ? json_decode($journey->steps, true) : $journey->steps;
+
+                    if (is_array($steps)) {
+                        foreach ($steps as $index => $step) {
+                            $description = $step['description'] ?? 'Passo sem descrição';
+                            $touchpoint = ($step['is_touchpoint'] ?? false) ? ' [TOUCHPOINT]' : '';
+                            $journeyString .= "    " . ($index + 1) . ". {$description}{$touchpoint}\n";
+                        }
+                    } else {
+                        $journeyString .= "    (Não foi possível listar os passos)\n";
+                    }
+                    return $journeyString;
+
+                })->implode("\n\n");
+            }
+            $allJourneys = $this->generateJourneysForPersonas($personasWithGoals, $combinedTranscripts, $existingJourneysContext);
+            
             return response()->json([
                 'status' => 'sucesso',
                 'project_id' => $projectId,
@@ -126,7 +151,7 @@ class JourneyGeneratorControllerGemini extends Controller
         return false;
     }
 
-    private function generateJourneysForPersonas($personas, string $interviewContext): array
+    private function generateJourneysForPersonas($personas, string $interviewContext, string $existingJourneysContext): array
     {
         $allJourneys = [];
 
@@ -138,7 +163,7 @@ class JourneyGeneratorControllerGemini extends Controller
                     continue;
                 }
 
-                $journeys = $this->generateJourneyForPersona($persona, $interviewContext);
+                $journeys = $this->generateJourneyForPersona($persona, $interviewContext, $existingJourneysContext);
                 $allJourneys = array_merge($allJourneys, $journeys);
             } catch (\Exception $e) {
                 Log::error("Erro ao gerar journey para persona {$persona->id}: " . $e->getMessage());
@@ -150,10 +175,10 @@ class JourneyGeneratorControllerGemini extends Controller
         return $allJourneys;
     }
 
-    private function generateJourneyForPersona(Persona $persona, string $interviewContext): array
+    private function generateJourneyForPersona(Persona $persona, string $interviewContext, string $existingJourneysContext): array
     {
         try {
-            $prompt = $this->createPrompt($persona, $interviewContext);
+            $prompt = $this->createPrompt($persona, $interviewContext, $existingJourneysContext);
             Log::info("PROMPT PARA JOURNEYS: \n\n{$prompt}:");
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
             $modelName = config('gemini.model');
@@ -169,7 +194,7 @@ class JourneyGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(Persona $persona, string $interviewContext): string
+    private function createPrompt(Persona $persona, string $interviewContext, string $existingJourneysContext): string
     {
         // Garantir que goals seja um array válido para o JSON
         $goals = is_string($persona->goals) ? json_decode($persona->goals, true) : $persona->goals;
@@ -189,6 +214,9 @@ class JourneyGeneratorControllerGemini extends Controller
 
         Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):
         {$interviewContext}
+
+        LISTA DE JOURNEYS JÁ EXISTENTES (NÃO REPITA):
+        {$existingJourneysContext}
 
         **Fim do contexto da entrevista**
         
@@ -259,6 +287,7 @@ class JourneyGeneratorControllerGemini extends Controller
         }
         **Fim do exemplo**
         IMPORTANTE: Retorne apenas o JSON e não use \ para escapar caracteres especiais.
+        IMPORTANTE: Gere apenas journeys que AINDA NÃO EXISTEM na lista fornecida. Se nenhuma nova journey for encontrada, retorne um array "journeys" vazio.
         IMPORTANTE: Caso não haja goal para a persona da vez, não gere ou invente uma journey(title, steps)
         IMPORTANTE: Caso o texto da goal não faça sentido, não gere ou invente uma journey(title, steps)
         PROMPT;
