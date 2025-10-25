@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
 use Illuminate\Support\Facades\Log;
 use App\Models\Interview;
+use App\Models\UsageScenario;
 
 class UsageScenarioGeneratorControllerGemini extends Controller
 {
@@ -34,14 +35,49 @@ class UsageScenarioGeneratorControllerGemini extends Controller
             
             $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
             
-            $allUsageScenarios = [];
+            $existingScenarios = UsageScenario::where('project_id', $projectId)->get();
+            $existingScenariosByStory = $existingScenarios->groupBy('story_id');
+            
+            $allUsageScenarios = [];;
             $modelName = config('gemini.model');
             $fullPromptPrefix = 'Você é um especialista em engenharia de software e análise de requisitos. ';
 
-            // Itera sobre cada estória e gera os cenários separadamente
             foreach ($stories as $story) {
                 try {
-                    $prompt = $this->createPrompt($story, $combinedTranscripts);
+                    $storyScenariosContext = "Nenhum.";
+                    if (isset($existingScenariosByStory[$story->id])) {
+                        $storyScenariosContext = $existingScenariosByStory[$story->id]
+                            ->map(function($scenario) {
+                                $desc = $scenario->description;
+                                if (!is_array($desc)) {
+                                    $desc = json_decode(strval($desc), true) ?? [];
+                                }
+
+                                $scenarioString = "- Cenário:\n";
+                                
+                                // Mapeia as chaves para texto legível
+                                $keyMap = [
+                                    'as' => 'COMO',
+                                    'given' => 'DADO QUE',
+                                    'when' => 'QUANDO',
+                                ];
+
+                                foreach ($desc as $key => $value) {
+                                    if (isset($keyMap[$key])) {
+                                        $scenarioString .= "    - " . $keyMap[$key] . ": " . $value . "\n";
+                                    } elseif (str_starts_with($key, 'then')) {
+                                        $scenarioString .= "    - ENTÃO: " . $value . "\n";
+                                    } elseif (str_starts_with($key, 'and')) {
+                                        $scenarioString .= "    - E: " . $value . "\n";
+                                    }
+                                }
+                                return $scenarioString;
+
+                            })
+                            ->implode("\n\n");
+                    }
+
+                    $prompt = $this->createPrompt($story, $combinedTranscripts, $storyScenariosContext);
                     Log::info("PROMPT PARA USAGE SCENARIOS: \n\n{$prompt}:");
                     $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPromptPrefix . $prompt);
                     $responseText = $result->text();
@@ -71,7 +107,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(Story $story, string $interviewContext): string
+    private function createPrompt(Story $story, string $interviewContext, string $existingScenariosContext): string
     {
         return <<<PROMPT
         Sua tarefa é criar Cenários de Uso para a Story fornecida, representando-os como Cenários de Aceitação no padrão GIVEN-WHEN-THEN. Os cenários de uso são os comportamentos que o produto possuirá a partir da interação com os usuários finais. Isso garante o refinamento das funcionalidades por meio de exemplos reais do negócio e a criação de cenários para testes de aceitação.
@@ -84,13 +120,19 @@ class UsageScenarioGeneratorControllerGemini extends Controller
         {$interviewContext}\
         **Fim do contexto da entrevista**   
 
-        O cenário deve seguir a estrutura:
+        **Fim do contexto da entrevista** 
+        
+        CENÁRIOS JÁ EXISTENTES PARA ESTA STORY:
+        {$existingScenariosContext}
+
+        O **NOVO** cenário deve seguir a estrutura:
         - 'as': O papel do usuário (extraído da estória).
         - 'given': A pré-condição ou o contexto inicial.
         - 'when': A ação que o usuário realiza.
         - 'then_1': O resultado esperado principal.
-        - 'and': (Opcional junto de then_x) Uma verificação adicional no resultado.
-        - 'then_2': (Opcional junto de and_x) Outro resultado esperado.
+        - 'and': (Opcional, existe junto de then_2) Uma verificação adicional no resultado.
+        - 'then_2': (Opcional, existe junto de and) Outro resultado esperado.
+        - outros and/then quando necessários
 
         REGRA: Um 'and' em hipótese alguma deve existir sem um 'then' logo apos ele. Essa é sua principal regra e nunca deve ser quebrada.
 
@@ -102,9 +144,7 @@ class UsageScenarioGeneratorControllerGemini extends Controller
                         "as": "O papel do usuário",
                         "given": "Dado que...",
                         "when": "Quando eu...",
-                        "then_1": "Então eu deveria...",
-                        "and": "E também...",
-                        "then_2": "E finalmente..."
+                        "then_1": "Então eu deveria..."
                     }
                 }
             ]
@@ -156,6 +196,8 @@ class UsageScenarioGeneratorControllerGemini extends Controller
         }
         **Fim do exemplo**
 
+        IMPORTANTE: Gere apenas cenários que AINDA NÃO EXISTEM na lista fornecida. 
+        IMPORTANTE: Se nenhum novo cenário for encontrado, retorne um array "usage_scenarios" vazio.
         IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }
