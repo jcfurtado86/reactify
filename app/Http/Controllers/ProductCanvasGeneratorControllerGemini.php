@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Interview;
+use App\Models\ProductCanvas;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Gemini\Laravel\Facades\Gemini;
@@ -31,12 +32,31 @@ class ProductCanvasGeneratorControllerGemini extends Controller
                 ], 422);
             }
 
+            $existingCanvas = ProductCanvas::where('project_id', $validated['project_id'])
+                ->whereNull('deleted_at') // Se houver soft delete
+                ->first();
+
+            $existingCanvasContext = "Nenhum canvas preenchido ainda.";
+            if ($existingCanvas) {
+                // Assumindo que o model armazena os valores como no exemplo do prompt
+                // Se seu model armazena o JSON inteiro, ajuste esta lógica
+                $existingCanvasData = [
+                    "issues" => $existingCanvas->issues ?? "Não definido",
+                    "solutions" => $existingCanvas->solutions ?? "Não definido",
+                    "personas" => $existingCanvas->personas ?? "Não definido",
+                    "restrictions" => $existingCanvas->restrictions ?? "Não definido",
+                    "product_is" => $existingCanvas->product_is ?? "Não definido",
+                    "product_is_not" => $existingCanvas->product_is_not ?? "Não definido",
+                ];
+                $existingCanvasContext = json_encode($existingCanvasData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            }
+
             $combinedTranscripts = $interviews->pluck('transcript')->implode("\n\n---\n\n");
 
-            $prompt = $this->createPrompt($combinedTranscripts);
+            $prompt = $this->createPrompt($combinedTranscripts, $existingCanvasContext);
             $modelName = config('gemini.model');
             $fullPrompt = 'Você é um especialista em engenharia de software e análise de requisitos. ' . $prompt;
-
+            Log::info("PROMPT PARA PRODUCT CANVAS: \n\n{$fullPrompt}:");
             $result = Gemini::generativeModel(model: $modelName)->generateContent($fullPrompt);
             $responseText = $result->text();
             $parsedData = $this->parseResponse($responseText);
@@ -52,7 +72,7 @@ class ProductCanvasGeneratorControllerGemini extends Controller
         }
     }
 
-    private function createPrompt(string $transcripts): string
+    private function createPrompt(string $transcripts, string $existingCanvasContext): string
     {
         return <<<PROMPT
         Sua tarefa é preencher um Product Canvas com base nas transcrições de entrevistas de usuários fornecidas.
@@ -61,6 +81,9 @@ class ProductCanvasGeneratorControllerGemini extends Controller
 
         **Transcrição das Entrevistas:**
         {$transcripts}
+
+        **Product Canvas ATUAL (Use como base para refinar):**
+        {$existingCanvasContext}
 
         Analise a transcrição e extraia as informações para preencher os seguintes campos. O valor de cada campo deve ser um texto conciso e principalmente direto e resumido, formatado com quebras de linha (`\n`) se necessário.
         - 'issues': Os problemas que serão solucionados com o produto.
@@ -96,8 +119,8 @@ class ProductCanvasGeneratorControllerGemini extends Controller
             ]
         }
 
-        IMPORTANTE: Baseie-se exclusivamente nas transcrições. 
-        REGRA: Retorne apenas o JSON.
+        IMPORTANTE: Baseie-se nas transcrições para **refinar o canvas atual**.
+        IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }
 
