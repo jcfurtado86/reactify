@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ArrowRight } from 'lucide-react'
 
 const ProductBacklog = ({ project, setProject }) => {
   const [localProject, setLocalProject] = useState(project)
   const [selectedStories, setSelectedStories] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  const handleNavigateToMatrix = () => {
+    localStorage.setItem('activeStoryDiscoveryMenu', 'Matriz de Priorização');
+    
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: 'storyDiscovery',
+      }),
+    );
+  };
 
   // ✅ Sincronizar estado local quando project muda
   useEffect(() => {
@@ -153,6 +164,41 @@ const ProductBacklog = ({ project, setProject }) => {
           <CardHeader>
             <CardTitle className="text-lg">{columnTitles[columnId]}</CardTitle>
 
+            {columnId === 'productBacklog' && (
+              <div className="pt-1 flex flex-col gap-2"> 
+                <p className="text-sm text-muted-foreground">
+                  Exibe stories priorizadas na Matriz de Priorização. Ainda não estão em uma Sprint.
+                </p>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-fit" // 'w-fit' para o botão não ocupar a largura toda
+                  onClick={handleNavigateToMatrix}
+                >
+                  Ir para Matriz de Priorização
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+
+                <p className="text-sm text-muted-foreground">
+                  Selecione as Stories para Sprint
+                </p>
+              </div>
+            )}
+
+            {columnId === 'sprintBacklog' && (
+              <p className="text-sm text-muted-foreground pt-1">
+                Stories em Sprints atuais (ativas ou em planejamento) aparecerâo aqui.
+              </p>
+            )}
+
+            {columnId === 'delivered' && (
+              <p className="text-sm text-muted-foreground pt-1">
+                Stories concluídas (status 'Done') dentro das Sprints
+                atuais (ativas ou em planejamento).
+              </p>
+            )}
+
             {/* Action buttons for Product Backlog */}
             {columnId === 'productBacklog' && selectedStories.length > 0 && (
               <div className="space-y-2">
@@ -230,7 +276,7 @@ const ProductBacklog = ({ project, setProject }) => {
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground text-center pt-8">
-                  No stories in this column.
+                  Sem stories nessa coluna.
                 </p>
               )}
             </div>
