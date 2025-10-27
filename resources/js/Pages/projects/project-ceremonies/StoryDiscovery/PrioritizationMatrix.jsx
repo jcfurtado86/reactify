@@ -17,9 +17,6 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { router } from '@inertiajs/react'
-import { storyVariants } from './Stories'
-import { typeColors as goalTypeColors } from '../Inception/Goals'
-import { priorityColors as goalPriorityColors } from '../Inception/Goals'
 
 import EditPriorities from './EditPriorities'
 
@@ -82,6 +79,7 @@ const StoryCard = ({
   priority = null,
   isDragOverlay = false,
   className = '',
+  systemColors,
 }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -98,8 +96,8 @@ const StoryCard = ({
 
   const isTemporary = story.story_id ? false : true
 
-  const selectedVariant = storyVariants[story.story_type] || storyVariants.user
-
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.story_type] || '#f97316'
   let cursorClass = ''
   if (story.isTemporary) {
     cursorClass = 'opacity-50 !cursor-not-allowed'
@@ -121,8 +119,9 @@ const StoryCard = ({
       {!story.isTemporary && (
         <div className="mr-auto">
           <Badge
+            style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer mb-2 ${selectedVariant.bg}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer mb-2`}
           >
             {`${story.story_type === 'system' ? 'SS' : 'US'}${isTemporary ? '' : story.story_id}`.toUpperCase()}
           </Badge>
@@ -134,23 +133,27 @@ const StoryCard = ({
   )
 }
 
-const GoalCard = ({ goal }) => {
-  const selectedType = goalTypeColors[goal.type] || goalTypeColors.bg
-  const selectedPriority = goalTypeColors[goal.priority] || goalTypeColors.bg
-
+const GoalCard = ({ goal, systemColors }) => {
+  // const selectedType = goalTypeColors[goal.type] || goalTypeColors.bg
+  // const selectedPriority = goalTypeColors[goal.priority] || goalTypeColors.bg
+  const goalVariants = systemColors?.goals || {}
+  const selectedType = goalVariants[goal.type] || '#f97316'
+  const selectedPriority = goalVariants[goal.priority] || '#f97316'
   return (
     <Card className="bg-card  border border-border transition-all duration-300 ease-in-out p-0 h-40 w-full rounded-md">
       <CardContent className="p-2 h-full text-xs flex flex-col gap-2">
         <div className="gap-2 flex w-full items-center justify-start">
           <Badge
+            style={{ backgroundColor: selectedType }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedType.color}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
             {`${goal.type.toUpperCase()}${goal.id}`}
           </Badge>
           <Badge
+            style={{ backgroundColor: selectedPriority }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedPriority.color}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
             {`${goal.priority.toUpperCase()}`}
           </Badge>
@@ -495,6 +498,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                     key={story.id}
                     story={unassignedStory}
                     className="h-full"
+                    systemColors={project?.system_colors}
                   />
                 )
               })
@@ -518,7 +522,11 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   return priorityB - priorityA // Subtrai para ordenar
                 })
                 .map((goal) => (
-                  <GoalCard key={goal.id} goal={goal}>
+                  <GoalCard
+                    key={goal.id}
+                    goal={goal}
+                    systemColors={project?.system_colors}
+                  >
                     {goal.title}
                   </GoalCard>
                 ))}
@@ -554,6 +562,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                                   key={story.id} // Use the prioritization ID for the key
                                   story={story}
                                   priority={priority}
+                                  systemColors={project?.system_colors}
                                 />
                               ))
                             ) : (
@@ -593,6 +602,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                     story={activeItem.data.current.story}
                     priority={priorityData}
                     isDragOverlay={true}
+                    systemColors={project?.system_colors}
                   />
                 )
               }

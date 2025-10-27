@@ -251,6 +251,7 @@ const StoryItem = ({
                             {`${key === 'system' ? 'ss' : 'us'}`.toUpperCase()}
                           </Badge>
                         </Button>
+                        {/* editar cores*/}
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="ghost" className="h-full w-6">
@@ -266,7 +267,7 @@ const StoryItem = ({
                                 handleColorSelect={(e) =>
                                   handleColorSelect(e, key)
                                 }
-                                selectedValue={key}
+                                selectedValue={color}
                               />
                             </div>
                           </PopoverContent>

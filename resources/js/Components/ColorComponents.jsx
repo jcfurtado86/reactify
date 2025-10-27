@@ -1,5 +1,5 @@
 import { isTemporary, darkenColor, PREDEFINED_COLORS } from '@/lib/utils'
-
+import { Check } from 'lucide-react'
 const ColorOptions = ({ selectedValue, handleColorSelect }) => {
   const handleSelect = (e, color) => {
     e.preventDefault()

@@ -1,11 +1,12 @@
 import {
   Plus,
-  Minus,
   Check,
+  Minus,
   X,
   LoaderCircle,
   ChevronDown,
   ChevronsUp,
+  EllipsisVertical,
 } from 'lucide-react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
@@ -14,18 +15,10 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import { tooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import { ColorOptions } from '@/Components/ColorComponents'
+import { PREDEFINED_COLORS } from '@/lib/utils'
 import { toast } from 'sonner'
 import InvestCard from '../Inspection/InvestCard'
-
-export const typeColors = {
-  bg: { color: '!bg-orange-600', title: 'bg' },
-  cg: { color: '!bg-purple-600', title: 'cg' },
-}
-export const priorityColors = {
-  high: { color: '!bg-red-600', title: 'high' },
-  medium: { color: '!bg-yellow-600', title: 'medium' },
-  low: { color: '!bg-green-600', title: 'low' },
-}
 
 const GeneratedItemsModal = ({
   isModalMinimized,
@@ -35,6 +28,7 @@ const GeneratedItemsModal = ({
   toggleItemSelection,
   confirmGeneratedItems,
   toggleAllItems,
+  systemColors,
 }) => {
   return (
     <div
@@ -92,8 +86,7 @@ const GeneratedItemsModal = ({
               <div className="space-y-2 pb-4">
                 {generatedItems.map((goal, index) => {
                   const selectedType = typeColors[goal.type] || typeColors.bg
-                  const selectedPriority =
-                    priorityColors[goal.priority] || priorityColors.medium
+                  priorityColors[goal.priority] || priorityColors.medium
 
                   return (
                     <div
@@ -117,7 +110,6 @@ const GeneratedItemsModal = ({
                           <Badge
                             className={cn(
                               'border-transparent text-background font-bold',
-                              selectedPriority.color,
                             )}
                           >
                             {goal.priority.toUpperCase()}
@@ -179,8 +171,32 @@ const GoalItem = ({
   prioritySelectId,
   onTogglePrioritySelect,
   onChangeGoalPriority,
+  systemColors,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
+
+  const handleColorSelect = (colorValue, variantTitle) => {
+    const selectedColor = PREDEFINED_COLORS.find(
+      (color) => color.color === colorValue,
+    )
+    if (!selectedColor) return
+    console.log(selectedColor, variantTitle)
+    router.post(
+      route('system-color.store'),
+      {
+        goals: { ...systemColors?.goals, [variantTitle]: colorValue },
+        project_id: goal.project_id,
+      },
+      {
+        onSuccess: () => {
+          console.log('Color saved successfully')
+        },
+        onError: () => {
+          console.log('Error saving color')
+        },
+      },
+    )
+  }
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -188,9 +204,20 @@ const GoalItem = ({
       onSave()
     }
   }
-  const selectedType = typeColors[goal.type] || typeColors.bg
-  const selectedPriority = priorityColors[goal.priority] || priorityColors.med
 
+  const goalVariants = systemColors?.goals || {}
+  const typeColors = {
+    bg: goalVariants?.bg || '#444',
+    cg: goalVariants?.cg || '#444',
+  }
+  const priorityColors = {
+    low: goalVariants?.low || '#444',
+    medium: goalVariants?.medium || '#444',
+    high: goalVariants?.high || '#444',
+  }
+  const selectedType = goalVariants[goal.type] || '#444'
+  const selectedPriority = goalVariants[goal.priority] || '#444'
+  console.log(goalVariants)
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -209,30 +236,57 @@ const GoalItem = ({
               >
                 <PopoverTrigger disabled={isTemporary}>
                   <Badge
+                    style={{ backgroundColor: selectedType }}
                     className={cn(
                       'border-transparent text-background font-bold cursor-pointer',
-                      selectedType.color,
                     )}
                   >
                     {goal.type.toUpperCase()} {goal.id}
                     <ChevronDown className="ml-1 size-3" />
                   </Badge>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto bg-popover border-border p-1">
+                <PopoverContent
+                  align="start"
+                  alignOffset={-8}
+                  className="w-auto bg-popover border-border p-1"
+                >
                   <div className="flex flex-col gap-1">
-                    {Object.values(typeColors).map((type, i) => (
-                      <Button
-                        key={i}
-                        variant="ghost"
-                        className="h-auto p-2 justify-start hover:bg-accent"
-                        onClick={() => onChangeGoalType(goal.id, type.title)}
-                      >
-                        <Badge
-                          className={cn('w-full text-background', type.color)}
+                    {Object.entries(typeColors).map(([key, color], i) => (
+                      <div key={`temp-${i}`} className="flex items-center ">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-2 justify-start hover:bg-accent"
+                          onClick={() => onChangeGoalType(goal.id, key)}
                         >
-                          {type.title.toUpperCase()}
-                        </Badge>
-                      </Button>
+                          <Badge
+                            style={{ backgroundColor: color }}
+                            className={cn('w-full text-background')}
+                          >
+                            {key.toUpperCase()}
+                          </Badge>
+                        </Button>
+                        {/* editar cores*/}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="ghost" className="h-full w-6">
+                              <EllipsisVertical />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-52 p-2" align="start">
+                            <div className="space-y-1">
+                              <h4 className="font-medium text-sm px-2 py-1.5">
+                                Cores
+                              </h4>
+                              <ColorOptions
+                                handleColorSelect={(e) =>
+                                  handleColorSelect(e, key)
+                                }
+                                selectedValue={color}
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                     ))}
                   </div>
                 </PopoverContent>
@@ -243,35 +297,57 @@ const GoalItem = ({
               >
                 <PopoverTrigger disabled={isTemporary}>
                   <Badge
+                    style={{ backgroundColor: selectedPriority }}
                     className={cn(
                       'border-transparent text-background font-bold cursor-pointer',
-                      selectedPriority.color,
                     )}
                   >
                     {goal.priority.toUpperCase()}
                     <ChevronDown className="ml-1 size-3" />
                   </Badge>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto bg-popover border-border p-1">
+                <PopoverContent
+                  align="start"
+                  alignOffset={-8}
+                  className="w-auto bg-popover border-border p-1"
+                >
                   <div className="flex flex-col gap-1">
-                    {Object.values(priorityColors).map((variant, i) => (
-                      <Button
-                        key={i}
-                        variant="ghost"
-                        className="h-auto p-2 justify-start hover:bg-accent"
-                        onClick={() =>
-                          onChangeGoalPriority(goal.id, variant.title)
-                        }
-                      >
-                        <Badge
-                          className={cn(
-                            'w-full text-background',
-                            variant.color,
-                          )}
+                    {Object.entries(priorityColors).map(([key, color], i) => (
+                      <div key={`temp-${i}`} className="flex items-center ">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-2 justify-start hover:bg-accent"
+                          onClick={() => onChangeGoalPriority(goal.id, key)}
                         >
-                          {variant.title.toUpperCase()}
-                        </Badge>
-                      </Button>
+                          <Badge
+                            style={{ backgroundColor: color }}
+                            className={cn('w-full text-background')}
+                          >
+                            {key.toUpperCase()}
+                          </Badge>
+                        </Button>
+                        {/* editar cores*/}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="ghost" className="h-full w-6">
+                              <EllipsisVertical />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-52 p-2" align="start">
+                            <div className="space-y-1">
+                              <h4 className="font-medium text-sm px-2 py-1.5">
+                                Cores
+                              </h4>
+                              <ColorOptions
+                                handleColorSelect={(e) =>
+                                  handleColorSelect(e, key)
+                                }
+                                selectedValue={key}
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                     ))}
                   </div>
                 </PopoverContent>
@@ -654,6 +730,7 @@ const Goals = ({ project, setProject }) => {
           toggleItemSelection={toggleGoalSelection}
           confirmGeneratedItems={confirmGeneratedGoals}
           toggleAllItems={toggleAllGoals}
+          systemColors={project?.system_colors}
         />
       )}
       {inspectionId && (
@@ -701,6 +778,7 @@ const Goals = ({ project, setProject }) => {
                 prioritySelectId={prioritySelectId}
                 onTogglePrioritySelect={() => togglePrioritySelect(goal.id)}
                 onChangeGoalPriority={changeGoalPriority}
+                systemColors={project?.system_colors}
               />
             ))
         ) : (
@@ -761,6 +839,7 @@ const Goals = ({ project, setProject }) => {
               prioritySelectId={prioritySelectId}
               onTogglePrioritySelect={() => togglePrioritySelect(goal.id)}
               onChangeGoalPriority={changeGoalPriority}
+              systemColors={project?.system_colors}
             />
           ))}
         <Button

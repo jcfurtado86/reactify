@@ -21,7 +21,9 @@ return new class extends Migration {
         ->default('{"system": "#f97316", "user": "#22c55e"}');
       $table
         ->jsonb('goals')
-        ->default('{"business": "#888888", "constraint": "#FFFFFF"}');
+        ->default(
+          '{"bg": "#5B4533", "cg": "#3b82f6", "low": "#22c55e", "medium": "#eab308", "high": "#f97316"}'
+        );
       $table->unique('project_id');
       $table->timestamps();
     });
