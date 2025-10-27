@@ -9,19 +9,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use App\Models\User;
+use App\Models\Project;
 use App\Models\ProjectInvitation;
 
 class ProjectSeeder extends Seeder
 {
   public function run(): void
   {
-    $adminRoleId = DB::table('user_roles')->insertGetId([
-      'name' => 'administrator',
-      'can_create' => true,
-      'can_read' => true,
-      'can_update' => true,
-    ]);
-
     // Criar Usuário Admin (evitar duplicação de email)
     $user1 = DB::table('users')->where('email', 'admin@example.com')->first();
 
@@ -74,24 +68,22 @@ class ProjectSeeder extends Seeder
       : $user3->id;
 
     // Criar Projeto
-    $projectId = DB::table('projects')->insertGetId([
+    $project = Project::create([
       'title' => 'Projeto ClassicFlix',
       'description' => "O ClassicFlix é uma plataforma de streaming dedicada exclusivamente a filmes em domínio público, com o objetivo de democratizar o acesso a obras clássicas e históricas. A plataforma oferece um catálogo diversificado de títulos legendados em português, voltado tanto para fins educacionais quanto para entretenimento.
-      Com uma proposta acessível, o ClassicFlix pratica preços de assinatura reduzidos em comparação às plataformas tradicionais de streaming, incentivando a preservação e valorização cultural dos filmes clássicos.
-      Além do acesso ao catálogo, a plataforma conta com uma comunidade interativa, permitindo que os usuários compartilhem experiências, troquem recomendações e participem ativamente da valorização do cinema histórico.
-      O ClassicFlix funciona diretamente em navegadores desktop e mobile, garantindo praticidade e acessibilidade sem a necessidade de instalar aplicativos ou programas adicionais..",
-      'active' => true,
-      'created_at' => now(),
-      'updated_at' => now(),
+    Com uma proposta acessível, o ClassicFlix pratica preços de assinatura reduzidos em comparação às plataformas tradicionais de streaming, incentivando a preservação e valorização cultural dos filmes clássicos.
+    Além do acesso ao catálogo, a plataforma conta com uma comunidade interativa, permitindo que os usuários compartilhem experiências, troquem recomendações e participem ativamente da valorização do cinema histórico.
+    O ClassicFlix funciona diretamente em navegadores desktop e mobile, garantindo praticidade e acessibilidade sem a necessidade de instalar aplicativos ou programas adicionais..",
     ]);
 
-    $projectId2 = DB::table('projects')->insertGetId([
+    $project2 = Project::create([
       'title' => 'Projeto Exemplo 2',
       'description' => 'Testes...',
       'active' => true,
-      'created_at' => now(),
-      'updated_at' => now(),
     ]);
+
+    $projectId = $project->id;
+    $projectId2 = $project2->id;
 
     $invitation = ProjectInvitation::create([
       'email' => 'admin@example.com',

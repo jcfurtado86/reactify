@@ -29,12 +29,14 @@ use App\Models\Persona;
 use App\Models\CrcCard;
 use App\Models\Prioritization;
 use App\Models\Storyboard;
+use App\Observers\ProjectObserver;
 
 use App\Models\MatrixPriority;
 use App\Models\ChangeRequest;
 use App\Models\BusinessRule;
 use App\Models\SystemInterface;
 use App\Models\Interview;
+use App\Models\Project;
 
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -71,5 +73,6 @@ class AppServiceProvider extends ServiceProvider
     BusinessRule::observe(BusinessRuleObserver::class);
     SystemInterface::observe(SystemInterfaceObserver::class);
     Interview::observe(InterviewObserver::class);
+    Project::observe(ProjectObserver::class);
   }
 }

@@ -18,7 +18,7 @@ return new class extends Migration {
         ->onDelete('cascade'); // Chave estrangeira
       $table
         ->jsonb('stories')
-        ->default('{"system": "#FFFFFF", "user": "#FFFFFF"}');
+        ->default('{"system": "##f97316", "user": "##22c55e"}');
       $table
         ->jsonb('goals')
         ->default('{"business": "#888888", "constraint": "#FFFFFF"}');
