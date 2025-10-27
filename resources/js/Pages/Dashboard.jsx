@@ -247,13 +247,13 @@ const Dashboard = ({ project, setProject }) => {
           icon={List}
         />
         <ProgressIcon
-          value={project?.personas?.length || 0}
+          value={project?.sprints?.length || 0}
           max={10}
           colorClass="text-destructive"
-          label="Personas"
+          label="Sprints"
           icon={Users}
         />
-        <ProgressIcon
+        {/* <ProgressIcon
           value={project?.goal_sketches?.length || 0}
           max={15}
           colorClass="text-info"
@@ -266,7 +266,7 @@ const Dashboard = ({ project, setProject }) => {
           colorClass="text-accent"
           label="Journeys"
           icon={GitBranch}
-        />
+        />*/}
       </div>
       <ExpandableCard
         title={project?.title || 'Project'}

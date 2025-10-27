@@ -9,9 +9,9 @@ const ProgressIcon = ({
   icon: IconComponent,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-
+  const currentValue = value > 0 ? 100 : 0
   const percentage =
-    max === 0 ? 0 : Math.min(Math.round((value / max) * 100), 100)
+    max === 0 ? 0 : Math.min(Math.round((currentValue / max) * 100), 100)
   const circumference = 2 * Math.PI * 45
   const offset = circumference - (percentage / 100) * circumference
 
