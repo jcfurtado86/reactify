@@ -60,28 +60,7 @@ const LeftMenu = () => {
     { name: 'Profile', url: 'profile.edit', icon: User },
     { name: 'Logout', url: 'logout', icon: LogOut },
   ]
-  // const projectPages = [
-  //   {
-  //     name: 'Inception',
-  //     url: 'inception',
-  //   },
-  //   {
-  //     name: 'Story Discovery',
-  //     url: 'story-discovery',
-  //   },
-  //   {
-  //     name: 'Refining',
-  //     url: 'refining',
-  //   },
-  //   {
-  //     name: 'Modeling',
-  //     url: 'modeling',
-  //   },
-  //   {
-  //     name: 'Backlog',
-  //     url: 'backlog',
-  //   },
-  // ]
+
   const cardVariants = {
     hidden: {
       opacity: 0,
@@ -117,7 +96,7 @@ const LeftMenu = () => {
   }, [])
 
   useEffect(() => {
-    console.log(props?.project?.system_colors)
+    console.log(props?.project)
   }, [props])
 
   const currentRouteName = route().current()

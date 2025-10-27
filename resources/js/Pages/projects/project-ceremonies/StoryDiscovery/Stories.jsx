@@ -20,6 +20,7 @@ import { ColorOptions } from '@/Components/ColorComponents'
 import InfoButton from '@/Components/InfoButton'
 import { tooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+
 export const storyVariants = {
   user: { bg: 'bg-purple-600', title: 'user' },
   system: { bg: 'bg-orange-600', title: 'system' },
@@ -177,7 +178,7 @@ const StoryItem = ({
     router.post(
       route('system-color.store'),
       {
-        stories: { ...systemColors[0].stories, [variantTitle]: colorValue },
+        stories: { ...systemColors?.stories, [variantTitle]: colorValue },
         project_id: story.project_id,
       },
       {
@@ -197,9 +198,10 @@ const StoryItem = ({
       onSave()
     }
   }
-
-  const selectedVariant = storyVariants[story.type] || storyVariants.user
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || 'f97316'
   const storyId = epicStoryId || story.id
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -218,8 +220,9 @@ const StoryItem = ({
               >
                 <PopoverTrigger className="flex">
                   <Badge
+                    style={{ backgroundColor: selectedVariant }}
                     variant="outline"
-                    className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                    className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
                   >
                     {`${story.type === 'system' ? 'SS' : 'US'}
                     ${story.epic_id ? `${story.epic_id}.` : ''}
@@ -232,21 +235,20 @@ const StoryItem = ({
                   alignOffset={-8}
                   className="w-auto bg-popover p-1 border border-border"
                 >
-                  <div className="flex flex-col gap-1 w-28 ">
-                    {Object.values(storyVariants).map((variant, i) => (
-                      <div key={`temp-${i}`} className="flex items-center">
+                  <div className="flex flex-col gap-1 w-24 ">
+                    {Object.entries(storyVariants).map(([key, color], i) => (
+                      <div key={`temp-${i}`} className="flex items-center ">
                         <Button
                           variant="ghost"
                           className="h-auto w-20 p-1 justify-start "
-                          onClick={() =>
-                            onChangeStoryType(story.id, variant.title)
-                          }
+                          onClick={() => onChangeStoryType(story.id, key)}
                         >
                           <Badge
+                            style={{ backgroundColor: color }}
                             variant="outline"
-                            className={`border-transparent text-primary-foreground font-bold w-full cursor-pointer ${variant.bg}`}
+                            className={`border-transparent text-primary-foreground font-bold w-full cursor-pointer`}
                           >
-                            {`${variant.title === 'system' ? 'ss' : 'us'}`.toUpperCase()}
+                            {`${key === 'system' ? 'ss' : 'us'}`.toUpperCase()}
                           </Badge>
                         </Button>
                         <Popover>
@@ -262,9 +264,9 @@ const StoryItem = ({
                               </h4>
                               <ColorOptions
                                 handleColorSelect={(e) =>
-                                  handleColorSelect(e, variant.title)
+                                  handleColorSelect(e, key)
                                 }
-                                // selectedValue={variant.title}
+                                selectedValue={key}
                               />
                             </div>
                           </PopoverContent>
@@ -276,8 +278,9 @@ const StoryItem = ({
               </Popover>
             ) : (
               <Badge
+                style={{ backgroundColor: selectedVariant }}
                 variant="outline"
-                className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
               >
                 {`${story.type === 'system' ? 'SS' : 'US'}
                 ${story.epic_id ? `${story.epic_id}.` : ''}
@@ -618,6 +621,9 @@ const Stories = ({ project, setProject }) => {
       <div className="flex flex-col gap-2 ">
         <InfoButton
           data={tooltipInfo.userStory}
+          badgeStyle={{
+            backgroundColor: project?.system_colors?.stories.user,
+          }}
           badgeContent={
             project?.stories?.filter((story) => story.type === 'user').length ||
             0
@@ -633,7 +639,6 @@ const Stories = ({ project, setProject }) => {
                 <React.Fragment key={story.id}>
                   <StoryItem
                     story={story}
-                    systemColors={project?.system_colors}
                     isEditing={editingId === story.id}
                     editValue={editValue}
                     onValueChange={handleInputChange}
@@ -647,6 +652,7 @@ const Stories = ({ project, setProject }) => {
                     typeSelectId={typeSelectId}
                     onToggleTypeSelect={() => toggleTypeSelect(story.id)}
                     onChangeStoryType={changeStoryType}
+                    systemColors={project?.system_colors}
                   />
                   {project?.stories?.length > 0 &&
                     project?.stories
@@ -681,6 +687,7 @@ const Stories = ({ project, setProject }) => {
                                 toggleTypeSelect(currentStory.id)
                               }
                               onChangeStoryType={changeStoryType}
+                              systemColors={project?.system_colors}
                             />
                           </React.Fragment>
                         )
@@ -714,7 +721,6 @@ const Stories = ({ project, setProject }) => {
                 <React.Fragment key={story.id}>
                   <StoryItem
                     story={story}
-                    systemColors={project?.system_colors}
                     isEditing={editingId === story.id}
                     editValue={editValue}
                     onValueChange={handleInputChange}
@@ -728,6 +734,7 @@ const Stories = ({ project, setProject }) => {
                     typeSelectId={typeSelectId}
                     onToggleTypeSelect={() => toggleTypeSelect(story.id)}
                     onChangeStoryType={changeStoryType}
+                    systemColors={project?.system_colors}
                   />
                   {project?.stories?.length > 0 &&
                     project?.stories
@@ -762,6 +769,7 @@ const Stories = ({ project, setProject }) => {
                                 toggleTypeSelect(currentStory.id)
                               }
                               onChangeStoryType={changeStoryType}
+                              systemColors={project?.system_colors}
                             />
                           </React.Fragment>
                         )

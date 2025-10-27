@@ -12,6 +12,7 @@ const InfoButton = ({
   },
 
   badgeContent = null,
+  badgeStyle = {},
 }) => {
   return (
     <Popover>
@@ -29,6 +30,7 @@ const InfoButton = ({
                 `${data.classNames?.badge}`,
                 'border-0 text-primary-foreground',
               )}
+              style={badgeStyle}
             >
               {badgeContent}
             </Badge>

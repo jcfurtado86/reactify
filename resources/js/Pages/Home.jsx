@@ -8,7 +8,6 @@ import {
 } from 'lucide-react'
 import { Link, router, usePage, Head } from '@inertiajs/react'
 import MainLayout from '@/Layouts/MainLayout'
-import { comma } from 'postcss/lib/list'
 import { toast } from 'sonner'
 
 const ProjectCard = ({ project, toggleActiveProject, deleteProject }) => {
@@ -224,11 +223,6 @@ const Dashboard = ({}) => {
     document.addEventListener('keydown', focusCommandInput)
     return () => document.removeEventListener('keydown', focusCommandInput)
   }, [])
-
-  useEffect(() => {
-    console.log(commandInputRef.current.value)
-    // console.log(currentProjects?.product_canvas)
-  }, [commandInputRef])
 
   useEcho(`projects`, 'ProjectUpdated', (e) => {
     let newProjectList = []

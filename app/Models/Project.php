@@ -29,9 +29,9 @@ class Project extends Model
     return $this->hasMany(Journey::class);
   }
 
-  public function system_colors(): HasMany
+  public function system_colors(): HasOne
   {
-    return $this->hasMany(SystemColor::class);
+    return $this->hasOne(SystemColor::class);
   }
 
   public function product_canvas(): HasOne
