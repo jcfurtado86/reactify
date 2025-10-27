@@ -7,14 +7,11 @@ import {
   ChevronsUp,
 } from 'lucide-react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import { storyVariants } from '../StoryDiscovery/Stories'
 import React from 'react'
 import { toast } from 'sonner'
 import { router } from '@inertiajs/react'
 import { isTemporary } from '@/lib/utils'
-import InfoButton from '@/Components/InfoButton'
 import GenerateAIButton from '@/Components/GenerateAIButton'
-import { tooltipInfo } from '@/lib/projectData'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 /**
  * Componente para renderizar um único card de estória.
@@ -31,7 +28,9 @@ const GeneratedItemsModal = ({
   toggleItemSelection,
   confirmGeneratedItems,
   toggleAllItems,
+  systemColors,
 }) => {
+  const storyVariants = systemColors?.stories || {}
   return (
     <div
       className={`
@@ -90,8 +89,7 @@ const GeneratedItemsModal = ({
                   const storyType = allStories.find(
                     (s) => s.id === story.story_id,
                   ).type
-                  const selectedVariant =
-                    storyVariants[storyType] || storyVariants.user
+                  const selectedVariant = storyVariants[story.type] || '#f97316'
                   return (
                     <div
                       key={'temp-' + index}
@@ -104,8 +102,9 @@ const GeneratedItemsModal = ({
                       <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
                         <div className="flex items-center gap-2 text-left">
                           <Badge
+                            style={{ backgroundColor: selectedVariant }}
                             variant="outline"
-                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
                           >
                             {`${story.type === 'user' ? 'US' : 'SS'}${story.new_epic_identifier}`.toUpperCase()}
                           </Badge>
@@ -148,8 +147,9 @@ const GeneratedItemsModal = ({
     </div>
   )
 }
-const StoryCard = ({ story, addEpicStory }) => {
-  const selectedVariant = storyVariants[story.type] || storyVariants.user
+const StoryCard = ({ story, addEpicStory, systemColors }) => {
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || '#f97316'
 
   return (
     <div className="relative group text-left">
@@ -164,8 +164,9 @@ const StoryCard = ({ story, addEpicStory }) => {
       >
         <div className="mr-auto">
           <Badge
+            style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${isTemporary(story.id) ? 'Temp-Id' : story.id}`.toUpperCase()}
           </Badge>
@@ -183,14 +184,15 @@ const EpicStoryCard = ({
   epicStoryId,
   lastElement = false,
   setProject,
+  systemColors,
 }) => {
   // ✨ ESTADOS PARA CONTROLE DA EDIÇÃO
   const [isHovered, setIsHovered] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(epicStory.title)
 
-  const selectedVariant = storyVariants[story.type] || storyVariants.user
-
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || '#f97316'
   // ⚡️ FUNÇÕES PARA MANIPULAR A EDIÇÃO
   const handleEdit = () => {
     setEditValue(epicStory.title) // Garante que o input comece com o valor atual
@@ -262,8 +264,9 @@ const EpicStoryCard = ({
           `}
         >
           <Badge
+            style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${story.id}.${
               isTemporary(epicStory.id) ? '' : epicStoryId
@@ -463,15 +466,6 @@ const EpicStories = ({ project, setProject }) => {
         onError: (errors) => {
           toast.error('Ocorreu um erro ao salvar as stories.')
           console.error('Erro do backend:', errors)
-          // setProject((prevProject) => {
-          //   const epicStoriesToAddIds = epicStoriesToAdd.map((g) => g.id)
-          //   return {
-          //     ...prevProject,
-          //     epic_stories: prevProject.epic_stories.filter(
-          //       (story) => !epicStoriesToAddIds.includes(story.id),
-          //     ),
-          //   }
-          // })
         },
       },
     )
@@ -510,6 +504,7 @@ const EpicStories = ({ project, setProject }) => {
           toggleItemSelection={toggleEpicStorySelection}
           confirmGeneratedItems={confirmGeneratedEpicStories}
           toggleAllItems={toggleAllEpicStories}
+          systemColors={project?.system_colors}
         />
       )}
       {/* user stories*/}
@@ -522,6 +517,7 @@ const EpicStories = ({ project, setProject }) => {
               <StoryCard
                 story={story}
                 addEpicStory={() => addEpicStory(story)}
+                systemColors={project?.system_colors}
               />
 
               <div className="flex flex-col gap-1 w-full">
@@ -537,6 +533,7 @@ const EpicStories = ({ project, setProject }) => {
                         index === array.length - 1 && array.length > 1
                       }
                       setProject={setProject}
+                      systemColors={project?.system_colors}
                     />
                   ))}
               </div>
@@ -553,6 +550,7 @@ const EpicStories = ({ project, setProject }) => {
               <StoryCard
                 story={story}
                 addEpicStory={() => addEpicStory(story)}
+                systemColors={project?.system_colors}
               />
 
               <div className="flex flex-col gap-1 w-full">
@@ -568,6 +566,7 @@ const EpicStories = ({ project, setProject }) => {
                         index === array.length - 1 && array.length > 1
                       }
                       setProject={setProject}
+                      systemColors={project?.system_colors}
                     />
                   ))}
               </div>

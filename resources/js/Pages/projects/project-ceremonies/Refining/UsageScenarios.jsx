@@ -1,4 +1,3 @@
-import React, { useMemo, useState } from 'react'
 import { router } from '@inertiajs/react'
 import {
   ArrowRight,
@@ -6,14 +5,12 @@ import {
   Minus,
   Check,
   X,
-  LoaderCircle,
   ChevronsUp,
 } from 'lucide-react'
 import { isTemporary } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
-import { storyVariants } from '../StoryDiscovery/Stories' // Assuming this path is correct
 import { toast } from 'sonner'
 
 /**
@@ -31,7 +28,9 @@ const GeneratedItemsModal = ({
   toggleItemSelection,
   confirmGeneratedItems,
   toggleAllItems,
+  systemColors,
 }) => {
+  const storyVariants = systemColors?.stories || {}
   return (
     <div
       className={`
@@ -90,8 +89,7 @@ const GeneratedItemsModal = ({
                   const story = allStories.find(
                     (s) => s.id === scenario.story_id,
                   )
-                  const selectedVariant =
-                    storyVariants[story.type] || storyVariants.user
+                  const selectedVariant = storyVariants[story.type] || '#f97316'
                   return (
                     <div
                       key={'temp-' + index}
@@ -110,8 +108,9 @@ const GeneratedItemsModal = ({
                           {/* 1. Cabeçalho (O que antes era o AccordionTrigger) */}
                           <div className="flex items-center gap-2">
                             <Badge
+                              style={{ backgroundColor: selectedVariant }}
                               variant="outline"
-                              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
                             >
                               {`${story.type === 'user' ? 'US' : 'SS'}${story.id}`.toUpperCase()}
                             </Badge>
@@ -192,8 +191,9 @@ const GeneratedItemsModal = ({
   )
 }
 
-const StoryCard = ({ story, addScenario }) => {
-  const selectedVariant = storyVariants[story.type] || storyVariants.user
+const StoryCard = ({ story, addScenario, systemColors }) => {
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || '#f97316'
 
   return (
     <div className="relative group w-52 flex-shrink-0 text-left">
@@ -202,8 +202,9 @@ const StoryCard = ({ story, addScenario }) => {
       <div className="flex flex-col h-full items-center justify-start p-2 gap-1 text-xs font-normal text-foreground border border-border bg-card rounded-md shadow-sm ">
         <div className="mr-auto">
           <Badge
+            style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
           </Badge>
@@ -225,6 +226,7 @@ const ScenarioCard = ({
   lastElement = false,
   setProject,
   onInspect,
+  systemColors,
 }) => {
   //
   const [isHovered, setIsHovered] = useState(false)
@@ -240,6 +242,9 @@ const ScenarioCard = ({
     and: scenario.description.and || '',
     then_2: scenario.description.then_2 || '',
   })
+
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || '#f97316'
 
   const handleEdit = () => {
     setEditValues({
@@ -441,7 +446,11 @@ const ScenarioCard = ({
             <div className="w-full bg-card rounded-lg p-2 shadow-sm">
               {/* 1. Cabeçalho (O que antes era o AccordionTrigger) */}
               <div className="flex items-center gap-2">
-                <Badge variant="secondary">
+                <Badge
+                  style={{ backgroundColor: selectedVariant }}
+                  variant="outline"
+                  className="border-transparent text-primary-foreground font-bold w-fit cursor-pointer"
+                >
                   {`US${scenario.id}`.toUpperCase()}
                 </Badge>
                 <span className="font-bold text-sm">{scenario.title}</span>
@@ -692,6 +701,7 @@ const UsageScenarios = ({ project, setProject }) => {
           toggleItemSelection={toggleUsageScenarioSelection}
           confirmGeneratedItems={confirmGeneratedUsageScenarios}
           toggleAllItems={toggleAllUsageScenarios}
+          systemColors={project?.system_colors}
         />
       )}
       {inspectionId && (
@@ -713,6 +723,7 @@ const UsageScenarios = ({ project, setProject }) => {
               <StoryCard
                 story={story}
                 addScenario={() => addScenario(story.id)}
+                systemColors={project?.system_colors}
               />
 
               <div className="flex flex-col gap-2 w-full">
@@ -728,6 +739,7 @@ const UsageScenarios = ({ project, setProject }) => {
                         index === array.length - 1 && array.length > 1
                       }
                       onInspect={() => inspectScenario(scenario.id)}
+                      systemColors={project?.system_colors}
                     />
                   ))}
               </div>
@@ -743,6 +755,7 @@ const UsageScenarios = ({ project, setProject }) => {
               <StoryCard
                 story={story}
                 addScenario={() => addScenario(story.id)}
+                systemColors={project?.system_colors}
               />
 
               <div className="flex flex-col gap-2 w-full">
@@ -758,6 +771,7 @@ const UsageScenarios = ({ project, setProject }) => {
                         index === array.length - 1 && array.length > 1
                       }
                       onInspect={() => inspectScenario(scenario.id)}
+                      systemColors={project?.system_colors}
                     />
                   ))}
               </div>

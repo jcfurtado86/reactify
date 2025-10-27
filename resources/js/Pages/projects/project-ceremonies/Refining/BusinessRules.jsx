@@ -1,17 +1,12 @@
 import {
   ArrowRight,
   CornerDownRight,
-  Plus,
   Minus,
   Check,
   X,
-  LoaderCircle,
-  ChevronDown,
   ChevronsUp,
 } from 'lucide-react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import { storyVariants } from '../StoryDiscovery/Stories'
-import React, { useMemo, useState } from 'react' // Adicionei useState que estava faltando no seu exemplo original para EpicStoryCard
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import { isTemporary } from '@/lib/utils'
@@ -32,7 +27,9 @@ const GeneratedItemsModal = ({
   toggleItemSelection,
   confirmGeneratedItems,
   toggleAllItems,
+  systemColors,
 }) => {
+  const storyVariants = systemColors?.stories || {}
   return (
     <div
       className={`
@@ -91,8 +88,7 @@ const GeneratedItemsModal = ({
                   const storyType = allStories.find(
                     (s) => s.id === story.story_id,
                   ).type
-                  const selectedVariant =
-                    storyVariants[storyType] || storyVariants.user
+                  const selectedVariant = storyVariants[story.type] || '#f97316'
                   return (
                     <div
                       key={'temp-' + index}
@@ -162,9 +158,9 @@ const GeneratedItemsModal = ({
   )
 }
 
-const StoryCard = ({ story, addBusinessRule }) => {
-  const selectedVariant = storyVariants[story.type] || storyVariants.user
-
+const StoryCard = ({ story, addBusinessRule, systemColors }) => {
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || '#f97316'
   return (
     <div className="relative group text-left">
       {/* O onAdd agora chama a função para adicionar uma regra de negócio */}
@@ -178,8 +174,9 @@ const StoryCard = ({ story, addBusinessRule }) => {
       >
         <div className="mr-auto">
           <Badge
+            style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
           </Badge>
@@ -197,13 +194,15 @@ const BusinessRuleCard = ({
   lastElement = false,
   setProject,
   onInspect,
+  systemColors,
 }) => {
   // ✨ ESTADOS PARA CONTROLE DA EDIÇÃO
   const [isHovered, setIsHovered] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(businessRule.title)
 
-  const selectedVariant = storyVariants[story.type] || storyVariants.user
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || '#f97316'
 
   // ⚡️ FUNÇÕES PARA MANIPULAR A EDIÇÃO
   const handleEdit = () => {
@@ -285,8 +284,9 @@ const BusinessRuleCard = ({
           `}
         >
           <Badge
+            style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
             {`BR${
               isTemporary(businessRule.id) ? '' : businessRule.id
@@ -533,6 +533,7 @@ const BusinessRules = ({ project, setProject }) => {
           toggleItemSelection={toggleBusinessRuleSelection}
           confirmGeneratedItems={confirmGeneratedBusinessRules}
           toggleAllItems={toggleAllBusinessRules}
+          systemColors={project?.system_colors}
         />
       )}
       {inspectionId && (
@@ -556,6 +557,7 @@ const BusinessRules = ({ project, setProject }) => {
               <StoryCard
                 story={story}
                 addBusinessRule={() => addBusinessRule(story.id)}
+                systemColors={project?.system_colors}
               />
 
               <div className="flex flex-col gap-1 w-full">
@@ -571,6 +573,7 @@ const BusinessRules = ({ project, setProject }) => {
                       }
                       setProject={setProject}
                       onInspect={() => inspectRule(businessRule.id)}
+                      systemColors={project?.system_colors}
                     />
                   ))}
               </div>
@@ -588,6 +591,7 @@ const BusinessRules = ({ project, setProject }) => {
               <StoryCard
                 story={story}
                 addBusinessRule={() => addBusinessRule(story.id)}
+                systemColors={project?.system_colors}
               />
 
               <div className="flex flex-col gap-1 w-full">
@@ -602,6 +606,8 @@ const BusinessRules = ({ project, setProject }) => {
                         index === array.length - 1 && array.length > 1
                       }
                       setProject={setProject}
+                      onInspect={() => inspectRule(businessRule.id)}
+                      systemColors={project?.system_colors}
                     />
                   ))}
               </div>

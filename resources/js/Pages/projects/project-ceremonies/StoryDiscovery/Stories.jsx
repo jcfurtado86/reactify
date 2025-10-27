@@ -199,9 +199,9 @@ const StoryItem = ({
     }
   }
   const storyVariants = systemColors?.stories || {}
-  const selectedVariant = storyVariants[story.type] || 'f97316'
-  const storyId = epicStoryId || story.id
+  const selectedVariant = storyVariants[story.type] || '#f97316'
 
+  const storyId = epicStoryId || story.id
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}

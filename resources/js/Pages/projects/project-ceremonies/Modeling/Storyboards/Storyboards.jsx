@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react'
+import React from 'react'
 import { Excalidraw, WelcomeScreen, exportToBlob } from '@excalidraw/excalidraw'
-import { storyVariants } from '../../StoryDiscovery/Stories'
 import { Paperclip, Save } from 'lucide-react'
 
 const blobToDataURL = (blob) => {
@@ -17,9 +17,14 @@ const StoryCard = ({
   onSelect,
   isSelected = false,
   isCollapsed = false,
+  epicStoryId,
+  systemColors,
 }) => {
-  const selectedVariant = storyVariants[story?.type] || storyVariants.user
-
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || '#f97316'
+  const realStoryId = story.epic_id
+    ? `${story.epic_id}.${epicStoryId}`
+    : `${story.id}`
   return (
     <div
       onClick={onSelect}
@@ -31,10 +36,11 @@ const StoryCard = ({
       {story && (
         <div className="mr-auto">
           <Badge
+            style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
           >
-            {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
+            {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
           </Badge>
         </div>
       )}
@@ -54,17 +60,8 @@ const Storyboards = ({ project }) => {
 
   const fileInputRef = useRef(null)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [commandInputRef, setCommandInputRef] = useState(null)
 
-  const {
-    state,
-    open,
-    setOpen,
-    openMobile,
-    setOpenMobile,
-    isMobile,
-    toggleSidebar,
-  } = useSidebar()
+  const { open, setOpen } = useSidebar()
 
   useEffect(() => {
     const html = document.querySelector('html')
@@ -326,31 +323,87 @@ const Storyboards = ({ project }) => {
           <SidebarContent>
             <SidebarGroup className="gap-2">
               {project?.stories
-                ?.filter((story) => story.type === 'system')
+                .filter((story) => story.type === 'system' && !story.epic_id)
+                .sort((a, b) => a.id - b.id)
                 .map((story) => (
-                  <StoryCard
-                    key={story.id}
-                    story={story}
-                    isCollapsed={!open}
-                    isSelected={story.id === selectedStory?.id}
-                    onSelect={() => {
-                      setSelectedStory(story)
-                    }}
-                  />
+                  <React.Fragment key={story.id}>
+                    <StoryCard
+                      key={story.id}
+                      story={story}
+                      isCollapsed={!open}
+                      isSelected={story.id === selectedStory?.id}
+                      onSelect={() => {
+                        setSelectedStory(story)
+                      }}
+                      systemColors={project?.system_colors}
+                    />
+                    {project?.stories?.length > 0 &&
+                      project?.stories
+                        .filter(
+                          (currentStory) =>
+                            currentStory.type === 'system' &&
+                            currentStory.epic_id === story.id,
+                        )
+                        .sort((a, b) => a.id - b.id)
+                        .map((currentStory, index) => {
+                          return (
+                            <React.Fragment key={currentStory.id}>
+                              <StoryCard
+                                epicStoryId={index + 1}
+                                story={currentStory}
+                                isCollapsed={!open}
+                                isSelected={
+                                  currentStory.id === selectedStory?.id
+                                }
+                                onSelect={() => {
+                                  setSelectedStory(currentStory)
+                                }}
+                                systemColors={project?.system_colors}
+                              />
+                            </React.Fragment>
+                          )
+                        })}
+                  </React.Fragment>
                 ))}
               {/* user stories*/}
               {project?.stories
                 ?.filter((story) => story.type === 'user')
                 .map((story) => (
-                  <StoryCard
-                    key={story.id}
-                    story={story}
-                    isCollapsed={!open}
-                    isSelected={story.id === selectedStory?.id}
-                    onSelect={() => {
-                      setSelectedStory(story)
-                    }}
-                  />
+                  <React.Fragment key={story.id}>
+                    <StoryCard
+                      story={story}
+                      isCollapsed={!open}
+                      isSelected={story.id === selectedStory?.id}
+                      onSelect={() => {
+                        setSelectedStory(story)
+                      }}
+                      systemColors={project?.system_colors}
+                    />
+                    {project?.stories?.length > 0 &&
+                      project?.stories
+                        .filter(
+                          (currentStory) =>
+                            currentStory.type === 'user' &&
+                            currentStory.epic_id === story.id,
+                        )
+                        .sort((a, b) => a.id - b.id)
+                        .map((currentStory, index) => {
+                          return (
+                            <React.Fragment key={currentStory.id}>
+                              <StoryCard
+                                epicStoryId={index + 1}
+                                story={story}
+                                isCollapsed={!open}
+                                isSelected={story.id === selectedStory?.id}
+                                onSelect={() => {
+                                  setSelectedStory(story)
+                                }}
+                                systemColors={project?.system_colors}
+                              />
+                            </React.Fragment>
+                          )
+                        })}
+                  </React.Fragment>
                 ))}
             </SidebarGroup>
           </SidebarContent>
