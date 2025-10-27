@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+  /**
+   * Run the migrations.
+   */
+  public function up(): void
+  {
+    Schema::create('system_colors', function (Blueprint $table) {
+      $table->id();
+      $table
+        ->foreignId('project_id')
+        ->constrained('projects')
+        ->onDelete('cascade'); // Chave estrangeira
+      $table
+        ->jsonb('stories')
+        ->default('{"system": "#FFFFFF", "user": "#FFFFFF"}');
+      $table
+        ->jsonb('goals')
+        ->default('{"business": "#888888", "constraint": "#FFFFFF"}');
+      $table->unique('project_id');
+      $table->timestamps();
+    });
+  }
+
+  /**
+   * Reverse the migrations.
+   */
+  public function down(): void
+  {
+    Schema::dropIfExists('system_colors');
+  }
+};

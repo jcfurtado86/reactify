@@ -29,6 +29,8 @@ use App\Http\Controllers\StoryboardController;
 use App\Http\Controllers\SystemInterfaceController;
 use App\Http\Controllers\InterviewController;
 
+use App\Http\Controllers\SystemColorController;
+
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -84,6 +86,20 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
   Route::get('/dashboard', [ProjectController::class, 'index'])->name(
     'dashboard'
   );
+  //rotas para cores do sistema
+  Route::prefix('system-color')->group(function () {
+    Route::post('/', [SystemColorController::class, 'store'])->name(
+      'system-color.store'
+    );
+    Route::patch('/{systemColor}', [
+      SystemColorController::class,
+      'update',
+    ])->name('system-color.update');
+    Route::delete('/{systemColor}', [
+      SystemColorController::class,
+      'destroy',
+    ])->name('system-color.destroy');
+  });
   //rotas para projetos
   Route::prefix('project')->group(function () {
     // Route for saving the state of the Prioritization Matrix for a project

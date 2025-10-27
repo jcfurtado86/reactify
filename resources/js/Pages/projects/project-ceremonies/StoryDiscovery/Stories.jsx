@@ -9,12 +9,14 @@ import {
   Minus,
   ChevronDown,
   ArrowRight,
+  EllipsisVertical,
 } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import axios from 'axios'
 import { toast } from 'sonner'
-import { isTemporary } from '@/lib/utils'
+import { isTemporary, darkenColor, PREDEFINED_COLORS } from '@/lib/utils'
+import { ColorOptions } from '@/Components/ColorComponents'
 import InfoButton from '@/Components/InfoButton'
 import { tooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
@@ -148,6 +150,7 @@ const GeneratedItemsModal = ({
 
 const StoryItem = ({
   story,
+  systemColors,
   epicStoryId = null,
   isEditing,
   editValue,
@@ -164,6 +167,29 @@ const StoryItem = ({
   onChangeStoryType,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
+
+  const handleColorSelect = (colorValue, variantTitle) => {
+    const selectedColor = PREDEFINED_COLORS.find(
+      (color) => color.color === colorValue,
+    )
+    if (!selectedColor) return
+    console.log(selectedColor, variantTitle)
+    router.post(
+      route('system-color.store'),
+      {
+        stories: { ...systemColors[0].stories, [variantTitle]: colorValue },
+        project_id: story.project_id,
+      },
+      {
+        onSuccess: () => {
+          console.log('Color saved successfully')
+        },
+        onError: () => {
+          console.log('Error saving color')
+        },
+      },
+    )
+  }
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -201,24 +227,49 @@ const StoryItem = ({
                     <ChevronDown className="ml-1 size-3" />
                   </Badge>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto bg-popover border-border p-1">
-                  <div className="flex flex-col gap-1">
+                <PopoverContent
+                  align="start"
+                  alignOffset={-8}
+                  className="w-auto bg-popover p-1 border border-border"
+                >
+                  <div className="flex flex-col gap-1 w-28 ">
                     {Object.values(storyVariants).map((variant, i) => (
-                      <Button
-                        key={`temp-${i}`}
-                        variant="ghost"
-                        className="h-auto p-2 justify-start "
-                        onClick={() =>
-                          onChangeStoryType(story.id, variant.title)
-                        }
-                      >
-                        <Badge
-                          variant="outline"
-                          className={`border-transparent text-primary-foreground font-bold w-full cursor-pointer ${variant.bg}`}
+                      <div key={`temp-${i}`} className="flex items-center">
+                        <Button
+                          variant="ghost"
+                          className="h-auto w-20 p-1 justify-start "
+                          onClick={() =>
+                            onChangeStoryType(story.id, variant.title)
+                          }
                         >
-                          {`${variant.title === 'system' ? 'ss' : 'us'}`.toUpperCase()}
-                        </Badge>
-                      </Button>
+                          <Badge
+                            variant="outline"
+                            className={`border-transparent text-primary-foreground font-bold w-full cursor-pointer ${variant.bg}`}
+                          >
+                            {`${variant.title === 'system' ? 'ss' : 'us'}`.toUpperCase()}
+                          </Badge>
+                        </Button>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="ghost" className="h-full w-6">
+                              <EllipsisVertical />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-52 p-2" align="start">
+                            <div className="space-y-1">
+                              <h4 className="font-medium text-sm px-2 py-1.5">
+                                Cores
+                              </h4>
+                              <ColorOptions
+                                handleColorSelect={(e) =>
+                                  handleColorSelect(e, variant.title)
+                                }
+                                // selectedValue={variant.title}
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                     ))}
                   </div>
                 </PopoverContent>
@@ -582,6 +633,7 @@ const Stories = ({ project, setProject }) => {
                 <React.Fragment key={story.id}>
                   <StoryItem
                     story={story}
+                    systemColors={project?.system_colors}
                     isEditing={editingId === story.id}
                     editValue={editValue}
                     onValueChange={handleInputChange}
@@ -662,6 +714,7 @@ const Stories = ({ project, setProject }) => {
                 <React.Fragment key={story.id}>
                   <StoryItem
                     story={story}
+                    systemColors={project?.system_colors}
                     isEditing={editingId === story.id}
                     editValue={editValue}
                     onValueChange={handleInputChange}

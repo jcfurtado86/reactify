@@ -38,6 +38,7 @@ class ProjectController extends Controller
         'system_interfaces',
         'storyboards',
         'interviews',
+        'system_colors',
       ]),
     ]);
   }
@@ -69,6 +70,7 @@ class ProjectController extends Controller
         'system_interfaces',
         'storyboards',
         'interviews',
+        'system_colors',
       ]),
       'message' => 'Projects updated successfully.',
       'status' => 'success',
@@ -104,6 +106,7 @@ class ProjectController extends Controller
       'system_interfaces',
       'storyboards',
       'interviews',
+      'system_colors',
       'users' => function ($query) {
         $query->select(['user_id', 'name', 'email', 'provider_avatar']);
       },
@@ -138,6 +141,7 @@ class ProjectController extends Controller
       'system_interfaces',
       'storyboards',
       'interviews',
+      'system_colors',
       'users' => function ($query) {
         $query->select(['user_id', 'name', 'email', 'provider_avatar']);
       },
