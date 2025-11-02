@@ -10,7 +10,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import React from 'react'
 import { toast } from 'sonner'
 import { router } from '@inertiajs/react'
-import { isTemporary } from '@/lib/utils'
+import { isTemporary, useGroupedStories } from '@/lib/utils'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 /**
@@ -327,27 +327,7 @@ const EpicStories = ({ project, setProject }) => {
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   // memoriza o estado das stories derivadas
-  const childrenByEpicId = useMemo(() => {
-    if (!project?.stories) {
-      return new Map()
-    }
-
-    return project.stories.reduce((acc, story) => {
-      const epicId = story.epic_id
-
-      if (!epicId) {
-        return acc
-      }
-
-      if (!acc.has(epicId)) {
-        acc.set(epicId, [])
-      }
-
-      acc.get(epicId).push(story)
-
-      return acc
-    }, new Map())
-  }, [project?.stories])
+  const childrenByEpicId = useGroupedStories(project?.stories)
 
   const addEpicStory = (story) => {
     router.post(route('story.store'), {

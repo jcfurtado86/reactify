@@ -2,7 +2,7 @@ import { router } from '@inertiajs/react'
 import React from 'react'
 import { Excalidraw, WelcomeScreen, exportToBlob } from '@excalidraw/excalidraw'
 import { Paperclip, Save } from 'lucide-react'
-
+import { useGroupedStories } from '@/lib/utils'
 const blobToDataURL = (blob) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -58,6 +58,7 @@ const Storyboards = ({ project }) => {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [selectedStory, setSelectedStory] = useState(null)
   const [sceneVersion, setSceneVersion] = useState(0)
+  const childrenByEpicId = useGroupedStories(project?.stories)
 
   const fileInputRef = useRef(null)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -326,25 +327,21 @@ const Storyboards = ({ project }) => {
               {project?.stories
                 .filter((story) => story.type === 'system' && !story.epic_id)
                 .sort((a, b) => a.id - b.id)
-                .map((story) => (
-                  <React.Fragment key={story.id}>
-                    <StoryCard
-                      key={story.id}
-                      story={story}
-                      isCollapsed={!open}
-                      isSelected={story.id === selectedStory?.id}
-                      onSelect={() => {
-                        setSelectedStory(story)
-                      }}
-                      systemColors={project?.system_colors}
-                    />
-                    {project?.stories?.length > 0 &&
-                      project?.stories
-                        .filter(
-                          (currentStory) =>
-                            currentStory.type === 'system' &&
-                            currentStory.epic_id === story.id,
-                        )
+                .map((story) => {
+                  const relatedEpics = childrenByEpicId.get(story.id) || []
+                  return (
+                    <React.Fragment key={story.id}>
+                      <StoryCard
+                        key={story.id}
+                        story={story}
+                        isCollapsed={!open}
+                        isSelected={story.id === selectedStory?.id}
+                        onSelect={() => {
+                          setSelectedStory(story)
+                        }}
+                        systemColors={project?.system_colors}
+                      />
+                      {[...relatedEpics]
                         .sort((a, b) => a.id - b.id)
                         .map((currentStory, index) => {
                           return (
@@ -364,29 +361,26 @@ const Storyboards = ({ project }) => {
                             </React.Fragment>
                           )
                         })}
-                  </React.Fragment>
-                ))}
+                    </React.Fragment>
+                  )
+                })}
               {/* user stories*/}
               {project?.stories
                 ?.filter((story) => story.type === 'user' && !story.epic_id)
-                .map((story) => (
-                  <React.Fragment key={story.id}>
-                    <StoryCard
-                      story={story}
-                      isCollapsed={!open}
-                      isSelected={story.id === selectedStory?.id}
-                      onSelect={() => {
-                        setSelectedStory(story)
-                      }}
-                      systemColors={project?.system_colors}
-                    />
-                    {project?.stories?.length > 0 &&
-                      project?.stories
-                        .filter(
-                          (currentStory) =>
-                            currentStory.type === 'user' &&
-                            currentStory.epic_id === story.id,
-                        )
+                .map((story) => {
+                  const relatedEpics = childrenByEpicId.get(story.id) || []
+                  return (
+                    <React.Fragment key={story.id}>
+                      <StoryCard
+                        story={story}
+                        isCollapsed={!open}
+                        isSelected={story.id === selectedStory?.id}
+                        onSelect={() => {
+                          setSelectedStory(story)
+                        }}
+                        systemColors={project?.system_colors}
+                      />
+                      {[...relatedEpics]
                         .sort((a, b) => a.id - b.id)
                         .map((currentStory, index) => {
                           return (
@@ -404,8 +398,9 @@ const Storyboards = ({ project }) => {
                             </React.Fragment>
                           )
                         })}
-                  </React.Fragment>
-                ))}
+                    </React.Fragment>
+                  )
+                })}
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>

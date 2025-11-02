@@ -89,3 +89,20 @@ export function darkenColor(hexColor, factor) {
 export function isTemporary(id) {
   return String(id).startsWith('temp-')
 }
+export function useGroupedStories(stories) {
+  const childrenByEpicId = useMemo(() => {
+    if (!Array.isArray(stories)) return new Map()
+
+    return stories.reduce((acc, story) => {
+      const epicId = story.epic_id
+
+      if (!epicId) return acc
+
+      if (!acc.has(epicId)) acc.set(epicId, [])
+
+      acc.get(epicId).push(story)
+      return acc
+    }, new Map())
+  }, [stories])
+  return childrenByEpicId
+}

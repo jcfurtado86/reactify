@@ -8,15 +8,13 @@ import {
   ChevronsUp,
   Minus,
   ChevronDown,
-  ArrowRight,
-  EllipsisVertical,
 } from 'lucide-react'
 import rainbowIcon from '/resources/images/rainbow.png'
 import { router } from '@inertiajs/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import axios from 'axios'
 import { toast } from 'sonner'
-import { PREDEFINED_COLORS } from '@/lib/utils'
+import { PREDEFINED_COLORS, useGroupedStories, isTemporary } from '@/lib/utils'
 import { ColorOptions } from '@/Components/ColorComponents'
 import InfoButton from '@/Components/InfoButton'
 import { tooltipInfo } from '@/lib/projectData'
@@ -362,9 +360,7 @@ const Stories = ({ project, setProject }) => {
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
 
-  const isTemporary = (story) =>
-    typeof story.id === 'string' && story.id.startsWith('temp-')
-
+  const childrenByEpicId = useGroupedStories(project?.stories)
   const handleInputChange = (e) => {
     setEditValue(e.target.value)
   }
@@ -640,9 +636,9 @@ const Stories = ({ project, setProject }) => {
         {project?.stories?.length > 0 &&
           project?.stories
             .filter((story) => story.type === 'user' && !story.epic_id)
-            // .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
             .sort((a, b) => a.id - b.id)
             .map((story, i) => {
+              const relatedEpics = childrenByEpicId.get(story.id) || []
               return (
                 <React.Fragment key={story.id}>
                   <StoryItem
@@ -662,44 +658,36 @@ const Stories = ({ project, setProject }) => {
                     onChangeStoryType={changeStoryType}
                     systemColors={project?.system_colors}
                   />
-                  {project?.stories?.length > 0 &&
-                    project?.stories
-                      .filter(
-                        (currentStory) =>
-                          currentStory.type === 'user' &&
-                          currentStory.epic_id === story.id,
+                  {[...relatedEpics]
+                    .sort((a, b) => a.id - b.id)
+                    .map((currentStory, index) => {
+                      return (
+                        <React.Fragment key={currentStory.id}>
+                          <StoryItem
+                            epicStoryId={index + 1}
+                            story={currentStory}
+                            isEditing={editingId === currentStory.id}
+                            editValue={editValue}
+                            onValueChange={handleInputChange}
+                            onInspect={() => inspectStory(currentStory.id)}
+                            onEdit={() => editStory(currentStory)}
+                            onSave={() => editStory(currentStory)}
+                            onDelete={() => deleteStory(currentStory.id)}
+                            onCancel={() => setEditingId(null)}
+                            isTemporary={isTemporary(currentStory)}
+                            textareaRef={
+                              editingId === currentStory.id ? textareaRef : null
+                            }
+                            typeSelectId={typeSelectId}
+                            onToggleTypeSelect={() =>
+                              toggleTypeSelect(currentStory.id)
+                            }
+                            onChangeStoryType={changeStoryType}
+                            systemColors={project?.system_colors}
+                          />
+                        </React.Fragment>
                       )
-                      .sort((a, b) => a.id - b.id)
-                      .map((currentStory, index) => {
-                        return (
-                          <React.Fragment key={currentStory.id}>
-                            <StoryItem
-                              epicStoryId={index + 1}
-                              story={currentStory}
-                              isEditing={editingId === currentStory.id}
-                              editValue={editValue}
-                              onValueChange={handleInputChange}
-                              onInspect={() => inspectStory(currentStory.id)}
-                              onEdit={() => editStory(currentStory)}
-                              onSave={() => editStory(currentStory)}
-                              onDelete={() => deleteStory(currentStory.id)}
-                              onCancel={() => setEditingId(null)}
-                              isTemporary={isTemporary(currentStory)}
-                              textareaRef={
-                                editingId === currentStory.id
-                                  ? textareaRef
-                                  : null
-                              }
-                              typeSelectId={typeSelectId}
-                              onToggleTypeSelect={() =>
-                                toggleTypeSelect(currentStory.id)
-                              }
-                              onChangeStoryType={changeStoryType}
-                              systemColors={project?.system_colors}
-                            />
-                          </React.Fragment>
-                        )
-                      })}
+                    })}
                 </React.Fragment>
               )
             })}
@@ -725,6 +713,7 @@ const Stories = ({ project, setProject }) => {
             .filter((story) => story.type === 'system' && !story.epic_id)
             .sort((a, b) => a.id - b.id)
             .map((story, i) => {
+              const relatedEpics = childrenByEpicId.get(story.id) || []
               return (
                 <React.Fragment key={story.id}>
                   <StoryItem
@@ -744,44 +733,36 @@ const Stories = ({ project, setProject }) => {
                     onChangeStoryType={changeStoryType}
                     systemColors={project?.system_colors}
                   />
-                  {project?.stories?.length > 0 &&
-                    project?.stories
-                      .filter(
-                        (currentStory) =>
-                          currentStory.type === 'system' &&
-                          currentStory.epic_id === story.id,
+                  {[...relatedEpics]
+                    .sort((a, b) => a.id - b.id)
+                    .map((currentStory, index) => {
+                      return (
+                        <React.Fragment key={currentStory.id}>
+                          <StoryItem
+                            epicStoryId={index + 1}
+                            story={currentStory}
+                            isEditing={editingId === currentStory.id}
+                            editValue={editValue}
+                            onValueChange={handleInputChange}
+                            onInspect={() => inspectStory(currentStory.id)}
+                            onEdit={() => editStory(currentStory)}
+                            onSave={() => editStory(currentStory)}
+                            onDelete={() => deleteStory(currentStory.id)}
+                            onCancel={() => setEditingId(null)}
+                            isTemporary={isTemporary(currentStory)}
+                            textareaRef={
+                              editingId === currentStory.id ? textareaRef : null
+                            }
+                            typeSelectId={typeSelectId}
+                            onToggleTypeSelect={() =>
+                              toggleTypeSelect(currentStory.id)
+                            }
+                            onChangeStoryType={changeStoryType}
+                            systemColors={project?.system_colors}
+                          />
+                        </React.Fragment>
                       )
-                      .sort((a, b) => a.id - b.id)
-                      .map((currentStory, index) => {
-                        return (
-                          <React.Fragment key={currentStory.id}>
-                            <StoryItem
-                              epicStoryId={index + 1}
-                              story={currentStory}
-                              isEditing={editingId === currentStory.id}
-                              editValue={editValue}
-                              onValueChange={handleInputChange}
-                              onInspect={() => inspectStory(currentStory.id)}
-                              onEdit={() => editStory(currentStory)}
-                              onSave={() => editStory(currentStory)}
-                              onDelete={() => deleteStory(currentStory.id)}
-                              onCancel={() => setEditingId(null)}
-                              isTemporary={isTemporary(currentStory)}
-                              textareaRef={
-                                editingId === currentStory.id
-                                  ? textareaRef
-                                  : null
-                              }
-                              typeSelectId={typeSelectId}
-                              onToggleTypeSelect={() =>
-                                toggleTypeSelect(currentStory.id)
-                              }
-                              onChangeStoryType={changeStoryType}
-                              systemColors={project?.system_colors}
-                            />
-                          </React.Fragment>
-                        )
-                      })}
+                    })}
                 </React.Fragment>
               )
             })}
