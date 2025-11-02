@@ -173,22 +173,10 @@ const StoryItem = ({
       (color) => color.color === colorValue,
     )
     if (!selectedColor) return
-    console.log(selectedColor, variantTitle)
-    router.post(
-      route('system-color.store'),
-      {
-        stories: { ...systemColors?.stories, [variantTitle]: colorValue },
-        project_id: story.project_id,
-      },
-      {
-        onSuccess: () => {
-          console.log('Color saved successfully')
-        },
-        onError: () => {
-          console.log('Error saving color')
-        },
-      },
-    )
+    router.post(route('system-color.store'), {
+      stories: { ...systemColors?.stories, [variantTitle]: colorValue },
+      project_id: story.project_id,
+    })
   }
 
   const handleKeyDown = (e) => {
