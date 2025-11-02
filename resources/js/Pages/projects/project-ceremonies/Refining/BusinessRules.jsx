@@ -88,7 +88,8 @@ const GeneratedItemsModal = ({
                   const storyType = allStories.find(
                     (s) => s.id === story.story_id,
                   ).type
-                  const selectedVariant = storyVariants[story.type] || '#f97316'
+                  const selectedVariant = storyVariants[storyType] || '#f97316'
+
                   return (
                     <div
                       key={'temp-' + index}
@@ -102,8 +103,9 @@ const GeneratedItemsModal = ({
                         <div className="flex items-center gap-2 text-left">
                           {/* Badge que mostra a Story Pai */}
                           <Badge
+                            style={{ backgroundColor: selectedVariant }}
                             variant="outline"
-                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
                           >
                             {`${storyType === 'system' ? 'SS' : 'US'}${story.story_id}`.toUpperCase()}
                           </Badge>

@@ -25,6 +25,7 @@ const StoryCard = ({
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${epicStoryId}`
     : `${story.id}`
+  console.log(epicStoryId)
   return (
     <div
       onClick={onSelect}
@@ -367,7 +368,7 @@ const Storyboards = ({ project }) => {
                 ))}
               {/* user stories*/}
               {project?.stories
-                ?.filter((story) => story.type === 'user')
+                ?.filter((story) => story.type === 'user' && !story.epic_id)
                 .map((story) => (
                   <React.Fragment key={story.id}>
                     <StoryCard
@@ -392,7 +393,7 @@ const Storyboards = ({ project }) => {
                             <React.Fragment key={currentStory.id}>
                               <StoryCard
                                 epicStoryId={index + 1}
-                                story={story}
+                                story={currentStory}
                                 isCollapsed={!open}
                                 isSelected={story.id === selectedStory?.id}
                                 onSelect={() => {

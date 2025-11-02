@@ -31,17 +31,6 @@ const GeneratedItemsModal = ({
   systemColors,
 }) => {
   const goalVariants = systemColors?.goals || {}
-  const typeColors = {
-    bg: goalVariants?.bg || '#444',
-    cg: goalVariants?.cg || '#444',
-  }
-  const priorityColors = {
-    low: goalVariants?.low || '#444',
-    medium: goalVariants?.medium || '#444',
-    high: goalVariants?.high || '#444',
-  }
-  // const selectedType = goalVariants[goal.type] || '#444'
-  // const selectedPriority = goalVariants[goal.priority] || '#444'
 
   return (
     <div

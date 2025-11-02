@@ -16,16 +16,12 @@ import { router } from '@inertiajs/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import axios from 'axios'
 import { toast } from 'sonner'
-import { isTemporary, darkenColor, PREDEFINED_COLORS } from '@/lib/utils'
+import { PREDEFINED_COLORS } from '@/lib/utils'
 import { ColorOptions } from '@/Components/ColorComponents'
 import InfoButton from '@/Components/InfoButton'
 import { tooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 
-export const storyVariants = {
-  user: { bg: 'bg-purple-600', title: 'user' },
-  system: { bg: 'bg-orange-600', title: 'system' },
-}
 import InvestCard from '../Inspection/InvestCard'
 
 const GeneratedItemsModal = ({
@@ -36,7 +32,9 @@ const GeneratedItemsModal = ({
   toggleItemSelection,
   confirmGeneratedItems,
   toggleAllItems,
+  systemColors,
 }) => {
+  const storyVariants = systemColors?.stories || {}
   return (
     <div
       className={`
@@ -92,8 +90,7 @@ const GeneratedItemsModal = ({
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
               <div className="space-y-2 pb-4">
                 {generatedItems.map((story, index) => {
-                  const selectedVariant =
-                    storyVariants[story.type] || storyVariants.user
+                  const selectedVariant = storyVariants[story.type] || '#444'
                   return (
                     <div
                       key={'temp-' + index}
@@ -106,8 +103,11 @@ const GeneratedItemsModal = ({
                       <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
                         <div className="flex items-center gap-2 text-left">
                           <Badge
+                            style={{
+                              backgroundColor: selectedVariant,
+                            }}
                             variant="outline"
-                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer ${selectedVariant.bg}`}
+                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
                           >
                             {story.type === 'system' ? 'SS' : 'US'}
                           </Badge>
@@ -611,6 +611,7 @@ const Stories = ({ project, setProject }) => {
           toggleItemSelection={toggleStorySelection}
           confirmGeneratedItems={confirmGeneratedStories}
           toggleAllItems={toggleAllStories}
+          systemColors={project?.system_colors}
         />
       )}
       {inspectionId && (
