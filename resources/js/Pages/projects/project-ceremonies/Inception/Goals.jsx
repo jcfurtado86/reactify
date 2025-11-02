@@ -30,6 +30,19 @@ const GeneratedItemsModal = ({
   toggleAllItems,
   systemColors,
 }) => {
+  const goalVariants = systemColors?.goals || {}
+  const typeColors = {
+    bg: goalVariants?.bg || '#444',
+    cg: goalVariants?.cg || '#444',
+  }
+  const priorityColors = {
+    low: goalVariants?.low || '#444',
+    medium: goalVariants?.medium || '#444',
+    high: goalVariants?.high || '#444',
+  }
+  // const selectedType = goalVariants[goal.type] || '#444'
+  // const selectedPriority = goalVariants[goal.priority] || '#444'
+
   return (
     <div
       className={`
@@ -85,8 +98,8 @@ const GeneratedItemsModal = ({
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
               <div className="space-y-2 pb-4">
                 {generatedItems.map((goal, index) => {
-                  const selectedType = typeColors[goal.type] || typeColors.bg
-                  priorityColors[goal.priority] || priorityColors.medium
+                  const selectedType = goalVariants[goal.type] || '#444'
+                  const selectedPriority = goalVariants[goal.priority] || '#444'
 
                   return (
                     <div
@@ -100,14 +113,15 @@ const GeneratedItemsModal = ({
                       <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
                         <div className="flex items-center gap-2 text-left">
                           <Badge
+                            style={{ backgroundColor: selectedType }}
                             className={cn(
                               'border-transparent text-background font-bold',
-                              selectedType.color,
                             )}
                           >
                             {goal.type.toUpperCase()}
                           </Badge>
                           <Badge
+                            style={{ backgroundColor: selectedPriority }}
                             className={cn(
                               'border-transparent text-background font-bold',
                             )}
@@ -217,7 +231,7 @@ const GoalItem = ({
   }
   const selectedType = goalVariants[goal.type] || '#444'
   const selectedPriority = goalVariants[goal.priority] || '#444'
-  console.log(goalVariants)
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
