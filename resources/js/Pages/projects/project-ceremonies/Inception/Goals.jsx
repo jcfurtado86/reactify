@@ -799,11 +799,17 @@ const Goals = ({ project, setProject }) => {
         ) : (
           <Card className="bg-card p-4 shadow-md">
             <div className="flex items-center mb-2 gap-2">
-              <Badge className={cn('text-background', typeColors.bg.color)}>
+              <Badge
+                style={{ backgroundColor: project?.system_colors?.goals.cg }}
+                className={cn('text-background')}
+              >
                 CG
               </Badge>
               <Badge
-                className={cn('text-background', priorityColors.medium.color)}
+                style={{
+                  backgroundColor: project?.system_colors?.goals.medium,
+                }}
+                className={cn('text-background')}
               >
                 MED
               </Badge>
