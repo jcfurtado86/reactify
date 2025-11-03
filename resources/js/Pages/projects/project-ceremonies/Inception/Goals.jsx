@@ -758,6 +758,9 @@ const Goals = ({ project, setProject }) => {
       <div className="flex flex-col gap-2">
         <InfoButton
           data={tooltipInfo.constraintGoal}
+          badgeStyle={{
+            backgroundColor: project?.system_colors?.goals.cg,
+          }}
           badgeContent={
             project?.goal_sketches?.filter((goal) => goal.type === 'cg')
               .length || 0
@@ -823,6 +826,9 @@ const Goals = ({ project, setProject }) => {
       <div className="flex flex-col gap-2">
         <InfoButton
           data={tooltipInfo.businessGoal}
+          badgeStyle={{
+            backgroundColor: project?.system_colors?.goals.bg,
+          }}
           badgeContent={
             project?.goal_sketches?.filter((goal) => goal.type === 'bg')
               .length || 0
