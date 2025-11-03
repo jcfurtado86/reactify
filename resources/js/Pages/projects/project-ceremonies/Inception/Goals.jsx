@@ -8,6 +8,7 @@ import {
   ChevronsUp,
   EllipsisVertical,
 } from 'lucide-react'
+import rainbowIcon from '/resources/images/rainbow.png'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
@@ -272,7 +273,11 @@ const GoalItem = ({
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="ghost" className="h-full w-6">
-                              <EllipsisVertical />
+                              <img
+                                src={rainbowIcon}
+                                alt="color-picker-icon"
+                                className="object-contain z-20 max-w-5 h-full"
+                              />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-52 p-2" align="start">
@@ -333,7 +338,11 @@ const GoalItem = ({
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="ghost" className="h-full w-6">
-                              <EllipsisVertical />
+                              <img
+                                src={rainbowIcon}
+                                alt="color-picker-icon"
+                                className="object-contain z-20 max-w-5 h-full"
+                              />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-52 p-2" align="start">
