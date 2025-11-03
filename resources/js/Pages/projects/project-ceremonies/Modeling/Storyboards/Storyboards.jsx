@@ -25,7 +25,6 @@ const StoryCard = ({
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${epicStoryId}`
     : `${story.id}`
-  console.log(epicStoryId)
   return (
     <div
       onClick={onSelect}
