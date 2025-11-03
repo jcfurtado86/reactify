@@ -8,6 +8,7 @@ import {
   ChevronsUp,
   EllipsisVertical,
 } from 'lucide-react'
+import rainbowIcon from '/resources/images/rainbow.png'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
@@ -272,7 +273,11 @@ const GoalItem = ({
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="ghost" className="h-full w-6">
-                              <EllipsisVertical />
+                              <img
+                                src={rainbowIcon}
+                                alt="color-picker-icon"
+                                className="object-contain z-20 max-w-5 h-full"
+                              />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-52 p-2" align="start">
@@ -333,7 +338,11 @@ const GoalItem = ({
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="ghost" className="h-full w-6">
-                              <EllipsisVertical />
+                              <img
+                                src={rainbowIcon}
+                                alt="color-picker-icon"
+                                className="object-contain z-20 max-w-5 h-full"
+                              />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-52 p-2" align="start">
@@ -749,6 +758,9 @@ const Goals = ({ project, setProject }) => {
       <div className="flex flex-col gap-2">
         <InfoButton
           data={tooltipInfo.constraintGoal}
+          badgeStyle={{
+            backgroundColor: project?.system_colors?.goals.cg,
+          }}
           badgeContent={
             project?.goal_sketches?.filter((goal) => goal.type === 'cg')
               .length || 0
@@ -814,6 +826,9 @@ const Goals = ({ project, setProject }) => {
       <div className="flex flex-col gap-2">
         <InfoButton
           data={tooltipInfo.businessGoal}
+          badgeStyle={{
+            backgroundColor: project?.system_colors?.goals.bg,
+          }}
           badgeContent={
             project?.goal_sketches?.filter((goal) => goal.type === 'bg')
               .length || 0
