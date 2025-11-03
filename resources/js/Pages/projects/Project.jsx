@@ -46,7 +46,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     () => localStorage.getItem('activeMenu') || 'Product Canvas',
   )
   const [menuItems, setMenuItems] = useState([
-    ...(can('productCanvas.create')
+    ...(can('productCanvas.view')
       ? [
           {
             label: 'Product Canvas',
@@ -55,7 +55,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('persona.create')
+    ...(can('persona.view')
       ? [
           {
             label: 'Personas',
@@ -64,7 +64,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('goal.create')
+    ...(can('goal.view')
       ? [
           {
             label: 'Goals',
@@ -73,7 +73,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('journey.create')
+    ...(can('journey.view')
       ? [
           {
             label: 'Journeys',
@@ -89,7 +89,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     () => localStorage.getItem('activeStoryDiscoveryMenu') || 'Stories',
   )
   const [storyDiscoveryMenuItems, setStoryDiscoveryMenuItems] = useState([
-    ...(can('userStory.create')
+    ...(can('userStory.view')
       ? [
           {
             label: 'Stories',
@@ -98,7 +98,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('overallModel.create')
+    ...(can('overallModel.view')
       ? [
           {
             label: 'Overall Model',
@@ -107,7 +107,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('prioritizationMatrix.create')
+    ...(can('prioritizationMatrix.view')
       ? [
           {
             label: 'Matriz de Priorização',
@@ -116,7 +116,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('changeLog.create')
+    ...(can('changeLog.view')
       ? [
           {
             label: 'Change Log',
@@ -132,7 +132,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     () => localStorage.getItem('activeRefiningMenu') || 'Epic Stories',
   )
   const [refiningMenuItems, setRefiningMenuItems] = useState([
-    ...(can('userStory.create')
+    ...(can('userStory.view')
       ? [
           {
             label: 'Epic Stories',
@@ -141,7 +141,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('businessRule.create')
+    ...(can('businessRule.view')
       ? [
           {
             label: 'Business Rules',
@@ -150,7 +150,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('usageScenario.create')
+    ...(can('usageScenario.view')
       ? [
           {
             label: 'Usage Scenarios',
@@ -166,7 +166,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     () => localStorage.getItem('activeModelingMenu') || 'Overall Model',
   )
   const [modelingMenuItems, setModelingMenuItems] = useState([
-    ...(can('overallModel.create')
+    ...(can('overallModel.view')
       ? [
           {
             label: 'Overall Model',
@@ -175,7 +175,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('interface.create')
+    ...(can('interface.view')
       ? [
           {
             label: 'Internal and External Interfaces',
@@ -184,7 +184,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
           },
         ]
       : []),
-    ...(can('storyboard.create')
+    ...(can('storyboard.view')
       ? [
           {
             label: 'Storyboards',
@@ -326,25 +326,25 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     switch (activeMenu) {
       case 'Product Canvas':
         return (
-          can('productCanvas.create') && (
+          can('productCanvas.view') && (
             <MainView project={project} setProject={setProject} />
           )
         )
       case 'Personas':
         return (
-          can('persona.create') && (
+          can('persona.view') && (
             <Personas project={project} setProject={setProject} />
           )
         )
       case 'Goals':
         return (
-          can('goal.create') && (
+          can('goal.view') && (
             <Goals project={project} setProject={setProject} />
           )
         )
       case 'Journeys':
         return (
-          can('journey.create') && (
+          can('journey.view') && (
             <Journeys project={project} setProject={setProject} />
           )
         )
@@ -357,25 +357,25 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     switch (activeStoryDiscoveryMenu) {
       case 'Stories':
         return (
-          can('userStory.create') && (
+          can('userStory.view') && (
             <Stories project={project} setProject={setProject} />
           )
         )
       case 'Overall Model':
         return (
-          can('overallModel.create') && (
+          can('overallModel.view') && (
             <OverallModel project={project} setProject={setProject} />
           )
         )
       case 'Matriz de Priorização':
         return (
-          can('prioritizationMatrix.create') && (
+          can('prioritizationMatrix.view') && (
             <PrioritizationMatrix project={project} setProject={setProject} />
           )
         )
       case 'Change Log':
         return (
-          can('changeLog.create') && (
+          can('changeLog.view') && (
             <ChangeLog project={project} setProject={setProject} />
           )
         )
@@ -388,19 +388,19 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     switch (activeRefiningMenu) {
       case 'Epic Stories':
         return (
-          can('userStory.create') && (
+          can('userStory.view') && (
             <EpicStories project={project} setProject={setProject} />
           )
         )
       case 'Business Rules':
         return (
-          can('businessRule.create') && (
+          can('businessRule.view') && (
             <BusinessRules project={project} setProject={setProject} />
           )
         )
       case 'Usage Scenarios':
         return (
-          can('usageScenario.create') && (
+          can('usageScenario.view') && (
             <UsageScenarios project={project} setProject={setProject} />
           )
         )
@@ -413,19 +413,19 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     switch (activeModelingMenu) {
       case 'Overall Model':
         return (
-          can('overallModel.create') && (
+          can('overallModel.view') && (
             <OverallModel project={project} setProject={setProject} />
           )
         )
       case 'Internal and External Interfaces':
         return (
-          can('interface.create') && (
+          can('interface.view') && (
             <Interfaces project={project} setProject={setProject} />
           )
         )
       case 'Storyboards':
         return (
-          can('storyboard.create') && (
+          can('storyboard.view') && (
             <SidebarProvider className="min-h-[calc(100vh-100px)]">
               <Storyboards project={project} setProject={setProject} />{' '}
             </SidebarProvider>
@@ -475,12 +475,12 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
               <TabsTrigger value="storyDiscovery">Story Discovery</TabsTrigger>
               <TabsTrigger value="refining">Refining</TabsTrigger>
               <TabsTrigger value="modeling">Modeling</TabsTrigger>
-              {can('productBacklog.create') && (
+              {can('productBacklog.view') && (
                 <TabsTrigger value="productBacklog">
                   Product Backlog
                 </TabsTrigger>
               )}
-              {can('sprint.create') && (
+              {can('sprint.view') && (
                 <TabsTrigger value="sprint">Sprint</TabsTrigger>
               )}
             </TabsList>

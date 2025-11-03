@@ -81,28 +81,10 @@ class ProjectSeeder extends Seeder
         'created_at' => now(),
         'updated_at' => now(),
       ])
-      : $user4->id;    
+      : $user4->id;
 
     // Criar Usuário customer
-    $user5 = DB::table('users')
-      ->where('email', 'facilitator@example.com')
-      ->first();
-    $userId5 = !$user5
-      ? DB::table('users')->insertGetId([
-        'name' => 'facilitator',
-        'email' => 'facilitator@example.com',
-        'password' => Hash::make('senha123'),
-        'active' => true,
-        'email_verified_at' => now(),
-        'created_at' => now(),
-        'updated_at' => now(),
-      ])
-      : $user5->id; 
-
-    // Criar Usuário customer
-    $user6 = DB::table('users')
-      ->where('email', 'team@example.com')
-      ->first();
+    $user6 = DB::table('users')->where('email', 'team@example.com')->first();
     $userId6 = !$user6
       ? DB::table('users')->insertGetId([
         'name' => 'team',
@@ -113,7 +95,7 @@ class ProjectSeeder extends Seeder
         'created_at' => now(),
         'updated_at' => now(),
       ])
-      : $user6->id; 
+      : $user6->id;
 
     // Criar Usuário customer
     $user7 = DB::table('users')
@@ -129,7 +111,7 @@ class ProjectSeeder extends Seeder
         'created_at' => now(),
         'updated_at' => now(),
       ])
-      : $user7->id; 
+      : $user7->id;
 
     // Criar Projeto
     $project = Project::create([
@@ -195,7 +177,7 @@ class ProjectSeeder extends Seeder
       ],
       [
         'user_id' => $userId2,
-        'role' => 'facilitator',
+        'role' => 'domain_expert',
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
@@ -207,13 +189,7 @@ class ProjectSeeder extends Seeder
         'created_at' => now(),
         'updated_at' => now(),
       ],
-      [
-        'user_id' => $userId5,
-        'role' => 'facilitator',
-        'project_id' => $projectId,
-        'created_at' => now(),
-        'updated_at' => now(),
-      ],
+
       [
         'user_id' => $userId6,
         'role' => 'team',

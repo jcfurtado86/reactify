@@ -179,9 +179,6 @@ export function ProjectPermissions({ project }) {
                               Domain Expert
                             </SelectItem>
                             <SelectItem value="team">Team</SelectItem>
-                            <SelectItem value="facilitator">
-                              Facilitator
-                            </SelectItem>
                             <SelectItem value="administrator">
                               Administrator
                             </SelectItem>
@@ -261,7 +258,6 @@ export function ProjectPermissions({ project }) {
                         Domain Expert
                       </SelectItem>
                       <SelectItem value="team">Team</SelectItem>
-                      <SelectItem value="facilitator">Facilitator</SelectItem>
                       <SelectItem value="administrator">
                         Administrator
                       </SelectItem>

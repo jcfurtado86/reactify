@@ -4,67 +4,51 @@ namespace App\Enums;
 
 enum PermissionEnum: string
 {
-  case PRODUCT_CANVAS_CREATE = 'productCanvas.create';
-  case PRODUCT_CANVAS_EDIT = 'productCanvas.edit';
-  case PRODUCT_CANVAS_DELETE = 'productCanvas.delete';
+  case PRODUCT_CANVAS_VIEW = 'productCanvas.view';
+  case PRODUCT_CANVAS_MANAGE = 'productCanvas.manage';
 
-  case USER_STORY_CREATE = 'userStory.create';
-  case USER_STORY_EDIT = 'userStory.edit';
-  case USER_STORY_DELETE = 'userStory.delete';
+  case USER_STORY_VIEW = 'userStory.view';
+  case USER_STORY_MANAGE = 'userStory.manage';
 
-  case SYSTEM_STORY_CREATE = 'systemStory.create';
-  case SYSTEM_STORY_EDIT = 'systemStory.edit';
-  case SYSTEM_STORY_DELETE = 'systemStory.delete';
+  case SYSTEM_STORY_VIEW = 'systemStory.view';
+  case SYSTEM_STORY_MANAGE = 'systemStory.manage';
 
-  case GOAL_CREATE = 'goal.create';
-  case GOAL_EDIT = 'goal.edit';
-  case GOAL_DELETE = 'goal.delete';
+  case GOAL_VIEW = 'goal.view';
+  case GOAL_MANAGE = 'goal.manage';
 
-  case PERSONA_CREATE = 'persona.create';
-  case PERSONA_EDIT = 'persona.edit';
-  case PERSONA_DELETE = 'persona.delete';
+  case PERSONA_VIEW = 'persona.view';
+  case PERSONA_MANAGE = 'persona.manage';
 
-  case JOURNEY_CREATE = 'journey.create';
-  case JOURNEY_EDIT = 'journey.edit';
-  case JOURNEY_DELETE = 'journey.delete';
+  case JOURNEY_VIEW = 'journey.view';
+  case JOURNEY_MANAGE = 'journey.manage';
 
-  case OVERALL_MODEL_CREATE = 'overallModel.create';
-  case OVERALL_MODEL_EDIT = 'overallModel.edit';
-  case OVERALL_MODEL_DELETE = 'overallModel.delete';
+  case OVERALL_MODEL_VIEW = 'overallModel.view';
+  case OVERALL_MODEL_MANAGE = 'overallModel.manage';
 
-  case USAGE_SCENARIO_CREATE = 'usageScenario.create';
-  case USAGE_SCENARIO_EDIT = 'usageScenario.edit';
-  case USAGE_SCENARIO_DELETE = 'usageScenario.delete';
+  case USAGE_SCENARIO_VIEW = 'usageScenario.view';
+  case USAGE_SCENARIO_MANAGE = 'usageScenario.manage';
 
-  case INTERFACE_CREATE = 'interface.create';
-  case INTERFACE_EDIT = 'interface.edit';
-  case INTERFACE_DELETE = 'interface.delete';
+  case INTERFACE_VIEW = 'interface.view';
+  case INTERFACE_MANAGE = 'interface.manage';
 
-  case BUSINESS_RULE_CREATE = 'businessRule.create';
-  case BUSINESS_RULE_EDIT = 'businessRule.edit';
-  case BUSINESS_RULE_DELETE = 'businessRule.delete';
+  case BUSINESS_RULE_VIEW = 'businessRule.view';
+  case BUSINESS_RULE_MANAGE = 'businessRule.manage';
 
-  case PRIORITIZATION_MATRIX_CREATE = 'prioritizationMatrix.create';
-  case PRIORITIZATION_MATRIX_EDIT = 'prioritizationMatrix.edit';
-  case PRIORITIZATION_MATRIX_DELETE = 'prioritizationMatrix.delete';
+  case PRIORITIZATION_MATRIX_VIEW = 'prioritizationMatrix.view';
+  case PRIORITIZATION_MATRIX_MANAGE = 'prioritizationMatrix.manage';
 
-  case STORYBOARD_CREATE = 'storyboard.create';
-  case STORYBOARD_EDIT = 'storyboard.edit';
-  case STORYBOARD_DELETE = 'storyboard.delete';
+  case STORYBOARD_VIEW = 'storyboard.view';
+  case STORYBOARD_MANAGE = 'storyboard.manage';
 
-  case CHANGE_LOG_CREATE = 'changeLog.create';
-  case CHANGE_LOG_EDIT = 'changeLog.edit';
-  case CHANGE_LOG_DELETE = 'changeLog.delete';
+  case CHANGE_LOG_VIEW = 'changeLog.view';
+  case CHANGE_LOG_MANAGE = 'changeLog.manage';
 
-  case PRODUCT_BACKLOG_CREATE = 'productBacklog.create';
-  case PRODUCT_BACKLOG_EDIT = 'productBacklog.edit';
-  case PRODUCT_BACKLOG_DELETE = 'productBacklog.delete';
+  case PRODUCT_BACKLOG_VIEW = 'productBacklog.view';
+  case PRODUCT_BACKLOG_MANAGE = 'productBacklog.manage';
 
-  case SPRINT_CREATE = 'sprint.create';
-  case SPRINT_EDIT = 'sprint.edit';
-  case SPRINT_DELETE = 'sprint.delete';
+  case SPRINT_VIEW = 'sprint.view';
+  case SPRINT_MANAGE = 'sprint.manage';
 
-  case INSPECTION_CARDS_CREATE = 'inspectionCards.create';
-  case INSPECTION_CARDS_EDIT = 'inspectionCards.edit';
-  case INSPECTION_CARDS_DELETE = 'inspectionCards.delete';
+  case INSPECTION_CARDS_VIEW = 'inspectionCards.view';
+  case INSPECTION_CARDS_MANAGE = 'inspectionCards.manage';
 }
