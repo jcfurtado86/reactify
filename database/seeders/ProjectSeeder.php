@@ -55,7 +55,7 @@ class ProjectSeeder extends Seeder
       ->where('email', 'lumagabriela1333@gmail.com')
       ->first();
 
-    $user3 = !$user3
+    $userId3 = !$user3
       ? DB::table('users')->insertGetId([
         'name' => 'luma',
         'email' => 'lumagabriela1333@gmail.com',
@@ -66,6 +66,70 @@ class ProjectSeeder extends Seeder
         'updated_at' => now(),
       ])
       : $user3->id;
+
+    // Criar Usuário customer
+    $user4 = DB::table('users')
+      ->where('email', 'customer@example.com')
+      ->first();
+    $userId4 = !$user4
+      ? DB::table('users')->insertGetId([
+        'name' => 'customer',
+        'email' => 'customer@example.com',
+        'password' => Hash::make('senha123'),
+        'active' => true,
+        'email_verified_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+      ])
+      : $user4->id;    
+
+    // Criar Usuário customer
+    $user5 = DB::table('users')
+      ->where('email', 'facilitator@example.com')
+      ->first();
+    $userId5 = !$user5
+      ? DB::table('users')->insertGetId([
+        'name' => 'facilitator',
+        'email' => 'facilitator@example.com',
+        'password' => Hash::make('senha123'),
+        'active' => true,
+        'email_verified_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+      ])
+      : $user5->id; 
+
+    // Criar Usuário customer
+    $user6 = DB::table('users')
+      ->where('email', 'team@example.com')
+      ->first();
+    $userId6 = !$user6
+      ? DB::table('users')->insertGetId([
+        'name' => 'team',
+        'email' => 'team@example.com',
+        'password' => Hash::make('senha123'),
+        'active' => true,
+        'email_verified_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+      ])
+      : $user6->id; 
+
+    // Criar Usuário customer
+    $user7 = DB::table('users')
+      ->where('email', 'domain_expert@example.com')
+      ->first();
+    $userId7 = !$user7
+      ? DB::table('users')->insertGetId([
+        'name' => 'domain_expert',
+        'email' => 'domain_expert@example.com',
+        'password' => Hash::make('senha123'),
+        'active' => true,
+        'email_verified_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+      ])
+      : $user7->id; 
 
     // Criar Projeto
     $project = Project::create([
@@ -132,6 +196,34 @@ class ProjectSeeder extends Seeder
       [
         'user_id' => $userId2,
         'role' => 'facilitator',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+      [
+        'user_id' => $userId4,
+        'role' => 'customer',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+      [
+        'user_id' => $userId5,
+        'role' => 'facilitator',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+      [
+        'user_id' => $userId6,
+        'role' => 'team',
+        'project_id' => $projectId,
+        'created_at' => now(),
+        'updated_at' => now(),
+      ],
+      [
+        'user_id' => $userId7,
+        'role' => 'domain_expert',
         'project_id' => $projectId,
         'created_at' => now(),
         'updated_at' => now(),
