@@ -45,7 +45,7 @@ const SortableJourneyStepItem = (props) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: props.step.id })
+  } = useSortable({ id: props.step.id, disabled: props.disabled })
 
   const style = {
     transform: CSS.Transform.toString(transform),
