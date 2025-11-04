@@ -10,15 +10,15 @@ const ProductBacklog = ({ project, setProject }) => {
   const [error, setError] = useState(null)
 
   const handleNavigateToMatrix = () => {
-    localStorage.setItem('activeStoryDiscoveryMenu', 'Matriz de Priorização');
-    
+    localStorage.setItem('activeStoryDiscoveryMenu', 'Matriz de Priorização')
+
     router.get(
       route('project.ceremony.show', {
         project: project.id,
         ceremony: 'storyDiscovery',
       }),
-    );
-  };
+    )
+  }
 
   // ✅ Sincronizar estado local quando project muda
   useEffect(() => {
@@ -156,6 +156,7 @@ const ProductBacklog = ({ project, setProject }) => {
       </div>
     )
   }
+  const storyVariants = project?.system_colors?.stories || {}
 
   return (
     <div className="flex space-x-4 p-4 min-h-[500px]">
@@ -165,14 +166,15 @@ const ProductBacklog = ({ project, setProject }) => {
             <CardTitle className="text-lg">{columnTitles[columnId]}</CardTitle>
 
             {columnId === 'productBacklog' && (
-              <div className="pt-1 flex flex-col gap-2"> 
+              <div className="pt-1 flex flex-col gap-2">
                 <p className="text-sm text-muted-foreground">
-                  Exibe stories priorizadas na Matriz de Priorização. Ainda não estão em uma Sprint.
+                  Exibe stories priorizadas na Matriz de Priorização. Ainda não
+                  estão em uma Sprint.
                 </p>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-fit" // 'w-fit' para o botão não ocupar a largura toda
                   onClick={handleNavigateToMatrix}
                 >
@@ -188,14 +190,15 @@ const ProductBacklog = ({ project, setProject }) => {
 
             {columnId === 'sprintBacklog' && (
               <p className="text-sm text-muted-foreground pt-1">
-                Stories em Sprints atuais (ativas ou em planejamento) aparecerâo aqui.
+                Stories em Sprints atuais (ativas ou em planejamento) aparecerâo
+                aqui.
               </p>
             )}
 
             {columnId === 'delivered' && (
               <p className="text-sm text-muted-foreground pt-1">
-                Stories concluídas (status 'Done') dentro das Sprints
-                atuais (ativas ou em planejamento).
+                Stories concluídas (status 'Done') dentro das Sprints atuais
+                (ativas ou em planejamento).
               </p>
             )}
 
@@ -238,7 +241,7 @@ const ProductBacklog = ({ project, setProject }) => {
                     key={card.id}
                     className={`
                       cursor-pointer transition-all duration-200
-                      ${card.status === 'prioritized' ? 'border-l-4 border-l-green-500' : ''}
+
                       ${columnId === 'productBacklog' && selectedStories.includes(card.id) ? 'ring-2 ring-primary' : ''}
                       hover:shadow-md
                     `}
@@ -248,7 +251,11 @@ const ProductBacklog = ({ project, setProject }) => {
                     }
                   >
                     <CardContent className="p-3">
-                      <p className="font-semibold text-sm">{`US${card.id}`}</p>
+                      <Badge
+                        style={{ backgroundColor: storyVariants[card.type] }}
+                        variant="outline"
+                        className="border-transparent text-primary-foreground font-bold cursor-pointer"
+                      >{`US${card.id}`}</Badge>
                       <p className="text-sm text-muted-foreground mt-1">
                         {card.title}
                       </p>
@@ -259,11 +266,11 @@ const ProductBacklog = ({ project, setProject }) => {
                             {card.sprint_name}
                           </Badge>
                         )}
-                        {card.status === 'prioritized' && (
+                        {/* {card.status === 'prioritized' && (
                           <Badge variant="default" className="text-xs">
                             Prioritized
                           </Badge>
-                        )}
+                        )}*/}
                       </div>
 
                       {card.value && (

@@ -8,11 +8,10 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  useDraggable,
+  useDroppable,
 } from '@dnd-kit/core'
-import { useDroppable } from '@dnd-kit/core'
-import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +20,7 @@ import { ArrowLeft } from 'lucide-react'
 // ============================================================================
 // Subcomponente para o Card da Story (Item Arrastável)
 // ============================================================================
-const KanbanStoryCard = ({ story, columnKey, isOverlay }) => {
+const KanbanStoryCard = ({ story, columnKey, isOverlay, systemColors }) => {
   // ✅ Hook do dnd-kit para tornar este componente arrastável
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -44,16 +43,22 @@ const KanbanStoryCard = ({ story, columnKey, isOverlay }) => {
   const overlayClasses = isOverlay
     ? 'shadow-2xl cursor-grabbing'
     : 'cursor-grab active:cursor-grabbing'
+  const storyVariants = systemColors?.stories
+
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <Card className={`p-3 ${overlayClasses}`}>
         <div className="space-y-2">
           <div className="flex justify-between items-start">
-            <Badge variant="outline" className="text-xs">
+            <Badge
+              style={{ backgroundColor: storyVariants[story.type] }}
+              variant="outline"
+              className="border-transparent text-primary-foreground font-bold cursor-pointer"
+            >
               US{story.id}
             </Badge>
           </div>
-          <p className="text-sm font-medium">{story.title}</p>
+          <p className="text-sm font-medium text-left">{story.title}</p>
         </div>
       </Card>
     </div>
@@ -63,7 +68,7 @@ const KanbanStoryCard = ({ story, columnKey, isOverlay }) => {
 // ============================================================================
 // Subcomponente para a Coluna do Kanban (Área de Soltar)
 // ============================================================================
-const KanbanColumn = ({ id, title, variant, stories }) => {
+const KanbanColumn = ({ id, title, variant, stories, systemColors }) => {
   // ✅ Hook do dnd-kit para tornar este componente uma área de soltar
   const { setNodeRef, isOver } = useDroppable({
     id: id,
@@ -75,14 +80,19 @@ const KanbanColumn = ({ id, title, variant, stories }) => {
       className={`min-h-96 transition-colors ${isOver ? 'bg-muted/50' : ''}`} // Feedback visual ao passar por cima
     >
       <CardHeader className="pb-4">
-        <CardTitle className="flex justify-between items-center text-base">
+        <CardTitle className="flex justify-between items-center text-sm">
           <span className="capitalize">{title}</span>
           <Badge variant={variant}>{stories.length}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {stories.map((story) => (
-          <KanbanStoryCard key={story.id} story={story} columnKey={id} />
+          <KanbanStoryCard
+            key={story.id}
+            story={story}
+            columnKey={id}
+            systemColors={systemColors}
+          />
         ))}
       </CardContent>
     </Card>
@@ -102,7 +112,6 @@ const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
       setLocalStories(sprint.stories)
     }
   }, [sprint])
-
   const storiesByStatus = useMemo(() => {
     const columns = { todo: [], in_progress: [], testing: [], done: [] }
     localStories.forEach((story) => {
@@ -194,8 +203,8 @@ const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
 
   const columns = [
     { key: 'todo', title: 'To Do', variant: 'secondary' },
-    { key: 'in_progress', title: 'In Progress', variant: 'default' },
-    { key: 'testing', title: 'Testing', variant: 'outline' },
+    { key: 'in_progress', title: 'In Progress', variant: 'secondary' },
+    { key: 'testing', title: 'Testing', variant: 'secondary' },
     { key: 'done', title: 'Done', variant: 'secondary' },
   ]
 
@@ -210,7 +219,7 @@ const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="text-center py-8">
+        <CardContent className="text-left py-8">
           <p className="text-muted-foreground">Nenhuma sprint selecionada</p>
         </CardContent>
       </Card>
@@ -227,7 +236,7 @@ const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
             <Button variant="outline" onClick={() => setView('list')}>
               <ArrowLeft className="w-4 h-4 mr-2" />
             </Button>
-            <CardTitle>{sprint.name} - Kanban Board</CardTitle>
+            <CardTitle>{sprint.name}</CardTitle>
             <Badge variant="outline">{totalStories} stories total</Badge>
           </div>
         </CardHeader>
@@ -262,13 +271,18 @@ const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
                 title={column.title}
                 variant={column.variant}
                 stories={storiesByStatus[column.key]}
+                systemColors={project?.system_colors}
               />
             ))}
           </div>
           {/* ✅ O DragOverlay renderiza o card "flutuante" */}
           <DragOverlay>
             {activeStory ? (
-              <KanbanStoryCard story={activeStory} isOverlay />
+              <KanbanStoryCard
+                systemColors={project?.system_colors}
+                story={activeStory}
+                isOverlay
+              />
             ) : null}
           </DragOverlay>
         </DndContext>

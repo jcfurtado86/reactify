@@ -18,7 +18,7 @@ const SprintList = ({
   sprints,
   setActiveSprint,
   setView,
-
+  systemColors,
   updateProject,
 }) => {
   const [editingSprint, setEditingSprint] = useState(null)
@@ -52,6 +52,7 @@ const SprintList = ({
     },
   ]
 
+  const storyVariants = systemColors?.stories
   // Separar sprints por status
   const sprintsByStatus = {
     planning: sprints.filter((sprint) => sprint.status === 'planning'),
@@ -623,7 +624,11 @@ const SprintList = ({
                     className="flex items-center justify-between p-2 border rounded"
                   >
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
+                      <Badge
+                        style={{ backgroundColor: storyVariants[story.type] }}
+                        variant="outline"
+                        className="border-transparent text-primary-foreground font-bold cursor-pointer"
+                      >
                         US{story.id}
                       </Badge>
                       <span className="text-sm">{story.title}</span>

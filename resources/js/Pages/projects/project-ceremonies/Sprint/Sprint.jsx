@@ -3,7 +3,6 @@ import { Plus, Calendar as CalendarIcon } from 'lucide-react'
 import SprintList from './SprintList'
 import KanbanBoard from './KanbanBoard'
 import { toast } from 'sonner'
-import { useState } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -191,13 +190,13 @@ const Sprint = ({ project, setProject }) => {
           sprints={sprints}
           setActiveSprint={setActiveSprint}
           setView={setView}
-          project={project}
+          systemColors={project?.system_colors}
           updateProject={updateProjectData}
         />
       ) : (
         <KanbanBoard
           sprint={activeSprint}
-          project={project}
+          systemColors={project?.system_colors}
           setView={setView}
           updateProject={updateProjectData}
         />
