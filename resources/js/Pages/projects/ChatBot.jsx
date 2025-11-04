@@ -32,7 +32,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      message: 'Olá! 👋 Como posso te ajudar hoje sobre o sistema?',
+      message:'Olá! 👋 Eu sou seu assistente REACT-M e atuarei como seu Facilitador. Como posso **guiar** você ou sua equipe na cerimônia de hoje?',
       sender: 'bot',
       timestamp: new Date().toISOString(),
     },
