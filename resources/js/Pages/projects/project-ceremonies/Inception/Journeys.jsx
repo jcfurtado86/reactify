@@ -1,3 +1,4 @@
+import { usePermissions } from '@/Context/PermissionContext'
 import {
   DndContext,
   closestCenter,
@@ -72,6 +73,7 @@ const JourneyStepItem = ({
   onSave,
   onCancel,
   onDelete,
+  disabled = false,
   textareaRef,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
@@ -150,6 +152,7 @@ const JourneyStepItem = ({
       </Card>
 
       <MotionDivOptions
+        disabled={disabled}
         isHovered={isHovered}
         isEditing={isEditing}
         onEdit={onEdit}
@@ -182,6 +185,7 @@ const Journeys = ({ project, setProject }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const textareaRef = useRef(null)
+  const { can } = usePermissions()
   const colors = [
     {
       text: 'text-orange-500',
@@ -574,7 +578,7 @@ const Journeys = ({ project, setProject }) => {
 
   return (
     <div className="flex flex-col gap-4 p-4 w-full">
-      {inspectionId && (
+      {inspectionId && can('journey.manage') && (
         <InvestCard
           itemCategory={'journeys'}
           itemId={inspectionId}
@@ -741,76 +745,81 @@ const Journeys = ({ project, setProject }) => {
                     </h4>
                   )}
                 </div>
+
                 <div className="flex items-center">
-                  <ButtonWithTooltip
-                    tooltipContent="Inspecionar (INVEST Card)"
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={(e) => inspectJourney(e, journey.id)}
-                  >
-                    <ChartArea size={20} />
-                  </ButtonWithTooltip>
-                  {editingJourney === journey.id ? (
-                    <ButtonWithTooltip
-                      tooltipContent={'Salvar titulo'}
-                      variant="success"
-                      size="icon"
-                      className=""
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        saveEditJourney()
-                      }}
-                    >
-                      <Check size={20} />
-                    </ButtonWithTooltip>
-                  ) : (
-                    <ButtonWithTooltip
-                      tooltipContent={'Editar titulo'}
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-foreground"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        startEditJourney(journey.id)
-                      }}
-                    >
-                      <Edit size={20} />
-                    </ButtonWithTooltip>
-                  )}
-                  <Popover>
-                    <PopoverTrigger asChild>
+                  {can('journey.manage') && (
+                    <>
                       <ButtonWithTooltip
-                        tooltipContent={'Deletar journey'}
+                        tooltipContent="Inspecionar (INVEST Card)"
                         variant="ghost"
                         size="icon"
-                        className="text-destructive/80 hover:text-destructive"
-                        onClick={(e) => e.stopPropagation()}
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={(e) => inspectJourney(e, journey.id)}
                       >
-                        <Trash size={20} />
+                        <ChartArea size={20} />
                       </ButtonWithTooltip>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-60 bg-popover border-border text-popover-foreground"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="space-y-3">
-                        <h4 className="font-medium">Delete Journey</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Are you sure? All steps will be lost.
-                        </p>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => deleteJourney(journey.id)}
+                      {editingJourney === journey.id ? (
+                        <ButtonWithTooltip
+                          tooltipContent={'Salvar titulo'}
+                          variant="success"
+                          size="icon"
+                          className=""
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            saveEditJourney()
+                          }}
+                        >
+                          <Check size={20} />
+                        </ButtonWithTooltip>
+                      ) : (
+                        <ButtonWithTooltip
+                          tooltipContent={'Editar titulo'}
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-foreground"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            startEditJourney(journey.id)
+                          }}
+                        >
+                          <Edit size={20} />
+                        </ButtonWithTooltip>
+                      )}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <ButtonWithTooltip
+                            tooltipContent={'Deletar journey'}
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive/80 hover:text-destructive"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                            <Trash size={20} />
+                          </ButtonWithTooltip>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-60 bg-popover border-border text-popover-foreground"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="space-y-3">
+                            <h4 className="font-medium">Delete Journey</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Are you sure? All steps will be lost.
+                            </p>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => deleteJourney(journey.id)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </>
+                  )}
                   <ChevronRight
                     className={cn(
                       'text-foreground transition-transform',
@@ -848,6 +857,7 @@ const Journeys = ({ project, setProject }) => {
                               isLastStep={
                                 stepIndex === journey.steps.length - 1
                               }
+                              disabled={!can('journey.manage')}
                               color={colors[stepIndex % colors.length]}
                               isEditing={isCurrentlyEditing}
                               editValue={
@@ -871,14 +881,16 @@ const Journeys = ({ project, setProject }) => {
                           )
                         })}
                         <div className="flex justify-start items-center h-full">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="text-primary"
-                            onClick={() => addNewStep(journey.id)}
-                          >
-                            <Plus size={18} />
-                          </Button>
+                          {can('journey.manage') && (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="text-primary"
+                              onClick={() => addNewStep(journey.id)}
+                            >
+                              <Plus size={18} />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </SortableContext>
@@ -886,18 +898,19 @@ const Journeys = ({ project, setProject }) => {
                 ) : (
                   <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
                     <p className="mb-2">This journey has no steps yet.</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-primary"
-                      onClick={() => addNewStep(journey.id)}
-                    >
-                      <Plus size={16} className="mr-1" /> Add first step
-                    </Button>
+                    {can('journey.manage') && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-primary"
+                        onClick={() => addNewStep(journey.id)}
+                      >
+                        <Plus size={16} className="mr-1" /> Add first step
+                      </Button>
+                    )}
                   </div>
                 )}
               </>
-              {/* )}*/}
             </div>
           ))
       ) : (
@@ -912,16 +925,24 @@ const Journeys = ({ project, setProject }) => {
 
       {/* Action Buttons */}
       <div className="flex gap-2 w-full items-center">
-        <Button variant="outline" className="flex-1" onClick={addNewJourney}>
-          <Plus size={18} className="mr-2" /> New Journey
-        </Button>
         {/* generate with ai button*/}
-        <GenerateAIButton
-          isGenerating={isGeneratingAI}
-          onClick={generateJourneys}
-          tooltip={tooltipInfo.aiGeneratedJourney}
-          className="w-1/2"
-        />
+        {can('journey.manage') && (
+          <>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={addNewJourney}
+            >
+              <Plus size={18} className="mr-2" /> New Journey
+            </Button>
+            <GenerateAIButton
+              isGenerating={isGeneratingAI}
+              onClick={generateJourneys}
+              tooltip={tooltipInfo.aiGeneratedJourney}
+              className="w-1/2"
+            />
+          </>
+        )}
       </div>
     </div>
   )

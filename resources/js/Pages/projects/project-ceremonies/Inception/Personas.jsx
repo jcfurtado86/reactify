@@ -1,3 +1,4 @@
+import { usePermissions } from '@/Context/PermissionContext'
 import {
   Plus,
   Edit,
@@ -172,6 +173,7 @@ const GeneratedItemsModal = ({
 }
 const PersonaCard = ({
   persona,
+  disabled = false,
   addNewItem,
   editingPersona,
   saveEditField,
@@ -248,6 +250,7 @@ const PersonaCard = ({
         </Button>
       </div>*/}
         <MotionDivOptions
+          disabled={disabled}
           isHovered={isHovered}
           onEdit={() => startEditPersona(persona.id)}
           onDelete={() => confirmDeletePersona(persona.id)}
@@ -267,14 +270,16 @@ const PersonaCard = ({
               >
                 {getFieldTitle(field)}
               </h4>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-6"
-                onClick={() => addNewItem(persona.id, field)}
-              >
-                <Plus className="size-4" />
-              </Button>
+              {!disabled && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-6"
+                  onClick={() => addNewItem(persona.id, field)}
+                >
+                  <Plus className="size-4" />
+                </Button>
+              )}
             </div>
             <Separator />
             <div className="flex flex-col gap-2">
@@ -282,6 +287,7 @@ const PersonaCard = ({
                 <PersonaItem
                   key={itemIndex}
                   item={item}
+                  disabled={disabled}
                   isEditing={
                     editingField.personaId === persona.id &&
                     editingField.field === field &&
@@ -312,6 +318,7 @@ const PersonaCard = ({
 }
 const PersonaItem = ({
   item,
+  disabled = false,
   isEditing,
   editValue,
   onValueChange,
@@ -375,6 +382,7 @@ const PersonaItem = ({
       )}
 
       <MotionDivOptions
+        disabled={disabled}
         isHovered={isHovered}
         isEditing={isEditing}
         // isTemporary={isTemporary}
@@ -395,6 +403,7 @@ const Personas = ({ project, setProject }) => {
     field: null,
     itemIndex: null,
   })
+  const { can } = usePermissions()
   const [editValue, setEditValue] = useState('')
   const [deleteConfirmItem, setDeleteConfirmItem] = useState({
     personaId: null,
@@ -750,7 +759,7 @@ const Personas = ({ project, setProject }) => {
           toggleAllItems={toggleAllPersonas}
         />
       )}
-      {inspectionId && (
+      {inspectionId && can('persona.manage') && (
         <InvestCard
           itemCategory={'stories'}
           itemId={inspectionId}
@@ -760,16 +769,25 @@ const Personas = ({ project, setProject }) => {
           setInspectionId={setInspectionId}
         />
       )}
-      <Button
-        variant="secondary"
-        onClick={addNewPersona}
-        disabled={isSubmitting}
-        className="xl:col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
-      >
-        <Plus size={18} className="mr-2" />
-        {isSubmitting ? 'Criando...' : 'Nova Persona'}
-      </Button>
-
+      {can('persona.manage') && (
+        <>
+          <Button
+            variant="secondary"
+            onClick={addNewPersona}
+            disabled={isSubmitting}
+            className="xl:col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
+          >
+            <Plus size={18} className="mr-2" />
+            {isSubmitting ? 'Criando...' : 'Nova Persona'}
+          </Button>
+          <GenerateAIButton
+            isGenerating={isGenerating}
+            onClick={generatePersonas}
+            // tooltip={tooltipInfo.aiGeneratedStory}
+            className="xl:col-span-2"
+          />
+        </>
+      )}
       {project.personas && project.personas.length > 0 ? (
         project.personas
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
@@ -795,6 +813,7 @@ const Personas = ({ project, setProject }) => {
                 inspectPersona={inspectPersona}
                 personaFieldVariants={personaFieldVariants}
                 addNewItem={addNewItem}
+                disabled={!can('persona.manage')}
               />
             )
           })
@@ -854,12 +873,6 @@ const Personas = ({ project, setProject }) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <GenerateAIButton
-        isGenerating={isGenerating}
-        onClick={generatePersonas}
-        // tooltip={tooltipInfo.aiGeneratedStory}
-        className="xl:col-span-2"
-      />
     </div>
   )
 }

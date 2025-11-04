@@ -5,6 +5,7 @@ const MotionDivOptions = ({
   isHovered,
   isEditing,
   isTemporary = false,
+  disabled = false,
   onAdd,
   onEdit,
   onInspect,
@@ -14,7 +15,7 @@ const MotionDivOptions = ({
     // 1. O Provider envolve tudo para que os tooltips funcionem
     <TooltipProvider delayDuration={100}>
       <AnimatePresence>
-        {isHovered && !isEditing && !isTemporary && (
+        {isHovered && !isEditing && !isTemporary && !disabled && (
           <motion.div
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}

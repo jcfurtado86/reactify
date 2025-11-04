@@ -1,3 +1,4 @@
+import { usePermissions } from '@/Context/PermissionContext'
 import {
   Plus,
   Check,
@@ -160,6 +161,7 @@ const GeneratedItemsModal = ({
 const GoalItem = ({
   goal,
   isTemporary,
+  disabled = false,
   isEditing,
   editValue,
   onValueChange,
@@ -412,6 +414,7 @@ const GoalItem = ({
         isHovered={isHovered}
         isEditing={isEditing}
         isTemporary={isTemporary}
+        disabled={disabled}
         onEdit={onEdit}
         onDelete={onDelete}
         onInspect={onInspect}
@@ -435,7 +438,7 @@ const Goals = ({ project, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
-
+  const { can } = usePermissions()
   // inspection function
   const inspectGoal = (goalId) => {
     if (inspectionId === goalId) {
@@ -745,16 +748,17 @@ const Goals = ({ project, setProject }) => {
           systemColors={project?.system_colors}
         />
       )}
-      {inspectionId && (
-        <InvestCard
-          itemCategory={'goal_sketches'}
-          itemId={inspectionId}
-          anchorEl={anchorEl}
-          project={project}
-          setProject={setProject}
-          setInspectionId={setInspectionId}
-        />
-      )}
+      {inspectionId &&
+        can('goal.manage')(
+          <InvestCard
+            itemCategory={'goal_sketches'}
+            itemId={inspectionId}
+            anchorEl={anchorEl}
+            project={project}
+            setProject={setProject}
+            setInspectionId={setInspectionId}
+          />,
+        )}
       <div className="flex flex-col gap-2">
         <InfoButton
           data={tooltipInfo.constraintGoal}
@@ -794,6 +798,7 @@ const Goals = ({ project, setProject }) => {
                 onTogglePrioritySelect={() => togglePrioritySelect(goal.id)}
                 onChangeGoalPriority={changeGoalPriority}
                 systemColors={project?.system_colors}
+                disabled={!can('goal.manage')}
               />
             ))
         ) : (
@@ -819,13 +824,15 @@ const Goals = ({ project, setProject }) => {
             </p>
           </Card>
         )}
-        <Button
-          className="col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
-          onClick={() => addNewGoal('cg')}
-        >
-          <Plus size={18} className="mr-2" />
-          <span>Nova Constraint Goal</span>
-        </Button>
+        {can('goal.manage') && (
+          <Button
+            className="col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
+            onClick={() => addNewGoal('cg')}
+          >
+            <Plus size={18} className="mr-2" />
+            <span>Nova Constraint Goal</span>
+          </Button>
+        )}
       </div>
 
       {/* --- Column 2: Business Goals --- */}
@@ -864,21 +871,26 @@ const Goals = ({ project, setProject }) => {
               onTogglePrioritySelect={() => togglePrioritySelect(goal.id)}
               onChangeGoalPriority={changeGoalPriority}
               systemColors={project?.system_colors}
+              disabled={!can('goal.manage')}
             />
           ))}
-        <Button
-          className="col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
-          onClick={() => addNewGoal('bg')}
-        >
-          <Plus size={18} className="mr-2" />
-          <span>Nova Business Goal</span>
-        </Button>
-        <GenerateAIButton
-          isGenerating={isGenerating}
-          onClick={generateGoals}
-          // tooltip={tooltipInfo.aiGeneratedStory}
-          className="w-1/2"
-        />
+        {can('goal.manage') && (
+          <>
+            <Button
+              className="col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
+              onClick={() => addNewGoal('bg')}
+            >
+              <Plus size={18} className="mr-2" />
+              <span>Nova Business Goal</span>
+            </Button>
+            <GenerateAIButton
+              isGenerating={isGenerating}
+              onClick={generateGoals}
+              // tooltip={tooltipInfo.aiGeneratedStory}
+              className="w-1/2"
+            />
+          </>
+        )}
       </div>
     </div>
   )

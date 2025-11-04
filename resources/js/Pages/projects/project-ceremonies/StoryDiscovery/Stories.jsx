@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import { usePermissions } from '@/Context/PermissionContext'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import {
   Plus,
@@ -165,6 +166,7 @@ const StoryItem = ({
   typeSelectId,
   onToggleTypeSelect,
   onChangeStoryType,
+  disabled = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
 
@@ -323,6 +325,7 @@ const StoryItem = ({
             isHovered={isHovered}
             isEditing={isEditing}
             isTemporary={isTemporary}
+            disabled={disabled}
             onEdit={onEdit}
             onDelete={onDelete}
             onInspect={onInspect}
@@ -347,7 +350,8 @@ const Stories = ({ project, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
-
+  //
+  const { can } = usePermissions()
   const childrenByEpicId = useGroupedStories(project?.stories)
   const handleInputChange = (e) => {
     setEditValue(e.target.value)
@@ -598,7 +602,7 @@ const Stories = ({ project, setProject }) => {
           systemColors={project?.system_colors}
         />
       )}
-      {inspectionId && (
+      {inspectionId && can('userStory.manage') && (
         <InvestCard
           itemCategory={'stories'}
           itemId={inspectionId}
@@ -645,6 +649,7 @@ const Stories = ({ project, setProject }) => {
                     onToggleTypeSelect={() => toggleTypeSelect(story.id)}
                     onChangeStoryType={changeStoryType}
                     systemColors={project?.system_colors}
+                    disabled={!can('userStory.manage')}
                   />
                   {[...relatedEpics]
                     .sort((a, b) => a.id - b.id)
@@ -672,6 +677,7 @@ const Stories = ({ project, setProject }) => {
                             }
                             onChangeStoryType={changeStoryType}
                             systemColors={project?.system_colors}
+                            disabled={!can('userStory.manage')}
                           />
                         </React.Fragment>
                       )
@@ -680,13 +686,16 @@ const Stories = ({ project, setProject }) => {
               )
             })}
 
-        <Button
-          className="flex items-center justify-center py-1 bg-card hover:bg-muted text-primary rounded-lg transition-colors shadow-md"
-          onClick={() => addNewStory('user')}
-        >
-          <Plus size={18} className="mr-2" />
-          <span>Nova User Story</span>
-        </Button>
+        {can('userStory.manage') && (
+          <Button
+            className="flex items-center justify-center py-1 bg-card hover:bg-muted text-primary rounded-lg transition-colors shadow-md"
+            onClick={() => addNewStory('user')}
+            disabled={!can('userStory.manage')}
+          >
+            <Plus size={18} className="mr-2" />
+            <span>Nova User Story</span>
+          </Button>
+        )}
       </div>
       <div className="flex flex-col gap-2 ">
         <InfoButton
@@ -720,6 +729,7 @@ const Stories = ({ project, setProject }) => {
                     onToggleTypeSelect={() => toggleTypeSelect(story.id)}
                     onChangeStoryType={changeStoryType}
                     systemColors={project?.system_colors}
+                    disabled={!can('userStory.manage')}
                   />
                   {[...relatedEpics]
                     .sort((a, b) => a.id - b.id)
@@ -747,6 +757,7 @@ const Stories = ({ project, setProject }) => {
                             }
                             onChangeStoryType={changeStoryType}
                             systemColors={project?.system_colors}
+                            disabled={!can('userStory.manage')}
                           />
                         </React.Fragment>
                       )
@@ -754,19 +765,24 @@ const Stories = ({ project, setProject }) => {
                 </React.Fragment>
               )
             })}
-        <Button
-          className="flex items-center justify-center py-1 bg-card hover:bg-muted text-primary rounded-lg transition-colors shadow-md"
-          onClick={() => addNewStory('system')}
-        >
-          <Plus size={18} className="mr-2" />
-          <span>Nova System Story</span>
-        </Button>
-        <GenerateAIButton
-          isGenerating={isGenerating}
-          onClick={generateStories}
-          tooltip={tooltipInfo.aiGeneratedStory}
-          className="w-1/2"
-        />
+        {can('userStory.manage') && (
+          <>
+            <Button
+              className="flex items-center justify-center py-1 bg-card hover:bg-muted text-primary rounded-lg transition-colors shadow-md"
+              disabled={!can('userStory.manage')}
+              onClick={() => addNewStory('system')}
+            >
+              <Plus size={18} className="mr-2" />
+              <span>Nova System Story</span>
+            </Button>
+            <GenerateAIButton
+              isGenerating={isGenerating}
+              onClick={generateStories}
+              tooltip={tooltipInfo.aiGeneratedStory}
+              className="w-1/2"
+            />
+          </>
+        )}
       </div>
     </div>
   )

@@ -1,3 +1,4 @@
+import { usePermissions } from '@/Context/PermissionContext'
 import {
   AlertCircle,
   Users,
@@ -364,6 +365,8 @@ const MainView = ({ project = {}, setProject }) => {
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   //
+  const { can } = usePermissions()
+
   const updateProductCanvas = async (prop, newContent) => {
     const productCanvasId = project.product_canvas.id
     if (!productCanvasId) return
@@ -523,6 +526,7 @@ const MainView = ({ project = {}, setProject }) => {
       {/* Main Dashboard - Responsive Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-2">
         <ExpandableCard
+          editable={can('productCanvas.manage')}
           title="Problems"
           content={project?.product_canvas?.issues}
           variant="destructive"
@@ -531,6 +535,7 @@ const MainView = ({ project = {}, setProject }) => {
           onContentUpdate={(content) => updateProductCanvas('issues', content)}
         />
         <ExpandableCard
+          editable={can('productCanvas.manage')}
           title="Solutions"
           content={project?.product_canvas?.solutions}
           variant="warning"
@@ -541,6 +546,7 @@ const MainView = ({ project = {}, setProject }) => {
           }
         />
         <ExpandableCard
+          editable={can('productCanvas.manage')}
           title="Involved Personas"
           content={project?.product_canvas?.personas}
           variant="accent"
@@ -551,16 +557,18 @@ const MainView = ({ project = {}, setProject }) => {
           }
         />
         <ExpandableCard
+          editable={can('productCanvas.manage')}
           title="Restrictions"
           content={project?.product_canvas?.restrictions}
           variant="success"
-          icon={Slash}
+          icon={X}
           placeholder="What are the project's limitations?"
           onContentUpdate={(content) =>
             updateProductCanvas('restrictions', content)
           }
         />
         <ExpandableCard
+          editable={can('productCanvas.manage')}
           title="Is"
           content={project?.product_canvas?.product_is}
           variant="info"
@@ -571,6 +579,7 @@ const MainView = ({ project = {}, setProject }) => {
           }
         />
         <ExpandableCard
+          editable={can('productCanvas.manage')}
           title="Is Not"
           content={project?.product_canvas?.product_is_not}
           variant="secondary"
@@ -581,12 +590,14 @@ const MainView = ({ project = {}, setProject }) => {
           }
         />
       </div>
-      <GenerateAIButton
-        isGenerating={isGenerating}
-        onClick={generateProductCanvas}
-        // tooltip={tooltipInfo.aiGeneratedStory}
-        className="w-1/2"
-      />
+      {can('productCanvas.manage') && (
+        <GenerateAIButton
+          isGenerating={isGenerating}
+          onClick={generateProductCanvas}
+          // tooltip={tooltipInfo.aiGeneratedStory}
+          className="w-1/2"
+        />
+      )}
     </div>
   )
 }
