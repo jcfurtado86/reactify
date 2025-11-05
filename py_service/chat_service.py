@@ -5,7 +5,7 @@ from flask import Flask, request, Response, jsonify
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain.agents import create_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import tool # Importa o decorador de ferramenta
 
@@ -317,7 +317,7 @@ def chat_stream():
         # 4. Invocar o agente (AGORA BLOQUEANTE)
         # O agente vai rodar, "pensar", e talvez chamar a ferramenta (API do Laravel)
         print("--- Invocando Agente ---")
-        response = agent_executor.invoke(input_data)
+        response = agent.invoke(input_data)
         print("--- Agente Concluído ---")
         
         # A resposta final está em 'output'
