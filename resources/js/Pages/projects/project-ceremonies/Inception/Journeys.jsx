@@ -47,11 +47,18 @@ const SortableJourneyStepItem = (props) => {
     isDragging,
   } = useSortable({ id: props.step.id, disabled: props.disabled })
 
+  const currentCursor = () => {
+    if (props.disabled) return 'pointer'
+    if (isDragging) return 'grabbing'
+    return 'grab'
+  }
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 'auto',
     boxShadow: isDragging ? '0px 10px 20px rgba(0,0,0,0.2)' : 'none',
+    cursor: currentCursor(),
   }
 
   return (
