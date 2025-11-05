@@ -9,6 +9,11 @@ import {
 import { Link, router, usePage, Head } from '@inertiajs/react'
 import MainLayout from '@/Layouts/MainLayout'
 import { toast } from 'sonner'
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from '@tanstack/react-table'
 
 const ProjectCard = ({ project, toggleActiveProject, deleteProject }) => {
   return (
@@ -109,17 +114,26 @@ const Dashboard = ({}) => {
   const [activeFilter, setActiveFilter] = useState('Todos')
   const commandInputRef = useRef(null)
   const [search, setSearch] = useState('')
-  const today = new Date()
+
   const [newProject, setNewProject] = useState({
     title: '',
     description: '',
   })
-  const formattedDate = new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(today)
+
+  const columns = [
+    {
+      accessorKey: 'title',
+      header: 'Title',
+    },
+    {
+      accessorKey: 'description',
+      header: 'Description',
+    },
+    {
+      accessorKey: 'created_at',
+      header: 'Created At',
+    },
+  ]
 
   const [taskFilters, setTaskFilters] = useState([
     { name: 'Todos', active: true },
@@ -127,6 +141,11 @@ const Dashboard = ({}) => {
     { name: 'Inativos', active: false },
   ])
 
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
   const handleFilterChange = (filter) => {
     if (filter) {
       const filters = taskFilters.map((f, i) =>
@@ -373,36 +392,54 @@ const Dashboard = ({}) => {
           ))}
         </div>
 
-        <div className="tasks flex gap-4">
-          {/* Todo Task */}
-          {projects &&
-            filteredProjects.map((project, index) => {
-              let color = null
-              if (!project) return null // Skip if project is undefined or null
-              switch (project.active) {
-                case true:
-                  color = 'bg-green-500'
-                  break
-                case 'Finalizado':
-                  color = 'bg-blue-500'
-                  break
-                case false:
-                  color = 'bg-red-500'
-                  break
-                default:
-                  color = 'bg-gray-800'
-              }
-
-              return (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  toggleActiveProject={toggleActiveProject}
-                  deleteProject={deleteProject}
-                />
-              )
-            })}
-        </div>
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   )
