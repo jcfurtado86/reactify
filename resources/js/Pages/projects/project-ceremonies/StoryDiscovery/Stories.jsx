@@ -169,7 +169,6 @@ const StoryItem = ({
   disabled = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-
   const handleColorSelect = (colorValue, variantTitle) => {
     const selectedColor = PREDEFINED_COLORS.find(
       (color) => color.color === colorValue,
@@ -204,7 +203,7 @@ const StoryItem = ({
             {/* exibe o popover apenas se a story nao for filha*/}
             {story.epic_id === null ? (
               <Popover
-                open={typeSelectId === story.id}
+                open={!disabled && typeSelectId === story.id}
                 onOpenChange={onToggleTypeSelect}
               >
                 <PopoverTrigger className="flex">
