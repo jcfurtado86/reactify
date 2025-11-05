@@ -142,7 +142,7 @@ const Dashboard = ({}) => {
   ])
 
   const table = useReactTable({
-    data,
+    data: currentProjects,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
