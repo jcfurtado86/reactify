@@ -237,7 +237,7 @@ const GoalItem = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Popover
-                open={typeSelectId === goal.id}
+                open={!disabled && typeSelectId === goal.id}
                 onOpenChange={onToggleTypeSelect}
               >
                 <PopoverTrigger disabled={isTemporary}>
@@ -302,7 +302,7 @@ const GoalItem = ({
                 </PopoverContent>
               </Popover>
               <Popover
-                open={prioritySelectId === goal.id}
+                open={!disabled && prioritySelectId === goal.id}
                 onOpenChange={onTogglePrioritySelect}
               >
                 <PopoverTrigger disabled={isTemporary}>
