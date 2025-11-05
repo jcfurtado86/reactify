@@ -1,6 +1,6 @@
 import React from 'react'
-import LeftMenu from '../Components/LeftMenu'
-import { useState, useEffect } from 'react'
+import TopMenu from '@/Components/TopMenu'
+import LeftMenu from '@/Components/LeftMenu'
 import { usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
 import { Link } from '@inertiajs/react'
@@ -29,7 +29,7 @@ const GuestLayout = ({ children }) => {
 
 const AuthenticatedLayout = ({ children }) => {
   const { message, status, flash_key } = usePage().props.flash
-
+  const [isOpen, setIsOpen] = useState(true)
   useEffect(() => {
     if (!message || !status) return
 
@@ -52,10 +52,13 @@ const AuthenticatedLayout = ({ children }) => {
     }
   }, [flash_key])
   return (
-    <div className="flex justify-start min-h-screen bg-background w-min-full">
-      <LeftMenu />
-      <main className="ml-16 flex-1 flex flex-col p-2 bg-background text-foreground items-center ">
-        {children}
+    <div className="flex flex-col justify-start min-h-screen bg-background w-min-full">
+      <TopMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+      <main className="flex-1 grid grid-rows-[1fr] grid-cols-[auto_1fr] bg-background text-foreground items-start ">
+        <LeftMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+        <section className="flex items-center justify-center pt-2">
+          {children}
+        </section>
       </main>
     </div>
   )

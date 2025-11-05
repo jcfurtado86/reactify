@@ -1,4 +1,4 @@
-import MainLayout from '@/Layouts/AuthenticatedLayout'
+import MainLayout from '@/Layouts/MainLayout'
 import { Head } from '@inertiajs/react'
 import DeleteUserForm from './Partials/DeleteUserForm'
 import UpdatePasswordForm from './Partials/UpdatePasswordForm'
@@ -9,7 +9,7 @@ const Edit = ({ mustVerifyEmail, status }) => {
   return (
     <>
       <Head title="Profile" />
-      <div className="py-12">
+      <div className="py-0">
         <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
           <div className="p-4 sm:rounded-lg sm:p-8">
             <UpdateProfileInformationForm
