@@ -81,11 +81,13 @@ agent_prompt = ChatPromptTemplate.from_messages([
 
 # 2. Criar o Agente
 # Este agente é especializado em usar as Funções/Ferramentas do Gemini
-agent = create_tool_calling_agent(llm, tools, agent_prompt)
+agent = create_agent(
+    llm,
+    tools, 
+    #system_prompt=
+    )
 
-# 3. Criar o Executor do Agente
-# O Executor é quem realmente "roda" o agente (loop de pensamento, chamada de ferramenta, etc.)
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True) # verbose=True é ótimo para debug no console
+
 
 # --- Funções de Ajuda (Portadas do PHP) ---
 
