@@ -14,6 +14,7 @@ use App\Http\Controllers\UsageScenarioGeneratorControllerGemini;
 use App\Http\Controllers\SystemInterfaceGeneratorControllerGemini;
 use App\Http\Controllers\ProductCanvasGeneratorControllerGemini;
 use App\Http\Controllers\SystemInterfaceController;
+use App\Http\Controllers\ToolController;
 
 Route::post('/stories/generate', [StoryGeneratorControllerGemini::class, 'generateStories'])->name('story.generate');
 
@@ -34,3 +35,12 @@ Route::post('/usage-scenarios/generate', [UsageScenarioGeneratorControllerGemini
 Route::post('/system-interface/generate', [SystemInterfaceGeneratorControllerGemini::class, 'generate'])->name('system-interface.generate');
 
 Route::post('/product-canvas/generate', [ProductCanvasGeneratorControllerGemini::class, 'generate'])->name('product-canvas.generate');
+
+
+// Endpoints que o serviço Python (Agente) pode chamar. | Protegido pela chave de API interna.
+Route::middleware(['verify_python_key'])
+    ->prefix('tools')
+    ->group(function () {
+        Route::post('/get-artifact-data', [ToolController::class, 'getArtifactData'])
+            ->name('tools.get_artifact_data');
+    });

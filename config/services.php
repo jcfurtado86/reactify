@@ -43,9 +43,12 @@ return [
     'client_id' => env('GOOGLE_CLIENT_ID'),
     'client_secret' => env('GOOGLE_CLIENT_SECRET'),
     'redirect' => 'http://localhost:8000/auth/google/callback',
-],
+  ],
   'python_transcriber' => [
       'url' => env('PYTHON_TRANSCRIBER_URL'),
   ],
-
+  'python_chat_service' => [
+        'url' => env('PYTHON_CHAT_SERVICE_URL', 'http://127.0.0.1:5002/chat-stream'),
+        'api_key' => env('PYTHON_SERVICE_API_KEY'),
+    ],
 ];

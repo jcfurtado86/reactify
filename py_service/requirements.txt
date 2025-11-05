@@ -4,3 +4,6 @@ requests
 python-dotenv
 pdfplumber
 python-docx
+langchain
+langchain-google-genai
+langchain-core

@@ -32,7 +32,7 @@ class ChatController extends Controller
       'page_context.page' => 'required|string',
       'page_context.artifact' => 'required|string',
       'history' => 'present|array',
-      'context_data' => 'present|nullable|array'
+      //'context_data' => 'present|nullable|array'
     ]);
 
     $user = Auth::user();
@@ -42,7 +42,15 @@ class ChatController extends Controller
     }
 
     try {
-      $this->aiAssistantService->generateStreamedResponse($project, $user, $validated['page_context'], $validated['history'], $validated['message'], $validated['context_data']);
+      $this->aiAssistantService->generateStreamedResponse(
+        $project, 
+        $user, 
+        $validated['page_context'], 
+        $validated['history'], 
+        $validated['message'], 
+        //$validated['context_data']
+        null
+      );
     } catch (\Exception $e) {
       return response()->json(['error' => $e->getMessage()], 500);
     }

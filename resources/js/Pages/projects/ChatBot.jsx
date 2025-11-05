@@ -83,7 +83,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
         body: JSON.stringify({
           message: userMessage.message,
           page_context: currentPage,
-          context_data: currentContextData,
+          //context_data: currentContextData,
           history: newMessages.map((m) => ({
             sender: m.sender,
             message: m.message,
