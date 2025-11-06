@@ -166,9 +166,9 @@ const Dashboard = ({ project, setProject }) => {
             {project.title}
             <Badge
               className="ml-2"
-              variant={`${project.status === 'active' ? 'secondary' : 'destructive'}`}
+              variant={`${project.active ? 'secondary' : 'destructive'}`}
             >
-              {project.status.toUpperCase()}
+              {project.active ? 'Active' : 'Inactive'}
             </Badge>
           </span>
           Progresso da Conclusão

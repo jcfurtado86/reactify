@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e869a86445fa7cd35beee5d9a24d3875",
+    "content-hash": "e4578a66580f93494a8d8c77832618ec",
     "packages": [
         {
             "name": "brick/math",
@@ -9273,16 +9273,16 @@
         },
         {
             "name": "laradumps/laradumps",
-            "version": "v4.5.2",
+            "version": "v4.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laradumps/laradumps.git",
-                "reference": "12c5862f4cb767e78b0e80a7795c6666b4a86334"
+                "reference": "19aaece19e1a0efb94ef0a4a9d7224e7b7287c7a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laradumps/laradumps/zipball/12c5862f4cb767e78b0e80a7795c6666b4a86334",
-                "reference": "12c5862f4cb767e78b0e80a7795c6666b4a86334",
+                "url": "https://api.github.com/repos/laradumps/laradumps/zipball/19aaece19e1a0efb94ef0a4a9d7224e7b7287c7a",
+                "reference": "19aaece19e1a0efb94ef0a4a9d7224e7b7287c7a",
                 "shasum": ""
             },
             "require": {
@@ -9333,7 +9333,7 @@
             "homepage": "https://github.com/laradumps/laradumps",
             "support": {
                 "issues": "https://github.com/laradumps/laradumps/issues",
-                "source": "https://github.com/laradumps/laradumps/tree/v4.5.2"
+                "source": "https://github.com/laradumps/laradumps/tree/v4.5.3"
             },
             "funding": [
                 {
@@ -9341,20 +9341,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-11T09:10:01+00:00"
+            "time": "2025-10-20T11:12:08+00:00"
         },
         {
             "name": "laradumps/laradumps-core",
-            "version": "v3.2.6",
+            "version": "v3.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laradumps/laradumps-core.git",
-                "reference": "b5df14006570d16409f271db938a850f67ac78d7"
+                "reference": "37b450134e1e29f6381c5957c23c0d53b322b9a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laradumps/laradumps-core/zipball/b5df14006570d16409f271db938a850f67ac78d7",
-                "reference": "b5df14006570d16409f271db938a850f67ac78d7",
+                "url": "https://api.github.com/repos/laradumps/laradumps-core/zipball/37b450134e1e29f6381c5957c23c0d53b322b9a6",
+                "reference": "37b450134e1e29f6381c5957c23c0d53b322b9a6",
                 "shasum": ""
             },
             "require": {
@@ -9402,7 +9402,7 @@
             "homepage": "https://github.com/laradumps/laradumps-core",
             "support": {
                 "issues": "https://github.com/laradumps/laradumps-core/issues",
-                "source": "https://github.com/laradumps/laradumps-core/tree/v3.2.6"
+                "source": "https://github.com/laradumps/laradumps-core/tree/v3.2.7"
             },
             "funding": [
                 {
@@ -9410,7 +9410,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-08-25T22:45:46+00:00"
+            "time": "2025-10-20T21:02:07+00:00"
         },
         {
             "name": "laravel/breeze",

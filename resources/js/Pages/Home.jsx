@@ -1,6 +1,13 @@
 import { useEcho } from '@laravel/echo-react'
-import { MoreHorizontal, ArrowUpDown, Check } from 'lucide-react'
-import { Link, router, usePage, Head } from '@inertiajs/react'
+import {
+  MoreHorizontal,
+  ArrowUpDown,
+  CircleCheck,
+  CircleOff,
+  PowerCircle,
+  Trash2,
+} from 'lucide-react'
+import { router, usePage, Head } from '@inertiajs/react'
 import MainLayout from '@/Layouts/MainLayout'
 import { toast } from 'sonner'
 import {
@@ -57,6 +64,14 @@ const Dashboard = ({}) => {
     {
       accessorKey: 'title',
       header: 'Title',
+      cell: ({ row }) => (
+        <Button
+          variant="empty"
+          onClick={() => router.get(route('project.show', row.getValue('id')))}
+        >
+          {row.getValue('title')}
+        </Button>
+      ),
     },
     {
       accessorKey: 'description',
@@ -72,7 +87,14 @@ const Dashboard = ({}) => {
       header: 'Status',
       cell: ({ row }) => (
         <div className="flex items-center !line-clamp-3">
-          {row.getValue('active') ? <Check /> : 'Inactive'}
+          <Button
+            size="icon"
+            variant="empty"
+            className={`rounded-full ${row.getValue('active') ? 'text-green-400' : 'text-red-500'}`}
+            title={row.getValue('active') ? 'Active' : 'Inactive'}
+          >
+            {row.getValue('active') ? <CircleCheck /> : <CircleOff />}
+          </Button>
         </div>
       ),
     },
@@ -93,7 +115,6 @@ const Dashboard = ({}) => {
       id: 'actions',
       enableHiding: false,
       cell: ({ row }) => {
-        const payment = row.original
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -108,12 +129,14 @@ const Dashboard = ({}) => {
                 onClick={() => toggleActive(row.getValue('id'))}
               >
                 Toggle active
+                <PowerCircle />
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 onClick={() => deleteProject(row.getValue('id'))}
               >
-                Delete Project
+                Delete
+                <Trash2 />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -149,13 +172,14 @@ const Dashboard = ({}) => {
 
     router.delete(route('project.destroy', projectId))
   }
-
+  //
   const getUpdatedProjects = async (idList) => {
     try {
       const response = await fetch(route('projects.updated', { ids: idList }), {
         method: 'GET',
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json',
         },
       })
 
@@ -174,10 +198,10 @@ const Dashboard = ({}) => {
           )
         })
       }
+      toast.success('Projetos atualizados com sucesso!')
     } catch (error) {
       toast.error('Erro ao obter projetos atualizados: ' + error.message)
-    } finally {
-      console.log('Projetos atualizados com sucesso!')
+      console.error(error)
     }
   }
 
@@ -211,132 +235,128 @@ const Dashboard = ({}) => {
     <div className="bg-background text-white p-6 flex-1 mx-auto w-full">
       <Head title="Home" />
       {/* Header */}
-      <div className="flex items-start gap-2">
-        <div className=" flex flex-col ">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="default"
-                className="flex relative items-center justify-center rounded-full shadow-md transition-colors hover:bg-accent bg-card text-foreground"
-              >
-                <ShineBorder
-                  borderWidth={2}
-                  shineColor={[
-                    'oklch(0.5497 0.2143 285.2157)',
-                    'oklch(0.6861 0.2061 14.9941)',
-                  ]}
-                />
-                Novo Projeto
-              </Button>
-            </DialogTrigger>
+      <div className="flex items-start justify-between gap-2">
+        <p className="font-semibold text-lg mb-4 text-foreground">Projects</p>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="default"
+              className="flex relative items-center justify-center rounded-full shadow-md transition-colors hover:bg-accent bg-card text-foreground"
+            >
+              <ShineBorder
+                borderWidth={2}
+                shineColor={[
+                  'oklch(0.5497 0.2143 285.2157)',
+                  'oklch(0.6861 0.2061 14.9941)',
+                ]}
+              />
+              Novo Projeto
+            </Button>
+          </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[425px]">
-              <form className="space-y-4" onSubmit={createProject}>
-                <DialogHeader>
-                  <DialogTitle>Criar Novo Projeto</DialogTitle>
-                  <DialogDescription>
-                    Preencha os campos abaixo para criar um novo projeto.
-                  </DialogDescription>
-                </DialogHeader>
+          <DialogContent className="sm:max-w-[425px]">
+            <form className="space-y-4" onSubmit={createProject}>
+              <DialogHeader>
+                <DialogTitle>Criar Novo Projeto</DialogTitle>
+                <DialogDescription>
+                  Preencha os campos abaixo para criar um novo projeto.
+                </DialogDescription>
+              </DialogHeader>
 
-                <div className="grid gap-4">
-                  <div className="grid gap-3">
-                    <Label htmlFor="title-1">Nome</Label>
-                    <Input
-                      placeholder="Nome do Projeto"
-                      id="title-1"
-                      name="title"
-                      value={newProject.title}
-                      onChange={(e) =>
-                        setNewProject({ ...newProject, title: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-3">
-                    <Label htmlFor="description">Descrição</Label>
-                    <Input
-                      placeholder="Descrição do Projeto"
-                      id="description-1"
-                      name="description"
-                      className="bg-background "
-                      value={newProject.description}
-                      onChange={(e) =>
-                        setNewProject({
-                          ...newProject,
-                          description: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+              <div className="grid gap-4">
+                <div className="grid gap-3">
+                  <Label htmlFor="title-1">Nome</Label>
+                  <Input
+                    placeholder="Nome do Projeto"
+                    id="title-1"
+                    name="title"
+                    value={newProject.title}
+                    onChange={(e) =>
+                      setNewProject({ ...newProject, title: e.target.value })
+                    }
+                  />
                 </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline">
-                      Cancelar
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit">Criar Projeto</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="description">Descrição</Label>
+                  <Input
+                    placeholder="Descrição do Projeto"
+                    id="description-1"
+                    name="description"
+                    className="bg-background "
+                    value={newProject.description}
+                    onChange={(e) =>
+                      setNewProject({
+                        ...newProject,
+                        description: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">
+                    Cancelar
+                  </Button>
+                </DialogClose>
+                <Button type="submit">Criar Projeto</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Task Overview */}
-      <div className="my-8">
-        <p className="font-semibold text-lg mb-4 text-foreground">Projects</p>
 
-        <div className="overflow-hidden rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead className="whitespace-nowrap" key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
-                    )
-                  })}
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead className="whitespace-nowrap" key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   )
