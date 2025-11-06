@@ -84,7 +84,14 @@ class HandleInertiaRequests extends Middleware
                 $query->select(['user_id', 'name', 'email', 'provider_avatar']);
               },
             ])
-            ->select(['title', 'projects.id', 'description', 'active'])
+            ->select([
+              'title',
+              'projects.id',
+              'description',
+              'active',
+              'projects.created_at',
+              'projects.updated_at',
+            ])
             ->get()
           : null,
       ],

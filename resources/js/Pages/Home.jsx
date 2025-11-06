@@ -1,111 +1,16 @@
 import { useEcho } from '@laravel/echo-react'
-import {
-  CheckCircle,
-  CornerDownLeft,
-  Power,
-  Trash2,
-  EllipsisVertical,
-} from 'lucide-react'
+import { MoreHorizontal, ArrowUpDown, Check } from 'lucide-react'
 import { Link, router, usePage, Head } from '@inertiajs/react'
 import MainLayout from '@/Layouts/MainLayout'
 import { toast } from 'sonner'
 import {
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-
-const ProjectCard = ({ project, toggleActiveProject, deleteProject }) => {
-  return (
-    <AlertDialog>
-      <Card className="flex flex-col rounded justify-between h-52 w-64 hover:shadow-md">
-        {/* CABEÇALHO: Título do projeto e menu de ações */}
-
-        <CardHeader className="flex-row items-center justify-between w-full">
-          <CardTitle className="text-md">
-            <Link
-              href={route('project.show', project.id)}
-              className="flex hover:underline max-w-48 "
-            >
-              <p className="truncate w-full"> {project.title}</p>
-            </Link>
-          </CardTitle>
-
-          {/* MENU DE AÇÕES */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <EllipsisVertical className="size-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onSelect={() => toggleActiveProject(project.id)}
-              >
-                <Power
-                  className={`mr-2 size-4 ${project.active ? 'text-success' : 'text-destructive'}`}
-                />
-                <span>{project.active ? 'Desativar' : 'Ativar'}</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-                  <Trash2 className="mr-2 size-4" />
-                  <span>Excluir</span>
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </CardHeader>
-
-        {/* CONTEÚDO: Descrição e contagem de membros */}
-        <CardContent className="flex-1 overflow-hidden">
-          <Link href={route('project.show', project.id)}>
-            <CardDescription className="line-clamp-3">
-              {' '}
-              {/* Limita o texto a 3 linhas */}
-              {project.description}
-            </CardDescription>
-          </Link>
-        </CardContent>
-
-        {/* RODAPÉ: Status e badge de Ativo/Inativo */}
-        <CardFooter>
-          <AvatarCircles
-            numPeople={project?.users.length}
-            avatarUrls={project?.users.map(
-              (user) =>
-                ({
-                  imageUrl: user.provider_avatar,
-                  profileUrl: '',
-                }) || {},
-            )}
-          />
-        </CardFooter>
-      </Card>
-
-      {/* CONTEÚDO DO DIÁLOGO DE CONFIRMAÇÃO */}
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Excluir "{project.title}"?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta ação não pode ser desfeita. Isso excluirá permanentemente o
-            projeto e todos os seus dados associados.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => deleteProject(project.id)}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            Excluir
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
 
 const Dashboard = ({}) => {
   const props = usePage().props
@@ -113,8 +18,9 @@ const Dashboard = ({}) => {
   const [currentProjects, setCurrentProjects] = useState(projects)
   const [activeFilter, setActiveFilter] = useState('Todos')
   const commandInputRef = useRef(null)
-  const [search, setSearch] = useState('')
-
+  const [sorting, setSorting] = useState([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnFilters, setColumnFilters] = useState([])
   const [newProject, setNewProject] = useState({
     title: '',
     description: '',
@@ -122,81 +28,124 @@ const Dashboard = ({}) => {
 
   const columns = [
     {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'id',
+      header: null,
+      cell: ({ row }) => null,
+    },
+    {
       accessorKey: 'title',
       header: 'Title',
     },
     {
       accessorKey: 'description',
       header: 'Description',
+      cell: ({ row }) => (
+        <div className="flex items-center !line-clamp-3">
+          {row.getValue('description')}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'active',
+      header: 'Status',
+      cell: ({ row }) => (
+        <div className="flex items-center !line-clamp-3">
+          {row.getValue('active') ? <Check /> : 'Inactive'}
+        </div>
+      ),
     },
     {
       accessorKey: 'created_at',
-      header: 'Created At',
+      header: 'Created',
+      cell: ({ row }) => (
+        <div className="flex items-center whitespace-nowrap">
+          {new Date(row.getValue('created_at')).toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </div>
+      ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const payment = row.original
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => toggleActive(row.getValue('id'))}
+              >
+                Toggle active
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => deleteProject(row.getValue('id'))}
+              >
+                Delete Project
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
     },
   ]
 
-  const [taskFilters, setTaskFilters] = useState([
-    { name: 'Todos', active: true },
-    { name: 'Ativos', active: false },
-    { name: 'Inativos', active: false },
-  ])
-
   const table = useReactTable({
-    data: currentProjects,
+    data: projects,
     columns,
+    getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+      columnFilters,
+      sorting,
+    },
   })
-  const handleFilterChange = (filter) => {
-    if (filter) {
-      const filters = taskFilters.map((f, i) =>
-        f.name === filter.name
-          ? { ...f, active: true }
-          : { ...f, active: false },
-      )
-      setTaskFilters(filters)
-    }
-    const updatedUiFilters = taskFilters.map((f) =>
-      f.name === filter.name ? { ...f, active: true } : { ...f, active: false },
-    )
-    setTaskFilters(updatedUiFilters)
-
-    // Apenas atualiza o nome do filtro ativo no estado
-    setActiveFilter(filter.name)
-  }
-
-  const filteredProjects = useMemo(() => {
-    if (!currentProjects) return []
-
-    switch (activeFilter) {
-      case 'Ativos':
-        return currentProjects.filter((p) => p.active)
-      case 'Inativos':
-        return currentProjects.filter((p) => !p.active)
-      case 'Finalizados':
-        return []
-      case 'Todos':
-      default:
-        return currentProjects
-    }
-  }, [currentProjects, activeFilter])
 
   const createProject = (e) => {
     e.preventDefault()
     router.post(route('project.store'), newProject)
   }
-  const toggleActiveProject = (projectId) => {
-    const updatedProjects = currentProjects.map((p) =>
-      p.id === projectId ? { ...p, active: !p.active } : p,
-    )
-    setCurrentProjects(updatedProjects)
-
+  const toggleActive = (projectId) => {
+    if (!projectId) return
     router.patch(route('project.toggle-active', projectId))
   }
 
   const deleteProject = (projectId) => {
-    const updatedProjects = currentProjects.filter((p) => p.id !== projectId)
-
-    setCurrentProjects(updatedProjects)
+    if (!projectId) return
 
     router.delete(route('project.destroy', projectId))
   }
@@ -332,114 +281,62 @@ const Dashboard = ({}) => {
             </DialogContent>
           </Dialog>
         </div>
-        {/* command */}
-
-        {/* <div className="relative flex flex-col justify-end">*/}
-        <Command className=" relative w-full md:min-w-[250px] max-w-prose  lg:max-w-screen-lg">
-          <CommandInput
-            shortcut
-            ref={commandInputRef}
-            value={search}
-            onValueChange={setSearch}
-            placeholder="Buscar Projetos..."
-            className="border-none focus:outline-none focus:ring-0"
-          />
-          <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden ">
-            <CommandEmpty className="py-6 text-center text-sm text-zinc-500">
-              Nenhum projeto encontrado.
-            </CommandEmpty>
-            <CommandGroup className={search.length > 0 ? '' : 'hidden'}>
-              {filteredProjects?.map(
-                (project) =>
-                  project && (
-                    <CommandItem
-                      key={project.id}
-                      value={project.title}
-                      onSelect={() => {
-                        router.visit(route('project.show', project.id))
-                      }}
-                    >
-                      <CheckCircle className="mr-3 size-4 text-foreground" />
-                      <span className="truncate w-full">{project.title}</span>
-                      <CornerDownLeft className="mr-3 size-4 text-zinc-500" />
-                    </CommandItem>
-                  ),
-              )}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-        {/* </div>*/}
       </div>
 
       {/* Task Overview */}
       <div className="my-8">
         <p className="font-semibold text-lg mb-4 text-foreground">Projects</p>
 
-        <div className="flex space-x-2 mb-6">
-          {taskFilters.map((filter, index) => (
-            <Button
-              variant="ghost"
-              onClick={() => handleFilterChange(filter)}
-              className={`px-4 py-1 hover:bg-secondary/50 rounded transition-colors duration-200 ${
-                filter.active
-                  ? 'bg-secondary text-foreground'
-                  : 'text-muted-foreground'
-              }`}
-              key={index}
-            >
-              {filter.name}
-            </Button>
-          ))}
-        </div>
-
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+        <div className="overflow-hidden rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead className="whitespace-nowrap" key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   )
