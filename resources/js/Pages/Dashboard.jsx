@@ -238,7 +238,7 @@ const Dashboard = ({ project, setProject }) => {
         </Popover>*/}
       {/* Progress Indicators */}
 
-      <div className="grid grid-cols-2 xl:row-start-1 xl:col-start-3 gap-2 items-center justify-center bg-card p-4 rounded-lg">
+      <div className="grid grid-cols-1  xl:row-start-1 xl:col-start-3 gap-2 items-center justify-center bg-card p-4 rounded-lg">
         <ProgressIcon
           value={project?.stories?.length || 0}
           max={20}

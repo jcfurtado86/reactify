@@ -32,7 +32,7 @@ const Dashboard = ({}) => {
     title: '',
     description: '',
   })
-
+  console.log(projects)
   const columns = [
     {
       id: 'select',
@@ -79,6 +79,24 @@ const Dashboard = ({}) => {
       cell: ({ row }) => (
         <div className="flex items-center !line-clamp-3">
           {row.getValue('description')}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'users',
+      header: 'Members',
+      cell: ({ row }) => (
+        <div className="w-32">
+          <AvatarCircles
+            numPeople={row.getValue('users').length}
+            avatarUrls={row.getValue('users').map(
+              (user) =>
+                ({
+                  imageUrl: user.provider_avatar,
+                  profileUrl: '',
+                }) || {},
+            )}
+          />
         </div>
       ),
     },
