@@ -3,6 +3,7 @@ import json
 import requests # Adicionado para chamar a API do Laravel
 from flask import Flask, request, Response, jsonify
 from dotenv import load_dotenv
+import langchain
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain.agents import create_agent
@@ -20,7 +21,7 @@ if not os.getenv("GOOGLE_API_KEY"):
 
 model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash") 
 llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.7)
-
+langchain.debug = True
 # --- Configuração das Ferramentas (Tools) ---
 
 # URL da API de Ferramentas do Laravel
@@ -70,23 +71,13 @@ tools = [get_data_for_artifact]
 
 # --- Configuração do Agente (Agent) ---
 
-# 1. O Prompt do Agente
-# O LangChain usará este template para formatar as entradas para o LLM
-agent_prompt = ChatPromptTemplate.from_messages([
-    ("system", "{system_prompt}"), # Nosso prompt de sistema (definido abaixo)
-    MessagesPlaceholder(variable_name="chat_history"), # O histórico de chat
-    ("human", "{input}"), # A mensagem atual do usuário
-    MessagesPlaceholder(variable_name="agent_scratchpad"), # Onde o agente "pensa" (logs, etc.)
-])
-
 # 2. Criar o Agente
 # Este agente é especializado em usar as Funções/Ferramentas do Gemini
 agent = create_agent(
     llm,
     tools, 
-    #system_prompt=
+    system_prompt="You are a helpful assistant. Be concise and accurate."
     )
-
 
 
 # --- Funções de Ajuda (Portadas do PHP) ---
@@ -290,40 +281,42 @@ def chat_stream():
     
     try:
         request_data = request.json
-        
+        app.logger.info("\n------------ REQUEST DATA --------------\n%s\n", request_data)
+
         # 1. Construir o prompt de sistema
         system_prompt = build_system_prompt(request_data)
-        
+        #app.logger.info("\n------------ SYSTEM PROMPT --------------\n%s\n", system_prompt)
         # 2. Construir o histórico de chat
         # O histórico completo (incluindo a última mensagem) é enviado pelo Laravel
         chat_history_raw = request_data.get('history', [])
         
         # Separa o histórico passado da mensagem atual
-        chat_history_messages = build_chat_history(chat_history_raw)
+        # chat_history_messages = build_chat_history(chat_history_raw)
         
         # Pega a última mensagem (o input do usuário)
         user_input = ""
         if chat_history_raw:
             user_input = chat_history_raw[-1].get('message', '')
 
-        if not user_input:
+        if not user_input or user_input.strip() == "":
+            app.logger.warning("Mensagem do usuário vazia ou só com espaços")
             return jsonify({"error": "Mensagem do usuário vazia"}), 400
+        
+        #app.logger.info("\n------------ INPUT --------------\n%s\n", user_input)
 
         # 3. Montar o input para o agente
-        input_data = {
-            "system_prompt": system_prompt,
-            "chat_history": chat_history_messages,
-            "input": user_input,
-        }
 
         # 4. Invocar o agente (AGORA BLOQUEANTE)
         # O agente vai rodar, "pensar", e talvez chamar a ferramenta (API do Laravel)
         print("--- Invocando Agente ---")
-        response = agent.invoke(input_data)
+        response = agent.invoke({"messages": [{"role": "user", "content": user_input}, 
+                                              {"role": "system", "content": system_prompt}
+                                              ]})
         print("--- Agente Concluído ---")
         
         # A resposta final está em 'output'
-        final_answer = response.get("output", "Desculpe, não consegui processar sua solicitação.")
+        app.logger.info("\n------------ RESPONSE --------------\n%s\n", response['messages'][-1].content[0]['text'])
+        final_answer = response['messages'][-1].content[0]['text']
 
         # 5. Fazer o stream da resposta final
         # O frontend (ChatBot.jsx) tem um efeito de "digitação" (setInterval).
