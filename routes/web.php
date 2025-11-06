@@ -102,6 +102,17 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
   });
   //rotas para projetos
   Route::prefix('project')->group(function () {
+    //rotas ṕara uso de websocket
+    Route::get('/getUpdatedProjects/', [
+      ProjectController::class,
+      'getUpdatedProjects',
+    ])->name('projects.updated');
+
+    Route::get('/{project}/getUpdated', [
+      ProjectController::class,
+      'getUpdatedProject',
+    ])->name('project.updated');
+
     // Route for saving the state of the Prioritization Matrix for a project
     Route::post('/create', [ProjectController::class, 'store'])->name(
       'project.store'
@@ -140,11 +151,6 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
       ProjectPermissionController::class,
       'removeMember',
     ])->name('project.permissions.removeMember');
-    //rotas ṕara uso de websocket
-    Route::get('/{project}/getUpdated', [
-      ProjectController::class,
-      'getUpdatedProject',
-    ])->name('project.updated');
   });
   //envia convite de projeto
   Route::post('/projects/{project}/invitations', [
