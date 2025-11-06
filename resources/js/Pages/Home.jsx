@@ -1,7 +1,6 @@
 import { useEcho } from '@laravel/echo-react'
 import {
   MoreHorizontal,
-  ArrowUpDown,
   CircleCheck,
   CircleOff,
   PowerCircle,
@@ -23,7 +22,6 @@ const Dashboard = ({}) => {
   const props = usePage().props
   const projects = props.auth.projects || []
   const [currentProjects, setCurrentProjects] = useState(projects)
-  const [activeFilter, setActiveFilter] = useState('Todos')
   const commandInputRef = useRef(null)
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
@@ -32,7 +30,7 @@ const Dashboard = ({}) => {
     title: '',
     description: '',
   })
-  console.log(projects)
+
   const columns = [
     {
       id: 'select',

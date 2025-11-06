@@ -2,12 +2,24 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight } from 'lucide-react'
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table'
 
 const ProductBacklog = ({ project, setProject }) => {
   const [localProject, setLocalProject] = useState(project)
   const [selectedStories, setSelectedStories] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  //
+  const [sorting, setSorting] = useState([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnFilters, setColumnFilters] = useState([])
 
   const handleNavigateToMatrix = () => {
     localStorage.setItem('activeStoryDiscoveryMenu', 'Matriz de Priorização')
@@ -139,11 +151,52 @@ const ProductBacklog = ({ project, setProject }) => {
     delivered: deliveredStories,
   }
 
-  const columnTitles = {
-    productBacklog: 'Product Backlog',
-    sprintBacklog: 'Sprint Backlog',
-    delivered: 'Delivered',
-  }
+  console.log(board)
+  const storyVariants = project?.system_colors?.stories || {}
+
+  const columns = [
+    {
+      accessorKey: 'id',
+      header: 'ID',
+      cell: ({ row }) => {
+        const story = row.original
+        const selectedVariant = storyVariants[story.type] || '#f97316'
+        console.log(story)
+        return (
+          <div className="flex items-center ">
+            <Badge
+              style={{ backgroundColor: selectedVariant }}
+              variant="outline"
+              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer mb-2`}
+            >
+              {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
+            </Badge>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: 'title',
+      header: 'Title',
+      cell: ({ row }) => (
+        <div className="flex items-center !line-clamp-3">
+          {row.getValue('title')}
+        </div>
+      ),
+    },
+  ]
+  const table = useReactTable({
+    data: board.productBacklog,
+    columns,
+    getSortedRowModel: getSortedRowModel(),
+    getCoreRowModel: getCoreRowModel(),
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+      columnFilters,
+      sorting,
+    },
+  })
 
   if (error) {
     return (
@@ -156,140 +209,60 @@ const ProductBacklog = ({ project, setProject }) => {
       </div>
     )
   }
-  const storyVariants = project?.system_colors?.stories || {}
 
   return (
-    <div className="flex space-x-4 p-4 min-h-[500px]">
-      {Object.keys(board).map((columnId) => (
-        <Card key={columnId} className="w-1/3 flex flex-col">
-          <CardHeader>
-            <CardTitle className="text-lg">{columnTitles[columnId]}</CardTitle>
-
-            {columnId === 'productBacklog' && (
-              <div className="pt-1 flex flex-col gap-2">
-                <p className="text-sm text-muted-foreground">
-                  Exibe stories priorizadas na Matriz de Priorização. Ainda não
-                  estão em uma Sprint.
-                </p>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-fit" // 'w-fit' para o botão não ocupar a largura toda
-                  onClick={handleNavigateToMatrix}
+    <div className="flex flex-col p-4 min-h-[500px]">
+      Product Backlog
+      <div className="overflow-hidden rounded-md border ">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead className="whitespace-nowrap" key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
                 >
-                  Ir para Matriz de Priorização
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-
-                <p className="text-sm text-muted-foreground">
-                  Selecione as Stories para Sprint
-                </p>
-              </div>
-            )}
-
-            {columnId === 'sprintBacklog' && (
-              <p className="text-sm text-muted-foreground pt-1">
-                Stories em Sprints atuais (ativas ou em planejamento) aparecerâo
-                aqui.
-              </p>
-            )}
-
-            {columnId === 'delivered' && (
-              <p className="text-sm text-muted-foreground pt-1">
-                Stories concluídas (status 'Done') dentro das Sprints atuais
-                (ativas ou em planejamento).
-              </p>
-            )}
-
-            {/* Action buttons for Product Backlog */}
-            {columnId === 'productBacklog' && selectedStories.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  {selectedStories.length} stories selected
-                </p>
-                {localProject.sprints
-                  ?.filter((s) => s.status === 'planning')
-                  .map((sprint) => (
-                    <Button
-                      key={sprint.id}
-                      onClick={() => moveToSprint(sprint.id)}
-                      variant="default"
-                      size="sm"
-                      disabled={isLoading}
-                      className="w-full"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Moving...
-                        </>
-                      ) : (
-                        `Move to ${sprint.name}`
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
                       )}
-                    </Button>
+                    </TableCell>
                   ))}
-              </div>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
             )}
-          </CardHeader>
-
-          <CardContent className="flex-1">
-            <div className="space-y-3">
-              {board[columnId].length > 0 ? (
-                board[columnId].map((card) => (
-                  <Card
-                    key={card.id}
-                    className={`
-                      cursor-pointer transition-all duration-200
-
-                      ${columnId === 'productBacklog' && selectedStories.includes(card.id) ? 'ring-2 ring-primary' : ''}
-                      hover:shadow-md
-                    `}
-                    onClick={() =>
-                      columnId === 'productBacklog' &&
-                      handleStorySelection(card.id)
-                    }
-                  >
-                    <CardContent className="p-3">
-                      <Badge
-                        style={{ backgroundColor: storyVariants[card.type] }}
-                        variant="outline"
-                        className="border-transparent text-primary-foreground font-bold cursor-pointer"
-                      >{`US${card.id}`}</Badge>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {card.title}
-                      </p>
-
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {card.sprint_name && (
-                          <Badge variant="secondary" className="text-xs">
-                            {card.sprint_name}
-                          </Badge>
-                        )}
-                        {/* {card.status === 'prioritized' && (
-                          <Badge variant="default" className="text-xs">
-                            Prioritized
-                          </Badge>
-                        )}*/}
-                      </div>
-
-                      {card.value && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Value: {card.value}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground text-center pt-8">
-                  Sem stories nessa coluna.
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }

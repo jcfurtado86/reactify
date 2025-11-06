@@ -453,7 +453,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
               }),
             )
           }
-          className="w-full"
+          className="w-full font-normal text-left"
         >
           <div className="flex justify-between items-center w-full gap-2">
             <Button
