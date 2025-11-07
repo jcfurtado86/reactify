@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight } from 'lucide-react'
+import { Loader2, ArrowRight, EllipsisVertical } from 'lucide-react'
 import {
   flexRender,
   getCoreRowModel,
@@ -10,6 +10,150 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import TableComponent from '@/Components/TableComponent'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
+
+const selectItems = (itemList, rowSelection, setItems) => {
+  const currentItems = []
+  itemList.forEach((item, index) => {
+    if (rowSelection[index]) currentItems.push(item.id)
+  })
+  setItems(currentItems)
+}
+
+const SprintTable = ({ sprint, moveToSprint, storyVariants, project }) => {
+  const [sorting, setSorting] = useState([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnFilters, setColumnFilters] = useState([])
+  const [selectedStories, setSelectedStories] = useState([])
+
+  useEffect(() => {
+    selectItems(sprint.stories, rowSelection, setSelectedStories)
+  }, [rowSelection])
+  const columns = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'id',
+      header: 'ID',
+      cell: ({ row }) => {
+        const story = row.original
+        const selectedVariant = storyVariants[story.type] || '#f97316'
+
+        return (
+          <div className="flex items-center ">
+            <Badge
+              style={{ backgroundColor: selectedVariant }}
+              variant="outline"
+              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
+            >
+              {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
+            </Badge>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: 'title',
+      header: 'Title',
+      cell: ({ row }) => (
+        <div className="flex items-center !line-clamp-3">
+          {row.getValue('title')}
+        </div>
+      ),
+    },
+    { accessorKey: 'type', header: 'Type' },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" title={'Options'}>
+                <EllipsisVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              <DropdownMenuItem>Options</DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {project.sprints.map((sprint) => (
+                      <DropdownMenuItem
+                        key={sprint.id}
+                        onClick={() =>
+                          moveToSprint(
+                            sprint.id,
+                            selectedStories,
+                            setSelectedStories,
+                          )
+                        }
+                      >
+                        {sprint.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
+  const table = useReactTable({
+    data: sprint.stories || [],
+    columns,
+    getSortedRowModel: getSortedRowModel(),
+    getCoreRowModel: getCoreRowModel(),
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+      columnFilters,
+      sorting,
+    },
+  })
+
+  return (
+    <AccordionItem
+      key={sprint.id}
+      value={sprint.name}
+      className=" px-4 border border-accent"
+    >
+      <AccordionTrigger>
+        <div>
+          {sprint.name} - {table.getRowCount()} items
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        <div className="overflow-hidden rounded-md border ">
+          <TableComponent table={table} />
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  )
+}
 
 const ProductBacklog = ({ project, setProject }) => {
   const [localProject, setLocalProject] = useState(project)
@@ -20,6 +164,62 @@ const ProductBacklog = ({ project, setProject }) => {
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState([])
+
+  const moveToSprint = async (
+    sprintId,
+    selectedStories,
+    setSelectedStories,
+  ) => {
+    console.log(selectedStories)
+    if (selectedStories.length === 0) return
+
+    setIsLoading(true)
+
+    setLocalProject((prevProject) => {
+      const updatedProject = { ...prevProject }
+      const targetSprint = updatedProject.sprints.find((s) => s.id === sprintId)
+
+      if (targetSprint) {
+        // Adicionar stories selecionadas ao sprint
+        const storiesToMove = updatedProject.stories.filter((s) =>
+          selectedStories.includes(s.id),
+        )
+        targetSprint.stories = [
+          ...(targetSprint.stories || []),
+          ...storiesToMove,
+        ]
+      }
+
+      return updatedProject
+    })
+
+    router.post(
+      route('sprint-stories.store', sprintId),
+      {
+        story_ids: selectedStories,
+      },
+      {
+        onSuccess: (page) => {
+          setSelectedStories([])
+          setIsLoading(false)
+          toast.success('Stories moved to sprint successfully!')
+
+          if (page.props.project) {
+            setProject(page.props.project)
+            setLocalProject(page.props.project)
+          }
+        },
+        onError: (errors) => {
+          setIsLoading(false)
+          setError('Failed to move stories to sprint')
+          toast.error('Failed to move stories to sprint')
+          console.error('Error:', errors)
+
+          setLocalProject(project)
+        },
+      },
+    )
+  }
 
   const handleNavigateToMatrix = () => {
     localStorage.setItem('activeStoryDiscoveryMenu', 'Matriz de Priorização')
@@ -86,88 +286,50 @@ const ProductBacklog = ({ project, setProject }) => {
       }
     }, [localProject])
 
-  const handleStorySelection = (storyId) => {
-    setSelectedStories((prev) =>
-      prev.includes(storyId)
-        ? prev.filter((id) => id !== storyId)
-        : [...prev, storyId],
-    )
-  }
-
-  const moveToSprint = async (sprintId) => {
-    if (selectedStories.length === 0) return
-
-    setIsLoading(true)
-
-    setLocalProject((prevProject) => {
-      const updatedProject = { ...prevProject }
-      const targetSprint = updatedProject.sprints.find((s) => s.id === sprintId)
-
-      if (targetSprint) {
-        // Adicionar stories selecionadas ao sprint
-        const storiesToMove = updatedProject.stories.filter((s) =>
-          selectedStories.includes(s.id),
-        )
-        targetSprint.stories = [
-          ...(targetSprint.stories || []),
-          ...storiesToMove,
-        ]
-      }
-
-      return updatedProject
-    })
-
-    router.post(
-      route('sprint-stories.store', sprintId),
-      {
-        story_ids: selectedStories,
-      },
-      {
-        onSuccess: (page) => {
-          setSelectedStories([])
-          setIsLoading(false)
-          toast.success('Stories moved to sprint successfully!')
-
-          if (page.props.project) {
-            setProject(page.props.project)
-            setLocalProject(page.props.project)
-          }
-        },
-        onError: (errors) => {
-          setIsLoading(false)
-          setError('Failed to move stories to sprint')
-          toast.error('Failed to move stories to sprint')
-          console.error('Error:', errors)
-
-          setLocalProject(project)
-        },
-      },
-    )
-  }
-
   const board = {
     productBacklog: productBacklogStories,
     sprintBacklog: sprintBacklogStories,
     delivered: deliveredStories,
   }
 
-  console.log(board)
   const storyVariants = project?.system_colors?.stories || {}
 
-  const columns = [
+  const backlogColumns = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: 'id',
       header: 'ID',
       cell: ({ row }) => {
         const story = row.original
         const selectedVariant = storyVariants[story.type] || '#f97316'
-        console.log(story)
+
         return (
           <div className="flex items-center ">
             <Badge
               style={{ backgroundColor: selectedVariant }}
               variant="outline"
-              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer mb-2`}
+              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
             >
               {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
             </Badge>
@@ -184,10 +346,50 @@ const ProductBacklog = ({ project, setProject }) => {
         </div>
       ),
     },
+    { accessorKey: 'type', header: 'Type' },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" title={'Options'}>
+                <EllipsisVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              <DropdownMenuItem>Options</DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {project.sprints.map((sprint) => (
+                      <DropdownMenuItem
+                        key={sprint.id}
+                        onClick={() =>
+                          moveToSprint(
+                            sprint.id,
+                            selectedStories,
+                            setSelectedStories,
+                          )
+                        }
+                      >
+                        {sprint.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
   ]
-  const table = useReactTable({
+
+  const productBacklogTable = useReactTable({
     data: board.productBacklog,
-    columns,
+    columns: backlogColumns,
     getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
@@ -197,6 +399,9 @@ const ProductBacklog = ({ project, setProject }) => {
       sorting,
     },
   })
+  useEffect(() => {
+    selectItems(board.productBacklog, rowSelection, setSelectedStories)
+  }, [rowSelection])
 
   if (error) {
     return (
@@ -209,60 +414,39 @@ const ProductBacklog = ({ project, setProject }) => {
       </div>
     )
   }
-
   return (
     <div className="flex flex-col p-4 min-h-[500px]">
-      Product Backlog
-      <div className="overflow-hidden rounded-md border ">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className="whitespace-nowrap" key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        defaultValue="item-1"
+      >
+        <AccordionItem
+          value={'Product Backlog'}
+          className=" px-4 border border-accent"
+        >
+          <AccordionTrigger>
+            <div>
+              Product Backlog - {productBacklogTable.getRowCount()} items
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="overflow-hidden rounded-md border ">
+              <TableComponent table={productBacklogTable} />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        {project.sprints.map((sprint) => (
+          <SprintTable
+            key={sprint.id}
+            sprint={sprint}
+            storyVariants={storyVariants}
+            moveToSprint={moveToSprint}
+            project={project}
+          />
+        ))}
+      </Accordion>
     </div>
   )
 }
