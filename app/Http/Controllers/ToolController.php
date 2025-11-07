@@ -12,6 +12,10 @@ class ToolController extends Controller
      */
     public function getArtifactData(Request $request)
     {
+        Log::info('Serviço Python (Agente) chamou a ferramenta getArtifactData', [
+            'data' => $request->all(),
+            'ip' => $request->ip()
+        ]); 
         $validated = $request->validate([
             'project_id' => 'required|integer|exists:projects,id',
             'artifact_name' => 'required|string',
@@ -44,6 +48,12 @@ class ToolController extends Controller
             default:
                 return response()->json(['error' => "Artefato '$artifact' não conhecido."], 404);
         }
+
+        Log::info('Retornando dados para a ferramenta do Agente', [
+            'project_id' => $validated['project_id'],
+            'artifact' => $validated['artifact_name'],
+            'data_count' => is_countable($data) ? count($data) : 'N/A'
+        ]);
 
         return response()->json($data);
     }

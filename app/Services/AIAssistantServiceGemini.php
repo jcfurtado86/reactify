@@ -56,39 +56,50 @@ class AIAssistantServiceGemini
     ];
 
     try {
-      $response = Http::withOptions([
-          'stream' => true,
-          'timeout' => 300,
-      ])
-      ->post($this->pythonServiceUrl, [
-          'project' => $projectData,
-          'user' => $userData,
-          'page_context' => $pageContext,
-          'history' => $chatHistory,
-          'message' => $userMessage, 
-          //'context_data' => $contextData,
-      ]);
+        Log::info('Iniciando conexão stream com o serviço Python de IA.', [
+            'url' => $this->pythonServiceUrl,
+            'project_id' => $project->id,
+            'user_id' => $user->id
+        ]);
+        $response = Http::withOptions([
+            'stream' => true,
+            'timeout' => 300,
+        ])
+        ->post($this->pythonServiceUrl, [
+            'project' => $projectData,
+            'user' => $userData,
+            'page_context' => $pageContext,
+            'history' => $chatHistory,
+            'message' => $userMessage, 
+            //'context_data' => $contextData,
+        ]);
 
-      if (!$response->successful()) {
-          Log::error('Falha ao conectar com o serviço Python de IA', [
-              'status' => $response->status(),
-              'body' => $response->body()
-          ]);
-          echo "Erro: Não foi possível conectar ao serviço de IA. (Status: {$response->status()})";
-          return;
-      }
+        if (!$response->successful()) {
+            Log::error('Falha ao conectar com o serviço Python de IA', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            echo "Erro: Não foi possível conectar ao serviço de IA. (Status: {$response->status()})";
+            return;
+        }
 
-      // Se a conexão foi bem-sucedida, pegamos o corpo (stream)
-      $streamBody = $response->getBody();
+        // Se a conexão foi bem-sucedida, pegamos o corpo (stream)
+        $streamBody = $response->getBody();
 
-      // Seu ChatController.php não espera um 'return', ele espera um 'echo'
-      // (pois o método retorna 'void').
-      // Vamos ler o stream do Python e "ecoa-lo" pedaço por pedaço.
-      // O frontend (ChatBot.jsx) já está ouvindo esse stream.
-      while (!$streamBody->eof()) {
-          echo $streamBody->read(1024); // Lê 1KB de cada vez e envia
-          flush(); // Força o envio do buffer do PHP para o navegador
-      }
+        // Seu ChatController.php não espera um 'return', ele espera um 'echo'
+        // (pois o método retorna 'void').
+        // Vamos ler o stream do Python e "ecoa-lo" pedaço por pedaço.
+        while (!$streamBody->eof()) {
+            $chunk = $streamBody->read(1024); // Lê 1KB de cada vez
+        
+            // Log para debugar o que está vindo do Python
+            Log::debug('Chunk recebido do Python: ', ['chunk' => $chunk]); 
+
+            echo $chunk; 
+            flush();
+        }
+        
+        Log::info('Stream com Python finalizado com sucesso.');
 
     } catch (\Illuminate\Http\Client\ConnectionException $e) {
         Log::error('Erro de conexão ao serviço Python de IA: ' . $e->getMessage());
