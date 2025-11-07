@@ -1,6 +1,6 @@
 import os
 import json
-import requests # Adicionado para chamar a API do Laravel
+import requests 
 from flask import Flask, request, Response, jsonify
 from dotenv import load_dotenv
 import langchain
@@ -8,7 +8,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain.agents import create_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.tools import tool # Importa o decorador de ferramenta
+from langchain.tools import tool 
+from langchain_core.tracers.langchain import wait_for_all_tracers
+
 
 # Carrega variáveis de ambiente (ex: GOOGLE_API_KEY, PYTHON_SERVICE_API_KEY)
 load_dotenv()
@@ -58,6 +60,7 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
         response.raise_for_status() # Lança erro se a resposta for 4xx ou 5xx
         print("--- Resposta da Ferramenta (JSON): ---")
         print(response.json())
+        wait_for_all_tracers()
         return response.json() # Retorna os dados
     except requests.exceptions.HTTPError as e:
         print(f"Erro HTTP: {e.response.text}")
@@ -66,21 +69,7 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
         print(f"Erro inesperado na ferramenta: {str(e)}")
         return f"Erro ao chamar a ferramenta: {str(e)}"
 
-# Lista de ferramentas que o agente pode usar
 tools = [get_data_for_artifact]
-
-# --- Configuração do Agente (Agent) ---
-
-# 2. Criar o Agente
-# Este agente é especializado em usar as Funções/Ferramentas do Gemini
-agent = create_agent(
-    llm,
-    tools, 
-    system_prompt="You are a helpful assistant. Be concise and accurate."
-    )
-
-
-# --- Funções de Ajuda (Portadas do PHP) ---
 
 def get_methodology_context():
     return """
@@ -215,10 +204,6 @@ def build_system_prompt(data) -> str:
     project_id = project.get('id', 'desconhecido') # <--- IMPORTANTE
     project_title = project.get('title', 'Meu Projeto')
     project_desc = project.get('description', '')
-    project_status = "Não definido"
-    try:
-        project_status = project.get('status', {}).get('value', 'Não definido')
-    except Exception: pass
 
     methodology_context = get_methodology_context()
 
@@ -245,7 +230,7 @@ def build_system_prompt(data) -> str:
     - Papel no Projeto: {user_role}
 
     Contexto do Projeto '{project_title}':
-    - Status Atual: {project_status}
+    - ID: {project_id}
     - Descrição: {project_desc}
 
     Contexto da Página Atual: '{page_name}'
@@ -272,8 +257,6 @@ def build_chat_history(chat_history_raw):
                 messages.append(AIMessage(content=content))
     return messages
 
-# --- Endpoint de Chat (Modificado para usar o Agente) ---
-
 @app.route('/chat-stream', methods=['POST'])
 def chat_stream():
     if not request.json:
@@ -281,18 +264,15 @@ def chat_stream():
     
     try:
         request_data = request.json
-        app.logger.info("\n------------ REQUEST DATA --------------\n%s\n", request_data)
-
-        # 1. Construir o prompt de sistema
+        #app.logger.info("\n------------ REQUEST DATA --------------\n%s\n", request_data)
+        
         system_prompt = build_system_prompt(request_data)
         #app.logger.info("\n------------ SYSTEM PROMPT --------------\n%s\n", system_prompt)
-        # 2. Construir o histórico de chat
+        
         # O histórico completo (incluindo a última mensagem) é enviado pelo Laravel
         chat_history_raw = request_data.get('history', [])
-        
         # Separa o histórico passado da mensagem atual
         # chat_history_messages = build_chat_history(chat_history_raw)
-        
         # Pega a última mensagem (o input do usuário)
         user_input = ""
         if chat_history_raw:
@@ -301,33 +281,57 @@ def chat_stream():
         if not user_input or user_input.strip() == "":
             app.logger.warning("Mensagem do usuário vazia ou só com espaços")
             return jsonify({"error": "Mensagem do usuário vazia"}), 400
-        
         #app.logger.info("\n------------ INPUT --------------\n%s\n", user_input)
 
-        # 3. Montar o input para o agente
+        # Invocar o agente (AGORA BLOQUEANTE)
+        agent = create_agent(
+          model=llm,
+          tools=tools, 
+          system_prompt=system_prompt
+        )
+        app.logger.info("--- Invocando Agente (AGORA COM STREAM) ---")
 
-        # 4. Invocar o agente (AGORA BLOQUEANTE)
-        # O agente vai rodar, "pensar", e talvez chamar a ferramenta (API do Laravel)
-        print("--- Invocando Agente ---")
-        response = agent.invoke({"messages": [{"role": "user", "content": user_input}, 
-                                              {"role": "system", "content": system_prompt}
-                                              ]})
-        print("--- Agente Concluído ---")
-        
-        # A resposta final está em 'output'
-        app.logger.info("\n------------ RESPONSE --------------\n%s\n", response['messages'][-1].content[0]['text'])
-        final_answer = response['messages'][-1].content[0]['text']
+        # Esta é a função que o Flask enviará ao Laravel
+        def stream_response_generator():
+            try:
+                # Use .stream() para obter os "pedaços" (eventos do agente)
+                app.logger.info("Iniciando agent.stream()...")
+                response_stream = agent.stream(
+                    {"messages": [{"role": "user", "content": user_input}]}    
+                )
+                
+                # Iteramos sobre os "pedaços" do stream
+                for chunk in response_stream:
+                    app.logger.debug(f"Chunk do agente recebido: {chunk}")
 
-        # 5. Fazer o stream da resposta final
-        # O frontend (ChatBot.jsx) tem um efeito de "digitação" (setInterval).
-        # Se enviarmos o texto todo, ele vai "digitar" rápido, o que é perfeito.
-        def stream_text(text):
-            yield text
+                    if "model" in chunk:
+                        model_output = chunk["model"]
+                        
+                        if "messages" in model_output:
+                            # Pega o último objeto AIMessage da lista
+                            last_message = model_output["messages"][-1]
+                            
+                            # Acessa o atributo 'content' desse objeto
+                            if hasattr(last_message, 'content') and last_message.content:
+                                content_chunk = last_message.content
+                                
+                                if isinstance(content_chunk, str):
+                                    app.logger.debug(f"Enviando chunk de texto (string): {content_chunk}")
+                                    yield content_chunk 
+                                else:
+                                    app.logger.warning(f"Tipo de 'content' não esperado: {type(content_chunk)}")
+                
+                app.logger.info("--- Stream do Agente Concluído (fim do loop) ---")
 
-        return Response(stream_text(final_answer), mimetype='text/plain')
+            except Exception as e:
+                app.logger.error(f"Erro DURANTE o stream do agente: {e}", exc_info=True)
+                yield f"\nErro interno no agente: {str(e)}"
+
+        # O Flask irá lidar com isso, enviando cada 'yield' como um pedaço
+        return Response(stream_response_generator(), mimetype='text/plain')
 
     except Exception as e:
-        print(f"Erro no endpoint /chat-stream: {e}")
+        app.logger.error(f"Erro GERAL no endpoint /chat-stream: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
