@@ -264,75 +264,85 @@ def chat_stream():
     
     try:
         request_data = request.json
-        #app.logger.info("\n------------ REQUEST DATA --------------\n%s\n", request_data)
-        
+        # app.logger.info("\n------------ DADOS RECEBIDOS --------------\n%s\n", 
+        #                 json.dumps(request_data, indent=2))
+
         system_prompt = build_system_prompt(request_data)
-        #app.logger.info("\n------------ SYSTEM PROMPT --------------\n%s\n", system_prompt)
-        
-        # O histórico completo (incluindo a última mensagem) é enviado pelo Laravel
+        # app.logger.info("\n------------ SYSTEM PROMPT--------------\n%s\n", 
+        #                 json.dumps(system_prompt, indent=2))
+
         chat_history_raw = request_data.get('history', [])
-        # Separa o histórico passado da mensagem atual
-        # chat_history_messages = build_chat_history(chat_history_raw)
-        # Pega a última mensagem (o input do usuário)
+        
         user_input = ""
         if chat_history_raw:
             user_input = chat_history_raw[-1].get('message', '')
 
         if not user_input or user_input.strip() == "":
-            app.logger.warning("Mensagem do usuário vazia ou só com espaços")
+            app.logger.warning("Mensagem do usuário vazia")
             return jsonify({"error": "Mensagem do usuário vazia"}), 400
-        #app.logger.info("\n------------ INPUT --------------\n%s\n", user_input)
-
-        # Invocar o agente (AGORA BLOQUEANTE)
+        
+        app.logger.info("\n------------ INPUT DO USUÁRIO --------------\n%s\n", user_input)
+        
         agent = create_agent(
           model=llm,
           tools=tools, 
           system_prompt=system_prompt
         )
-        app.logger.info("--- Invocando Agente (AGORA COM STREAM) ---")
 
-        # Esta é a função que o Flask enviará ao Laravel
-        def stream_response_generator():
-            try:
-                # Use .stream() para obter os "pedaços" (eventos do agente)
-                app.logger.info("Iniciando agent.stream()...")
-                response_stream = agent.stream(
-                    {"messages": [{"role": "user", "content": user_input}]}    
-                )
+        app.logger.info("--- Invocando Agente ---")
+
+        # Esta é a chamada bloqueante
+        response = agent.invoke(
+            {"messages": [{"role": "user", "content": user_input}]}    
+        )
+        
+        app.logger.info("--- Agente Concluído ---")
+        app.logger.debug(f"Resposta completa do agente: {response}")
+
+        final_answer = ""
+        if response and "messages" in response and response["messages"]:
+            # Pega a última mensagem (uma AIMessage)
+            last_message = response["messages"][-1] 
+            
+            # O 'content' pode ser uma string simples ou uma lista de blocos
+            if hasattr(last_message, 'content'):
+                if isinstance(last_message.content, str):
+                    # Caso mais simples (ex: gemini-flash)
+                    final_answer = last_message.content
                 
-                # Iteramos sobre os "pedaços" do stream
-                for chunk in response_stream:
-                    app.logger.debug(f"Chunk do agente recebido: {chunk}")
+                # Se for uma lista de 'content_blocks' (ex: gemini-pro)
+                elif isinstance(last_message.content, list) and len(last_message.content) > 0:
+                    # Um bloco de conteúdo padrão tem 'type' e 'text'
+                    if isinstance(last_message.content[0], dict) and 'text' in last_message.content[0]:
+                        final_answer = last_message.content[0]['text']
+                    else:
+                        app.logger.warning(f"Conteúdo da IA é lista, mas formato é inesperado: {last_message.content}")
+                        final_answer = str(last_message.content) # Fallback
+                else:
+                    # Fallback para o atributo .text, se 'content' for outra coisa
+                    final_answer = getattr(last_message, 'text', '')
+            
+        if not final_answer:
+            app.logger.error("Não foi possível extrair a resposta final da IA")
+            final_answer = "Erro: Não consegui processar uma resposta."
 
-                    if "model" in chunk:
-                        model_output = chunk["model"]
-                        
-                        if "messages" in model_output:
-                            # Pega o último objeto AIMessage da lista
-                            last_message = model_output["messages"][-1]
-                            
-                            # Acessa o atributo 'content' desse objeto
-                            if hasattr(last_message, 'content') and last_message.content:
-                                content_chunk = last_message.content
-                                
-                                if isinstance(content_chunk, str):
-                                    app.logger.debug(f"Enviando chunk de texto (string): {content_chunk}")
-                                    yield content_chunk 
-                                else:
-                                    app.logger.warning(f"Tipo de 'content' não esperado: {type(content_chunk)}")
-                
-                app.logger.info("--- Stream do Agente Concluído (fim do loop) ---")
+        app.logger.info("\n------------ RESPOSTA FINAL EXTRAÍDA --------------\n%s\n", final_answer)
 
-            except Exception as e:
-                app.logger.error(f"Erro DURANTE o stream do agente: {e}", exc_info=True)
-                yield f"\nErro interno no agente: {str(e)}"
+        def stream_text_generator(text):
+            yield text
+            app.logger.info("Resposta completa enviada ao Laravel.")
 
-        # O Flask irá lidar com isso, enviando cada 'yield' como um pedaço
-        return Response(stream_response_generator(), mimetype='text/plain')
+        return Response(stream_text_generator(final_answer), mimetype='text/plain')
 
     except Exception as e:
         app.logger.error(f"Erro GERAL no endpoint /chat-stream: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
-
+        # Tenta enviar o erro como texto plano para o frontend
+        error_message = f"Erro crítico no servidor de IA: {str(e)}"
+        
+        # Gerador simples para enviar o erro
+        def stream_error_generator(text):
+            yield text
+            
+        return Response(stream_error_generator(error_message), mimetype='text/plain', status=500)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
