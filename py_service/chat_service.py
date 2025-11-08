@@ -27,7 +27,7 @@ langchain.debug = True
 # --- Configuração das Ferramentas (Tools) ---
 
 # URL da API de Ferramentas do Laravel
-LARAVEL_TOOL_API_URL = os.getenv("LARAVEL_TOOL_API_URL", "http://127.0.0.1:8000/api/tools/get-artifact-data")
+LARAVEL_TOOL_API_URL = os.getenv("LARAVEL_TOOL_API_URL", "http://127.0.0.1:8001/api/tools/get-artifact-data")
 # Chave secreta para autenticar no Laravel
 LARAVEL_API_KEY = os.getenv("PYTHON_SERVICE_API_KEY", "")
 
@@ -59,7 +59,7 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
         )
         response.raise_for_status() # Lança erro se a resposta for 4xx ou 5xx
         print("--- Resposta da Ferramenta (JSON): ---")
-        print(response.json())
+        #print(response.json())
         wait_for_all_tracers()
         return response.json() # Retorna os dados
     except requests.exceptions.HTTPError as e:
@@ -268,21 +268,53 @@ def chat_stream():
         #                 json.dumps(request_data, indent=2))
 
         system_prompt = build_system_prompt(request_data)
-        # app.logger.info("\n------------ SYSTEM PROMPT--------------\n%s\n", 
-        #                 json.dumps(system_prompt, indent=2))
-
+        
         chat_history_raw = request_data.get('history', [])
         
-        user_input = ""
-        if chat_history_raw:
-            user_input = chat_history_raw[-1].get('message', '')
+        # Convertemos o histórico do frontend para o formato do LangChain
+        langchain_messages = []
+        for message in chat_history_raw:
+            sender = message.get('sender')
+            content = message.get('message')
+            
+            if not content:
+                continue
+            
+            # O React envia 'user'
+            if sender == 'user':
+                langchain_messages.append(HumanMessage(content=content))
+            # O React envia 'bot', 'model', 'ai'
+            elif sender in ['bot', 'model', 'ai', 'assistant']:
+                langchain_messages.append(AIMessage(content=content))
+        
+        if not langchain_messages or not isinstance(langchain_messages[-1], HumanMessage):
+             app.logger.warning("Histórico vazio ou não termina com mensagem humana.")
+             # Adiciona a mensagem de 'message' se o histórico estiver vazio por algum motivo
+             user_input = request_data.get('message', '')
+             if user_input:
+                 langchain_messages.append(HumanMessage(content=user_input))
+             else:
+                 return jsonify({"error": "Mensagem do usuário vazia"}), 400
 
-        if not user_input or user_input.strip() == "":
-            app.logger.warning("Mensagem do usuário vazia")
-            return jsonify({"error": "Mensagem do usuário vazia"}), 400
+        app.logger.info(f"\n------------ HISTÓRICO ENVIADO AO AGENTE ({len(langchain_messages)} mensagens) --------------\n")
         
-        app.logger.info("\n------------ INPUT DO USUÁRIO --------------\n%s\n", user_input)
+        log_messages_formatadas = []
+        for msg in langchain_messages:
+            # Limita a 150 caracteres para não poluir o log
+            conteudo_truncado = (msg.content[:150] + '...') if len(msg.content) > 150 else msg.content
+            # Remove quebras de linha do log
+            conteudo_limpo = conteudo_truncado.replace('\n', ' ')
+            
+            log_messages_formatadas.append(f"  [{msg.type.upper()}]: {conteudo_limpo}")
+
+        # Junta todas as mensagens formatadas em uma única string
+        readable_history = "\n".join(log_messages_formatadas)
         
+        # Imprime o log formatado
+        app.logger.info(readable_history)
+        app.logger.info("\n---------------------------------------------------------------------------------------\n")
+
+
         agent = create_agent(
           model=llm,
           tools=tools, 
@@ -291,13 +323,12 @@ def chat_stream():
 
         app.logger.info("--- Invocando Agente ---")
 
-        # Esta é a chamada bloqueante
         response = agent.invoke(
-            {"messages": [{"role": "user", "content": user_input}]}    
-        )
+            {"messages": langchain_messages}
+        ) 
         
         app.logger.info("--- Agente Concluído ---")
-        app.logger.debug(f"Resposta completa do agente: {response}")
+        #app.logger.debug(f"Resposta completa do agente: {response}")
 
         final_answer = ""
         if response and "messages" in response and response["messages"]:
@@ -323,10 +354,10 @@ def chat_stream():
                     final_answer = getattr(last_message, 'text', '')
             
         if not final_answer:
-            app.logger.error("Não foi possível extrair a resposta final da IA")
-            final_answer = "Erro: Não consegui processar uma resposta."
+          app.logger.error("Não foi possível extrair a resposta final da IA")
+          final_answer = "Erro: Não consegui processar uma resposta."
 
-        app.logger.info("\n------------ RESPOSTA FINAL EXTRAÍDA --------------\n%s\n", final_answer)
+        #app.logger.info("\n------------ RESPOSTA FINAL EXTRAÍDA --------------\n%s\n", final_answer)
 
         def stream_text_generator(text):
             yield text
@@ -344,5 +375,6 @@ def chat_stream():
             yield text
             
         return Response(stream_error_generator(error_message), mimetype='text/plain', status=500)
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
