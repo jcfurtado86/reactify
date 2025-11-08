@@ -150,7 +150,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
           >
             <header className="flex justify-between items-center p-4 bg-primary text-primary-foreground rounded-t-lg">
               <h3 id="chat-heading" className="text-base font-semibold">
-                Assistente Virtual
+                Facilitador
               </h3>
               <Button
                 variant="ghost"
