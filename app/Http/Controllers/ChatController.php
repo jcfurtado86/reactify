@@ -7,6 +7,7 @@ use App\Services\AIAssistantServiceGemini;
 use App\Services\AIAssistantServiceOllama;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ChatController extends Controller
 {

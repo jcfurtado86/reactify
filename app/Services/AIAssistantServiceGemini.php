@@ -63,7 +63,7 @@ class AIAssistantServiceGemini
         ]);
         $response = Http::withOptions([
             'stream' => true,
-            'timeout' => 300,
+            'timeout' => 100,
         ])
         ->post($this->pythonServiceUrl, [
             'project' => $projectData,

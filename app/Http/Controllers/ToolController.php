@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ToolController extends Controller
 {
@@ -52,6 +53,7 @@ class ToolController extends Controller
         Log::info('Retornando dados para a ferramenta do Agente', [
             'project_id' => $validated['project_id'],
             'artifact' => $validated['artifact_name'],
+            'data' => $data,
             'data_count' => is_countable($data) ? count($data) : 'N/A'
         ]);
 
