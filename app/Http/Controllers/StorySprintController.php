@@ -5,88 +5,119 @@ namespace App\Http\Controllers;
 use App\Models\Sprint;
 use App\Models\Story;
 use App\Models\StorySprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class StorySprintController extends Controller
 {
-    /**
-     * Adicionar stories à sprint
-     */
-    public function store(Request $request, Sprint $sprint)
-    {
-        $validated = $request->validate([
-            'story_ids' => 'required|array',
-            'story_ids.*' => 'exists:stories,id'
+  /**
+   * Adicionar stories à sprint
+   */
+  public function store(Request $request, Sprint $sprint)
+  {
+    $validated = $request->validate([
+      'story_ids' => 'required|array',
+      'story_ids.*' => 'exists:stories,id',
+    ]);
+
+    $storyIds = $validated['story_ids'];
+    $targetSprintId = $sprint->id;
+
+    try {
+      DB::transaction(function () use ($storyIds, $sprint, $targetSprintId) {
+        $pivotTable = $sprint->stories()->getTable();
+
+        DB::table($pivotTable)
+          ->whereIn('story_id', $storyIds) // Para as stories que estamos movendo
+          ->where('sprint_id', '!=', $targetSprintId) // De qualquer sprint que NÃO seja a nossa
+          ->delete();
+
+        $dataToSync = collect($storyIds)
+          ->mapWithKeys(function ($id) {
+            return [
+              $id => [
+                'kanban_status' => 'todo',
+                'position' => 0,
+              ],
+            ];
+          })
+          ->all();
+
+        $sprint->stories()->syncWithoutDetaching($dataToSync);
+
+        Story::whereIn('id', $storyIds)->update([
+          'status' => 'in_progress',
         ]);
+      });
 
-        foreach ($validated['story_ids'] as $storyId) {
-            if (!$sprint->stories()->where('story_id', $storyId)->exists()) {
-                $sprint->stories()->attach($storyId, [
-                    'kanban_status' => 'todo',
-                    'position' => 0
-                ]);
+      Log::info("Stories movidas para a sprint {$sprint->id}", [
+        'stories' => $storyIds,
+      ]);
+    } catch (\Exception $e) {
+      Log::error("Falha ao mover stories para a sprint {$sprint->id}", [
+        'error' => $e->getMessage(),
+        'stories' => $storyIds,
+      ]);
 
-                Story::where('id', $storyId)->update([
-                    'status' => 'in_progress'
-                ]);
-
-                Log::info("Story {$storyId} added to sprint {$sprint->id}");
-            }
-        }
-
-        return back()->with([
-            'message' => 'Stories added to sprint successfully',
-            'status' => 'success'
-        ]);
+      return back()->with([
+        'message' => 'Erro ao mover as stories.',
+        'status' => 'error',
+      ]);
     }
 
-    /**
-     * Remover story da sprint
-     */
-    public function destroy(Sprint $sprint, $storyId)
-    {
-        $sprint->stories()->detach($storyId);
-        
-        Story::where('id', $storyId)->update([
-            'status' => 'prioritized'
-        ]);
+    return back()->with([
+      'message' => 'Stories adicionadas à sprint com sucesso',
+      'status' => 'success',
+    ]);
+  }
 
-        Log::info("Story {$storyId} removed from sprint {$sprint->id}");
+  /**
+   * Remover story da sprint
+   */
+  public function destroy(Sprint $sprint, $storyId)
+  {
+    $sprint->stories()->detach($storyId);
 
-        return back()->with([
-            'message' => 'Story removed from sprint',
-            'status' => 'success'
-        ]);
+    Story::where('id', $storyId)->update([
+      'status' => 'prioritized',
+    ]);
+
+    Log::info("Story {$storyId} removed from sprint {$sprint->id}");
+
+    return back()->with([
+      'message' => 'Story removed from sprint',
+      'status' => 'success',
+    ]);
+  }
+
+  /**
+   * Atualizar status/posição das stories
+   */
+  public function update(Request $request, Sprint $sprint)
+  {
+    $validated = $request->validate([
+      'story_id' => 'required|exists:stories,id',
+      'kanban_status' => 'required|in:todo,in_progress,testing,done',
+      'position' => 'sometimes|integer|min:0',
+    ]);
+
+    $sprint->stories()->updateExistingPivot($validated['story_id'], [
+      'kanban_status' => $validated['kanban_status'],
+      'position' => $validated['position'] ?? 0,
+    ]);
+
+    if ($validated['kanban_status'] === 'done') {
+      Story::where('id', $validated['story_id'])->update([
+        'status' => 'done',
+      ]);
     }
 
-    /**
-     * Atualizar status/posição das stories
-     */
-    public function update(Request $request, Sprint $sprint)
-    {
-        $validated = $request->validate([
-            'story_id' => 'required|exists:stories,id',
-            'kanban_status' => 'required|in:todo,in_progress,testing,done',
-            'position' => 'sometimes|integer|min:0'
-        ]);
+    Log::info("Story {$validated['story_id']} updated in sprint {$sprint->id}");
 
-        $sprint->stories()->updateExistingPivot($validated['story_id'], [
-            'kanban_status' => $validated['kanban_status'],
-            'position' => $validated['position'] ?? 0
-        ]);
-
-        if ($validated['kanban_status'] === 'done') {
-            Story::where('id', $validated['story_id'])->update([
-                'status' => 'done'
-            ]);
-        }
-
-        Log::info("Story {$validated['story_id']} updated in sprint {$sprint->id}");
-
-        return back()->with([
-            'message' => 'Story updated successfully',
-            'status' => 'success'
-        ]);
-    }
+    return back()->with([
+      'message' => 'Story updated successfully',
+      'status' => 'success',
+    ]);
+  }
 }
