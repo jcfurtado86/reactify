@@ -18,97 +18,151 @@ class AIAssistantServiceGemini
     
     if (!$this->pythonServiceUrl) {
       Log::error('PYTHON_CHAT_SERVICE_URL não definida no .env ou config/services.php');
-      // Define um fallback apenas para evitar quebrar
       $this->pythonServiceUrl = 'http://127.0.0.1:5002/chat-stream';
     }
   }
 
-
   /**
-   * Envia os dados para o serviço Python e faz o stream da resposta de volta
-   * para o ChatController, que a envia para o browser.
-   *
-   * @param Project $project
-   * @param User $user
-   * @param array $pageContext
-   * @param array $chatHistory
-   * @param string $userMessage
-   * @return void
-   */
-  public function generateStreamedResponse(Project $project, User $user, array $pageContext, array $chatHistory, string $userMessage, ?array $contextData): void
-  {
-    $userRole = $project->users()->find($user->id)->pivot->role;
-    $userData = [
-        'id' => $user->id,
-        'name' => $user->name,
-        'pivot' => [
-            'role' => [
-                'value' => $userRole->value ?? null
-            ]
-        ]
-    ];
-    
-    $projectData = [
-        'id' => $project->id,
-        'title' => $project->title,
-        'status' => $project->status,
-        'description' => $project->description,
-    ];
+     * Envia os dados para o serviço Python e espera pela resposta COMPLETA.
+     * Este método é BLOQUEANTE e deve ser usado apenas em JOBS (filas).
+     *
+     * @return string A resposta completa da IA.
+     */
+    public function generateBlockingResponse(Project $project, User $user, array $pageContext, array $chatHistory, string $userMessage): string
+    {
+        $userRole = $project->users()->find($user->id)->pivot->role;
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'pivot' => ['role' => ['value' => $userRole->value ?? null]]
+        ];
+        
+        $projectData = [
+            'id' => $project->id,
+            'title' => $project->title,
+            'status' => $project->status,
+            'description' => $project->description,
+        ];
 
-    try {
-        Log::info('Iniciando conexão stream com o serviço Python de IA.', [
-            'url' => $this->pythonServiceUrl,
-            'project_id' => $project->id,
-            'user_id' => $user->id
-        ]);
-        $response = Http::withOptions([
-            'stream' => true,
-            'timeout' => 100,
-        ])
-        ->post($this->pythonServiceUrl, [
-            'project' => $projectData,
-            'user' => $userData,
-            'page_context' => $pageContext,
-            'history' => $chatHistory,
-            'message' => $userMessage, 
-            //'context_data' => $contextData,
-        ]);
-
-        if (!$response->successful()) {
-            Log::error('Falha ao conectar com o serviço Python de IA', [
-                'status' => $response->status(),
-                'body' => $response->body()
+        try {
+            // stream' => false (ou omitido) e 'timeout' longo
+            $response = Http::withOptions([
+                'timeout' => 600, 
+            ])
+            ->post($this->pythonServiceUrl, [
+                'project' => $projectData,
+                'user' => $userData,
+                'page_context' => $pageContext,
+                'history' => $chatHistory,
+                'message' => $userMessage, 
             ]);
-            echo "Erro: Não foi possível conectar ao serviço de IA. (Status: {$response->status()})";
-            return;
+
+            if (!$response->successful()) {
+                Log::error('Falha ao conectar com o serviço Python de IA (bloqueante)', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return "Erro: Não foi possível conectar ao serviço de IA. (Status: {$response->status()})";
+            }
+
+            // Retorna o corpo da resposta completo como uma string
+            return $response->body();
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Erro de conexão ao serviço Python de IA (bloqueante): ' . $e->getMessage());
+            return "Erro crítico: O serviço de IA está offline. " . $e->getMessage();
+        } catch (\Exception $e) {
+            Log::error('Erro desconhecido no serviço de IA (bloqueante): ' . $e->getMessage());
+            return "Erro: " . $e->getMessage();
         }
-
-        // Se a conexão foi bem-sucedida, pegamos o corpo (stream)
-        $streamBody = $response->getBody();
-
-        // Seu ChatController.php não espera um 'return', ele espera um 'echo'
-        // (pois o método retorna 'void').
-        // Vamos ler o stream do Python e "ecoa-lo" pedaço por pedaço.
-        while (!$streamBody->eof()) {
-            $chunk = $streamBody->read(1024); // Lê 1KB de cada vez
-        
-            // Log para debugar o que está vindo do Python
-            Log::debug('Chunk recebido do Python: ', ['chunk' => $chunk]); 
-
-            echo $chunk; 
-            flush();
-        }
-        
-        Log::info('Stream com Python finalizado com sucesso.');
-
-    } catch (\Illuminate\Http\Client\ConnectionException $e) {
-        Log::error('Erro de conexão ao serviço Python de IA: ' . $e->getMessage());
-        echo "Erro crítico: O serviço de IA está offline. " . $e->getMessage();
-    } catch (\Exception $e) {
-        Log::error('Erro desconhecido no stream do chat: ' . $e->getMessage());
-        echo "Erro: " . $e->getMessage();
     }
-  }
+
+
+//   /**
+//    * Envia os dados para o serviço Python e faz o stream da resposta de volta
+//    * para o ChatController, que a envia para o browser.
+//    *
+//    * @param Project $project
+//    * @param User $user
+//    * @param array $pageContext
+//    * @param array $chatHistory
+//    * @param string $userMessage
+//    * @return void
+//    */
+//   public function generateStreamedResponse(Project $project, User $user, array $pageContext, array $chatHistory, string $userMessage, ?array $contextData): void
+//   {
+//     $userRole = $project->users()->find($user->id)->pivot->role;
+//     $userData = [
+//         'id' => $user->id,
+//         'name' => $user->name,
+//         'pivot' => [
+//             'role' => [
+//                 'value' => $userRole->value ?? null
+//             ]
+//         ]
+//     ];
+    
+//     $projectData = [
+//         'id' => $project->id,
+//         'title' => $project->title,
+//         'status' => $project->status,
+//         'description' => $project->description,
+//     ];
+
+//     try {
+//         Log::info('Iniciando conexão stream com o serviço Python de IA.', [
+//             'url' => $this->pythonServiceUrl,
+//             'project_id' => $project->id,
+//             'user_id' => $user->id
+//         ]);
+//         $response = Http::withOptions([
+//             'stream' => true,
+//             'timeout' => 100,
+//         ])
+//         ->post($this->pythonServiceUrl, [
+//             'project' => $projectData,
+//             'user' => $userData,
+//             'page_context' => $pageContext,
+//             'history' => $chatHistory,
+//             'message' => $userMessage, 
+//             //'context_data' => $contextData,
+//         ]);
+
+//         if (!$response->successful()) {
+//             Log::error('Falha ao conectar com o serviço Python de IA', [
+//                 'status' => $response->status(),
+//                 'body' => $response->body()
+//             ]);
+//             echo "Erro: Não foi possível conectar ao serviço de IA. (Status: {$response->status()})";
+//             return;
+//         }
+
+//         // Se a conexão foi bem-sucedida, pegamos o corpo (stream)
+//         $streamBody = $response->getBody();
+
+//         // Seu ChatController.php não espera um 'return', ele espera um 'echo'
+//         // (pois o método retorna 'void').
+//         // Vamos ler o stream do Python e "ecoa-lo" pedaço por pedaço.
+//         while (!$streamBody->eof()) {
+//             $chunk = $streamBody->read(1024); // Lê 1KB de cada vez
+        
+//             // Log para debugar o que está vindo do Python
+//             Log::debug('Chunk recebido do Python: ', ['chunk' => $chunk]); 
+
+//             echo $chunk; 
+//             flush();
+//         }
+        
+//         Log::info('Stream com Python finalizado com sucesso.');
+
+//     } catch (\Illuminate\Http\Client\ConnectionException $e) {
+//         Log::error('Erro de conexão ao serviço Python de IA: ' . $e->getMessage());
+//         echo "Erro crítico: O serviço de IA está offline. " . $e->getMessage();
+//     } catch (\Exception $e) {
+//         Log::error('Erro desconhecido no stream do chat: ' . $e->getMessage());
+//         echo "Erro: " . $e->getMessage();
+//     }
+//   }
 
 
   // /**

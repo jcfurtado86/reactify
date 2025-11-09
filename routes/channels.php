@@ -15,3 +15,7 @@ Broadcast::channel('project.{id}', function ($user, $id) {
 Broadcast::channel('projects', function ($user) {
   return Auth::check();
 });
+
+Broadcast::channel('project.{project}', function ($user, Project $project) {
+    return $project->users()->where('user_id', $user->id)->exists();
+});

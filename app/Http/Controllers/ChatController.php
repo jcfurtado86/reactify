@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Services\AIAssistantServiceGemini;
 use App\Services\AIAssistantServiceOllama;
+use App\Jobs\ProcessChatJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -39,23 +40,19 @@ class ChatController extends Controller
     $user = Auth::user();
 
     if (!$project->users()->where('user_id', $user->id)->exists()) {
-      return response()->json(['error' => 'Acesso negado'], 403);
+      abort(403, 'Acesso negado');
+      //return response()->json(['error' => 'Acesso negado'], 403);
     }
 
-    try {
-      $this->aiAssistantService->generateStreamedResponse(
+    ProcessChatJob::dispatch(
         $project, 
         $user, 
         $validated['page_context'], 
         $validated['history'], 
-        $validated['message'], 
-        //$validated['context_data']
-        null
-      );
-    } catch (\Exception $e) {
-      return response()->json(['error' => $e->getMessage()], 500);
-    }
+        $validated['message']
+    );
 
-    return;
+    // Retorna uma resposta 202 (Accepted)
+    return back();
   }
 }

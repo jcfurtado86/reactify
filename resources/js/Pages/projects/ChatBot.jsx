@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react'
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageSquare, X, SendHorizontal, LoaderCircle } from 'lucide-react'
@@ -9,13 +10,18 @@ const AIMessage = ({ fullContent, animate }) => {
   )
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setDisplayedContent((prev) => fullContent.slice(0, prev.length + 1))
-    }, 20)
-    return () => clearInterval(interval)
-  }, [fullContent, displayedContent])
+    if (animate) {
+      const interval = setInterval(() => {
+        setDisplayedContent((prev) => fullContent.slice(0, prev.length + 1))
+      }, 20)
+      
+      return () => clearInterval(interval)
+    } else {
+      setDisplayedContent(fullContent)
+    }
+  }, [fullContent, animate]) // MUDANÇA: Depende de 'fullContent' e 'animate'
 
-  const isTyping = displayedContent.length < fullContent.length
+  const isTyping = animate && displayedContent.length < fullContent.length
   return (
     <>
       <div
@@ -28,13 +34,18 @@ const AIMessage = ({ fullContent, animate }) => {
   )
 }
 
+/**
+ * Componente principal do ChatBot, agora com WebSockets (Laravel Echo).
+ */
 const ChatBot = ({ project, currentPage, currentContextData }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      message:'Olá! 👋 Eu sou seu assistente REACT-M e atuarei como seu Facilitador. Como posso **guiar** você ou sua equipe na cerimônia de hoje?',
+      message:
+        'Olá! 👋 Eu sou seu assistente REACT-M e atuarei como seu Facilitador. Como posso **guiar** você ou sua equipe na cerimônia de hoje?',
       sender: 'bot',
       timestamp: new Date().toISOString(),
+      animate: false, 
     },
   ])
   const [isOpen, setIsOpen] = useState(false)
@@ -42,17 +53,51 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
   const [isLoading, setIsLoading] = useState(false)
   const chatBodyRef = useRef(null)
 
-  // Efeito para rolar para a última mensagem
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight
     }
   }, [messages, isOpen])
 
-  const toggleChat = () => {
-    setIsOpen((prevState) => !prevState)
-  }
+  // NOVO EFEITO PARA OUVIR O WEBSOCKET (LARAVEL ECHO)
+  useEffect(() => {
+    // Só liga o Echo se o chat estiver aberto e tivermos um projeto
+    if (!project?.id || !isOpen) {
+      return
+    }
 
+    // Entra no canal privado do projeto (definido em routes/channels.php)
+    const channel = window.Echo.private(`project.${project.id}`)
+
+    // Ouve o evento 'chat.message.received' (definido em App/Events/ChatMessageReceived.php)
+    channel.listen('.chat.message.received', (event) => {
+      console.log('Evento WebSocket recebido:', event)
+
+      const aiMessage = {
+        id: `ai-${Date.now()}`,
+        message: event.message, // A mensagem vem do broadcast
+        sender: 'model',
+        timestamp: new Date().toISOString(),
+        animate: true,
+      }
+
+      setIsLoading(false)
+
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === 'ai-loading-placeholder' ? aiMessage : msg,
+        ),
+      )
+    })
+
+    // Sai do canal quando o chat é fechado ou o componente desmonta
+    return () => {
+      channel.stopListening('.chat.message.received')
+      window.Echo.leaveChannel(`project.${project.id}`)
+    }
+  }, [project, isOpen]) // Re-executa se o projeto ou o estado 'aberto' mudar
+
+  // Envia a mensagem para a FILA (via ChatController)
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '' || !project.id) return
 
@@ -61,79 +106,64 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
       sender: 'user',
       message: inputMessage,
       created_at: new Date().toISOString(),
+      animate: false, 
     }
 
     const newMessages = [...messages, userMessage]
-    setMessages(newMessages)
+
+    const placeholderMessage = {
+      id: 'ai-loading-placeholder',
+      message: '', 
+      sender: 'model',
+      timestamp: new Date().toISOString(),
+      isLoading: true,
+    }
+
+    setMessages([...newMessages, placeholderMessage]) 
     setInputMessage('')
     setIsLoading(true)
-    console.log('currentContextData:', currentContextData)
+
     try {
-      const csrfToken = document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute('content')
+      const data = {
+        message: userMessage.message,
+        page_context: currentPage,
+        history: newMessages.map((m) => ({
+          sender: m.sender,
+          message: m.message,
+        })),
+      };
 
-      const response = await fetch(route('chat.store', project.id), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
+      router.post(route('chat.store', project.id), data, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          console.log('Mensagem enviada para a fila com sucesso.');
         },
-        body: JSON.stringify({
-          message: userMessage.message,
-          page_context: currentPage,
-          //context_data: currentContextData,
-          history: newMessages.map((m) => ({
-            sender: m.sender,
-            message: m.message,
-          })), // Envia o histórico
-        }),
-      })
-      if (!response.ok) {
-        throw new Error('A resposta da rede não foi bem-sucedida.')
-      }
-      const aiMessageId = `ai-${Date.now()}`
-      const placeholderMessage = {
-        id: aiMessageId,
-        message: '',
-        sender: 'model',
-        timestamp: new Date().toISOString(),
-      }
+        onError: (errors) => {
+          const firstError = errors[Object.keys(errors)[0]];
+          throw new Error(firstError || 'Erro ao processar a requisição.');
+        },
+      });
 
-      setMessages((prevMessages) => [...prevMessages, placeholderMessage])
-
-      //leitor do corpo da respost
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value)
-        setMessages((prevMessages) =>
-          prevMessages.map((msg) =>
-            msg.id === aiMessageId
-              ? { ...msg, message: msg.message + chunk }
-              : msg,
-          ),
-        )
-      }
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error)
       const errorMessage = {
         id: `temp-error-${Date.now()}`,
-        message:
-          'Ocorreu um erro ao enviar sua mensagem. Por favor, tente novamente.',
+        message: `Ocorreu um erro ao enviar sua mensagem: ${error.message}`,
         sender: 'ai',
         timestamp: new Date().toISOString(),
+        animate: false,
       }
-      setMessages((prevMessages) => [...prevMessages, errorMessage])
-    } finally {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === 'ai-loading-placeholder' ? errorMessage : msg,
+        ),
+      )
       setIsLoading(false)
     }
   }
+
+  const toggleChat = () => setIsOpen(!isOpen)
 
   return (
     <>
@@ -166,9 +196,20 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
               ref={chatBodyRef}
               className="flex-1 text-sm font-normal p-4 overflow-y-auto bg-background flex flex-col gap-4"
             >
-              {messages.map((message, index) => {
-                const isLastMessage = index === messages.length - 1
-                const shouldAnimate = isLastMessage && isLoading
+              {messages.map((message) => {
+                if (message.isLoading) {
+                  return (
+                    <div
+                      key={message.id}
+                      className="flex items-center gap-2.5 justify-start"
+                    >
+                      <div className="bg-secondary text-secondary-foreground rounded-lg px-3 py-2 flex items-center">
+                        <LoaderCircle className="animate-spin size-4" />
+                      </div>
+                    </div>
+                  )
+                }
+
                 return (
                   <div
                     key={message.id}
@@ -183,10 +224,9 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
                         {message.sender !== 'user' ? (
                           <AIMessage
                             fullContent={message.message}
-                            animate={shouldAnimate}
+                            animate={message.animate}
                           />
                         ) : (
-                          // A mensagem do usuário não precisa do efeito
                           <div className="prose-container prose prose-sm">
                             <ReactMarkdown>{message.message}</ReactMarkdown>
                           </div>
@@ -202,16 +242,9 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
                   </div>
                 )
               })}
-              {isLoading && (
-                <div className="flex items-center gap-2.5 justify-start">
-                  <div className="bg-secondary text-secondary-foreground rounded-lg px-3 py-2 flex items-center">
-                    <LoaderCircle className="animate-spin size-4" />
-                  </div>
-                </div>
-              )}
             </main>
 
-            <div className="p-4 border-t border-border bg-card rounded-b-lg">
+            <footer className="p-4 border-t border-border bg-card rounded-b-lg">
               <div className="flex items-center space-x-2">
                 <Input
                   disabled={isLoading}
@@ -235,7 +268,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
                   <SendHorizontal className="size-5" />
                 </Button>
               </div>
-            </div>
+            </footer>
           </motion.div>
         )}
       </AnimatePresence>
