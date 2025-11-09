@@ -11,7 +11,100 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import TableComponent from '@/Components/TableComponent'
-import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
+
+const getSharedColumns = ({
+  storyVariants,
+  project,
+  onMoveRequest,
+  selectedStories,
+}) => [
+  {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+  },
+  {
+    accessorKey: 'id',
+    header: 'ID',
+    cell: ({ row }) => {
+      const story = row.original
+      const selectedVariant = storyVariants[story.type] || '#f97316'
+      return (
+        <Badge
+          style={{ backgroundColor: selectedVariant }}
+          variant="outline"
+          className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
+        >
+          {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: 'title',
+    header: 'Title',
+    cell: ({ row }) => (
+      <div className="flex items-center !line-clamp-3">
+        {row.getValue('title')}
+      </div>
+    ),
+  },
+  { accessorKey: 'type', header: 'Type' },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      const story = row.original
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" title={'Options'}>
+              <EllipsisVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="start">
+            <DropdownMenuItem>
+              {selectedStories.length > 1
+                ? `${selectedStories.length} selected`
+                : `1 selected`}
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {project.sprints.map((sprint) => (
+                    <DropdownMenuItem
+                      key={sprint.id}
+                      // 4. O onClick agora chama a prop 'onMoveRequest'
+                      // Ele passa o ID da sprint e a story da linha
+                      onClick={() => onMoveRequest(sprint.id, story.id)}
+                    >
+                      {sprint.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
+  },
+]
 
 const selectItems = (itemList, rowSelection, setItems) => {
   const currentItems = []
@@ -30,98 +123,34 @@ const SprintTable = ({ sprint, moveToSprint, storyVariants, project }) => {
   useEffect(() => {
     selectItems(sprint.stories, rowSelection, setSelectedStories)
   }, [rowSelection])
-  const columns = [
-    {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: 'id',
-      header: 'ID',
-      cell: ({ row }) => {
-        const story = row.original
-        const selectedVariant = storyVariants[story.type] || '#f97316'
 
-        return (
-          <div className="flex items-center ">
-            <Badge
-              style={{ backgroundColor: selectedVariant }}
-              variant="outline"
-              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
-            >
-              {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
-            </Badge>
-          </div>
-        )
-      },
+  const handleMoveRequest = useCallback(
+    (sprintId, clickedStoryId) => {
+      let idsToMove = []
+      if (selectedStories.length > 0) {
+        idsToMove = selectedStories
+      } else {
+        idsToMove = [clickedStoryId]
+      }
+
+      // Chama a função 'moveToSprint' (do pai)
+      moveToSprint(sprintId, idsToMove).then(() => {
+        setRowSelection({}) // Limpa o estado LOCAL
+      })
     },
-    {
-      accessorKey: 'title',
-      header: 'Title',
-      cell: ({ row }) => (
-        <div className="flex items-center !line-clamp-3">
-          {row.getValue('title')}
-        </div>
-      ),
-    },
-    { accessorKey: 'type', header: 'Type' },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" title={'Options'}>
-                <EllipsisVertical />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              <DropdownMenuItem>Options</DropdownMenuItem>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    {project.sprints.map((sprint) => (
-                      <DropdownMenuItem
-                        key={sprint.id}
-                        onClick={() =>
-                          moveToSprint(
-                            sprint.id,
-                            selectedStories,
-                            setSelectedStories,
-                          )
-                        }
-                      >
-                        {sprint.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      },
-    },
-  ]
+    [selectedStories, moveToSprint],
+  )
+  const columns = useMemo(
+    () =>
+      getSharedColumns({
+        storyVariants,
+        project,
+        onMoveRequest: handleMoveRequest, // Passe o handler LOCAL
+        selectedStories,
+      }),
+    [storyVariants, project, handleMoveRequest, selectedStories],
+  )
+
   const table = useReactTable({
     data: sprint.stories || [],
     columns,
@@ -165,13 +194,8 @@ const ProductBacklog = ({ project, setProject }) => {
   const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState([])
 
-  const moveToSprint = async (
-    sprintId,
-    selectedStories,
-    setSelectedStories,
-  ) => {
-    console.log(selectedStories)
-    if (selectedStories.length === 0) return
+  const moveToSprint = async (sprintId, storyIdsToMove = []) => {
+    if (storyIdsToMove.length === 0) return
 
     setIsLoading(true)
 
@@ -182,7 +206,7 @@ const ProductBacklog = ({ project, setProject }) => {
       if (targetSprint) {
         // Adicionar stories selecionadas ao sprint
         const storiesToMove = updatedProject.stories.filter((s) =>
-          selectedStories.includes(s.id),
+          storyIdsToMove.includes(s.id),
         )
         targetSprint.stories = [
           ...(targetSprint.stories || []),
@@ -196,13 +220,11 @@ const ProductBacklog = ({ project, setProject }) => {
     router.post(
       route('sprint-stories.store', sprintId),
       {
-        story_ids: selectedStories,
+        story_ids: storyIdsToMove,
       },
       {
         onSuccess: (page) => {
-          setSelectedStories([])
           setIsLoading(false)
-          toast.success('Stories moved to sprint successfully!')
 
           if (page.props.project) {
             setProject(page.props.project)
@@ -212,7 +234,6 @@ const ProductBacklog = ({ project, setProject }) => {
         onError: (errors) => {
           setIsLoading(false)
           setError('Failed to move stories to sprint')
-          toast.error('Failed to move stories to sprint')
           console.error('Error:', errors)
 
           setLocalProject(project)
@@ -221,18 +242,6 @@ const ProductBacklog = ({ project, setProject }) => {
     )
   }
 
-  const handleNavigateToMatrix = () => {
-    localStorage.setItem('activeStoryDiscoveryMenu', 'Matriz de Priorização')
-
-    router.get(
-      route('project.ceremony.show', {
-        project: project.id,
-        ceremony: 'storyDiscovery',
-      }),
-    )
-  }
-
-  // ✅ Sincronizar estado local quando project muda
   useEffect(() => {
     setLocalProject(project)
   }, [project])
@@ -294,98 +303,33 @@ const ProductBacklog = ({ project, setProject }) => {
 
   const storyVariants = project?.system_colors?.stories || {}
 
-  const backlogColumns = [
-    {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: 'id',
-      header: 'ID',
-      cell: ({ row }) => {
-        const story = row.original
-        const selectedVariant = storyVariants[story.type] || '#f97316'
+  const handleMoveRequest = ({ sprintId, clickedStoryId }) => {
+    let idsToMove = []
+    if (selectedStories.length > 0) {
+      idsToMove = selectedStories.map((story) => story.id)
+    } else {
+      idsToMove = [clickedStoryId]
+    }
 
-        return (
-          <div className="flex items-center ">
-            <Badge
-              style={{ backgroundColor: selectedVariant }}
-              variant="outline"
-              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
-            >
-              {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
-            </Badge>
-          </div>
-        )
-      },
-    },
-    {
-      accessorKey: 'title',
-      header: 'Title',
-      cell: ({ row }) => (
-        <div className="flex items-center !line-clamp-3">
-          {row.getValue('title')}
-        </div>
-      ),
-    },
-    { accessorKey: 'type', header: 'Type' },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" title={'Options'}>
-                <EllipsisVertical />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              <DropdownMenuItem>Options</DropdownMenuItem>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    {project.sprints.map((sprint) => (
-                      <DropdownMenuItem
-                        key={sprint.id}
-                        onClick={() =>
-                          moveToSprint(
-                            sprint.id,
-                            selectedStories,
-                            setSelectedStories,
-                          )
-                        }
-                      >
-                        {sprint.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      },
-    },
-  ]
+    moveToSprint(sprintId, idsToMove).then(() => {
+      setRowSelection({})
+    })
+  }
+
+  const backlogColumns = useMemo(
+    () =>
+      getSharedColumns({
+        storyVariants,
+        project,
+        onMoveRequest: handleMoveRequest,
+        selectedStories,
+      }),
+    [storyVariants, project, handleMoveRequest, selectedStories],
+  )
+
+  useEffect(() => {
+    selectItems(board.productBacklog, rowSelection, setSelectedStories)
+  }, [rowSelection])
 
   const productBacklogTable = useReactTable({
     data: board.productBacklog,
@@ -399,9 +343,6 @@ const ProductBacklog = ({ project, setProject }) => {
       sorting,
     },
   })
-  useEffect(() => {
-    selectItems(board.productBacklog, rowSelection, setSelectedStories)
-  }, [rowSelection])
 
   if (error) {
     return (
@@ -420,7 +361,7 @@ const ProductBacklog = ({ project, setProject }) => {
         type="single"
         collapsible
         className="w-full"
-        defaultValue="item-1"
+        defaultValue="Product Backlog"
       >
         <AccordionItem
           value={'Product Backlog'}
