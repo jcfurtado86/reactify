@@ -26,3 +26,4 @@ env-reactify/
 wrangler.jsonc
 laradumps.yaml
 __pycache__
+.whisper_models
