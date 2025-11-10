@@ -1,4 +1,4 @@
-# reactify
+### Configurar serviço python(uma vez)
  
 >**Necessário** ter o Python previamente instalado
 
@@ -11,23 +11,21 @@
    ```bash
    source .venv/bin/activate
    ```
-- Ativar o ambiente virtual (windows):
-   ```bash
-   .venv\Scripts\activate
-   ```
    
-- Adicionar as dependencias do projeto:
+- Baixar as dependencias do projeto:
    ```bash
    cd py_service
    pip install -r requirements.txt
    ```
 
-- Desativar o ambiente virtual (linux):
+### Antes de rodar o projeto
+     
+- Ativar o ambiente virtua na raiz (linux):
    ```bash
-   deactivate
+   source .venv/bin/activate
    ```
-   
-- Rodar(raiz)
+
+- Rodar o projeto:
    ```bash
-    composer dev
+   composer dev
    ```

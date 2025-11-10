@@ -21,7 +21,7 @@ print("Carregando o modelo Whisper...")
 # large | 1550 M | N/A | large | ~10 GB | 1x
 # turbo | 809 M | N/A | turbo | ~6 GB | ~8x
 
-model = whisper.load_model("medium", download_root=MODEL_DIR) #para rodar na cpu: device="cpu"
+model = whisper.load_model("medium", download_root=MODEL_DIR, device="cpu") #para rodar na cpu: device="cpu"
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe_audio():

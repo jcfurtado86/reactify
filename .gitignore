@@ -25,5 +25,5 @@ env-reactify/
 .env.testing
 wrangler.jsonc
 laradumps.yaml
-/py_service
-/py_service/__pycache__
+__pycache__
+.whisper_models
