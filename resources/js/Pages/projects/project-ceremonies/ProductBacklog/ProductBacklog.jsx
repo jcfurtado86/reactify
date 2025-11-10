@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
-import { toast } from 'sonner'
-import { Loader2, ArrowRight, EllipsisVertical } from 'lucide-react'
+import { EllipsisVertical } from 'lucide-react'
 import {
   flexRender,
   getCoreRowModel,
@@ -11,6 +10,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import TableComponent from '@/Components/TableComponent'
+import NewSprintForm from '../Sprint/NewSprintForm'
 
 const getSharedColumns = ({
   storyVariants,
@@ -64,9 +64,52 @@ const getSharedColumns = ({
       </div>
     ),
   },
-  { accessorKey: 'type', header: 'Type' },
+  {
+    accessorKey: 'pivot.kanban_status',
+    header: 'Status',
+    cell: ({ row }) => {
+      const story = row.original
+      const status = story?.pivot?.kanban_status || 'Backlog'
+      const getStatusColor = (status) => {
+        switch (status) {
+          case 'Backlog':
+            return '#433E3F' // Jet
+          case 'In Progress':
+            return '#A5D8FF' // uranian blue
+          case 'Completed':
+            return '#6F9B77' //
+          default:
+            return '#433E3F' //
+        }
+      }
+      return (
+        <div className="flex items-center ">
+          <Badge
+            variant={'ghost'}
+            style={{ backgroundColor: getStatusColor(status) }}
+            className="whitespace-nowrap"
+          >
+            {status.replace('_', ' ').toUpperCase()}
+          </Badge>
+        </div>
+      )
+    },
+  },
   {
     id: 'actions',
+    header: () => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" title={'Options'}>
+            <EllipsisVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="start">
+          <DropdownMenuItem>Sprint Options</DropdownMenuItem>
+          <DropdownMenuItem>Edit Sprint</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
     cell: ({ row }) => {
       const story = row.original
       return (
@@ -86,16 +129,18 @@ const getSharedColumns = ({
               <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
-                  {project.sprints.map((sprint) => (
-                    <DropdownMenuItem
-                      key={sprint.id}
-                      // 4. O onClick agora chama a prop 'onMoveRequest'
-                      // Ele passa o ID da sprint e a story da linha
-                      onClick={() => onMoveRequest(sprint.id, story.id)}
-                    >
-                      {sprint.name}
-                    </DropdownMenuItem>
-                  ))}
+                  {project.sprints
+                    .sort((a, b) => a.created_at - b.created_at)
+                    .map((sprint) => (
+                      <DropdownMenuItem
+                        key={sprint.id}
+                        // 4. O onClick agora chama a prop 'onMoveRequest'
+                        // Ele passa o ID da sprint e a story da linha
+                        onClick={() => onMoveRequest(sprint.id, story.id)}
+                      >
+                        {sprint.name}
+                      </DropdownMenuItem>
+                    ))}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
@@ -165,22 +210,28 @@ const SprintTable = ({ sprint, moveToSprint, storyVariants, project }) => {
   })
 
   return (
-    <AccordionItem
-      key={sprint.id}
-      value={sprint.name}
-      className=" px-4 border border-accent"
+    <Accordion
+      defaultValue={sprint.stories.length > 0 ? sprint.name : ''}
+      type="single"
+      collapsible
     >
-      <AccordionTrigger>
-        <div>
-          {sprint.name} - {table.getRowCount()} items
-        </div>
-      </AccordionTrigger>
-      <AccordionContent>
-        <div className="overflow-hidden rounded-md border ">
-          <TableComponent table={table} />
-        </div>
-      </AccordionContent>
-    </AccordionItem>
+      <AccordionItem
+        key={sprint.id}
+        value={sprint.name}
+        className=" px-4 border border-accent"
+      >
+        <AccordionTrigger>
+          <div>
+            {sprint.name} - {table.getRowCount()} items
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="overflow-hidden rounded-md border ">
+            <TableComponent table={table} />
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   )
 }
 
@@ -357,6 +408,9 @@ const ProductBacklog = ({ project, setProject }) => {
   }
   return (
     <div className="flex flex-col p-4 min-h-[500px]">
+      <section>
+        <NewSprintForm project={project} setProject={setProject} />
+      </section>
       <Accordion
         type="single"
         collapsible
@@ -378,16 +432,16 @@ const ProductBacklog = ({ project, setProject }) => {
             </div>
           </AccordionContent>
         </AccordionItem>
-        {project.sprints.map((sprint) => (
-          <SprintTable
-            key={sprint.id}
-            sprint={sprint}
-            storyVariants={storyVariants}
-            moveToSprint={moveToSprint}
-            project={project}
-          />
-        ))}
       </Accordion>
+      {project.sprints.map((sprint) => (
+        <SprintTable
+          key={sprint.id}
+          sprint={sprint}
+          storyVariants={storyVariants}
+          moveToSprint={moveToSprint}
+          project={project}
+        />
+      ))}
     </div>
   )
 }

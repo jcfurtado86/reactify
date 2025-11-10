@@ -7,9 +7,21 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { Calendar } from '@/components/ui/calendar'
+import NewSprintForm from './NewSprintForm'
+
+const getActiveSprint = (sprints) => {
+  const now = new Date()
+  return sprints.find((sprint) => {
+    const startDate = new Date(sprint.start_date)
+    const endDate = new Date(sprint.end_date)
+    return startDate <= now && now <= endDate
+  })
+}
 
 const Sprint = ({ project, setProject }) => {
-  const [activeSprint, setActiveSprint] = useState(null)
+  const [activeSprint, setActiveSprint] = useState(
+    getActiveSprint(project?.sprints || []),
+  )
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [view, setView] = useState('list')
   const sprints = project?.sprints || []
@@ -61,7 +73,7 @@ const Sprint = ({ project, setProject }) => {
   return (
     <div className="w-full space-y-6 p-4">
       {/* Header */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-2xl">Sprint Management</CardTitle>
@@ -84,7 +96,7 @@ const Sprint = ({ project, setProject }) => {
             </div>
           </div>
         </CardHeader>
-      </Card>
+      </Card>*/}
 
       {/* Form de Criação de Sprint */}
       {showCreateForm && (
@@ -183,24 +195,15 @@ const Sprint = ({ project, setProject }) => {
           </CardContent>
         </Card>
       )}
-
+      {/* <NewSprintForm project={project} setProject={setProject} />*/}
       {/* Content */}
-      {view === 'list' ? (
-        <SprintList
-          sprints={sprints}
-          setActiveSprint={setActiveSprint}
-          setView={setView}
-          systemColors={project?.system_colors}
-          updateProject={updateProjectData}
-        />
-      ) : (
-        <KanbanBoard
-          sprint={activeSprint}
-          systemColors={project?.system_colors}
-          setView={setView}
-          updateProject={updateProjectData}
-        />
-      )}
+
+      <KanbanBoard
+        sprint={activeSprint}
+        systemColors={project?.system_colors}
+        setView={setView}
+        updateProject={updateProjectData}
+      />
     </div>
   )
 }

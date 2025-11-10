@@ -43,15 +43,15 @@ const KanbanStoryCard = ({ story, columnKey, isOverlay, systemColors }) => {
   const overlayClasses = isOverlay
     ? 'shadow-2xl cursor-grabbing'
     : 'cursor-grab active:cursor-grabbing'
-  const storyVariants = systemColors?.stories
-
+  const storyVariants = systemColors?.stories || {}
+  const selectedVariant = storyVariants[story.type] || '#fff'
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <Card className={`p-3 ${overlayClasses}`}>
         <div className="space-y-2">
           <div className="flex justify-between items-start">
             <Badge
-              style={{ backgroundColor: storyVariants[story.type] }}
+              style={{ backgroundColor: selectedVariant }}
               variant="outline"
               className="border-transparent text-primary-foreground font-bold cursor-pointer"
             >
@@ -102,7 +102,13 @@ const KanbanColumn = ({ id, title, variant, stories, systemColors }) => {
 // ============================================================================
 // Componente Principal do Kanban Board
 // ============================================================================
-const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
+const KanbanBoard = ({
+  sprint,
+  project,
+  setView,
+  updateProject,
+  systemColors,
+}) => {
   const [localStories, setLocalStories] = useState([])
   // ✅ Estado para armazenar a story que está sendo arrastada
   const [activeStory, setActiveStory] = useState(null)
@@ -233,9 +239,6 @@ const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={() => setView('list')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-            </Button>
             <CardTitle>{sprint.name}</CardTitle>
             <Badge variant="outline">{totalStories} stories total</Badge>
           </div>
@@ -271,7 +274,7 @@ const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
                 title={column.title}
                 variant={column.variant}
                 stories={storiesByStatus[column.key]}
-                systemColors={project?.system_colors}
+                systemColors={systemColors}
               />
             ))}
           </div>
@@ -279,7 +282,7 @@ const KanbanBoard = ({ sprint, project, setView, updateProject }) => {
           <DragOverlay>
             {activeStory ? (
               <KanbanStoryCard
-                systemColors={project?.system_colors}
+                systemColors={systemColors}
                 story={activeStory}
                 isOverlay
               />
