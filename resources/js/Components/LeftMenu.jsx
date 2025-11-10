@@ -1,17 +1,6 @@
 import { useState, useEffect } from 'react'
-import { usePage, router, Link } from '@inertiajs/react'
-import {
-  Grid,
-  User,
-  Squirrel,
-  LogOut,
-  Sun,
-  Moon,
-  Home,
-  Bell,
-  ChevronsRight,
-  Milestone,
-} from 'lucide-react'
+import { usePage, router } from '@inertiajs/react'
+import { Grid, Milestone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 

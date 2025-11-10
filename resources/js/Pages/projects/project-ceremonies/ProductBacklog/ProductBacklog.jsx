@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
 import { EllipsisVertical } from 'lucide-react'
 import {
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -45,11 +44,7 @@ const getSharedColumns = ({
       const story = row.original
       const selectedVariant = storyVariants[story.type] || '#f97316'
       return (
-        <Badge
-          style={{ backgroundColor: selectedVariant }}
-          variant="outline"
-          className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
-        >
+        <Badge style={{ backgroundColor: selectedVariant }} variant="badge">
           {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
         </Badge>
       )
@@ -58,8 +53,9 @@ const getSharedColumns = ({
   {
     accessorKey: 'title',
     header: 'Title',
+    meta: { className: 'w-[80%]' },
     cell: ({ row }) => (
-      <div className="flex items-center !line-clamp-3">
+      <div className="flex items-center w-full !line-clamp-3">
         {row.getValue('title')}
       </div>
     ),
@@ -73,11 +69,15 @@ const getSharedColumns = ({
       const getStatusColor = (status) => {
         switch (status) {
           case 'Backlog':
-            return '#433E3F' // Jet
-          case 'In Progress':
-            return '#A5D8FF' // uranian blue
-          case 'Completed':
-            return '#6F9B77' //
+            return '#0095B6' // Jet
+          case 'todo':
+            return '#E0FFFF' // oxford blue
+          case 'in_progress':
+            return '#0095B6' // celtic blue
+          case 'testing':
+            return '#FF7F50'
+          case 'done':
+            return '#03C03C' //
           default:
             return '#433E3F' //
         }
@@ -85,9 +85,8 @@ const getSharedColumns = ({
       return (
         <div className="flex items-center ">
           <Badge
-            variant={'ghost'}
+            variant={'badge'}
             style={{ backgroundColor: getStatusColor(status) }}
-            className="whitespace-nowrap"
           >
             {status.replace('_', ' ').toUpperCase()}
           </Badge>
@@ -415,7 +414,9 @@ const ProductBacklog = ({ project, setProject }) => {
         type="single"
         collapsible
         className="w-full"
-        defaultValue="Product Backlog"
+        defaultValue={
+          productBacklogTable.getRowCount() > 0 ? 'Product Backlog' : ''
+        }
       >
         <AccordionItem
           value={'Product Backlog'}

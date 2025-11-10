@@ -1,4 +1,5 @@
 import { flexRender } from '@tanstack/react-table'
+import { cn } from '@/lib/utils'
 
 const TableComponent = ({ table }) => {
   const columns = table.getVisibleLeafColumns().length
@@ -31,7 +32,13 @@ const TableComponent = ({ table }) => {
               data-state={row.getIsSelected() && 'selected'}
             >
               {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
+                <TableCell
+                  key={cell.id}
+                  className={cn(
+                    // Trunca o texto se for muito longo
+                    cell.column.columnDef.meta?.className, // Nossa nova classe!
+                  )}
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}

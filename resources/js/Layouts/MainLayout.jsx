@@ -29,7 +29,7 @@ const GuestLayout = ({ children }) => {
 
 const AuthenticatedLayout = ({ children }) => {
   const { message, status, flash_key } = usePage().props.flash
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
   useEffect(() => {
     if (!message || !status) return
 
