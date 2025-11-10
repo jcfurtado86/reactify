@@ -106,3 +106,20 @@ export function useGroupedStories(stories) {
   }, [stories])
   return childrenByEpicId
 }
+
+export const getStatusColor = (status) => {
+  switch (status) {
+    case 'Backlog':
+      return '#0095B6' // Jet
+    case 'todo':
+      return '#E0FFFF' // oxford blue
+    case 'in_progress':
+      return '#0095B6' // celtic blue
+    case 'testing':
+      return '#FF7F50'
+    case 'done':
+      return '#03C03C' //
+    default:
+      return '#433E3F' //
+  }
+}

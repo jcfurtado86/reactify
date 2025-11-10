@@ -19,7 +19,7 @@ const NewSprintForm = ({ project, setProject }) => {
   const handleCreateSprint = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
-
+    console.log(formData, e)
     const sprintData = {
       name: formData.get('name'),
       start_date: startDate ? format(startDate, 'yyyy-MM-dd') : null,
@@ -52,7 +52,7 @@ const NewSprintForm = ({ project, setProject }) => {
   }
 
   return (
-    <div className="w-full space-y-6 p-4">
+    <div className="">
       {/* Header */}
       <Button onClick={() => setShowCreateForm(!showCreateForm)}>
         <Plus className="w-4 h-4 mr-2" />

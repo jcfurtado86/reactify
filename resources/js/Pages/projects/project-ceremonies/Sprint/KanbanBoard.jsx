@@ -1,4 +1,3 @@
-// resources/js/Pages/Project/project-ceremonies/Sprint/KanbanBoard.jsx
 import { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
 import {
@@ -12,11 +11,8 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft } from 'lucide-react'
-
+import { getStatusColor } from '@/lib/utils'
 // ============================================================================
 // Subcomponente para o Card da Story (Item Arrastável)
 // ============================================================================
@@ -68,12 +64,11 @@ const KanbanStoryCard = ({ story, columnKey, isOverlay, systemColors }) => {
 // ============================================================================
 // Subcomponente para a Coluna do Kanban (Área de Soltar)
 // ============================================================================
-const KanbanColumn = ({ id, title, variant, stories, systemColors }) => {
+const KanbanColumn = ({ id, variant, title, stories, systemColors }) => {
   // ✅ Hook do dnd-kit para tornar este componente uma área de soltar
   const { setNodeRef, isOver } = useDroppable({
     id: id,
   })
-
   return (
     <Card
       ref={setNodeRef}
@@ -82,7 +77,12 @@ const KanbanColumn = ({ id, title, variant, stories, systemColors }) => {
       <CardHeader className="pb-4">
         <CardTitle className="flex justify-between items-center text-sm">
           <span className="capitalize">{title}</span>
-          <Badge variant={variant}>{stories.length}</Badge>
+          <Badge
+            style={{ backgroundColor: getStatusColor(variant) }}
+            variant={'badge'}
+          >
+            {stories.length}
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -208,10 +208,10 @@ const KanbanBoard = ({
   )
 
   const columns = [
-    { key: 'todo', title: 'To Do', variant: 'secondary' },
-    { key: 'in_progress', title: 'In Progress', variant: 'secondary' },
-    { key: 'testing', title: 'Testing', variant: 'secondary' },
-    { key: 'done', title: 'Done', variant: 'secondary' },
+    { key: 'todo', title: 'To Do' },
+    { key: 'in_progress', title: 'In Progress' },
+    { key: 'testing', title: 'Testing' },
+    { key: 'done', title: 'Done' },
   ]
 
   // A lógica de renderização para o estado de 'nenhuma sprint' permanece a mesma
@@ -270,9 +270,9 @@ const KanbanBoard = ({
             {columns.map((column) => (
               <KanbanColumn
                 key={column.key}
+                variant={column.key}
                 id={column.key}
                 title={column.title}
-                variant={column.variant}
                 stories={storiesByStatus[column.key]}
                 systemColors={systemColors}
               />

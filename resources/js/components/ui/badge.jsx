@@ -15,7 +15,7 @@ const badgeVariants = cva(
         destructive:
           'border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80',
         outline: 'text-foreground ',
-        badge: 'text-black font-bold w-fit cursor-pointer',
+        badge: 'text-black font-bold w-fit cursor-pointer whitespace-nowrap',
         numberIcon:
           'absolute flex size-5 -top-2 -left-2 items-center justify-center text-center text-sm p-1 rounded-full font-bold border-0 text-white cursor-pointer ',
       },

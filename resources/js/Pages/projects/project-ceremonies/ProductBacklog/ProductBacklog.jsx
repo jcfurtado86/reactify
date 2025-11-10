@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
-import { EllipsisVertical } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { EllipsisVertical, Calendar as CalendarIcon } from 'lucide-react'
+import { getStatusColor } from '@/lib/utils'
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -52,7 +56,7 @@ const getSharedColumns = ({
   },
   {
     accessorKey: 'title',
-    header: 'Title',
+    header: 'Título',
     meta: { className: 'w-[80%]' },
     cell: ({ row }) => (
       <div className="flex items-center w-full !line-clamp-3">
@@ -66,22 +70,7 @@ const getSharedColumns = ({
     cell: ({ row }) => {
       const story = row.original
       const status = story?.pivot?.kanban_status || 'Backlog'
-      const getStatusColor = (status) => {
-        switch (status) {
-          case 'Backlog':
-            return '#0095B6' // Jet
-          case 'todo':
-            return '#E0FFFF' // oxford blue
-          case 'in_progress':
-            return '#0095B6' // celtic blue
-          case 'testing':
-            return '#FF7F50'
-          case 'done':
-            return '#03C03C' //
-          default:
-            return '#433E3F' //
-        }
-      }
+
       return (
         <div className="flex items-center ">
           <Badge
@@ -96,19 +85,7 @@ const getSharedColumns = ({
   },
   {
     id: 'actions',
-    header: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" title={'Options'}>
-            <EllipsisVertical />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="start">
-          <DropdownMenuItem>Sprint Options</DropdownMenuItem>
-          <DropdownMenuItem>Edit Sprint</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    header: '',
     cell: ({ row }) => {
       const story = row.original
       return (
@@ -158,7 +135,15 @@ const selectItems = (itemList, rowSelection, setItems) => {
   setItems(currentItems)
 }
 
-const SprintTable = ({ sprint, moveToSprint, storyVariants, project }) => {
+const SprintTable = ({
+  sprint,
+  moveToSprint,
+  storyVariants,
+  project,
+  open,
+  setOpen,
+  setSelectedSprint,
+}) => {
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState([])
@@ -207,7 +192,12 @@ const SprintTable = ({ sprint, moveToSprint, storyVariants, project }) => {
       sorting,
     },
   })
-
+  const editSprint = (e, sprint) => {
+    e.preventDefault()
+    setOpen(!open)
+    setSelectedSprint(sprint)
+    console.log(sprint)
+  }
   return (
     <Accordion
       defaultValue={sprint.stories.length > 0 ? sprint.name : ''}
@@ -220,10 +210,30 @@ const SprintTable = ({ sprint, moveToSprint, storyVariants, project }) => {
         className=" px-4 border border-accent"
       >
         <AccordionTrigger>
-          <div>
-            {sprint.name} - {table.getRowCount()} items
+          <div className="flex gap-4">
+            <span className="font-bold">{sprint.name}</span>
+            <span className="text-muted-foreground">
+              {' '}
+              {new Date(sprint.start_date).toLocaleDateString('pt-BR')} -{' '}
+              {new Date(sprint.end_date).toLocaleDateString('pt-BR')} (
+              {table.getRowCount()} items)
+            </span>{' '}
+            <span
+              role="button"
+              tabIndex={0}
+              className="border border-border px-2 hover:bg-accent"
+              onClick={(e) => editSprint(e, sprint)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  editSprint(e, sprint)
+                }
+              }}
+            >
+              Editar sprint
+            </span>
           </div>
         </AccordionTrigger>
+
         <AccordionContent>
           <div className="overflow-hidden rounded-md border ">
             <TableComponent table={table} />
@@ -236,6 +246,12 @@ const SprintTable = ({ sprint, moveToSprint, storyVariants, project }) => {
 
 const ProductBacklog = ({ project, setProject }) => {
   const [localProject, setLocalProject] = useState(project)
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(
+    new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // Default para 14 dias no futuro
+  )
+  const [open, setOpen] = useState(false)
+  const [selectedSprint, setSelectedSprint] = useState(null)
   const [selectedStories, setSelectedStories] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -295,6 +311,11 @@ const ProductBacklog = ({ project, setProject }) => {
   useEffect(() => {
     setLocalProject(project)
   }, [project])
+
+  useEffect(() => {
+    setStartDate(selectedSprint?.start_date || null)
+    setEndDate(selectedSprint?.end_date || null)
+  }, [selectedSprint])
 
   const { productBacklogStories, sprintBacklogStories, deliveredStories } =
     useMemo(() => {
@@ -394,6 +415,59 @@ const ProductBacklog = ({ project, setProject }) => {
     },
   })
 
+  const createSprint = (e) => {
+    e.preventDefault()
+    setOpen(!open)
+    setSelectedSprint(null)
+    console.log()
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const formData = new FormData(e.target)
+    const sprintData = {
+      name: formData.get('name'),
+      start_date: startDate ? format(startDate, 'yyyy-MM-dd') : null,
+      end_date: endDate ? format(endDate, 'yyyy-MM-dd') : null,
+      project_id: project.id,
+      status: selectedSprint?.status || 'planning',
+    }
+    console.log(sprintData)
+    if (selectedSprint) {
+      router.patch(
+        route('sprint.update', selectedSprint.id),
+        {
+          name: sprintData.name,
+          start_date: sprintData.start_date.split('T')[0],
+          end_date: sprintData.end_date.split('T')[0],
+        },
+        {
+          preserveState: true,
+          preserveScroll: true,
+        },
+      )
+      setOpen(false)
+      setSelectedSprint(null)
+    } else {
+      router.post(
+        route('sprint.store'),
+        {
+          name: sprintData.name,
+          start_date: sprintData.start_date.split('T')[0],
+          end_date: sprintData.end_date.split('T')[0],
+          status: 'planning',
+          project_id: project.id,
+        },
+        {
+          preserveState: true,
+          preserveScroll: true,
+        },
+      )
+      setOpen(false)
+      setSelectedSprint(null)
+    }
+  }
+
   if (error) {
     return (
       <div className="p-4">
@@ -405,11 +479,110 @@ const ProductBacklog = ({ project, setProject }) => {
       </div>
     )
   }
+
   return (
     <div className="flex flex-col p-4 min-h-[500px]">
-      <section>
-        <NewSprintForm project={project} setProject={setProject} />
-      </section>
+      {/* editar sprint */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedSprint?.name ? 'Editar sprint' : 'Criar sprint'}
+            </DialogTitle>
+            <DialogDescription>
+              {' '}
+              {selectedSprint?.name
+                ? 'Altere as informações da sprint.'
+                : 'Preencha as informações da nova sprint.'}
+              Clique para salvar.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 pb-2">
+              <div className="grid gap-3">
+                <Label htmlFor="name-1">Nome</Label>
+                <Input
+                  id="name-1"
+                  name="name"
+                  defaultValue={
+                    selectedSprint?.name || 'Sprint 1 - Configuração Inicial'
+                  }
+                />
+              </div>
+              <div className="grid gap-3">
+                <label className="text-sm font-medium">Data de início</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !startDate && 'text-muted-foreground',
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 size-4 " />
+                      {startDate ? (
+                        format(startDate, 'dd/MM/yyyy', { locale: ptBR })
+                      ) : (
+                        <span>Escolha uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      disabled={{ before: new Date() }}
+                      locale={ptBR}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Data de término</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !endDate && 'text-muted-foreground',
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? (
+                        format(endDate, 'dd/MM/yyyy', { locale: ptBR })
+                      ) : (
+                        <span>Escolha uma data</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      disabled={{ before: new Date() }}
+                      locale={ptBR}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <hr />
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancelar</Button>
+              </DialogClose>
+              <Button type="submit">Salvar Alterações</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      {/* product backlog*/}
       <Accordion
         type="single"
         collapsible
@@ -423,8 +596,21 @@ const ProductBacklog = ({ project, setProject }) => {
           className=" px-4 border border-accent"
         >
           <AccordionTrigger>
-            <div>
-              Product Backlog - {productBacklogTable.getRowCount()} items
+            <div className="flex gap-4">
+              Product Backlog ({productBacklogTable.getRowCount()} items)
+              <span
+                role="button"
+                tabIndex={0}
+                className="border border-border px-2 hover:bg-accent"
+                onClick={(e) => createSprint(e)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    createSprint(e)
+                  }
+                }}
+              >
+                Criar sprint
+              </span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -441,6 +627,9 @@ const ProductBacklog = ({ project, setProject }) => {
           storyVariants={storyVariants}
           moveToSprint={moveToSprint}
           project={project}
+          open={open}
+          setOpen={setOpen}
+          setSelectedSprint={setSelectedSprint}
         />
       ))}
     </div>
