@@ -18,21 +18,22 @@ use App\Observers\ChangeRequestObserver;
 use App\Observers\BusinessRuleObserver;
 use App\Observers\SystemInterfaceObserver;
 use App\Observers\InterviewObserver;
-
-use App\Models\Story;
-use App\Models\UsageScenario;
-use App\Models\ProductCanvas;
-use App\Models\Goal;
-use App\Models\SystemColor;
+use App\Observers\ProjectObserver;
+use App\Observers\SystemColorObserver;
+use App\Observers\SprintObserver;
 
 use App\Models\Journey;
 use App\Models\Persona;
 use App\Models\CrcCard;
 use App\Models\Prioritization;
 use App\Models\Storyboard;
-use App\Observers\ProjectObserver;
 
-use App\Observers\SystemColorObserver;
+use App\Models\Story;
+use App\Models\UsageScenario;
+use App\Models\ProductCanvas;
+use App\Models\Goal;
+use App\Models\SystemColor;
+use App\Models\Sprint;
 
 use App\Models\MatrixPriority;
 use App\Models\ChangeRequest;
@@ -78,5 +79,6 @@ class AppServiceProvider extends ServiceProvider
     Interview::observe(InterviewObserver::class);
     Project::observe(ProjectObserver::class);
     SystemColor::observe(SystemColorObserver::class);
+    Sprint::observe(SprintObserver::class);
   }
 }
