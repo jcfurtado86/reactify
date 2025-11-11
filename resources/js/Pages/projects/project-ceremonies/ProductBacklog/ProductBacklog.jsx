@@ -226,15 +226,20 @@ const SprintTable = ({
         value={sprint.name}
         className=" px-4 border border-accent"
       >
-        <AccordionTrigger>
+        <AccordionTrigger className="hover:no-underline">
           <div className="flex gap-4">
-            <span className="font-bold">{sprint.name}</span>
+            <span className="font-bold hover:underline">{sprint.name}</span>
             <span className="text-muted-foreground">
               {' '}
               {new Date(sprint.start_date).toLocaleDateString('pt-BR')} -{' '}
               {new Date(sprint.end_date).toLocaleDateString('pt-BR')} (
               {table.getRowCount()} items)
-            </span>{' '}
+            </span>
+            {sprint.status === 'active' && (
+              <Badge variant="badge" className={'bg-green-300'}>
+                Atual
+              </Badge>
+            )}
             <span
               role="button"
               tabIndex={0}
@@ -248,20 +253,22 @@ const SprintTable = ({
             >
               Editar sprint
             </span>
-            <span
-              role="button"
-              tabIndex={0}
-              className="border border-border px-2 hover:bg-accent"
-              onClick={(e) => openChangeStatusDialog(e, sprint)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  openChangeStatusDialog(e, sprint)
-                }
-              }}
-            >
-              {sprint?.status === 'planning' && 'Iniciar Sprint'}
-              {sprint?.status === 'active' && 'Finalizar Sprint'}
-            </span>
+            {(sprint.status === 'active' || sprint.status === 'planning') && (
+              <span
+                role="button"
+                tabIndex={0}
+                className="border border-border px-2 hover:bg-accent"
+                onClick={(e) => openChangeStatusDialog(e, sprint)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    openChangeStatusDialog(e, sprint)
+                  }
+                }}
+              >
+                {sprint?.status === 'planning' && 'Iniciar Sprint'}
+                {sprint?.status === 'active' && 'Finalizar Sprint'}
+              </span>
+            )}
             <span
               role="button"
               tabIndex={0}
@@ -720,9 +727,13 @@ const ProductBacklog = ({ project, setProject }) => {
           value={'Product Backlog'}
           className=" px-4 border border-accent"
         >
-          <AccordionTrigger>
+          <AccordionTrigger className="hover:no-underline">
             <div className="flex gap-4">
-              Product Backlog ({productBacklogTable.getRowCount()} items)
+              <span className="hover:underline">
+                {' '}
+                Product Backlog ({productBacklogTable.getRowCount()} items)
+              </span>
+
               <span
                 role="button"
                 tabIndex={0}
