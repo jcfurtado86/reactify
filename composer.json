@@ -73,7 +73,7 @@
     ],
     "dev": [
       "Composer\\Config::disableProcessTimeout",
-      "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74,#4ade80,#4ff3ed\" --kill-others-on-fail \"php artisan reverb:start\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\"  --names=reverb,server,queue,logs,vite,python"
+      "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74,#4ade80,#4ff3ed,#fca5a5\" --kill-others-on-fail --names \"reverb,server,queue,logs,vite,py-chat,py-transcribe\" \"php artisan reverb:start\" \"php artisan serve --port=8000\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" \".venv/bin/flask --app py_service/chat_service.py run --port=5002\" \".venv/bin/flask --app py_service/interview_service.py run --port=5001\""
     ]
   },
   "extra": {
