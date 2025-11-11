@@ -110,11 +110,9 @@ const getSharedColumns = ({
                     .map((sprint) => (
                       <DropdownMenuItem
                         key={sprint.id}
-                        // 4. O onClick agora chama a prop 'onMoveRequest'
-                        // Ele passa o ID da sprint e a story da linha
                         onClick={() => onMoveRequest(sprint.id, story.id)}
                       >
-                        {sprint.name}
+                        {sprint.name}-{sprint.id}
                       </DropdownMenuItem>
                     ))}
                 </DropdownMenuSubContent>
@@ -262,6 +260,10 @@ const ProductBacklog = ({ project, setProject }) => {
 
   const moveToSprint = async (sprintId, storyIdsToMove = []) => {
     if (storyIdsToMove.length === 0) return
+    if (!sprintId) {
+      console.error('Sprint ID is required')
+      return
+    }
 
     setIsLoading(true)
 
@@ -282,7 +284,7 @@ const ProductBacklog = ({ project, setProject }) => {
 
       return updatedProject
     })
-
+    console.log(sprintId)
     router.post(
       route('sprint-stories.store', sprintId),
       {
@@ -374,10 +376,10 @@ const ProductBacklog = ({ project, setProject }) => {
 
   const storyVariants = project?.system_colors?.stories || {}
 
-  const handleMoveRequest = ({ sprintId, clickedStoryId }) => {
+  const handleMoveRequest = (sprintId, clickedStoryId) => {
     let idsToMove = []
     if (selectedStories.length > 0) {
-      idsToMove = selectedStories.map((story) => story.id)
+      idsToMove = selectedStories
     } else {
       idsToMove = [clickedStoryId]
     }
