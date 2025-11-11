@@ -3,7 +3,11 @@ import { router } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { EllipsisVertical, Calendar as CalendarIcon } from 'lucide-react'
+import {
+  EllipsisVertical,
+  Calendar as CalendarIcon,
+  Trash2Icon as TrashIcon,
+} from 'lucide-react'
 import { getStatusColor } from '@/lib/utils'
 import {
   getCoreRowModel,
@@ -14,6 +18,7 @@ import {
 } from '@tanstack/react-table'
 import TableComponent from '@/Components/TableComponent'
 import NewSprintForm from '../Sprint/NewSprintForm'
+import { toast } from 'sonner'
 
 const getSharedColumns = ({
   storyVariants,
@@ -140,6 +145,10 @@ const SprintTable = ({
   project,
   open,
   setOpen,
+  openDeleteForm,
+  setOpenDeleteForm,
+  openStatusDialog,
+  setOpenStatusDialog,
   setSelectedSprint,
 }) => {
   const [sorting, setSorting] = useState([])
@@ -190,12 +199,22 @@ const SprintTable = ({
       sorting,
     },
   })
-  const editSprint = (e, sprint) => {
+  const openEditSprintForm = (e, sprint) => {
     e.preventDefault()
     setOpen(!open)
     setSelectedSprint(sprint)
-    console.log(sprint)
   }
+  const openDeleteSprintForm = (e, sprint) => {
+    e.preventDefault()
+    setOpenDeleteForm(!openDeleteForm)
+    setSelectedSprint(sprint)
+  }
+  const openChangeStatusDialog = (e, sprint) => {
+    e.preventDefault()
+    setOpenStatusDialog(!openStatusDialog)
+    setSelectedSprint(sprint)
+  }
+
   return (
     <Accordion
       defaultValue={sprint.stories.length > 0 ? sprint.name : ''}
@@ -220,14 +239,42 @@ const SprintTable = ({
               role="button"
               tabIndex={0}
               className="border border-border px-2 hover:bg-accent"
-              onClick={(e) => editSprint(e, sprint)}
+              onClick={(e) => openEditSprintForm(e, sprint)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  editSprint(e, sprint)
+                  openEditSprintForm(e, sprint)
                 }
               }}
             >
               Editar sprint
+            </span>
+            <span
+              role="button"
+              tabIndex={0}
+              className="border border-border px-2 hover:bg-accent"
+              onClick={(e) => openChangeStatusDialog(e, sprint)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  openChangeStatusDialog(e, sprint)
+                }
+              }}
+            >
+              {sprint?.status === 'planning' && 'Iniciar Sprint'}
+              {sprint?.status === 'active' && 'Finalizar Sprint'}
+            </span>
+            <span
+              role="button"
+              tabIndex={0}
+              title="Deletar sprint"
+              className="flex border border-border items-center px-2 bg-destructive/20 hover:bg-destructive/50"
+              onClick={(e) => openDeleteSprintForm(e, sprint)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  openDeleteSprintForm(e, sprint)
+                }
+              }}
+            >
+              <TrashIcon className="size-3" />
             </span>
           </div>
         </AccordionTrigger>
@@ -248,6 +295,8 @@ const ProductBacklog = ({ project, setProject }) => {
   const [endDate, setEndDate] = useState(
     new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // Default para 14 dias no futuro
   )
+  const [openStatusDialog, setOpenStatusDialog] = useState(false)
+  const [openDeleteForm, setOpenDeleteForm] = useState(false)
   const [open, setOpen] = useState(false)
   const [selectedSprint, setSelectedSprint] = useState(null)
   const [selectedStories, setSelectedStories] = useState([])
@@ -284,7 +333,6 @@ const ProductBacklog = ({ project, setProject }) => {
 
       return updatedProject
     })
-    console.log(sprintId)
     router.post(
       route('sprint-stories.store', sprintId),
       {
@@ -421,7 +469,6 @@ const ProductBacklog = ({ project, setProject }) => {
     e.preventDefault()
     setOpen(!open)
     setSelectedSprint(null)
-    console.log()
   }
 
   const handleSubmit = (e) => {
@@ -434,7 +481,6 @@ const ProductBacklog = ({ project, setProject }) => {
       project_id: project.id,
       status: selectedSprint?.status || 'planning',
     }
-    console.log(sprintData)
     if (selectedSprint) {
       router.patch(
         route('sprint.update', selectedSprint.id),
@@ -470,6 +516,41 @@ const ProductBacklog = ({ project, setProject }) => {
     }
   }
 
+  const deleteSprint = (e) => {
+    e.preventDefault()
+    if (!selectedSprint) {
+      toast.error('Please select a sprint to delete')
+      return
+    }
+    router.delete(route('sprint.destroy', selectedSprint.id))
+    setSelectedSprint(null)
+    setOpenDeleteForm(false)
+  }
+  const changeSprintStatus = (e) => {
+    e.preventDefault()
+    if (!selectedSprint) {
+      toast.error('Please select a change status')
+      return
+    }
+
+    let newStatus = ''
+    if (selectedSprint.status === 'planning') newStatus = 'active'
+    if (selectedSprint.status === 'active') newStatus = 'completed'
+    router.patch(
+      route('sprint.update', selectedSprint.id),
+      {
+        status: newStatus,
+      },
+      {
+        onSuccess: () => toast.success('Status changed successfully'),
+        onError: (error) => {
+          toast.error('Error changing status', error)
+          console.error(error)
+        },
+      },
+    )
+    setOpenStatusDialog(false)
+  }
   if (error) {
     return (
       <div className="p-4">
@@ -484,6 +565,48 @@ const ProductBacklog = ({ project, setProject }) => {
 
   return (
     <div className="flex flex-col p-4 min-h-[500px]">
+      {/* alterar status da sprint*/}
+      <AlertDialog open={openStatusDialog} onOpenChange={setOpenStatusDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {selectedSprint?.status === 'planning' && 'Iniciar Sprint'}
+              {selectedSprint?.status === 'active' && 'Finalizar Sprint'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedSprint?.status === 'planning' &&
+                'Tem certeza que deseja iniciar essa sprint?'}
+              {selectedSprint?.status === 'active' &&
+                'Tem certeza que deseja finalizar essa sprint?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={changeSprintStatus}>
+              {selectedSprint?.status === 'planning' && 'Iniciar Sprint'}
+              {selectedSprint?.status === 'active' && 'Finalizar Sprint'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* deletar sprint*/}
+      <AlertDialog open={openDeleteForm} onOpenChange={setOpenDeleteForm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar Sprint</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja deletar essa sprint? As estórias contidas
+              nela voltarão ao Backlog.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteSprint}>
+              Deletar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {/* editar sprint */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -631,6 +754,10 @@ const ProductBacklog = ({ project, setProject }) => {
           project={project}
           open={open}
           setOpen={setOpen}
+          openDeleteForm={openDeleteForm}
+          setOpenDeleteForm={setOpenDeleteForm}
+          openStatusDialog={openStatusDialog}
+          setOpenStatusDialog={setOpenStatusDialog}
           setSelectedSprint={setSelectedSprint}
         />
       ))}
