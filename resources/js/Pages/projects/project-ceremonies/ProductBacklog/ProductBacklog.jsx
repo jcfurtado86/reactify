@@ -526,7 +526,31 @@ const ProductBacklog = ({ project, setProject }) => {
     setSelectedSprint(null)
     setOpenDeleteForm(false)
   }
+  const changeSprintStatus = (e) => {
+    e.preventDefault()
+    if (!selectedSprint) {
+      toast.error('Please select a change status')
+      return
+    }
 
+    let newStatus = ''
+    if (selectedSprint.status === 'planning') newStatus = 'active'
+    if (selectedSprint.status === 'active') newStatus = 'completed'
+    router.patch(
+      route('sprint.update', selectedSprint.id),
+      {
+        status: newStatus,
+      },
+      {
+        onSuccess: () => toast.success('Status changed successfully'),
+        onError: (error) => {
+          toast.error('Error changing status', error)
+          console.error(error)
+        },
+      },
+    )
+    setOpenStatusDialog(false)
+  }
   if (error) {
     return (
       <div className="p-4">
@@ -558,8 +582,9 @@ const ProductBacklog = ({ project, setProject }) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={deleteSprint}>
-              Deletar
+            <AlertDialogAction onClick={changeSprintStatus}>
+              {selectedSprint?.status === 'planning' && 'Iniciar Sprint'}
+              {selectedSprint?.status === 'active' && 'Finalizar Sprint'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
