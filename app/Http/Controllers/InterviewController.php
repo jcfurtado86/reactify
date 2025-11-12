@@ -57,6 +57,28 @@ class InterviewController extends Controller
     }
 
     /**
+     * Atualiza o campo de 'transcript' de uma entrevista específica.
+     */
+    public function update(Request $request, Interview $interview)
+    {
+        $validated = $request->validate([
+            'transcript' => ['required', 'string'],
+        ]);
+
+        try {
+            $interview->update([
+                'transcript' => $validated['transcript'],
+            ]);
+
+            return back()->with('success', 'Transcrição atualizada com sucesso.');
+
+        } catch (\Exception $e) {
+            Log::error("Falha ao atualizar transcrição da Entrevista ID: {$interview->id}. Erro: " . $e->getMessage());
+            return back()->withErrors(['update' => 'Ocorreu um erro ao salvar a transcrição.']);
+        }
+    }
+
+    /**
      * Remove o ficheiro do Cloudinary e o registo da base de dados.
      */
     public function destroy(Interview $interview)

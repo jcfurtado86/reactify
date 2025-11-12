@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react' 
 import { router } from '@inertiajs/react'
 import {
   UploadCloud,
@@ -31,7 +31,7 @@ const InterviewEditModal = ({ interview, onClose }) => {
     setIsSaving(true)
 
     router.patch(
-      route('interview.updateTranscript', interview.id),
+      route('interview.update', interview.id),
       {
         transcript: editedTranscript,
       },
@@ -58,10 +58,8 @@ const InterviewEditModal = ({ interview, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      {/* Container do Modal */}
-      <div className="w-full max-w-2xl rounded-lg bg-card p-6 shadow-2xl">
-        {/* Cabeçalho */}
-        <div className="mb-4 flex items-center justify-between">
+      <div className="w-full max-w-2xl rounded-lg bg-card shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between p-6 border-b border-border flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground">
             Editar Transcrição
           </h3>
@@ -75,7 +73,7 @@ const InterviewEditModal = ({ interview, onClose }) => {
         </div>
 
         {/* Corpo (Textarea) */}
-        <div className="mb-6">
+        <div className="flex-1 overflow-y-auto p-0 min-h-0">
           <TextareaAutosize
             minRows={10}
             className="w-full resize-none rounded-md border border-input bg-background p-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -85,7 +83,7 @@ const InterviewEditModal = ({ interview, onClose }) => {
         </div>
 
         {/* Rodapé (Botões) */}
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 p-6 border-t border-border flex-shrink-0">
           <button
             onClick={onClose}
             className="rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
@@ -172,7 +170,6 @@ const InterviewListItem = ({ interview, onEditClick }) => {
       </a>
 
       <div className="flex items-center gap-4">
-        {/* Exibe a data formatada. Ajuste as classes de estilo se desejar. */}
         <span className="w-20 flex-shrink-0 text-right text-xs font-medium text-muted-foreground">
           {formattedDate}
         </span>
@@ -194,7 +191,7 @@ const InterviewListItem = ({ interview, onEditClick }) => {
             <span>Extração falhou</span>
           </div>
         )}
-        </div>
+      </div>
 
       <div className="relative flex items-center">
         {interview.extraction_status === 'completed' &&

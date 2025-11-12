@@ -414,6 +414,11 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     'destroy',
   ])->name('interview.destroy');
 
+  Route::patch('/interviews/{interview}/transcript', [
+    InterviewController::class,
+    'update',
+  ])->name('interview.update');
+
   //pagina de notificacoes
   Route::prefix('notifications')->group(function () {
     Route::get('/', [NotificationController::class, 'index'])->name(
