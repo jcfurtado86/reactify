@@ -10,11 +10,110 @@ import {
   Trash2,
   X,
   Check,
+  Pencil
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import TextareaAutosize from 'react-textarea-autosize'
 
-const InterviewListItem = ({ interview }) => {
+const InterviewEditModal = ({ interview, onClose }) => {
+  const [editedTranscript, setEditedTranscript] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    if (interview) {
+      setEditedTranscript(interview.transcript || '')
+    }
+  }, [interview])
+
+  const handleSaveTranscript = () => {
+    if (!interview) return
+    setIsSaving(true)
+
+    router.patch(
+      route('interview.updateTranscript', interview.id),
+      {
+        transcript: editedTranscript,
+      },
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success('Transcrição atualizada com sucesso!')
+          onClose() 
+        },
+        onError: (errors) => {
+          console.error('Erro ao salvar:', errors)
+          toast.error(errors.update || 'Erro ao salvar a transcrição.')
+        },
+        onFinish: () => {
+          setIsSaving(false)
+        },
+      },
+    )
+  }
+
+  if (!interview) {
+    return null
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      {/* Container do Modal */}
+      <div className="w-full max-w-2xl rounded-lg bg-card p-6 shadow-2xl">
+        {/* Cabeçalho */}
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-xl font-bold text-foreground">
+            Editar Transcrição
+          </h3>
+          <button
+            onClick={onClose}
+            className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted"
+            disabled={isSaving}
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Corpo (Textarea) */}
+        <div className="mb-6">
+          <TextareaAutosize
+            minRows={10}
+            className="w-full resize-none rounded-md border border-input bg-background p-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            value={editedTranscript}
+            onChange={(e) => setEditedTranscript(e.target.value)}
+          />
+        </div>
+
+        {/* Rodapé (Botões) */}
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80"
+            disabled={isSaving}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSaveTranscript}
+            className="flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            disabled={
+              editedTranscript === interview.transcript || isSaving
+            }
+          >
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="mr-2 h-4 w-4" />
+            )}
+            {isSaving ? 'Salvando...' : 'Salvar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const InterviewListItem = ({ interview, onEditClick }) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
 
   const formattedDate = new Date(interview.created_at).toLocaleDateString(
@@ -98,6 +197,18 @@ const InterviewListItem = ({ interview }) => {
         </div>
 
       <div className="relative flex items-center">
+        {interview.extraction_status === 'completed' &&
+          interview.transcript &&
+          !showConfirmDelete && (
+            <button
+              onClick={() => onEditClick(interview)} 
+              className="ml-4 text-muted-foreground opacity-60 transition-opacity hover:opacity-100"
+              title={'Visualizar/Editar Transcrição'}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          )}
+
         {showConfirmDelete ? (
           <div className="flex items-center gap-2 ml-4">
             <span className="text-xs text-muted-foreground">Confirmar?</span>
@@ -139,6 +250,8 @@ const InterviewUploadCard = ({
   const [uploadProgress, setUploadProgress] = useState(0)
   const [error, setError] = useState(null)
   const fileInputRef = useRef(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedInterview, setSelectedInterview] = useState(null)
 
   const validateFile = (file) => {
     const allowedTypes = ['pdf', 'mp3', 'mp4']
@@ -209,6 +322,17 @@ const InterviewUploadCard = ({
       },
     )
   }
+
+  const handleOpenEditModal = (interview) => {
+    setSelectedInterview(interview)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseEditModal = () => {
+    setIsModalOpen(false)
+    setSelectedInterview(null)
+  }
+
   const acceptedFileTypes = '.pdf,.mp3,.mp4';
 
   return (
@@ -243,7 +367,6 @@ const InterviewUploadCard = ({
         />
       </div>
 
-      {/* Informação sobre tipos e tamanho - posição fixa */}
       <div className="mb-4 rounded-md bg-muted/50 p-3 text-center">
         <p className="text-xs text-muted-foreground">
           <strong>Tipos permitidos:</strong> PDF, MP3, MP4
@@ -256,7 +379,11 @@ const InterviewUploadCard = ({
       <div className="mt-2 space-y-2">
         {interviews.length > 0 ? (
           interviews.map((interview) => (
-            <InterviewListItem key={interview.id} interview={interview} />
+            <InterviewListItem
+              key={interview.id}
+              interview={interview}
+              onEditClick={handleOpenEditModal} 
+            />
           ))
         ) : (
           <div className="py-8 text-center text-sm text-muted-foreground">
@@ -264,6 +391,11 @@ const InterviewUploadCard = ({
           </div>
         )}
       </div>
+
+      <InterviewEditModal
+        interview={selectedInterview}
+        onClose={handleCloseEditModal}
+      />
     </div>
   )
 }
