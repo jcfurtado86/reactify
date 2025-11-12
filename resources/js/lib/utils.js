@@ -123,3 +123,11 @@ export const getStatusColor = (status) => {
       return '#433E3F' //
   }
 }
+
+export const isSprintActive = (sprint) => {
+  const now = new Date()
+  const startDate = new Date(sprint.start_date)
+  const endDate = new Date(sprint.end_date)
+
+  return now >= startDate && now <= endDate
+}

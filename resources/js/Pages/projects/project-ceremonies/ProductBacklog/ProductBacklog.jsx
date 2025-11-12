@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
-import { cn } from '@/lib/utils'
+import { cn, isSprintActive } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
@@ -143,13 +143,9 @@ const SprintTable = ({
   moveToSprint,
   storyVariants,
   project,
-  open,
-  setOpen,
-  openDeleteForm,
-  setOpenDeleteForm,
-  openStatusDialog,
-  setOpenStatusDialog,
-  setSelectedSprint,
+  openDeleteSprintForm,
+  openEditSprintForm,
+  openEndSprintForm,
 }) => {
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
@@ -199,21 +195,6 @@ const SprintTable = ({
       sorting,
     },
   })
-  const openEditSprintForm = (e, sprint) => {
-    e.preventDefault()
-    setOpen(!open)
-    setSelectedSprint(sprint)
-  }
-  const openDeleteSprintForm = (e, sprint) => {
-    e.preventDefault()
-    setOpenDeleteForm(!openDeleteForm)
-    setSelectedSprint(sprint)
-  }
-  const openChangeStatusDialog = (e, sprint) => {
-    e.preventDefault()
-    setOpenStatusDialog(!openStatusDialog)
-    setSelectedSprint(sprint)
-  }
 
   return (
     <Accordion
@@ -235,9 +216,9 @@ const SprintTable = ({
               {new Date(sprint.end_date).toLocaleDateString('pt-BR')} (
               {table.getRowCount()} items)
             </span>
-            {sprint.status === 'active' && (
+            {isSprintActive(sprint) && (
               <Badge variant="badge" className={'bg-green-300'}>
-                Atual
+                Ativa
               </Badge>
             )}
             <span
@@ -253,20 +234,27 @@ const SprintTable = ({
             >
               Editar sprint
             </span>
-            {(sprint.status === 'active' || sprint.status === 'planning') && (
+            {sprint.status === 'active' && (
               <span
                 role="button"
                 tabIndex={0}
                 className="border border-border px-2 hover:bg-accent"
-                onClick={(e) => openChangeStatusDialog(e, sprint)}
+                onClick={(e) => {
+                  !isSprintActive(sprint)
+                    ? openEditSprintForm(e, sprint, true)
+                    : openEndSprintForm(e, sprint)
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    openChangeStatusDialog(e, sprint)
+                    return !isSprintActive(sprint)
+                      ? openEditSprintForm(e, sprint, true)
+                      : openEndSprintForm(e, sprint)
                   }
                 }}
               >
-                {sprint?.status === 'planning' && 'Iniciar Sprint'}
-                {sprint?.status === 'active' && 'Finalizar Sprint'}
+                {!isSprintActive(sprint)
+                  ? 'Iniciar Sprint'
+                  : 'Finalizar Sprint'}
               </span>
             )}
             <span
@@ -302,9 +290,11 @@ const ProductBacklog = ({ project, setProject }) => {
   const [endDate, setEndDate] = useState(
     new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // Default para 14 dias no futuro
   )
-  const [openStatusDialog, setOpenStatusDialog] = useState(false)
   const [openDeleteForm, setOpenDeleteForm] = useState(false)
   const [open, setOpen] = useState(false)
+  const [openEndForm, setOpenEndForm] = useState(null)
+  const [sprintOperation, setSprintOperation] = useState(null)
+  const [dialogContent, setDialogContent] = useState({ title: '', content: '' })
   const [selectedSprint, setSelectedSprint] = useState(null)
   const [selectedStories, setSelectedStories] = useState([])
   const [isLoading, setIsLoading] = useState(false)
@@ -370,9 +360,24 @@ const ProductBacklog = ({ project, setProject }) => {
   }, [project])
 
   useEffect(() => {
-    setStartDate(selectedSprint?.start_date || null)
-    setEndDate(selectedSprint?.end_date || null)
-  }, [selectedSprint])
+    selectItems(board.productBacklog, rowSelection, setSelectedStories)
+  }, [rowSelection])
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (!open) setSprintOperation(null)
+    }, 500)
+  }, [open])
+
+  useEffect(() => {
+    if (sprintOperation === 'start') setStartDate(new Date())
+    else setStartDate(selectedSprint?.start_date)
+
+    setEndDate(
+      selectedSprint?.end_date ||
+        new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    )
+  }, [selectedSprint, sprintOperation])
 
   const { productBacklogStories, sprintBacklogStories, deliveredStories } =
     useMemo(() => {
@@ -455,10 +460,6 @@ const ProductBacklog = ({ project, setProject }) => {
     [storyVariants, project, handleMoveRequest, selectedStories],
   )
 
-  useEffect(() => {
-    selectItems(board.productBacklog, rowSelection, setSelectedStories)
-  }, [rowSelection])
-
   const productBacklogTable = useReactTable({
     data: board.productBacklog,
     columns: backlogColumns,
@@ -476,6 +477,7 @@ const ProductBacklog = ({ project, setProject }) => {
     e.preventDefault()
     setOpen(!open)
     setSelectedSprint(null)
+    setSprintOperation('create')
   }
 
   const handleSubmit = (e) => {
@@ -520,6 +522,8 @@ const ProductBacklog = ({ project, setProject }) => {
       )
       setOpen(false)
       setSelectedSprint(null)
+      setStartDate(new Date())
+      setEndDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))
     }
   }
 
@@ -543,6 +547,7 @@ const ProductBacklog = ({ project, setProject }) => {
     let newStatus = ''
     if (selectedSprint.status === 'planning') newStatus = 'active'
     if (selectedSprint.status === 'active') newStatus = 'completed'
+
     router.patch(
       route('sprint.update', selectedSprint.id),
       {
@@ -556,8 +561,51 @@ const ProductBacklog = ({ project, setProject }) => {
         },
       },
     )
-    setOpenStatusDialog(false)
   }
+
+  const openEditSprintForm = (e, sprint, startSprint = false) => {
+    e.preventDefault()
+
+    if (startSprint) {
+      console.log('start')
+      setStartDate(new Date())
+      setSprintOperation('start')
+    } else setSprintOperation('edit')
+
+    setOpen(!open)
+    setSelectedSprint(sprint)
+  }
+  const openDeleteSprintForm = (e, sprint) => {
+    e.preventDefault()
+    setOpenDeleteForm(!openDeleteForm)
+    setSelectedSprint(sprint)
+  }
+  const openEndSprintForm = (e, sprint) => {
+    e.preventDefault()
+    setOpenEndForm(!openEndForm)
+    setSelectedSprint(sprint)
+  }
+
+  const getAlertContents = () => {
+    switch (sprintOperation) {
+      case 'start':
+        return {
+          title: 'Iniciar Sprint',
+          description: 'Define a data de inicio da sprint para hoje.',
+        }
+
+      case 'edit':
+        return {
+          title: 'Editar Sprint',
+          description: 'Edite os detalhes da sprint.',
+        }
+      case 'create':
+        return { title: 'Criar Sprint', description: 'Crie uma nova sprint.' }
+      default:
+        return { title: 'Operacao' }
+    }
+  }
+
   if (error) {
     return (
       <div className="p-4">
@@ -572,26 +620,20 @@ const ProductBacklog = ({ project, setProject }) => {
 
   return (
     <div className="flex flex-col p-4 min-h-[500px]">
-      {/* alterar status da sprint*/}
-      <AlertDialog open={openStatusDialog} onOpenChange={setOpenStatusDialog}>
+      {/* finalizar sprint*/}
+      <AlertDialog open={openEndForm} onOpenChange={setOpenEndForm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {selectedSprint?.status === 'planning' && 'Iniciar Sprint'}
-              {selectedSprint?.status === 'active' && 'Finalizar Sprint'}
-            </AlertDialogTitle>
+            <AlertDialogTitle>Finalizar Sprint</AlertDialogTitle>
             <AlertDialogDescription>
-              {selectedSprint?.status === 'planning' &&
-                'Tem certeza que deseja iniciar essa sprint?'}
-              {selectedSprint?.status === 'active' &&
-                'Tem certeza que deseja finalizar essa sprint?'}
+              Tem certeza que deseja finalizar essa sprint? As estórias contidas
+              nela voltarão ao Backlog.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={changeSprintStatus}>
-              {selectedSprint?.status === 'planning' && 'Iniciar Sprint'}
-              {selectedSprint?.status === 'active' && 'Finalizar Sprint'}
+            <AlertDialogAction onClick={deleteSprint}>
+              Finalizar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -614,25 +656,23 @@ const ProductBacklog = ({ project, setProject }) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* editar sprint */}
+      {/* editar sprint / iniciar / criar */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="">
           <DialogHeader>
-            <DialogTitle>
-              {selectedSprint?.name ? 'Editar sprint' : 'Criar sprint'}
-            </DialogTitle>
+            <DialogTitle>{getAlertContents().title}</DialogTitle>
             <DialogDescription>
-              {' '}
-              {selectedSprint?.name
-                ? 'Altere as informações da sprint.'
-                : 'Preencha as informações da nova sprint.'}
-              Clique para salvar.
+              {getAlertContents().description} <br />
+              Os campos obrigatórios estão marcados com um asterisco{' '}
+              <span className="text-destructive">*</span>
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 pb-2">
               <div className="grid gap-3">
-                <Label htmlFor="name-1">Nome</Label>
+                <Label htmlFor="name-1">
+                  Nome <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="name-1"
                   name="name"
@@ -642,7 +682,9 @@ const ProductBacklog = ({ project, setProject }) => {
                 />
               </div>
               <div className="grid gap-3">
-                <label className="text-sm font-medium">Data de início</label>
+                <label className="text-sm font-medium">
+                  Data de início <span className="text-destructive">*</span>
+                </label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -673,7 +715,9 @@ const ProductBacklog = ({ project, setProject }) => {
                 </Popover>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Data de término</label>
+                <label className="text-sm font-medium">
+                  Data de término <span className="text-destructive">*</span>
+                </label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -702,7 +746,6 @@ const ProductBacklog = ({ project, setProject }) => {
                     />
                   </PopoverContent>
                 </Popover>
-                <hr />
               </div>
             </div>
             <DialogFooter>
@@ -763,13 +806,9 @@ const ProductBacklog = ({ project, setProject }) => {
           storyVariants={storyVariants}
           moveToSprint={moveToSprint}
           project={project}
-          open={open}
-          setOpen={setOpen}
-          openDeleteForm={openDeleteForm}
-          setOpenDeleteForm={setOpenDeleteForm}
-          openStatusDialog={openStatusDialog}
-          setOpenStatusDialog={setOpenStatusDialog}
-          setSelectedSprint={setSelectedSprint}
+          openEditSprintForm={openEditSprintForm}
+          openDeleteSprintForm={openDeleteSprintForm}
+          openEndSprintForm={openEndSprintForm}
         />
       ))}
     </div>

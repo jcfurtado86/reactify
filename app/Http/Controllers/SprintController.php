@@ -65,10 +65,25 @@ class SprintController extends Controller
   {
     $validated = $request->validate([
       'name' => 'sometimes|string|max:255',
-      'start_date' => 'sometimes|date|after_or_equal:today',
+      'start_date' => 'sometimes|date|after_or_equal:yesterday',
       'end_date' => 'sometimes|date|after:start_date',
-      'status' => 'sometimes|in:planning,active,completed',
+      'status' => 'sometimes|in:active,completed',
     ]);
+    // validacao para caso sprint esteja ativa
+    // if (isset($validated['status']) && $validated['status'] === 'active') {
+    //   $otherActiveSprints = $sprint->project
+    //     ->sprints()
+    //     ->where('status', 'active')
+    //     ->where('id', '!=', $sprint->id)
+    //     ->exists();
+
+    //   if ($otherActiveSprints) {
+    //     return back()->with([
+    //       'message' => 'Impossível ativar sprint com outra sprint ativa.',
+    //       'status' => 'error',
+    //     ]);
+    //   }
+    // }
 
     $sprint->update($validated);
 
@@ -78,7 +93,8 @@ class SprintController extends Controller
     return redirect()
       ->back()
       ->with([
-        'project' => $project,
+        'message' => 'Sprint atualizada com sucesso!', // É bom enviar uma mensagem de sucesso
+        'status' => 'success',
       ]);
   }
 
