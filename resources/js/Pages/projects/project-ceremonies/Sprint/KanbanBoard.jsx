@@ -1,4 +1,3 @@
-import { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
 import {
   DndContext,
@@ -11,7 +10,6 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { ArrowLeft } from 'lucide-react'
 import { getStatusColor } from '@/lib/utils'
 // ============================================================================
 // Subcomponente para o Card da Story (Item Arrastável)
@@ -102,22 +100,18 @@ const KanbanColumn = ({ id, variant, title, stories, systemColors }) => {
 // ============================================================================
 // Componente Principal do Kanban Board
 // ============================================================================
-const KanbanBoard = ({
-  sprint,
-  project,
-  setView,
-  updateProject,
-  systemColors,
-}) => {
+const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
   const [localStories, setLocalStories] = useState([])
+
   // ✅ Estado para armazenar a story que está sendo arrastada
   const [activeStory, setActiveStory] = useState(null)
 
   useEffect(() => {
-    if (sprint?.stories) {
-      setLocalStories(sprint.stories)
+    if (sprints) {
+      const sprintStories = sprints.flatMap((sprint) => sprint.stories || [])
+      setLocalStories(sprintStories)
     }
-  }, [sprint])
+  }, [sprints])
   const storiesByStatus = useMemo(() => {
     const columns = { todo: [], in_progress: [], testing: [], done: [] }
     localStories.forEach((story) => {
@@ -129,8 +123,8 @@ const KanbanBoard = ({
     return columns
   }, [localStories])
 
-  const moveStory = (storyId, newStatus) => {
-    // A lógica de UI otimista permanece a mesma - isso é ótimo!
+  const moveStory = (story, storyId, newStatus) => {
+    const sprintId = story?.pivot?.sprint_id || null
     setLocalStories((prevStories) =>
       prevStories.map((story) =>
         story.id === storyId
@@ -144,9 +138,9 @@ const KanbanBoard = ({
           : story,
       ),
     )
-
+    if (!sprintId) return
     router.patch(
-      route('sprint-stories.update', sprint.id),
+      route('sprint-stories.update', sprintId),
       {
         story_id: storyId,
         kanban_status: newStatus,
@@ -158,7 +152,7 @@ const KanbanBoard = ({
           if (page.props.project) {
             updateProject(page.props.project)
             const updatedSprint = page.props.project.sprints?.find(
-              (s) => s.id === sprint.id,
+              (s) => s.id === null, // ajeitar ,
             )
             if (updatedSprint?.stories) {
               setLocalStories(updatedSprint.stories)
@@ -167,8 +161,8 @@ const KanbanBoard = ({
         },
         onError: (errors) => {
           console.error('Erro ao mover story:', errors)
-          if (sprint?.stories) {
-            setLocalStories(sprint.stories)
+          if (sprintStories) {
+            setLocalStories(sprintStories)
           }
         },
       },
@@ -186,14 +180,14 @@ const KanbanBoard = ({
   // ✅ Handler atualizado: chamado quando o arraste TERMINA
   const handleDragEnd = (event) => {
     const { active, over } = event
-
+    const story = active?.data.current?.story || null
     if (over && active.id !== over.id) {
       const storyId = active.id
       const fromColumn = active.data.current?.fromColumn
       const toColumn = over.id
 
       if (fromColumn && toColumn && fromColumn !== toColumn) {
-        moveStory(storyId, toColumn)
+        moveStory(story, storyId, toColumn)
       }
     }
 
@@ -215,15 +209,11 @@ const KanbanBoard = ({
   ]
 
   // A lógica de renderização para o estado de 'nenhuma sprint' permanece a mesma
-  if (!sprint) {
+  if (!sprints) {
     return (
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={() => setView('list')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-            </Button>
-          </div>
+          <div className="flex items-center gap-4"></div>
         </CardHeader>
         <CardContent className="text-left py-8">
           <p className="text-muted-foreground">Nenhuma sprint selecionada</p>
@@ -239,7 +229,7 @@ const KanbanBoard = ({
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <CardTitle>{sprint.name}</CardTitle>
+            <CardTitle>{'Sprints'}</CardTitle>
             <Badge variant="outline">{totalStories} stories total</Badge>
           </div>
         </CardHeader>
@@ -251,9 +241,7 @@ const KanbanBoard = ({
             <p className="text-muted-foreground mb-4">
               Esta sprint não possui stories ainda.
             </p>
-            <Button variant="outline" onClick={() => setView('list')}>
-              Voltar para a lista de sprints
-            </Button>
+
             <p className="text-sm text-muted-foreground mt-2">
               e adicione stories do Product Backlog.
             </p>
