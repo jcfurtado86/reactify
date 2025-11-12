@@ -1,4 +1,3 @@
-import React, { useState, useEffect, useMemo } from 'react'
 import { router } from '@inertiajs/react'
 import { cn, isSprintActive } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -17,7 +16,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import TableComponent from '@/Components/TableComponent'
-import NewSprintForm from '../Sprint/NewSprintForm'
 import { toast } from 'sonner'
 
 const getSharedColumns = ({
@@ -370,7 +368,8 @@ const ProductBacklog = ({ project, setProject }) => {
   }, [open])
 
   useEffect(() => {
-    if (sprintOperation === 'start') setStartDate(new Date())
+    if (sprintOperation === 'start' || sprintOperation === 'create')
+      setStartDate(new Date())
     else setStartDate(selectedSprint?.start_date)
 
     setEndDate(
@@ -388,7 +387,7 @@ const ProductBacklog = ({ project, setProject }) => {
         .filter((story) => {
           const isInActiveSprint = sprints.some(
             (sprint) =>
-              (sprint.status === 'planning' || sprint.status === 'active') &&
+              sprint.status === 'active' &&
               sprint.stories?.some(
                 (sprintStory) => sprintStory.id === story.id,
               ),
@@ -410,7 +409,7 @@ const ProductBacklog = ({ project, setProject }) => {
       const delivered = []
 
       sprints.forEach((sprint) => {
-        if (sprint.status === 'planning' || sprint.status === 'active') {
+        if (sprint.status === 'active') {
           sprint.stories?.forEach((story) => {
             if (story.pivot?.kanban_status === 'done') {
               delivered.push({ ...story, sprint_name: sprint.name })
@@ -473,13 +472,6 @@ const ProductBacklog = ({ project, setProject }) => {
     },
   })
 
-  const createSprint = (e) => {
-    e.preventDefault()
-    setOpen(!open)
-    setSelectedSprint(null)
-    setSprintOperation('create')
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
@@ -488,7 +480,7 @@ const ProductBacklog = ({ project, setProject }) => {
       start_date: startDate ? format(startDate, 'yyyy-MM-dd') : null,
       end_date: endDate ? format(endDate, 'yyyy-MM-dd') : null,
       project_id: project.id,
-      status: selectedSprint?.status || 'planning',
+      status: selectedSprint?.status || 'active',
     }
     if (selectedSprint) {
       router.patch(
@@ -512,7 +504,7 @@ const ProductBacklog = ({ project, setProject }) => {
           name: sprintData.name,
           start_date: sprintData.start_date.split('T')[0],
           end_date: sprintData.end_date.split('T')[0],
-          status: 'planning',
+          status: 'active',
           project_id: project.id,
         },
         {
@@ -527,6 +519,14 @@ const ProductBacklog = ({ project, setProject }) => {
     }
   }
 
+  const createSprint = (e) => {
+    e.preventDefault()
+    setOpen(!open)
+    setSelectedSprint(null)
+    setSprintOperation('create')
+    setStartDate(new Date())
+  }
+
   const deleteSprint = (e) => {
     e.preventDefault()
     if (!selectedSprint) {
@@ -537,30 +537,16 @@ const ProductBacklog = ({ project, setProject }) => {
     setSelectedSprint(null)
     setOpenDeleteForm(false)
   }
-  const changeSprintStatus = (e) => {
+  const finishSprint = (e) => {
     e.preventDefault()
     if (!selectedSprint) {
-      toast.error('Please select a change status')
+      toast.error('Please select s sprint')
       return
     }
-
-    let newStatus = ''
-    if (selectedSprint.status === 'planning') newStatus = 'active'
-    if (selectedSprint.status === 'active') newStatus = 'completed'
-
-    router.patch(
-      route('sprint.update', selectedSprint.id),
-      {
-        status: newStatus,
-      },
-      {
-        onSuccess: () => toast.success('Status changed successfully'),
-        onError: (error) => {
-          toast.error('Error changing status', error)
-          console.error(error)
-        },
-      },
-    )
+    router.patch(route('sprint.finish', selectedSprint.id), {
+      new_sprint_id: 1,
+    })
+    setOpenEndForm(false)
   }
 
   const openEditSprintForm = (e, sprint, startSprint = false) => {
@@ -632,7 +618,7 @@ const ProductBacklog = ({ project, setProject }) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={deleteSprint}>
+            <AlertDialogAction onClick={finishSprint}>
               Finalizar
             </AlertDialogAction>
           </AlertDialogFooter>

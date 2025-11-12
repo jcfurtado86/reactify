@@ -46,7 +46,7 @@ class SprintController extends Controller
       'name' => 'required|string|max:255',
       'start_date' => 'required|date',
       'end_date' => 'required|date|after:start_date',
-      'status' => 'sometimes|in:planning,active,completed',
+      'status' => 'required|in:active,completed',
       'project_id' => 'required|exists:projects,id',
     ]);
 
@@ -69,21 +69,6 @@ class SprintController extends Controller
       'end_date' => 'sometimes|date|after:start_date',
       'status' => 'sometimes|in:active,completed',
     ]);
-    // validacao para caso sprint esteja ativa
-    // if (isset($validated['status']) && $validated['status'] === 'active') {
-    //   $otherActiveSprints = $sprint->project
-    //     ->sprints()
-    //     ->where('status', 'active')
-    //     ->where('id', '!=', $sprint->id)
-    //     ->exists();
-
-    //   if ($otherActiveSprints) {
-    //     return back()->with([
-    //       'message' => 'Impossível ativar sprint com outra sprint ativa.',
-    //       'status' => 'error',
-    //     ]);
-    //   }
-    // }
 
     $sprint->update($validated);
 
@@ -96,6 +81,73 @@ class SprintController extends Controller
         'message' => 'Sprint atualizada com sucesso!', // É bom enviar uma mensagem de sucesso
         'status' => 'success',
       ]);
+  }
+
+  public function finish(Request $request, Sprint $sprint)
+  {
+    $validated = $request->validate([
+      'new_sprint_id' => 'required|exists:sprints,id',
+    ]);
+
+    $newSprintId = $validated['new_sprint_id'];
+
+    if ($newSprintId == $sprint->id) {
+      back()->with([
+        'message' =>
+          'Você não pode mover as stories para a mesma sprint que está finalizando.',
+        'status' => 'error',
+      ]);
+    }
+    try {
+      $incompleteStories = $sprint
+        ->stories()
+        ->where('status', '!=', 'done')
+        ->get();
+
+      $incompleteStoryIds = $incompleteStories->pluck('id');
+      $storyCount = $incompleteStoryIds->count();
+
+      if ($storyCount > 0) {
+        // 7. Encontra a nova sprint de destino
+        $newSprint = Sprint::findOrFail($newSprintId);
+
+        // 8. Prepara os novos dados da pivot (resetando o status)
+        $storiesToSync = $incompleteStoryIds
+          ->mapWithKeys(function ($id) {
+            return [
+              $id => [
+                'kanban_status' => 'todo',
+                'position' => 0,
+              ],
+            ];
+          })
+          ->all();
+
+        // 9. MOVE as stories: Desanexa da sprint atual
+        $sprint->stories()->detach($incompleteStoryIds);
+
+        // 10. E anexa na nova sprint com os dados pivô resetados
+        $newSprint->stories()->attach($storiesToSync);
+
+        $sprint->update(['status' => 'completed']);
+
+        back()->with([
+          'message' => 'Stories movidas com sucesso para a nova sprint!',
+          'status' => 'success',
+        ]);
+      }
+    } catch (\Exception $e) {
+      Log::error("Falha ao finalizar a sprint {$sprint->id}", [
+        'error' => $e->getMessage(),
+      ]);
+
+      return redirect()
+        ->back()
+        ->with([
+          'message' => 'Ocorreu um erro ao finalizar a sprint.',
+          'status' => 'error',
+        ]);
+    }
   }
 
   public function destroy(Sprint $sprint)

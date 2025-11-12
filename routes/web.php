@@ -243,8 +243,11 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('/{sprint}', [SprintController::class, 'show'])->name(
       'sprint.show'
     );
-    Route::patch('/{sprint}', [SprintController::class, 'update'])->name(
+    Route::patch('/{sprint}/update', [SprintController::class, 'update'])->name(
       'sprint.update'
+    );
+    Route::patch('/{sprint}/finish', [SprintController::class, 'finish'])->name(
+      'sprint.finish'
     );
     Route::delete('/{sprint}', [SprintController::class, 'destroy'])->name(
       'sprint.destroy'
