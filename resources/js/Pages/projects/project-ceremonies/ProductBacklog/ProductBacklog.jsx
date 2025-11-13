@@ -1,5 +1,5 @@
 import { router, useForm } from '@inertiajs/react'
-import { cn, isSprintActive } from '@/lib/utils'
+import { cn, formatDate, isSprintActive, parseDateAsLocal } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
@@ -23,6 +23,7 @@ const getSharedColumns = ({
   project,
   onMoveRequest,
   selectedStories,
+  status,
 }) => [
   {
     id: 'select',
@@ -91,6 +92,7 @@ const getSharedColumns = ({
     header: '',
     cell: ({ row }) => {
       const story = row.original
+      const sprintId = story?.pivot?.sprint_id || null
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -104,23 +106,33 @@ const getSharedColumns = ({
                 ? `${selectedStories.length} selected`
                 : `1 selected`}
             </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  {project.sprints
-                    .sort((a, b) => a.created_at - b.created_at)
-                    .map((sprint) => (
-                      <DropdownMenuItem
-                        key={sprint.id}
-                        onClick={() => onMoveRequest(sprint.id, story.id)}
-                      >
-                        {sprint.name}-{sprint.id}
-                      </DropdownMenuItem>
-                    ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
+            {status === 'active' && (
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {project.sprints
+                      .filter(
+                        (sprint) =>
+                          sprint.status === 'active' && sprint.id !== sprintId,
+                      )
+                      .sort(
+                        (a, b) =>
+                          new Date(a.created_at) - new Date(b.created_at),
+                      )
+
+                      .map((sprint) => (
+                        <DropdownMenuItem
+                          key={sprint.id}
+                          onClick={() => onMoveRequest(sprint.id, story.id)}
+                        >
+                          {sprint.name}
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -177,8 +189,9 @@ const SprintTable = ({
         project,
         onMoveRequest: handleMoveRequest, // Passe o handler LOCAL
         selectedStories,
+        status: sprint.status,
       }),
-    [storyVariants, project, handleMoveRequest, selectedStories],
+    [storyVariants, project, handleMoveRequest, selectedStories, status],
   )
 
   const table = useReactTable({
@@ -210,8 +223,7 @@ const SprintTable = ({
             <span className="font-bold hover:underline">{sprint.name}</span>
             <span className="text-muted-foreground">
               {' '}
-              {new Date(sprint.start_date).toLocaleDateString('pt-BR')} -{' '}
-              {new Date(sprint.end_date).toLocaleDateString('pt-BR')} (
+              {formatDate(sprint.start_date)} - {formatDate(sprint.end_date)} (
               {table.getRowCount()} items)
             </span>
 
@@ -382,10 +394,10 @@ const ProductBacklog = ({ project, setProject }) => {
   useEffect(() => {
     if (sprintOperation === 'start' || sprintOperation === 'create')
       setStartDate(new Date())
-    else setStartDate(selectedSprint?.start_date)
+    else setStartDate(parseDateAsLocal(selectedSprint?.start_date))
 
     setEndDate(
-      selectedSprint?.end_date ||
+      parseDateAsLocal(selectedSprint?.end_date) ||
         new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
     )
   }, [selectedSprint, sprintOperation])
@@ -494,6 +506,7 @@ const ProductBacklog = ({ project, setProject }) => {
       project_id: project.id,
       status: selectedSprint?.status || 'active',
     }
+    console.log(sprintData, startDate)
     if (selectedSprint) {
       router.patch(
         route('sprint.update', selectedSprint.id),
@@ -569,7 +582,6 @@ const ProductBacklog = ({ project, setProject }) => {
       },
       {
         onSuccess: () => {
-          toast.success('Sprint finished successfully')
           setSelectedSprint(null)
           setOpenEndForm(false)
         },
@@ -661,7 +673,10 @@ const ProductBacklog = ({ project, setProject }) => {
                       Backlog
                     </SelectItem>
                     {project.sprints
-                      .sort((a, b) => a.created_at - b.created_at)
+                      .sort(
+                        (a, b) =>
+                          new Date(a.created_at) - new Date(b.created_at),
+                      )
                       .map((sprint) => (
                         <SelectItem key={sprint.id} value={String(sprint.id)}>
                           {sprint.name}
@@ -736,7 +751,7 @@ const ProductBacklog = ({ project, setProject }) => {
                     >
                       <CalendarIcon className="mr-2 size-4 " />
                       {startDate ? (
-                        format(startDate, 'dd/MM/yyyy', { locale: ptBR })
+                        formatDate(startDate)
                       ) : (
                         <span>Escolha uma data</span>
                       )}
@@ -769,7 +784,7 @@ const ProductBacklog = ({ project, setProject }) => {
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {endDate ? (
-                        format(endDate, 'dd/MM/yyyy', { locale: ptBR })
+                        formatDate(endDate)
                       ) : (
                         <span>Escolha uma data</span>
                       )}
@@ -839,18 +854,20 @@ const ProductBacklog = ({ project, setProject }) => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      {project.sprints.map((sprint) => (
-        <SprintTable
-          key={sprint.id}
-          sprint={sprint}
-          storyVariants={storyVariants}
-          moveToSprint={moveToSprint}
-          project={project}
-          openEditSprintForm={openEditSprintForm}
-          openDeleteSprintForm={openDeleteSprintForm}
-          openEndSprintForm={openEndSprintForm}
-        />
-      ))}
+      {project.sprints
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .map((sprint) => (
+          <SprintTable
+            key={sprint.id}
+            sprint={sprint}
+            storyVariants={storyVariants}
+            moveToSprint={moveToSprint}
+            project={project}
+            openEditSprintForm={openEditSprintForm}
+            openDeleteSprintForm={openDeleteSprintForm}
+            openEndSprintForm={openEndSprintForm}
+          />
+        ))}
     </div>
   )
 }

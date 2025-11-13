@@ -51,9 +51,7 @@ class SprintController extends Controller
     ]);
 
     $sprint = Sprint::create($validated);
-    Log::info(
-      'Sprint created successfully: ' . $sprint->id . ' - ' . $sprint->name
-    );
+    Log::info("Sprint created successfully: {$sprint->id}  -  {$sprint->name}");
 
     return back()->with([
       'message' => 'Sprint created successfully',
@@ -65,8 +63,8 @@ class SprintController extends Controller
   {
     $validated = $request->validate([
       'name' => 'sometimes|string|max:255',
-      'start_date' => 'sometimes|date|after_or_equal:yesterday',
-      'end_date' => 'sometimes|date|after:start_date',
+      'start_date' => 'sometimes|date_format:Y-m-d|after_or_equal:today',
+      'end_date' => 'sometimes|date_format:Y-m-d|after:start_date',
       'status' => 'sometimes|in:active,completed',
     ]);
 

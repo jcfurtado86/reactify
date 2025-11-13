@@ -1,5 +1,7 @@
 import { clsx } from 'clsx'
+import { format } from 'date-fns'
 import { twMerge } from 'tailwind-merge'
+import { ptBR } from 'date-fns/locale'
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -130,4 +132,38 @@ export const isSprintActive = (sprint) => {
   const endDate = new Date(sprint.end_date)
 
   return now >= startDate && now <= endDate
+}
+
+export const formatDate = (dateInput) => {
+  // 1. Se a entrada for nula, indefinida ou uma string vazia, retorna vazio.
+  if (!dateInput) {
+    return ''
+  }
+
+  let dateToFormat = dateInput
+
+  // 2. Verifica se a entrada é a string de data (YYYY-MM-DD)
+  if (
+    typeof dateInput === 'string' &&
+    dateInput.length === 10 &&
+    dateInput.includes('-')
+  ) {
+    // 3. Aplica o "truque" para forçar a interpretação como fuso local
+    dateToFormat = dateInput + 'T00:00:00'
+  }
+
+  // 4. Agora, 'format' recebe ou a string corrigida ("2025-11-16T00:00:00")
+  //    ou o objeto Date original (vindo do calendário), e formata corretamente.
+  return format(new Date(dateToFormat), 'dd/MM/yyyy', {
+    locale: ptBR,
+  })
+}
+export const parseDateAsLocal = (dateString) => {
+  // Se a string for nula, indefinida ou vazia, retorne null
+  if (!dateString) {
+    return null
+  }
+
+  // Aplica o "truque" para forçar a interpretação como fuso local
+  return new Date(String(dateString) + 'T00:00:00')
 }
