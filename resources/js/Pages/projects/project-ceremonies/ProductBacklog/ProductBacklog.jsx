@@ -106,7 +106,7 @@ const getSharedColumns = ({
                 ? `${selectedStories.length} selected`
                 : `1 selected`}
             </DropdownMenuItem>
-            {status === 'active' && (
+            {status !== 'completed' && (
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
