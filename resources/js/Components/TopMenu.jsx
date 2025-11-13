@@ -9,8 +9,7 @@ import {
   PanelLeftOpen,
   Bell,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-
+import RaccoonIcon from '/resources/images/raccoon.svg'
 const TopMenu = ({ isOpen, setIsOpen }) => {
   const { props } = usePage()
   const { user, notifications } = props.auth
@@ -49,7 +48,13 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           className="flex items-center gap-3 cursor-pointer text-2xl"
           href={route('dashboard')}
         >
-          <Squirrel className="size-8 text-primary" /> Reactify
+          {/* raccoon*/}
+          <img
+            src={RaccoonIcon}
+            alt="Raccoon"
+            className="rounded-full bg-white size-9"
+          />
+          Reactify
         </Link>
       </div>
       <div className=" z-10 flex items-center gap-2 justify-center">
