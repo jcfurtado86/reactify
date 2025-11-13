@@ -1,4 +1,4 @@
-import { router } from '@inertiajs/react'
+import { router, useForm } from '@inertiajs/react'
 import { cn, isSprintActive } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -214,46 +214,55 @@ const SprintTable = ({
               {new Date(sprint.end_date).toLocaleDateString('pt-BR')} (
               {table.getRowCount()} items)
             </span>
-            {isSprintActive(sprint) && (
+
+            {sprint.status === 'completed' && (
+              <Badge variant="badge" className={'bg-rose-300'}>
+                Finalizada
+              </Badge>
+            )}
+
+            {isSprintActive(sprint) && sprint.status === 'active' && (
               <Badge variant="badge" className={'bg-green-300'}>
                 Ativa
               </Badge>
             )}
-            <span
-              role="button"
-              tabIndex={0}
-              className="border border-border px-2 hover:bg-accent"
-              onClick={(e) => openEditSprintForm(e, sprint)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  openEditSprintForm(e, sprint)
-                }
-              }}
-            >
-              Editar sprint
-            </span>
             {sprint.status === 'active' && (
-              <span
-                role="button"
-                tabIndex={0}
-                className="border border-border px-2 hover:bg-accent"
-                onClick={(e) => {
-                  !isSprintActive(sprint)
-                    ? openEditSprintForm(e, sprint, true)
-                    : openEndSprintForm(e, sprint)
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    return !isSprintActive(sprint)
+              <>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  className="border border-border px-2 hover:bg-accent"
+                  onClick={(e) => {
+                    !isSprintActive(sprint)
                       ? openEditSprintForm(e, sprint, true)
                       : openEndSprintForm(e, sprint)
-                  }
-                }}
-              >
-                {!isSprintActive(sprint)
-                  ? 'Iniciar Sprint'
-                  : 'Finalizar Sprint'}
-              </span>
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      return !isSprintActive(sprint)
+                        ? openEditSprintForm(e, sprint, true)
+                        : openEndSprintForm(e, sprint)
+                    }
+                  }}
+                >
+                  {!isSprintActive(sprint)
+                    ? 'Iniciar Sprint'
+                    : 'Finalizar Sprint'}
+                </span>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  className="border border-border px-2 hover:bg-accent"
+                  onClick={(e) => openEditSprintForm(e, sprint)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      openEditSprintForm(e, sprint)
+                    }
+                  }}
+                >
+                  Editar sprint
+                </span>
+              </>
             )}
             <span
               role="button"
@@ -288,6 +297,9 @@ const ProductBacklog = ({ project, setProject }) => {
   const [endDate, setEndDate] = useState(
     new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // Default para 14 dias no futuro
   )
+  const { data, setData, post, processing } = useForm({
+    destination: 'Backlog',
+  })
   const [openDeleteForm, setOpenDeleteForm] = useState(false)
   const [open, setOpen] = useState(false)
   const [openEndForm, setOpenEndForm] = useState(null)
@@ -493,10 +505,12 @@ const ProductBacklog = ({ project, setProject }) => {
         {
           preserveState: true,
           preserveScroll: true,
+          onSuccess: () => {
+            setSelectedSprint(null)
+            setOpen(false)
+          },
         },
       )
-      setOpen(false)
-      setSelectedSprint(null)
     } else {
       router.post(
         route('sprint.store'),
@@ -543,10 +557,24 @@ const ProductBacklog = ({ project, setProject }) => {
       toast.error('Please select s sprint')
       return
     }
-    router.patch(route('sprint.finish', selectedSprint.id), {
-      new_sprint_id: 1,
-    })
-    setOpenEndForm(false)
+
+    console.log(data.destination)
+    let destination
+    if (data.destination === 'Backlog') destination = null
+    else destination = data.destination
+    router.patch(
+      route('sprint.finish', selectedSprint.id),
+      {
+        new_sprint_id: destination,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Sprint finished successfully')
+          setSelectedSprint(null)
+          setOpenEndForm(false)
+        },
+      },
+    )
   }
 
   const openEditSprintForm = (e, sprint, startSprint = false) => {
@@ -609,19 +637,45 @@ const ProductBacklog = ({ project, setProject }) => {
       {/* finalizar sprint*/}
       <AlertDialog open={openEndForm} onOpenChange={setOpenEndForm}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Finalizar Sprint</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja finalizar essa sprint? As estórias contidas
-              nela voltarão ao Backlog.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={finishSprint}>
-              Finalizar
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          <form onSubmit={finishSprint}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Finalizar Sprint</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja finalizar essa sprint? As estórias nao
+                finalizadas presentes nela podem ir para outra sprint ou ao
+                Backlog.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <section className="my-4">
+              <Select
+                value={data.destination} // O valor é controlado pelo 'data'
+                onValueChange={(value) => setData('destination', value)} // Atualiza o 'data'
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Sprints</SelectLabel>
+                    <SelectItem key="Backlog" value={'Backlog'}>
+                      Backlog
+                    </SelectItem>
+                    {project.sprints
+                      .sort((a, b) => a.created_at - b.created_at)
+                      .map((sprint) => (
+                        <SelectItem key={sprint.id} value={String(sprint.id)}>
+                          {sprint.name}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </section>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction type="submit">Finalizar</AlertDialogAction>
+            </AlertDialogFooter>
+          </form>
         </AlertDialogContent>
       </AlertDialog>
       {/* deletar sprint*/}

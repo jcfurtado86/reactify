@@ -1,11 +1,8 @@
 import KanbanBoard from './KanbanBoard'
-
+import { isSprintActive } from '@/lib/utils'
 const getActiveSprints = (sprints) => {
-  const now = new Date()
   return sprints.filter((sprint) => {
-    const startDate = new Date(sprint.start_date)
-    const endDate = new Date(sprint.end_date)
-    return startDate <= now && now <= endDate
+    return isSprintActive(sprint)
   })
 }
 
