@@ -9,6 +9,7 @@ import {
   ChevronsUp,
   Minus,
   ChevronDown,
+  BookText
 } from 'lucide-react'
 import rainbowIcon from '/resources/images/rainbow.png'
 import { router } from '@inertiajs/react'
@@ -624,7 +625,9 @@ const Stories = ({ project, setProject }) => {
           }
         />
 
-        {project?.stories?.length > 0 &&
+        {project?.stories?.filter(
+          (story) => story.type === 'user' && !story.epic_id,
+        ).length > 0 ? (
           project?.stories
             .filter((story) => story.type === 'user' && !story.epic_id)
             .sort((a, b) => a.id - b.id)
@@ -683,11 +686,20 @@ const Stories = ({ project, setProject }) => {
                     })}
                 </React.Fragment>
               )
-            })}
+            })
+        ) : (
+          <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
+            <BookText size={32} className="mb-3 text-primary" />
+            <p className="mb-2 text-sm text-center font-medium text-foreground">
+              Nenhuma User Story
+            </p>
+          </div>
+        )}
 
         {can('userStory.manage') && (
           <Button
-            className="flex items-center justify-center py-1 bg-card hover:bg-muted text-primary rounded-lg transition-colors shadow-md"
+            variant="secondary"
+            className="flex items-center justify-center py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
             onClick={() => addNewStory('user')}
             disabled={!can('userStory.manage')}
           >
@@ -704,7 +716,9 @@ const Stories = ({ project, setProject }) => {
               .length || 0
           }
         />
-        {project?.stories?.length > 0 &&
+        {project?.stories?.filter(
+          (story) => story.type === 'system' && !story.epic_id,
+        ).length > 0 ? (
           project?.stories
             .filter((story) => story.type === 'system' && !story.epic_id)
             .sort((a, b) => a.id - b.id)
@@ -763,11 +777,20 @@ const Stories = ({ project, setProject }) => {
                     })}
                 </React.Fragment>
               )
-            })}
+            })
+        ) : (
+          <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
+            <BookText size={32} className="mb-3 text-primary" />
+            <p className="mb-2 text-sm text-center font-medium text-foreground">
+              Nenhuma System Story
+            </p>
+          </div>
+        )}
         {can('userStory.manage') && (
           <>
             <Button
-              className="flex items-center justify-center py-1 bg-card hover:bg-muted text-primary rounded-lg transition-colors shadow-md"
+              variant="secondary"
+              className="flex items-center justify-center py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
               disabled={!can('userStory.manage')}
               onClick={() => addNewStory('system')}
             >
