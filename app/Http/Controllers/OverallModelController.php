@@ -7,6 +7,7 @@ use App\Models\CrcCard;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\BulkStoreOverallModelRequest;
 use Illuminate\Support\Facades\DB;
+use App\Models\OverallModelClass;
 
 class OverallModelController extends Controller
 {
@@ -16,6 +17,12 @@ class OverallModelController extends Controller
 
     DB::transaction(function () use ($validatedData) {
       foreach ($validatedData['crc_cards'] as $cardData) {
+        // Garante que a classe principal exista no banco de classes
+        OverallModelClass::firstOrCreate(
+          ['project_id' => $cardData['project_id'], 'name' => $cardData['class']],
+          ['project_id' => $cardData['project_id'], 'name' => $cardData['class']]
+        );
+
         // O Model é CrcCard, mas os campos estão corretos.
         CrcCard::create($cardData);
       }
@@ -38,6 +45,12 @@ class OverallModelController extends Controller
       'responsabilities' => 'required|array',
       'responsabilities.*' => 'required|string|max:40',
     ]);
+
+    // Garante que a classe principal exista no banco de classes
+    OverallModelClass::firstOrCreate(
+      ['project_id' => $validated['project_id'], 'name' => $validated['class']],
+      ['project_id' => $validated['project_id'], 'name' => $validated['class']]
+    );
 
     CrcCard::create($validated);
 
@@ -65,6 +78,28 @@ class OverallModelController extends Controller
       'invest_card.small' => 'nullable|string|in:yes,no,na',
       'invest_card.testable' => 'nullable|string|in:yes,no,na',
     ]);
+
+    if ($request->has('class') && $request->class !== $model->class) {
+      $newClassName = $validated['class'];
+      $oldClassName = $model->class; // Captura o nome antigo ANTES do update
+      $projectId = $model->project_id;
+
+      // Tenta encontrar a classe no "Banco de Classes" com o nome ANTIGO
+      $existingClass = OverallModelClass::where('project_id', $projectId)
+        ->where('name', $oldClassName)
+        ->first();
+
+      if ($existingClass) {
+        // Se encontrou, ATUALIZA o nome dela para o NOVO
+        $existingClass->update(['name' => $newClassName]);
+      } else {
+        // Se não encontrou (caso raro), apenas cria a nova
+        OverallModelClass::firstOrCreate(
+          ['project_id' => $projectId, 'name' => $newClassName],
+          ['project_id' => $projectId, 'name' => $newClassName]
+        );
+      }
+    }
 
     $model->update($validated);
 

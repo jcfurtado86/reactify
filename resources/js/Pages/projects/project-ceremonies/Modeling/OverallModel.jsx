@@ -385,6 +385,10 @@ const CRCCard = ({
     })
   }
 
+  const collaboratorOptions = reusableClasses.filter(
+    (cls) => cls.name !== card.class,
+  );
+
   return (
     <div className="relative group bg-card border border-border rounded-lg shadow-lg flex flex-col text-muted-foreground animate-fade-in">
       <div
@@ -485,7 +489,7 @@ const CRCCard = ({
             <CollaboratorItem
               key={`${card.id}-collab-${i}`}
               item={collab}
-              options={reusableClasses}
+              options={collaboratorOptions}
               onChange={(value) => handleCollaboratorChange(value, card.id, i)}
               onDelete={() => handleDeleteListItem(card.id, 'collaborators', i)}
             />
@@ -642,7 +646,15 @@ const OverallModel = ({ project, setProject }) => {
       responsabilities: ['Responsabilidade'],
       collaborators: ['Colaborador'],
     }
-    const updatedCards = [...project.crc_cards, newCard]
+
+    const newClass = {
+      id: `temp-class-${new Date().getTime()}`,
+      name: newCard.class,
+    };
+    
+    // Prepara as listas atualizadas para o estado
+    const updatedCards = [...project.crc_cards, newCard];
+    const updatedClasses = [...project.overall_model_classes, newClass];
 
     router.post(
       route('overall.store'),
@@ -654,7 +666,12 @@ const OverallModel = ({ project, setProject }) => {
       },
       {
         onSuccess: () => {
-          setProject((prev) => ({ ...prev, crc_cards: updatedCards }))
+          // Atualiza ambos (cards e classes) no sucesso
+          setProject((prev) => ({ 
+            ...prev, 
+            crc_cards: updatedCards,
+            overall_model_classes: updatedClasses 
+          }))
         },
       },
     )
