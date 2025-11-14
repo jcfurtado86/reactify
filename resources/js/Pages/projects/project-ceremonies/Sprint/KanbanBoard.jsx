@@ -239,11 +239,11 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
         <Card className="border-dashed border-2 border-muted-foreground/25">
           <CardContent className="flex flex-col items-center justify-center py-8 text-center">
             <p className="text-muted-foreground mb-4">
-              Esta sprint não possui stories ainda.
+              Sem stories em sprints.
             </p>
 
             <p className="text-sm text-muted-foreground mt-2">
-              e adicione stories do Product Backlog.
+              Crie uma sprint, adicione stories do Product Backlog e inicie-a.
             </p>
           </CardContent>
         </Card>
