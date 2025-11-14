@@ -261,11 +261,11 @@ const EditableListItem = ({
             ref={inputRef}
             type="text"
             value={editValue}
+            maxLength={40}
             onChange={onValueChange}
             onKeyDown={handleKeyDown}
-            className="h-8 flex-1 text-center p-0 bg-secondary"
+            className="h-8 flex-1 text-left px-2 bg-secondary"
             autoFocus
-            maxLength={40}
           />
           {/* <Button
             variant="ghost"
@@ -286,7 +286,7 @@ const EditableListItem = ({
         </div>
       ) : (
         <>
-          <p className="text-sm flex-1">{item}</p>
+          <p className="text-sm px-2 flex-1 break-words">{item}</p>
           <MotionDivOptions
             isHovered={isHovered}
             isEditing={isEditing}
@@ -387,7 +387,7 @@ const CRCCard = ({
 
   const collaboratorOptions = reusableClasses.filter(
     (cls) => cls.name !== card.class,
-  );
+  )
 
   return (
     <div className="relative group bg-card border border-border rounded-lg shadow-lg flex flex-col text-muted-foreground animate-fade-in">
@@ -650,11 +650,11 @@ const OverallModel = ({ project, setProject }) => {
     const newClass = {
       id: `temp-class-${new Date().getTime()}`,
       name: newCard.class,
-    };
-    
+    }
+
     // Prepara as listas atualizadas para o estado
-    const updatedCards = [...project.crc_cards, newCard];
-    const updatedClasses = [...project.overall_model_classes, newClass];
+    const updatedCards = [...project.crc_cards, newCard]
+    const updatedClasses = [...project.overall_model_classes, newClass]
 
     router.post(
       route('overall.store'),
@@ -667,10 +667,10 @@ const OverallModel = ({ project, setProject }) => {
       {
         onSuccess: () => {
           // Atualiza ambos (cards e classes) no sucesso
-          setProject((prev) => ({ 
-            ...prev, 
+          setProject((prev) => ({
+            ...prev,
             crc_cards: updatedCards,
-            overall_model_classes: updatedClasses 
+            overall_model_classes: updatedClasses,
           }))
         },
       },
