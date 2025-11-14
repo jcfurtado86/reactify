@@ -265,6 +265,7 @@ const EditableListItem = ({
             onKeyDown={handleKeyDown}
             className="h-8 flex-1 text-center p-0 bg-secondary"
             autoFocus
+            maxLength={40}
           />
           {/* <Button
             variant="ghost"
@@ -401,6 +402,7 @@ const CRCCard = ({
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={handleTitleKeyDown}
               className="h-9 text-lg font-semibold flex-1"
+              maxLength={30}
             />
             {/* <Button
               variant="ghost"
@@ -923,6 +925,7 @@ const OverallModel = ({ project, setProject }) => {
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleAddReusableName()
                   }
+                  maxLength={30}
                 />
                 <Button onClick={handleAddReusableName}>Salvar</Button>
               </div>

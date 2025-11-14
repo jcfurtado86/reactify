@@ -32,11 +32,11 @@ class OverallModelController extends Controller
   {
     $validated = $request->validate([
       'project_id' => 'required|exists:projects,id',
-      'class' => 'required|string|max:90',
+      'class' => 'required|string|max:30',
       'collaborators' => 'required|array',
-      'collaborators.*' => 'required|string|max:50',
+      'collaborators.*' => 'required|string|max:30',
       'responsabilities' => 'required|array',
-      'responsabilities.*' => 'required|string|max:50',
+      'responsabilities.*' => 'required|string|max:40',
     ]);
 
     CrcCard::create($validated);
@@ -52,11 +52,11 @@ class OverallModelController extends Controller
   public function update(Request $request, CrcCard $model)
   {
     $validated = $request->validate([
-      'class' => 'nullable|string|max:90',
+      'class' => 'nullable|string|max:30',
       'collaborators' => 'nullable|array',
-      'collaborators.*' => 'nullable|string|max:50',
+      'collaborators.*' => 'nullable|string|max:30',
       'responsabilities' => 'nullable|array',
-      'responsabilities.*' => 'nullable|string|max:50',
+      'responsabilities.*' => 'nullable|string|max:40',
       'invest_card' => 'nullable|array',
       'invest_card.independent' => 'nullable|string|in:yes,no,na',
       'invest_card.negotiable' => 'nullable|string|in:yes,no,na',
