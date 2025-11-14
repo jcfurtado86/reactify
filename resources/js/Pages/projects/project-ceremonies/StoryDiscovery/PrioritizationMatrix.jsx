@@ -140,7 +140,7 @@ const GoalCard = ({ goal, systemColors }) => {
   const selectedType = goalVariants[goal.type] || '#f97316'
   const selectedPriority = goalVariants[goal.priority] || '#f97316'
   return (
-    <Card className="bg-card  border border-border transition-all duration-300 ease-in-out p-0 h-40 w-full rounded-md">
+    <Card className="bg-card  border border-border transition-all duration-300 ease-in-out p-0 h-44 w-full rounded-md">
       <CardContent className="p-2 h-full text-xs flex flex-col gap-2">
         <div className="gap-2 flex w-full items-center justify-start">
           <Badge
@@ -479,7 +479,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
         </div>
         {/* conteiner de stories*/}
         <section className=" bg-card text-card-foreground border-0 rounded-xl shadow-sm  w-full ">
-          <h2 className="text-lg font-bold my-1 text-muted-foreground">
+          <h2 className="text-lg font-bold m-2 text-muted-foreground">
             Stories
           </h2>
           <DroppableCell
@@ -554,7 +554,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                           <DroppableCell
                             key={cellId}
                             id={cellId}
-                            className={`h-40 min-w-60`}
+                            className={`h-44 min-w-60`}
                           >
                             {storiesInCell && storiesInCell.length > 0 ? (
                               storiesInCell.map((story) => (

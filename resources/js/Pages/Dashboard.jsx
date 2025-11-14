@@ -287,7 +287,7 @@ const Dashboard = ({ project, setProject }) => {
       />
       {/* ceremonies*/}
       <section className="ceremonies xl:col-start-4 xl:row-span-3 flex flex-col justify-between min-w-72 items-center bg-card gap-2 p-2">
-        <span>Ceremonies</span>
+        <span>Cerimônias</span>
         {ceremonies.map((ceremony, index) => (
           <CeremonyCard
             key={ceremony}
