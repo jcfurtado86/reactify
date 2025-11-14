@@ -10,8 +10,6 @@ import {
 import { getStatusColor } from '@/lib/utils'
 import {
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'

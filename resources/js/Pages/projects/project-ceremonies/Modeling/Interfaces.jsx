@@ -496,8 +496,8 @@ const Interfaces = ({ project, setProject }) => {
   }
 
   return (
-    <div className="p-4 grid md:grid-cols-2 gap-2">
-      <div className="md:col-span-2">
+    <div className="p-4 flex flex-col gap-2">
+      <div className="mx-auto gap-2">
         {showAiModal && (
           <GeneratedItemsModal
             allClassModels={allClassModels}
@@ -650,39 +650,41 @@ const Interfaces = ({ project, setProject }) => {
           </DialogContent>
         </Dialog>
       </div>
-      <section>
-        <h3 className="text-2xl font-bold mb-4">Interfaces Internas</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {project?.system_interfaces
-            ?.filter((i) => i.type === 'internal')
-            .map((item) => (
-              <InterfaceCard
-                key={`internal-${item.id}`}
-                data={item}
-                onDelete={() => handleDelete(item)}
-                onClick={() => handleOpenForEdit(item)}
-                onInspect={() => inspectInterface(item.id)}
-              />
-            ))}
-        </div>
-      </section>
+      <div className="flex w-full gap-2">
+        <section className="flex flex-col items-center gap-2 w-1/2">
+          <h3 className="text-2xl font-bold mb-4">Interfaces Internas</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {project?.system_interfaces
+              ?.filter((i) => i.type === 'internal')
+              .map((item) => (
+                <InterfaceCard
+                  key={`internal-${item.id}`}
+                  data={item}
+                  onDelete={() => handleDelete(item)}
+                  onClick={() => handleOpenForEdit(item)}
+                  onInspect={() => inspectInterface(item.id)}
+                />
+              ))}
+          </div>
+        </section>
 
-      <section className="border-l border-border pl-2">
-        <h3 className="text-2xl font-bold mb-4">Interfaces Externas</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {project?.system_interfaces
-            ?.filter((i) => i.type === 'external')
-            .map((item) => (
-              <InterfaceCard
-                key={`external-${item.id}`}
-                data={item}
-                onDelete={() => handleDelete(item)}
-                onClick={() => handleOpenForEdit(item)}
-                onInspect={() => inspectInterface(item.id)}
-              />
-            ))}
-        </div>
-      </section>
+        <section className="flex flex-col items-center gap-2 border-l border-border pl-2 w-1/2">
+          <h3 className="text-2xl font-bold mb-4">Interfaces Externas</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {project?.system_interfaces
+              ?.filter((i) => i.type === 'external')
+              .map((item) => (
+                <InterfaceCard
+                  key={`external-${item.id}`}
+                  data={item}
+                  onDelete={() => handleDelete(item)}
+                  onClick={() => handleOpenForEdit(item)}
+                  onInspect={() => inspectInterface(item.id)}
+                />
+              ))}
+          </div>
+        </section>
+      </div>
       <GenerateAIButton
         isGenerating={isGenerating}
         onClick={generateInterfaces}
