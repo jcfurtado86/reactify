@@ -904,7 +904,7 @@ const Journeys = ({ project, setProject }) => {
                   </DndContext>
                 ) : (
                   <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
-                    <p className="mb-2">This journey has no steps yet.</p>
+                    <p className="mb-2">Essa Jornada não possui nenhum passo.</p>
                     {can('journey.manage') && (
                       <Button
                         variant="outline"
@@ -912,7 +912,7 @@ const Journeys = ({ project, setProject }) => {
                         className="text-primary"
                         onClick={() => addNewStep(journey.id)}
                       >
-                        <Plus size={16} className="mr-1" /> Add first step
+                        <Plus size={16} className="mr-1" /> Adicionar passo
                       </Button>
                     )}
                   </div>
@@ -923,9 +923,9 @@ const Journeys = ({ project, setProject }) => {
       ) : (
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border">
           <Map size={40} className="mb-4 text-primary" />
-          <p className="mb-2">No journeys defined yet.</p>
+          <p className="mb-2">Nenhuma Jornada definida.</p>
           <p className="mb-4 text-sm">
-            Create a new journey to map the user flow.
+            Crie uma nova jornada para mapear o fluxo do usuário.
           </p>
         </div>
       )}
@@ -936,11 +936,11 @@ const Journeys = ({ project, setProject }) => {
         {can('journey.manage') && (
           <>
             <Button
-              variant="outline"
-              className="flex-1"
+              variant="secondary"
+              className="flex-1 flex items-center justify-center py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
               onClick={addNewJourney}
             >
-              <Plus size={18} className="mr-2" /> New Journey
+              <Plus size={18} className="mr-2" /> Nova Jornada
             </Button>
             <GenerateAIButton
               isGenerating={isGeneratingAI}

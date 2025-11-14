@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronsUp,
   EllipsisVertical,
+  Goal
 } from 'lucide-react'
 import rainbowIcon from '/resources/images/rainbow.png'
 import TextareaAutosize from 'react-textarea-autosize'
@@ -802,27 +803,12 @@ const Goals = ({ project, setProject }) => {
               />
             ))
         ) : (
-          <Card className="bg-card p-4 shadow-md">
-            <div className="flex items-center mb-2 gap-2">
-              <Badge
-                style={{ backgroundColor: project?.system_colors?.goals.cg }}
-                className={cn('text-background')}
-              >
-                CG
-              </Badge>
-              <Badge
-                style={{
-                  backgroundColor: project?.system_colors?.goals.medium,
-                }}
-                className={cn('text-background')}
-              >
-                MED
-              </Badge>
-            </div>
-            <p className="text-foreground text-sm font-medium">
-              Example of a constraint goal...
+          <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
+            <Goal size={32} className="mb-3 text-primary" />
+            <p className="mb-2 text-sm text-center font-medium text-foreground">
+              Nenhuma Constraint Goal
             </p>
-          </Card>
+          </div>
         )}
         {can('goal.manage') && (
           <Button
@@ -847,33 +833,43 @@ const Goals = ({ project, setProject }) => {
               .length || 0
           }
         />
-        {project.goal_sketches
-          ?.filter((goal) => goal.type === 'bg')
-          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-          .map((goal) => (
-            <GoalItem
-              key={goal.id}
-              goal={goal}
-              isTemporary={isTemporary(goal)}
-              isEditing={editingId === goal.id}
-              editValue={editValue}
-              onValueChange={handleInputChange}
-              onEdit={() => editGoal(goal)}
-              onSave={() => editGoal(goal)}
-              onCancel={() => setEditingId(null)}
-              onDelete={() => deleteGoal(goal.id)}
-              onInspect={() => inspectGoal(goal.id)}
-              textareaRef={editingId === goal.id ? textareaRef : null}
-              typeSelectId={typeSelectId}
-              onToggleTypeSelect={() => toggleTypeSelect(goal.id)}
-              onChangeGoalType={changeGoalType}
-              prioritySelectId={prioritySelectId}
-              onTogglePrioritySelect={() => togglePrioritySelect(goal.id)}
-              onChangeGoalPriority={changeGoalPriority}
-              systemColors={project?.system_colors}
-              disabled={!can('goal.manage')}
-            />
-          ))}
+        {project.goal_sketches?.filter((goal) => goal.type === 'bg').length >
+        0 ? (
+          project.goal_sketches
+            .filter((goal) => goal.type === 'bg')
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            .map((goal) => (
+              <GoalItem
+                key={goal.id}
+                goal={goal}
+                isTemporary={isTemporary(goal)}
+                isEditing={editingId === goal.id}
+                editValue={editValue}
+                onValueChange={handleInputChange}
+                onEdit={() => editGoal(goal)}
+                onSave={() => editGoal(goal)}
+                onCancel={() => setEditingId(null)}
+                onDelete={() => deleteGoal(goal.id)}
+                onInspect={() => inspectGoal(goal.id)}
+                textareaRef={editingId === goal.id ? textareaRef : null}
+                typeSelectId={typeSelectId}
+                onToggleTypeSelect={() => toggleTypeSelect(goal.id)}
+                onChangeGoalType={changeGoalType}
+                prioritySelectId={prioritySelectId}
+                onTogglePrioritySelect={() => togglePrioritySelect(locagoal.id)}
+                onChangeGoalPriority={changeGoalPriority}
+                systemColors={project?.system_colors}
+                disabled={!can('goal.manage')}
+              />
+            ))
+        ) : (
+          <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
+            <Goal size={32} className="mb-3 text-primary" />
+            <p className="mb-2 text-sm text-center font-medium text-foreground">
+              Nenhuma Business Goal
+            </p>
+          </div>
+        )}
         {can('goal.manage') && (
           <>
             <Button

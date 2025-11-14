@@ -769,25 +769,7 @@ const Personas = ({ project, setProject }) => {
           setInspectionId={setInspectionId}
         />
       )}
-      {can('persona.manage') && (
-        <>
-          <Button
-            variant="secondary"
-            onClick={addNewPersona}
-            disabled={isSubmitting}
-            className="xl:col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
-          >
-            <Plus size={18} className="mr-2" />
-            {isSubmitting ? 'Criando...' : 'Nova Persona'}
-          </Button>
-          <GenerateAIButton
-            isGenerating={isGenerating}
-            onClick={generatePersonas}
-            // tooltip={tooltipInfo.aiGeneratedStory}
-            className="xl:col-span-2"
-          />
-        </>
-      )}
+      
       {project.personas && project.personas.length > 0 ? (
         project.personas
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
@@ -818,13 +800,33 @@ const Personas = ({ project, setProject }) => {
             )
           })
       ) : (
-        <div className="col-span-1 flex flex-col items-center justify-center p-10 bg-muted/50 border-dashed border rounded-lg text-center">
+        <div className="col-span-1 xl:col-span-2 flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border">
           <UserCircle2 size={40} className="mb-4 text-primary" />
-          <h3 className="text-xl font-semibold">Nenhuma persona definida</h3>
-          <p className="text-muted-foreground mt-2">
-            Crie sua primeira persona para mapear os usuários do seu projeto.
+          <p className="mb-2 font-medium text-foreground">Nenhuma persona definida</p>
+          <p className="mb-4 text-sm text-center max-w-xs">
+            Crie uma nova persona para mapear os perfis de usuário do seu projeto.
           </p>
         </div>
+      )}
+
+      {can('persona.manage') && (
+        <>
+          <Button
+            variant="secondary"
+            onClick={addNewPersona}
+            disabled={isSubmitting}
+            className="xl:col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
+          >
+            <Plus size={18} className="mr-2" />
+            {isSubmitting ? 'Criando...' : 'Nova Persona'}
+          </Button>
+          <GenerateAIButton
+            isGenerating={isGenerating}
+            onClick={generatePersonas}
+            // tooltip={tooltipInfo.aiGeneratedStory}
+            className="xl:col-span-2"
+          />
+        </>
       )}
 
       <AlertDialog
