@@ -1,6 +1,6 @@
 import { router, usePage } from '@inertiajs/react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import { Plus, Minus, Check, X, ChevronsUp } from 'lucide-react'
+import { Plus, Minus, Check, X, ChevronsUp, StickyNote } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 
@@ -908,6 +908,7 @@ const OverallModel = ({ project, setProject }) => {
           type="single"
           collapsible
           className="w-full bg-card border rounded-lg"
+          defaultValue="item-1"
         >
           <AccordionItem value="item-1" className="border-b-0">
             <AccordionTrigger className="px-4 py-3 text-sm font-semibold hover:no-underline">
@@ -955,7 +956,12 @@ const OverallModel = ({ project, setProject }) => {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-        <Button className="h-11" onClick={handleAddCard}>
+        <Button
+          variant="secondary"
+          className="h-11 flex items-center justify-center py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
+          onClick={handleAddCard}
+        >
+          <Plus size={18} className="mr-2" />
           Adicionar CRC Card
         </Button>
       </section>
@@ -969,30 +975,44 @@ const OverallModel = ({ project, setProject }) => {
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {project?.crc_cards
-          ?.slice()
-          .sort((a, b) => a.id - b.id)
-          .map((card) => (
-            <CRCCard
-              key={card.id}
-              card={card}
-              project={project}
-              setProject={setProject}
-              editingField={editingField}
-              setEditingField={setEditingField}
-              handleDeleteListItem={handleDeleteListItem}
-              confirmDeleteCard={confirmDeleteCard}
-              editingTitleId={editingTitleId}
-              startEditTitle={startEditTitle}
-              saveEditTitle={handleSave}
-              cancelEditTitle={cancelEditTitle}
-              editValue={editValue}
-              setEditValue={setEditValue}
-              reusableClasses={project?.overall_model_classes || []}
-              handleCollaboratorChange={handleCollaboratorChange}
-              onInspect={() => inspectOverallModel(card.id)}
-            />
-          ))}
+        {/* Adicionada verificação de 'length > 0' */}
+        {project?.crc_cards && project.crc_cards.length > 0 ? (
+          project.crc_cards
+            .slice()
+            .sort((a, b) => a.id - b.id)
+            .map((card) => (
+              <CRCCard
+                key={card.id}
+                card={card}
+                project={project}
+                setProject={setProject}
+                editingField={editingField}
+                setEditingField={setEditingField}
+                handleDeleteListItem={handleDeleteListItem}
+                confirmDeleteCard={confirmDeleteCard}
+                editingTitleId={editingTitleId}
+                startEditTitle={startEditTitle}
+                saveEditTitle={handleSave}
+                cancelEditTitle={cancelEditTitle}
+                editValue={editValue}
+                setEditValue={setEditValue}
+                reusableClasses={project?.overall_model_classes || []}
+                handleCollaboratorChange={handleCollaboratorChange}
+                onInspect={() => inspectOverallModel(card.id)}
+              />
+            ))
+        ) : (
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
+            <StickyNote size={40} className="mb-4 text-primary" />
+            <p className="mb-2 font-medium text-foreground">
+              Nenhum cartão de Colaboradoração Responsabilidade-Classe definido
+            </p>
+            <p className="mb-4 text-sm text-center max-w-xs">
+              Crie um novo card para mapear as classes, responsabilidades e
+              colaboradores.
+            </p>
+          </div>
+        )}
       </div>
 
       <AlertDialog
