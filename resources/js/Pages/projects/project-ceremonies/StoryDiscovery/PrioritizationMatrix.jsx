@@ -16,7 +16,7 @@ import {
   horizontalListSortingStrategy, // Estratégia para colunas horizontais
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { router } from '@inertiajs/react'
+import { router, Link } from '@inertiajs/react'
 import { BookText, Target, LayoutGrid } from 'lucide-react'
 import EditPriorities from './EditPriorities'
 
@@ -480,9 +480,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
         </div>
         {/* conteiner de stories*/}
         <section className=" bg-card text-card-foreground border-0 rounded-xl shadow-sm  w-full ">
-          <h2 className="text-lg font-bold m-2 text-muted-foreground">
-            Stories
-          </h2>
+          <span className="h-11 py-1 m-2 t-4">Stories</span>
           <DroppableCell
             id="story-list"
             className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 p-1 items-start border-0"
