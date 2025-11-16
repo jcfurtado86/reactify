@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { router, Link } from '@inertiajs/react'
-import { BookText, Target, LayoutGrid } from 'lucide-react'
+import { BookText, Target, LayoutGrid, ExternalLink } from 'lucide-react'
 import EditPriorities from './EditPriorities'
 
 const SortablePriorityColumn = ({
@@ -514,6 +514,15 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                 <p className="text-sm text-center">
                   Arraste uma story da matriz aqui para "despriorizá-la".
                 </p>
+                <Button asChild variant="ghost" size="sm">
+                  <Link
+                    href={route('project.ceremony.show', { project: project.id, ceremony: 'storyDiscovery' })}
+                    onClick={() => localStorage.setItem('activeStoryDiscoveryMenu', 'Stories')}
+                  >
+                    Ir para Stories
+                    <ExternalLink className="size-4 ml-2" />
+                  </Link>
+                </Button>
               </div>
             )}
           </DroppableCell>
@@ -553,6 +562,14 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   <p className="text-xs text-center">
                     Crie Goals primeiro.
                   </p>
+                  <Button asChild variant="ghost" size="sm">
+                    <Link
+                      href={route('project.ceremony.show', { project: project.id, ceremony: 'inception' })}
+                      onClick={() => localStorage.setItem('activeMenu', 'Goals')}
+                    > Ir para Goals
+                      <ExternalLink className="size-4" />
+                    </Link>
+                  </Button>
                 </div>
               )}
             </aside>
