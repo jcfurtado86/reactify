@@ -6,6 +6,7 @@ import {
   Check,
   X,
   ChevronsUp,
+  FileText
 } from 'lucide-react'
 import { isTemporary } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
@@ -510,6 +511,7 @@ const UsageScenarios = ({ project, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
+  const hasStories = project?.stories && project.stories.length > 0
   // Memoize scenarios grouped by their parent `story_id`.
   const scenariosByStoryId = useMemo(() => {
     if (!project?.usage_scenarios) return new Map()
@@ -713,6 +715,18 @@ const UsageScenarios = ({ project, setProject }) => {
           setProject={setProject}
           setInspectionId={setInspectionId}
         />
+      )}
+      {!hasStories && (
+        <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
+          <FileText size={40} className="mb-4 text-primary" />
+          <p className="mb-2 font-medium text-foreground">
+            Nenhum Cenário de Uso
+          </p>
+          <p className="mb-4 text-sm text-center max-w-xs">
+            Crie uma User Story ou System Story primeiro para poder adicionar
+            cenários de uso.
+          </p>
+        </div>
       )}
       {project?.stories
         ?.filter((story) => story.type === 'user')

@@ -1023,7 +1023,7 @@ const OverallModel = ({ project, setProject }) => {
             ))
         ) : (
           <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
-            <StickyNote size={40} className="mb-4 text-primary" />
+            <StickyNote size={32} className="mb-3 text-primary" />
             <p className="mb-2 font-medium text-foreground">
               Nenhum cartão de Colaboradoração Responsabilidade-Classe definido
             </p>

@@ -5,6 +5,7 @@ import {
   Check,
   X,
   ChevronsUp,
+  GanttChartSquare
 } from 'lucide-react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { router } from '@inertiajs/react'
@@ -334,6 +335,7 @@ const BusinessRules = ({ project, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
+  const hasStories = project?.stories && project.stories.length > 0
 
   // Memoriza o estado das business_rules
   const businessRulesByStoryId = useMemo(() => {
@@ -547,6 +549,18 @@ const BusinessRules = ({ project, setProject }) => {
           setProject={setProject}
           setInspectionId={setInspectionId}
         />
+      )}
+      {!hasStories && (
+        <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
+          <GanttChartSquare size={40} className="mb-4 text-primary" />
+          <p className="mb-2 font-medium text-foreground">
+            Nenhuma Regra de Negócio
+          </p>
+          <p className="mb-4 text-sm text-center max-w-xs">
+            Crie uma User Story ou System Story primeiro para poder adicionar
+            regras de negócio.
+          </p>
+        </div>
       )}
       {/* user stories*/}
       {project?.stories

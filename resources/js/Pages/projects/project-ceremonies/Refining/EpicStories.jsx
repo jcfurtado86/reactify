@@ -5,6 +5,7 @@ import {
   Check,
   X,
   ChevronsUp,
+  Layers
 } from 'lucide-react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import React from 'react'
@@ -328,6 +329,7 @@ const EpicStories = ({ project, setProject }) => {
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   // memoriza o estado das stories derivadas
   const childrenByEpicId = useGroupedStories(project?.stories)
+  const hasStories = project?.stories && project.stories.length > 0
 
   const addEpicStory = (story) => {
     router.post(route('story.store'), {
@@ -486,6 +488,15 @@ const EpicStories = ({ project, setProject }) => {
           toggleAllItems={toggleAllEpicStories}
           systemColors={project?.system_colors}
         />
+      )}
+      {!hasStories && (
+        <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
+          <Layers size={40} className="mb-4 text-primary" />
+          <p className="mb-2 font-medium text-foreground">Nenhuma Story</p>
+          <p className="mb-4 text-sm text-center max-w-xs">
+            Não é possível decompor épicos pois nenhuma story foi criada ainda.
+          </p>
+        </div>
       )}
       {/* user stories*/}
       {project?.stories
