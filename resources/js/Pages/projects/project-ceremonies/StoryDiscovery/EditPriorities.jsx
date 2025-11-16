@@ -2,37 +2,77 @@ import { router } from '@inertiajs/react'
 import { Trash2, Check, Bookmark, Info } from 'lucide-react'
 import { darkenColor, PREDEFINED_COLORS } from '@/lib/utils'
 import { ColorOptions, ColorPickerPopover } from '@/Components/ColorComponents'
+import { useState, useEffect } from 'react' 
+import { toast } from 'sonner' 
 
-const PriorityEditPopover = ({ priority, children, setProject }) => {
+const PriorityEditPopover = ({ priority, children, setProject, project }) => {
   const [name, setName] = useState(priority.name)
   const [color, setColor] = useState(priority.color)
   const [isProcessing, setIsProcessing] = useState(false)
 
   function handleSubmit(e) {
     e.preventDefault()
+    if (name === priority.name && color === priority.color) {
+      toast.info('Nenhuma alteração detectada.')
+      return
+    }
+
     setIsProcessing(true)
+
+    const oldPriorities = project.matrix_priorities
+
+    const newPriorities = oldPriorities.map((p) =>
+      p.id === priority.id ? { ...p, name, color } : p,
+    )
+    setProject((prev) => ({ ...prev, matrix_priorities: newPriorities }))
+
     router.patch(
       route('matrix-priority.update', { priority: priority.id }),
       { name, color },
       {
         preserveScroll: true,
-        onFinish: () => setIsProcessing(false),
+        onSuccess: () => {
+          toast.success('Prioridade atualizada com sucesso.')
+        },
+        onError: (errors) => {
+          setProject((prev) => ({ ...prev, matrix_priorities: oldPriorities }))
+          setName(priority.name)
+          setColor(priority.color)
+
+          if (errors.name) {
+            toast.error(errors.name)
+          } else if (errors.error) {
+            toast.error(errors.error)
+          } else {
+            toast.error('Ocorreu um erro ao atualizar a prioridade.')
+          }
+        },
+        onFinish: () => {
+          setIsProcessing(false)
+        },
       },
     )
   }
 
   function handleDelete() {
     setIsProcessing(true)
+
+    const oldPriorities = project.matrix_priorities
+
+    const newPriorities = oldPriorities.filter((p) => p.id !== priority.id)
+    setProject((prev) => ({ ...prev, matrix_priorities: newPriorities }))
+
     router.delete(route('matrix-priority.destroy', { priority: priority.id }), {
       preserveScroll: true,
+      onSuccess: () => {
+        toast.success('Prioridade excluída com sucesso.')
+      },
+      onError: (errors) => {
+        setProject((prev) => ({ ...prev, matrix_priorities: oldPriorities }))
+        toast.error(errors.error || 'Ocorreu um erro ao excluir a prioridade.')
+      },
       onFinish: () => {
         setIsProcessing(false)
-        setProject((prev) => ({
-          ...prev,
-          matrix_priorities: prev.matrix_priorities.filter(
-            (p) => p.id !== priority.id,
-          ),
-        }))
       },
     })
   }
@@ -77,8 +117,11 @@ const PriorityEditPopover = ({ priority, children, setProject }) => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Excluir
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? 'Excluindo...' : 'Excluir'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -95,7 +138,7 @@ const PriorityEditPopover = ({ priority, children, setProject }) => {
           </div>
 
           <Button type="submit" className="w-full" disabled={isProcessing}>
-            Salvar Alterações
+            {isProcessing ? 'Salvando...' : 'Salvar Alterações'}
           </Button>
         </form>
       </PopoverContent>
@@ -134,32 +177,55 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
       window.removeEventListener('scroll', measurePosition)
     }
   }, [])
+
   function handleStore(e) {
     e.preventDefault()
     setIsStoring(true)
+
+    const tempId = `temp-${Date.now()}`
+    const tempPriority = {
+      id: tempId,
+      order_column: project.matrix_priorities.length + 1,
+      name: newName,
+      color: newColor,
+      project_id: projectId,
+    }
+
+    const oldPriorities = project.matrix_priorities
+
+    setProject((prev) => ({
+      ...prev,
+      matrix_priorities: [...prev.matrix_priorities, tempPriority],
+    }))
+    setNewName('')
+    setNewColor('#ffffff')
+
     router.post(
       route('matrix-priority.store'),
       { name: newName, color: newColor, project_id: projectId },
       {
         preserveScroll: true,
         onSuccess: () => {
-          setNewName('')
-          setNewColor('#ffffff')
+          toast.success('Prioridade criada com sucesso.')
+        },
+        onError: (errors) => {
           setProject((prev) => ({
             ...prev,
-            matrix_priorities: [
-              ...prev.matrix_priorities,
-              {
-                id: `temp-${new Date().getTime()}`,
-                order_column: prev.matrix_priorities.length + 1,
-                name: newName,
-                color: newColor,
-                project_id: projectId,
-              },
-            ],
+            matrix_priorities: oldPriorities,
           }))
+
+         
+          if (errors.name) {
+            toast.error(errors.name)
+          } else if (errors.error) {
+            toast.error(errors.error)
+          } else {
+            toast.error('Ocorreu um erro ao criar a prioridade.')
+          }
         },
-        onFinish: () => setIsStoring(false),
+        onFinish: () => {
+          setIsStoring(false)
+        },
       },
     )
   }
@@ -192,6 +258,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
               <PriorityEditPopover
                 key={p.id}
                 priority={p}
+                project={project} 
                 setProject={setProject}
               >
                 <Button
@@ -240,7 +307,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
             </div>
             <SheetFooter>
               <Button type="submit" disabled={isStoring}>
-                Adicionar
+                {isStoring ? 'Adicionando...' : 'Adicionar'}
               </Button>
             </SheetFooter>
           </form>

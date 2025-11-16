@@ -7,64 +7,99 @@ use Illuminate\Http\Request;
 use App\Events\ProjectUpdated;
 use App\Models\Project;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class MatrixPriorityController extends Controller
 {
   public function store(Request $request)
   {
-
     $validatedData = $request->validate([
-      'name'       => 'required|string|max:255',
+      'name'       => [
+        'required',
+        'string',
+        'max:255',
+        Rule::unique('matrix_priorities')->where(function ($query) use ($request) {
+          return $query->where('project_id', $request->project_id);
+        })
+      ],
       'color'      => 'required|string|max:7',
       'project_id' => 'required|exists:projects,id',
     ]);
 
-    $nextOrder = MatrixPriority::where('project_id', $validatedData['project_id'])->count();
+    try {
+      $nextOrder = MatrixPriority::where('project_id', $validatedData['project_id'])->count();
+      $validatedData['order_column'] = $nextOrder;
+      $priority = MatrixPriority::create($validatedData);
 
-    $validatedData['order_column'] = $nextOrder;
-
-    $priority = MatrixPriority::create($validatedData);
-
-    return back()->with(['message' => 'Priority created successfully', 'status' => 'success']);
+      return back();
+    } catch (Exception $e) {
+      Log::error('Erro ao criar prioridade: ' . $e->getMessage());
+      return back();
+    }
   }
 
   public function update(Request $request, MatrixPriority $priority)
   {
     $validatedData = $request->validate([
-      'name' => 'nullable|string',
+      'name' => [
+        'nullable',
+        'string',
+        'max:255',
+        Rule::unique('matrix_priorities')->where(function ($query) use ($priority) {
+          return $query->where('project_id', $priority->project_id);
+        })->ignore($priority->id)
+      ],
       'color' => 'required|string',
     ]);
 
-    $priority->update($validatedData);
-    return back()->with(['message' => 'Priority updated successfully', 'status' => 'success']);
+    try {
+      $priority->update($validatedData);
+
+      return back();
+    } catch (Exception $e) {
+      Log::error('Erro ao atualizar prioridade: ' . $e->getMessage(), ['id' => $priority->id]);
+      return back();
+    }
   }
 
   public function destroy(MatrixPriority $priority)
   {
-    $priority->delete();
+    try {
+      $priority->delete();
 
-    return back()->with(['message' => 'Priority deleted successfully', 'status' => 'success']);
+      return back();
+    } catch (Exception $e) {
+      Log::error('Erro ao deletar prioridade: ' . $e->getMessage(), ['id' => $priority->id]);
+      return back();
+    }
   }
+
   public function reorder(Request $request)
   {
-    $request->validate([
-      'priorities' => 'required|array',
-      'priorities.*.id' => 'required|exists:matrix_priorities,id',
-      'priorities.*.order' => 'required|integer',
-      'project_id' => 'required|exists:projects,id',
-    ]);
-    $project = Project::findOrFail($request->project_id);
+    try {
+      $request->validate([
+        'priorities' => 'required|array',
+        'priorities.*.id' => 'required|exists:matrix_priorities,id',
+        'priorities.*.order' => 'required|integer',
+        'project_id' => 'required|exists:projects,id',
+      ]);
+      $project = Project::findOrFail($request->project_id);
 
-    DB::transaction(function () use ($request) {
-      foreach ($request->priorities as $priorityData) {
-        MatrixPriority::where('id', $priorityData['id'])
-          ->update(['order_column' => $priorityData['order']]);
-      }
-    });
+      DB::transaction(function () use ($request) {
+        foreach ($request->priorities as $priorityData) {
+          MatrixPriority::where('id', $priorityData['id'])
+            ->update(['order_column' => $priorityData['order']]);
+        }
+      });
 
-    broadcast(new ProjectUpdated($project));
+      broadcast(new ProjectUpdated($project));
 
-    // Retorna uma resposta vazia, pois o frontend já atualizou a UI.
-    return back()->with(['message' => 'Priorities reordered successfully', 'status' => 'success']);
+      return back();
+    } catch (Exception $e) {
+      Log::error('Erro ao reordenar prioridades: ' . $e->getMessage());
+      return back();
+    }
   }
 }
