@@ -685,17 +685,6 @@ const Interfaces = ({ project, setProject }) => {
                 </p>
               </div>
             )}
-            {project?.system_interfaces
-              ?.filter((i) => i.type === 'internal')
-              .map((item) => (
-                <InterfaceCard
-                  key={`internal-${item.id}`}
-                  data={item}
-                  onDelete={() => handleDelete(item)}
-                  onClick={() => handleOpenForEdit(item)}
-                  onInspect={() => inspectInterface(item.id)}
-                />
-              ))}
           </div>
         </section>
 
@@ -727,17 +716,6 @@ const Interfaces = ({ project, setProject }) => {
                 </p>
               </div>
             )}
-            {project?.system_interfaces
-              ?.filter((i) => i.type === 'external')
-              .map((item) => (
-                <InterfaceCard
-                  key={`external-${item.id}`}
-                  data={item}
-                  onDelete={() => handleDelete(item)}
-                  onClick={() => handleOpenForEdit(item)}
-                  onInspect={() => inspectInterface(item.id)}
-                />
-              ))}
           </div>
         </section>
       </div>
