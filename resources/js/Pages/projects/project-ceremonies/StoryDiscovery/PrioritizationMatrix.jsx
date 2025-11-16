@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { router } from '@inertiajs/react'
-
+import { BookText, Target, LayoutGrid } from 'lucide-react'
 import EditPriorities from './EditPriorities'
 
 const SortablePriorityColumn = ({
@@ -460,6 +460,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
     () => orderedPriorities.map((p) => p.id),
     [orderedPriorities],
   )
+  const hasGoals = project.goal_sketches && project.goal_sketches.length > 0
 
   return (
     <DndContext
@@ -503,9 +504,19 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                 )
               })
             ) : (
-              <p className="text-sm text-muted-foreground p-2">
-                Todas as stories foram priorizadas.
-              </p>
+              <div className="col-span-4 md:col-span-5 lg:col-span-6 flex flex-col items-center justify-center p-6 text-muted-foreground min-h-[100px]">
+                <BookText
+                  size={32}
+                  className="mb-3 text-primary flex-shrink-0" // Adicionado flex-shrink-0
+                  strokeWidth={1.5}
+                />
+                <p className="mb-2 text-sm text-center font-medium text-foreground">
+                  Todas as stories foram priorizadas
+                </p>
+                <p className="text-sm text-center">
+                  Arraste uma story da matriz aqui para "despriorizá-la".
+                </p>
+              </div>
             )}
           </DroppableCell>
         </section>
@@ -514,7 +525,8 @@ const PrioritizationMatrix = ({ project, setProject }) => {
           <section className="flex gap-2 justify-between">
             <aside className="flex flex-col w-64 items-center bg-card p-2 gap-2 rounded">
               <span className="h-11 py-1 ">Goals</span>
-              {project.goal_sketches
+              {hasGoals ? (
+                project.goal_sketches
                 .sort((a, b) => {
                   const priorityA = priorityOrder[a.priority] // Pega o valor numérico para o tipo de 'a'
                   const priorityB = priorityOrder[b.priority] // Pega o valor numérico para o tipo de 'b'
@@ -529,14 +541,30 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   >
                     {goal.title}
                   </GoalCard>
-                ))}
+                ))
+                ) : (
+                <div className="flex flex-col items-center justify-center p-6 text-muted-foreground border-2 border-dashed border-border rounded-lg w-full min-h-[150px]">
+                  <Target
+                    size={32}
+                    className="mb-3 text-primary flex-shrink-0" // Adicionado flex-shrink-0
+                    strokeWidth={1.5}
+                  />
+                  <p className="text-sm text-center font-medium text-foreground">
+                    Nenhum Goal
+                  </p>
+                  <p className="text-xs text-center">
+                    Crie Goals primeiro.
+                  </p>
+                </div>
+              )}
             </aside>
             <div className="flex-1 grid grid-flow-col auto-cols-max gap-2 pr-2">
-              <SortableContext
-                items={priorityIds}
-                strategy={horizontalListSortingStrategy}
-              >
-                {orderedPriorities.map((priority) => {
+              {orderedPriorities.length > 0 ? (
+                <SortableContext
+                  items={priorityIds}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  {orderedPriorities.map((priority) => {
                   const itemCount = Object.values(prioritizationMatrix).filter(
                     (story) => story && story.priority_id == priority.id,
                   ).length
@@ -576,6 +604,22 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   )
                 })}
               </SortableContext>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px] w-full">
+                  <LayoutGrid
+                    size={40}
+                    className="mb-4 text-primary flex-shrink-0" // Adicionado flex-shrink-0
+                    strokeWidth={1.5}
+                  />
+                  <p className="mb-2 font-medium text-foreground">
+                    Nenhuma coluna de Prioridade definida
+                  </p>
+                  <p className="text-sm text-center max-w-xs">
+                    Clique em "Editar Prioridades" para criar as colunas(baixa, média, alta) da sua
+                    matriz.
+                  </p>
+                </div>
+              )}
             </div>
           </section>
         </section>

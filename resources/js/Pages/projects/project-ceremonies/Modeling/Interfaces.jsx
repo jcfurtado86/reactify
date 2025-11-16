@@ -1,5 +1,5 @@
 import { useForm, router } from '@inertiajs/react'
-import { Minus, Check, X, ChevronsUp } from 'lucide-react'
+import { Minus, Check, X, ChevronsUp, Network } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
@@ -176,6 +176,11 @@ const Interfaces = ({ project, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
+
+  const internalInterfaces =
+    project?.system_interfaces?.filter((i) => i.type === 'internal') || []
+  const externalInterfaces =
+    project?.system_interfaces?.filter((i) => i.type === 'external') || []
 
   // Hook `useForm` do Inertia para gerenciar o estado completo do formulário.
   const {
@@ -654,6 +659,32 @@ const Interfaces = ({ project, setProject }) => {
         <section className="flex flex-col items-center gap-2 w-1/2">
           <h3 className="text-2xl font-bold mb-4">Interfaces Internas</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* ADICIONADO: Verificação de Empty State para Internas */}
+            {internalInterfaces.length > 0 ? (
+              internalInterfaces.map((item) => (
+                <InterfaceCard
+                  key={`internal-${item.id}`}
+                  data={item}
+                  onDelete={() => handleDelete(item)}
+                  onClick={() => handleOpenForEdit(item)}
+                  onInspect={() => inspectInterface(item.id)}
+                />
+              ))
+            ) : (
+              <div className="col-span-1 lg:col-span-2 flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[150px]">
+                <Network
+                  size={40}
+                  className="mb-4 text-primary flex-shrink-0" // Adicionado flex-shrink-0
+                  strokeWidth={1.5}
+                />
+                <p className="mb-2 font-medium text-foreground">
+                  Nenhuma Interface Interna
+                </p>
+                <p className="text-sm text-center max-w-xs">
+                  Crie uma interface interna para este projeto.
+                </p>
+              </div>
+            )}
             {project?.system_interfaces
               ?.filter((i) => i.type === 'internal')
               .map((item) => (
@@ -671,6 +702,31 @@ const Interfaces = ({ project, setProject }) => {
         <section className="flex flex-col items-center gap-2 border-l border-border pl-2 w-1/2">
           <h3 className="text-2xl font-bold mb-4">Interfaces Externas</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {externalInterfaces.length > 0 ? (
+              externalInterfaces.map((item) => (
+                <InterfaceCard
+                  key={`external-${item.id}`}
+                  data={item}
+                  onDelete={() => handleDelete(item)}
+                  onClick={() => handleOpenForEdit(item)}
+                  onInspect={() => inspectInterface(item.id)}
+                />
+              ))
+            ) : (
+              <div className="col-span-1 lg:col-span-2 flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[150px]">
+                <Network
+                  size={40}
+                  className="mb-4 text-primary flex-shrink-0" // Adicionado flex-shrink-0
+                  strokeWidth={1.5}
+                />
+                <p className="mb-2 font-medium text-foreground">
+                  Nenhuma Interface Externa
+                </p>
+                <p className="text-sm text-center max-w-xs">
+                  Crie uma interface externa para este projeto.
+                </p>
+              </div>
+            )}
             {project?.system_interfaces
               ?.filter((i) => i.type === 'external')
               .map((item) => (
