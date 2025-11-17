@@ -7,11 +7,11 @@ import { ProjectPermissions } from '@/Components/ProjectPermissions'
 import { ProjectSettings } from '@/Components/ProjectSettings'
 import {
   Users,
-  Target,
-  GitBranch,
   List,
   Clock,
   ArrowRight,
+  CircleCheckBig,
+  CircleAlert,
   Calendar as CalendarIcon,
 } from 'lucide-react'
 import MainLayout from '@/Layouts/MainLayout'
@@ -31,66 +31,129 @@ const getDateObject = (dateInput) => {
   }
   return date
 }
-const ceremonies = [
-  'inception',
-  'storyDiscovery',
-  'refining',
-  'modeling',
-  'productBacklog',
-  'sprint',
-]
 
-export const CeremonyCard = ({ item, className, onClick, delay = 0 }) => {
+export const CeremonyCard = ({
+  item,
+  artifacts = [],
+  amount = 0,
+  className,
+  onClick, // IMPORTANTE: Esta prop agora é usada no botão "Ver mais"
+  delay = 0,
+  project,
+}) => {
   const Icon = item?.icon
 
+  // O Card foi substituído por um AccordionItem.
+  // Ele precisa de uma prop "value" única. Usaremos item.title.
   return (
-    <Card
-      onClick={onClick}
+    <AccordionItem
+      value={item.title}
       className={cn(
-        'group relative w-full p-6 overflow-hidden bg-background cursor-pointer',
-        'transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl',
+        'group relative w-full overflow-hidden bg-background',
+        'transition-all duration-300 ease-in-out ',
+        'border-b', // O AccordionItem já tem uma borda por padrão
         className,
       )}
     >
-      <div className="flex items-center gap-4">
-        {Icon && (
-          <div className="flex-shrink-0">
-            <Icon className="size-8 text-muted-foreground transition-colors duration-300 group-hover:text-primary" />
-          </div>
-        )}
-        <div className="flex-grow">
-          <div className="flex justify-between">
-            <h3 className="text-md font-semibold text-foreground">
-              {item.title}
-            </h3>
-            {/* SETA "VER MAIS" */}
-            <div
-              className="flex items-center gap-1 text-xs text-muted-foreground
-                         opacity-0 transition-all duration-300 ease-in-out
-                         group-hover:opacity-100 "
-            >
-              <span>ver mais</span>
-              <ArrowRight className="size-3" />
+      {/* HEADER (O QUE É CLICÁVEL) */}
+      <AccordionTrigger
+        // O padding p-2 do Card original foi movido para cá
+        // hover:no-underline remove o sublinhado padrão do hover
+        className="p-2 hover:no-underline"
+      >
+        <div className="flex w-full items-center gap-2">
+          {Icon && (
+            <div className="flex-shrink-0">
+              <Icon
+                className={cn(
+                  'size-8 text-muted-foreground transition-colors duration-300',
+                  // Muda a cor quando o accordion está aberto (substitui o group-hover)
+                  'data-[state=open]:text-primary',
+                )}
+              />
+            </div>
+          )}
+          <div className="flex-grow">
+            <div className="flex justify-between">
+              {/* text-left alinha o título à esquerda (trigger centraliza por padrão) */}
+              <h3 className="text-md font-semibold text-foreground text-left">
+                {item.title}{' '}
+                {amount > 0 && <Badge variant="secondary">{amount}</Badge>}
+              </h3>
+
+              {/* O "ver mais" com seta foi removido daqui.
+                O AccordionTrigger já tem sua própria seta (chevron)
+                e colocar outra ficaria visualmente confuso.
+              */}
             </div>
           </div>
-          {/* DESCRIÇÃO CONDICIONAL */}
-          {/* Começa com altura máxima 0 e opacidade 0. */}
-          {/* No hover do `group` (o card), a altura e opacidade aumentam. */}
-          <div className="overflow-hidden transition-all duration-300 ease-in-out max-h-0 group-hover:max-h-80">
-            <p className="pt-1 text-sm text-muted-foreground opacity-0 transition-opacity duration-300 delay-100 group-hover:opacity-100">
-              {item.description}
-            </p>
-          </div>
         </div>
-      </div>
-      <BorderBeam
+      </AccordionTrigger>
+
+      {/* CONTEÚDO (O QUE ABRE E FECHA) */}
+      <AccordionContent
+        // Adiciona padding ao conteúdo, exceto no topo para ficar mais fluido
+        className="px-2 pt-0 pb-2"
+      >
+        {/* Descrição (descomentada do seu código original) */}
+        {item.description && (
+          <p className="pt-1 text-sm text-muted-foreground">
+            {item.description}
+          </p>
+        )}
+
+        {/* Lista de Artefatos (lógica idêntica) */}
+        {artifacts.length > 0 && (
+          <p className="mt-4 mb-2 text-sm font-medium">Artefatos contidos:</p>
+        )}
+        <div className="flex flex-col gap-2 text-sm">
+          {artifacts.map((artifact, index) => {
+            const artifactAmount = project?.[artifact?.title]?.length || 0
+
+            return (
+              <div key={index} className="flex items-center gap-2">
+                {artifact.label}{' '}
+                {artifactAmount > 0 ? (
+                  <>
+                    {' '}
+                    <Badge variant="secondary">{artifactAmount}</Badge>{' '}
+                    <CircleCheckBig className="size-4 text-green-400" />
+                  </>
+                ) : (
+                  <CircleAlert className="size-4 text-destructive" />
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* BOTÃO "VER MAIS"
+          A prop "onClick" original do Card foi movida para este botão.
+          Isso segue o padrão de design do Accordion, onde o 'trigger'
+          apenas expande, e as ações ficam dentro do conteúdo.
+        */}
+        {onClick && (
+          <Button
+            variant="link"
+            size="sm"
+            onClick={onClick}
+            className="p-0 mt-4 text-primary" // Dando a cor primária
+          >
+            Ver mais
+            <ArrowRight className="size-3 ml-1" />
+          </Button>
+        )}
+      </AccordionContent>
+
+      {/* BorderBeam (mantido no root do AccordionItem) */}
+      {/* <BorderBeam
         borderWidth={2}
         size={70}
         delay={delay}
         colorTo={'var(--primary)'}
         colorFrom={'var(--secondary)'}
-      />
-    </Card>
+      />*/}
+    </AccordionItem>
   )
 }
 
@@ -99,6 +162,93 @@ const Dashboard = ({ project, setProject }) => {
   const isInitialMount = useRef(true)
   const [progress, setProgress] = useState(0)
 
+  const { productBacklogStories, sprintBacklogStories, deliveredStories } =
+    useMemo(() => {
+      const stories = project?.stories || []
+      const sprints = project?.sprints || []
+
+      const productBacklog = stories
+        .filter((story) => {
+          const isInActiveSprint = sprints.some(
+            (sprint) =>
+              sprint.status === 'active' &&
+              sprint.stories?.some(
+                (sprintStory) => sprintStory.id === story.id,
+              ),
+          )
+
+          return (
+            (story.status === 'prioritized' || story.value !== null) &&
+            !isInActiveSprint
+          )
+        })
+        .sort((a, b) => {
+          if (a.status === 'prioritized' && b.status !== 'prioritized')
+            return -1
+          if (b.status === 'prioritized' && a.status !== 'prioritized') return 1
+          return (b.value ?? -1) - (a.value ?? -1)
+        })
+
+      const sprintBacklog = []
+      const delivered = []
+
+      sprints.forEach((sprint) => {
+        if (sprint.status === 'active') {
+          sprint.stories?.forEach((story) => {
+            if (story.pivot?.kanban_status === 'done') {
+              delivered.push({ ...story, sprint_name: sprint.name })
+            } else {
+              sprintBacklog.push({ ...story, sprint_name: sprint.name })
+            }
+          })
+        }
+      })
+
+      return {
+        productBacklogStories: productBacklog,
+        sprintBacklogStories: sprintBacklog,
+        deliveredStories: delivered,
+      }
+    }, [project])
+
+  const ceremonies = [
+    {
+      title: 'inception',
+      artifacts: [
+        { label: 'Product Canvas', title: 'productCanvas' },
+        { label: 'Personas', title: 'personas' },
+        { label: 'Goals', title: 'goal_sketches' },
+        { label: 'Journeys', title: 'journeys' },
+      ],
+    },
+    {
+      title: 'storyDiscovery',
+      artifacts: [
+        { label: 'Stories', title: 'stories' },
+        { label: 'Overall Model', title: 'crc_cards' },
+        { label: 'Matriz de Priorização', title: 'prioritizations' },
+        { label: 'Change Log', title: 'change_requests' },
+      ],
+    },
+    {
+      title: 'refining',
+      artifacts: [
+        { label: 'Epic Stories', title: 'Epic Stories' },
+        { label: 'Business Rules', title: 'Business Rules' },
+        { label: 'Usage Scenarios', title: 'usage_scenarios' },
+      ],
+    },
+    {
+      title: 'modeling',
+      artifacts: [
+        { label: 'Overall Model', title: 'crc_cards' },
+        { label: 'Interfaces Internas e Externas', title: 'interfaces' },
+        { label: 'Storyboards', title: 'storyboards' },
+      ],
+    },
+    { title: 'productBacklog', amount: 3 },
+    { title: 'sprint', amount: project?.sprints?.length },
+  ]
   useEffect(() => {
     // console.clear();
     if (!date || !project.created_at) {
@@ -157,7 +307,7 @@ const Dashboard = ({ project, setProject }) => {
   }, [date])
 
   return (
-    <main className="grid md:grid-cols-[auto,auto] lg:grid-cols-[16rem,auto,auto] xl:grid-cols-[22rem,16rem,auto,auto] gap-4 p-4 w-full ">
+    <main className="grid md:grid-cols-[1fr,1fr] lg:grid-cols-[1fr,1fr,1fr] xl:grid-cols-[1fr,1fr,1fr,1fr] gap-4 p-4 w-full ">
       <Head title={project.title || 'Project Title'} />
       {/* progresso de conclusao*/}
       <section className="bg-card rounded-lg flex flex-col text-muted-foreground p-2 gap-2 w-full h-full ">
@@ -238,7 +388,7 @@ const Dashboard = ({ project, setProject }) => {
         </Popover>*/}
       {/* Progress Indicators */}
 
-      <div className="grid grid-cols-1  xl:row-start-1 xl:col-start-3 gap-2 items-center justify-center bg-card p-4 rounded-lg">
+      <div className="flex lg:flex-col md:row-start-4 lg:row-start-2  lg:col-start-3 xl:row-start-1 xl:col-start-3 gap-2 items-center justify-center bg-card p-4 rounded-lg">
         <ProgressIcon
           value={project?.stories?.length || 0}
           max={20}
@@ -253,20 +403,6 @@ const Dashboard = ({ project, setProject }) => {
           label="Sprints"
           icon={Users}
         />
-        {/* <ProgressIcon
-          value={project?.goal_sketches?.length || 0}
-          max={15}
-          colorClass="text-info"
-          label="Goals"
-          icon={Target}
-        />
-        <ProgressIcon
-          value={project?.journeys?.length || 0}
-          max={10}
-          colorClass="text-accent"
-          label="Journeys"
-          icon={GitBranch}
-        />*/}
       </div>
       <ExpandableCard
         title={project?.title || 'Project'}
@@ -277,32 +413,36 @@ const Dashboard = ({ project, setProject }) => {
         editable={false}
         defaultExpanded={true}
         placeholder="Describe your project..."
-        className="xl:row-start-3 xl:col-span-3 min-w-full "
+        className="xl:row-start-3 md:col-span-2 xl:col-span-3 min-w-full "
         // onContentUpdate={(content) => updateProject('description', content)}
       />
       <Interview
-        className="xl:row-start-2 xl:col-span-3"
+        className="xl:row-start-2 md:col-span-2 xl:col-span-3"
         projectId={project.id}
         interviews={project.interviews || []} // Passe a lista de entrevistas do seu projeto
       />
       {/* ceremonies*/}
-      <section className="ceremonies xl:col-start-4 xl:row-span-3 flex flex-col justify-between min-w-72 items-center bg-card gap-2 p-2">
-        <span>Cerimônias</span>
-        {ceremonies.map((ceremony, index) => (
-          <CeremonyCard
-            key={ceremony}
-            item={tooltipInfo[ceremony]}
-            delay={index * 1}
-            onClick={() =>
-              router.get(
-                route('project.ceremony.show', {
-                  project: project.id,
-                  ceremony: ceremony,
-                }),
-              )
-            }
-          />
-        ))}
+      <section className="ceremonies xl:col-start-4  lg:col-start-3 lg:row-start-1 xl:row-span-3 flex flex-col  justify-between items-center bg-card gap-2 p-2">
+        <Accordion collapsible multiple className="w-full">
+          {ceremonies.map((ceremony, index) => (
+            <CeremonyCard
+              project={project}
+              key={ceremony.title}
+              item={tooltipInfo[ceremony.title]}
+              amount={ceremony?.amount || 0}
+              artifacts={ceremony.artifacts}
+              delay={index * 1}
+              onClick={() =>
+                router.get(
+                  route('project.ceremony.show', {
+                    project: project.id,
+                    ceremony: ceremony.title,
+                  }),
+                )
+              }
+            />
+          ))}
+        </Accordion>
       </section>
     </main>
   )

@@ -178,7 +178,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
     ...(can('interface.view')
       ? [
           {
-            label: 'Internal and External Interfaces',
+            label: 'Interfaces Internas e Externas',
             value: false,
             tooltip: tooltipInfo.interfaces,
           },
@@ -232,7 +232,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
       'Epic Stories': 'epic_stories',
       'Business Rules': 'business_rules',
       'Usage Scenarios': 'usage_scenarios',
-      'Internal and External Interfaces': 'system_interfaces',
+      'Interfaces Internas e Externas': 'system_interfaces',
       Storyboards: 'storyboards',
       //'Product Backlog': 'stories',
       Sprint: 'sprints.stories',
@@ -417,7 +417,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
             <OverallModel project={project} setProject={setProject} />
           )
         )
-      case 'Internal and External Interfaces':
+      case 'Interfaces Internas e Externas':
         return (
           can('interface.view') && (
             <Interfaces project={project} setProject={setProject} />
