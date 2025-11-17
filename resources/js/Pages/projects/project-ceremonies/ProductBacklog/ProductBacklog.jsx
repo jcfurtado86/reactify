@@ -845,28 +845,35 @@ const ProductBacklog = ({ project, setProject }) => {
               >
                 Criar sprint
               </span>
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                onClick={(e) => e.stopPropagation()} // Impede o accordion de fechar
-              >
-                <Link
-                  href={route('project.ceremony.show', {
-                    project: project.id,
-                    ceremony: 'storyDiscovery',
-                  })}
-                  onClick={() =>
-                    localStorage.setItem(
-                      'activeStoryDiscoveryMenu',
-                      'Matriz de Priorização',
+              <span
+                role="button"
+                tabIndex={0}
+                className="border border-border px-2 hover:bg-accent"
+                onClick={(e) => {
+                  e.preventDefault()
+                  router.get(
+                    route('project.ceremony.show', {
+                      project: project.id,
+                      ceremony: 'storyDiscovery',
+                    }),
+                    { artifact: 'prioritizationMatrix' },
+                  )
+                }}
+                onKeyDown={(e) => {
+                  e.preventDefault()
+                  if (e.key === 'Enter') {
+                    router.get(
+                      route('project.ceremony.show', {
+                        project: project.id,
+                        ceremony: 'storyDiscovery',
+                      }),
+                      { artifact: 'prioritizationMatrix' },
                     )
                   }
-                >
-                  Ir para Matriz
-                  <ExternalLink className="size-4 ml-2" />
-                </Link>
-              </Button>
+                }}
+              >
+                Ir para matriz
+              </span>
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -888,21 +895,20 @@ const ProductBacklog = ({ project, setProject }) => {
                   Nenhuma story foi priorizada. Vá para a Matriz de Priorização
                   para classificar suas stories.
                 </p>
-                <Button asChild size="sm" className="mt-4">
-                  <Link
-                    href={route('project.ceremony.show', {
-                      project: project.id,
-                      ceremony: 'storyDiscovery',
-                    })}
-                    onClick={() =>
-                      localStorage.setItem(
-                        'activeStoryDiscoveryMenu',
-                        'Matriz de Priorização',
-                      )
-                    }
-                  >
-                    Ir para Matriz de Priorização
-                  </Link>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() =>
+                    router.get(
+                      route('project.ceremony.show', {
+                        project: project.id,
+                        ceremony: 'storyDiscovery',
+                      }),
+                      { artifact: 'prioritizationMatrix' },
+                    )
+                  }
+                >
+                  Ir para Matriz de Priorização
                 </Button>
               </div>
             )}
