@@ -1,4 +1,4 @@
-import { router, useForm } from '@inertiajs/react'
+import { router, useForm, Link } from '@inertiajs/react'
 import { cn, formatDate, isSprintActive, parseDateAsLocal } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -6,6 +6,8 @@ import {
   EllipsisVertical,
   Calendar as CalendarIcon,
   Trash2Icon as TrashIcon,
+  ClipboardList,
+  ExternalLink,
 } from 'lucide-react'
 import { getStatusColor } from '@/lib/utils'
 import {
@@ -843,12 +845,67 @@ const ProductBacklog = ({ project, setProject }) => {
               >
                 Criar sprint
               </span>
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                onClick={(e) => e.stopPropagation()} // Impede o accordion de fechar
+              >
+                <Link
+                  href={route('project.ceremony.show', {
+                    project: project.id,
+                    ceremony: 'storyDiscovery',
+                  })}
+                  onClick={() =>
+                    localStorage.setItem(
+                      'activeStoryDiscoveryMenu',
+                      'Matriz de Priorização',
+                    )
+                  }
+                >
+                  Ir para Matriz
+                  <ExternalLink className="size-4 ml-2" />
+                </Link>
+              </Button>
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="overflow-hidden rounded-md border ">
-              <TableComponent table={productBacklogTable} />
-            </div>
+            {productBacklogTable.getRowCount() > 0 ? (
+              <div className="overflow-hidden rounded-md border ">
+                <TableComponent table={productBacklogTable} />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[150px]">
+                <ClipboardList
+                  size={40}
+                  className="mb-4 text-primary flex-shrink-0"
+                  strokeWidth={1.5}
+                />
+                <p className="mb-2 font-medium text-foreground">
+                  Product Backlog Vazio
+                </p>
+                <p className="text-sm text-center max-w-xs">
+                  Nenhuma story foi priorizada. Vá para a Matriz de Priorização
+                  para classificar suas stories.
+                </p>
+                <Button asChild size="sm" className="mt-4">
+                  <Link
+                    href={route('project.ceremony.show', {
+                      project: project.id,
+                      ceremony: 'storyDiscovery',
+                    })}
+                    onClick={() =>
+                      localStorage.setItem(
+                        'activeStoryDiscoveryMenu',
+                        'Matriz de Priorização',
+                      )
+                    }
+                  >
+                    Ir para Matriz de Priorização
+                  </Link>
+                </Button>
+              </div>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
