@@ -506,7 +506,7 @@ const ProductBacklog = ({ project, setProject }) => {
       project_id: project.id,
       status: selectedSprint?.status || 'active',
     }
-    console.log(sprintData, startDate)
+
     if (selectedSprint) {
       router.patch(
         route('sprint.update', selectedSprint.id),
@@ -571,7 +571,6 @@ const ProductBacklog = ({ project, setProject }) => {
       return
     }
 
-    console.log(data.destination)
     let destination
     if (data.destination === 'Backlog') destination = null
     else destination = data.destination
@@ -593,7 +592,6 @@ const ProductBacklog = ({ project, setProject }) => {
     e.preventDefault()
 
     if (startSprint) {
-      console.log('start')
       setStartDate(new Date())
       setSprintOperation('start')
     } else setSprintOperation('edit')
@@ -653,9 +651,9 @@ const ProductBacklog = ({ project, setProject }) => {
             <AlertDialogHeader>
               <AlertDialogTitle>Finalizar Sprint</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja finalizar essa sprint? As estórias nao
-                finalizadas presentes nela podem ir para outra sprint ou ao
-                Backlog.
+                Tem certeza que deseja finalizar essa sprint? <br />
+                As estórias nao finalizadas presentes nela podem ir para a
+                próxima sprint ou ao Backlog.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <section className="my-4">
@@ -672,16 +670,27 @@ const ProductBacklog = ({ project, setProject }) => {
                     <SelectItem key="Backlog" value={'Backlog'}>
                       Backlog
                     </SelectItem>
-                    {project.sprints
+                    {project?.sprints
+                      ?.filter(
+                        (sprint) =>
+                          sprint.status === 'active' &&
+                          sprint.id !== selectedSprint?.id,
+                      )
                       .sort(
                         (a, b) =>
                           new Date(a.created_at) - new Date(b.created_at),
                       )
-                      .map((sprint) => (
-                        <SelectItem key={sprint.id} value={String(sprint.id)}>
-                          {sprint.name}
-                        </SelectItem>
-                      ))}
+                      .map(
+                        (sprint, index) =>
+                          index === 0 && (
+                            <SelectItem
+                              key={sprint.id}
+                              value={String(sprint.id)}
+                            >
+                              {sprint.name}
+                            </SelectItem>
+                          ),
+                      )}
                   </SelectGroup>
                 </SelectContent>
               </Select>
