@@ -12,21 +12,25 @@ const tooltipInfo = {
   // all ceremonies/tools
   inception: {
     title: 'Inception',
+    link: 'inception',
     description:
       'É a primeira grande conversa para entender a ideia geral do projeto. O objetivo é que todos (clientes e equipe) concordem sobre o que é o produto e qual problema ele resolve.',
   },
   storyDiscovery: {
     title: 'Story Discovery',
+    link: 'storyDiscovery',
     description:
       'Depois de entender a ideia geral, é preciso listar tudo o que o sistema fará. O resultado é uma lista inicial de "funcionalidades" ou "tarefas", conhecido como Backlog.',
   },
   refining: {
     title: 'Refining',
+    link: 'refining',
     description:
       'Aqui, a equipe seleciona os itens mais importantes daquela lista de tarefas e faz uma análise profunda. O objetivo é adicionar detalhes.',
   },
   modeling: {
     title: 'Modeling',
+    link: 'modeling',
     description:
       'Aqui a equipe técnica detalha como as telas vão parecer ou como as partes internas do sistema vão funcionar para cada tarefa.',
   },
@@ -37,32 +41,38 @@ const tooltipInfo = {
   },
   productBacklog: {
     title: 'Product Backlog',
+    link: 'productBacklog',
     description:
       'Lista priorizada de estórias de usuário e sistema levantadas, gerenciada para garantir entrega incremental de valor. Utiliza-se a priorização para definir a ordem de entrega.',
   },
   sprint: {
     title: 'Sprint',
+    link: 'sprint',
     description:
       'Conjunto de estórias do Product Backlog selecionadas para implementação no ciclo atual.',
   },
   // inception
   productCanvas: {
     title: 'Product Canvas',
+    link: 'productCanvas',
     description:
       'Visualize todos os itens do projeto, incluindo personas, objetivos e jornadas.',
   },
   goals: {
     title: 'Goals',
+    link: 'goals',
     description:
       'Objetivos principais do projeto, indicando metas e resultados esperados.',
   },
   personas: {
     title: 'Personas',
+    link: 'personas',
     description:
       'Perfis representativos dos usuários do sistema, com expectativas, restrições e objetivos.',
   },
   journeys: {
     title: 'Journeys',
+    link: 'journeys',
     description:
       'Sequências de etapas (jornadas) que descrevem o caminho do usuário ou do administrador para atingir um objetivo no sistema.',
   },
@@ -74,15 +84,18 @@ const tooltipInfo = {
   //story discovery
   stories: {
     title: 'Stories',
+    link: 'stories',
     description:
       'Histórias de usuários e requisitos do sistema que detalham funcionalidades e necessidades do projeto.',
   },
   prioritizationMatrix: {
     title: 'Prioritization Matrix',
+    link: 'prioritizationMatrix',
     description: 'Matriz para priorizar as histórias de usuário.',
   },
   changeLog: {
     title: 'Change Log',
+    link: 'changeLog',
     description: 'Registro de mudanças.',
   },
 
@@ -90,16 +103,19 @@ const tooltipInfo = {
   // refining
   epicStories: {
     title: 'Epic Stories',
+    link: 'epicStories',
     description:
       'As histórias épicas são histórias de complexas o bastante que necessitam ser divididas em várias histórias de usuário para serem implementadas.',
   },
   businessRules: {
     title: 'Business Rules',
+    link: 'businessRules',
     description:
       'As regras de negócio são instruções que definem as regras e restrições que devem ser seguidas para garantir a integridade e a consistência do sistema.',
   },
   usageScenarios: {
-    title: 'Use Cases',
+    title: 'Usage Scenarios',
+    link: 'usageScenarios',
     description:
       'Os casos de uso são relatos de eventos que ocorrem em um contexto específico, como a criação de contas para acessar o sistema, a gestão de playlists para organizar músicas e outras funcionalidades voltadas para a experiência do usuário.',
     classNames: {
@@ -109,6 +125,7 @@ const tooltipInfo = {
   //modeling
   overallModel: {
     title: 'Overall Model',
+    link: 'overallModel',
     description:
       'O modelo geral é uma visão abrangente do sistema, que inclui todas as funcionalidades e requisitos do aplicativo.',
     classNames: {
@@ -117,6 +134,7 @@ const tooltipInfo = {
   },
   interfaces: {
     title: 'Interfaces',
+    link: 'interfaces',
     description:
       'As interfaces são as formas como os usuários interagem com o sistema, como a interface de usuário para acessar o aplicativo e a interface de API para integrar com outros sistemas.',
     classNames: {
@@ -125,6 +143,7 @@ const tooltipInfo = {
   },
   storyboards: {
     title: 'Storyboards',
+    link: 'storyboards',
     description:
       'Os storyboards são visões detalhadas das interfaces do aplicativo, que mostram como os usuários interagem com o sistema em diferentes cenários.',
     classNames: {

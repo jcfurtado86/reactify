@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react'
+import { Head, Link, router } from '@inertiajs/react'
 import ProgressIcon from '@/Components/ProgressIcon'
 import { ExpandableCard } from './projects/project-ceremonies/Inception/MainView'
 import Interview from '@/Components/Interview'
@@ -34,6 +34,7 @@ const getDateObject = (dateInput) => {
 
 export const CeremonyCard = ({
   item,
+
   artifacts = [],
   amount = 0,
   className,
@@ -43,10 +44,14 @@ export const CeremonyCard = ({
 }) => {
   const Icon = item?.icon
 
-  // O Card foi substituído por um AccordionItem.
-  // Ele precisa de uma prop "value" única. Usaremos item.title.
+  console.log(item)
   return (
-    <Accordion collapsible single className="w-full" defaultValue={item.title}>
+    <Accordion
+      collapsible
+      type="single"
+      className="w-full"
+      defaultValue={item.title}
+    >
       <AccordionItem
         value={item.title}
         className={cn(
@@ -76,16 +81,10 @@ export const CeremonyCard = ({
             )}
             <div className="flex-grow">
               <div className="flex justify-between">
-                {/* text-left alinha o título à esquerda (trigger centraliza por padrão) */}
                 <h3 className="text-md font-semibold text-foreground text-left">
                   {item.title}{' '}
                   {amount > 0 && <Badge variant="secondary">{amount}</Badge>}
                 </h3>
-
-                {/* O "ver mais" com seta foi removido daqui.
-                O AccordionTrigger já tem sua própria seta (chevron)
-                e colocar outra ficaria visualmente confuso.
-              */}
               </div>
             </div>
           </div>
@@ -97,22 +96,35 @@ export const CeremonyCard = ({
           className="px-2 pt-0 pb-2"
         >
           {/* Descrição (descomentada do seu código original) */}
-          {/* {item.description && (
-            <p className="pt-1 text-sm text-muted-foreground">
+          {item.description && (
+            <p className="pt-1 text-sm text-muted-foreground ">
               {item.description}
             </p>
-          )}*/}
+          )}
 
           {/* Lista de Artefatos (lógica idêntica) */}
           {artifacts.length > 0 && (
             <p className="mt-4 mb-2 text-sm font-medium">Artefatos contidos:</p>
           )}
-          <div className="flex flex-col gap-2 text-sm">
+          <div className="flex  items-start gap-1 text-sm">
             {artifacts.map((artifact, index) => {
               const artifactAmount = project?.[artifact?.title]?.length || 0
 
               return (
-                <div key={index} className="flex items-center gap-2">
+                <Button
+                  variant="link"
+                  key={index}
+                  className="flex items-center gap-2"
+                  onClick={() =>
+                    router.get(
+                      route('project.ceremony.show', {
+                        project: project.id,
+                        ceremony: item.link || 'inception',
+                      }),
+                      { artifact: artifact.title },
+                    )
+                  }
+                >
                   {artifact.label}{' '}
                   {artifactAmount > 0 ? (
                     <>
@@ -123,16 +135,11 @@ export const CeremonyCard = ({
                   ) : (
                     <CircleAlert className="size-4 text-destructive" />
                   )}
-                </div>
+                </Button>
               )
             })}
           </div>
 
-          {/* BOTÃO "VER MAIS"
-          A prop "onClick" original do Card foi movida para este botão.
-          Isso segue o padrão de design do Accordion, onde o 'trigger'
-          apenas expande, e as ações ficam dentro do conteúdo.
-        */}
           {onClick && (
             <Button
               variant="link"
@@ -219,7 +226,7 @@ const Dashboard = ({ project, setProject }) => {
       artifacts: [
         { label: 'Product Canvas', title: 'productCanvas' },
         { label: 'Personas', title: 'personas' },
-        { label: 'Goals', title: 'goal_sketches' },
+        { label: 'Goals', title: 'goals' },
         { label: 'Journeys', title: 'journeys' },
       ],
     },
@@ -227,23 +234,23 @@ const Dashboard = ({ project, setProject }) => {
       title: 'storyDiscovery',
       artifacts: [
         { label: 'Stories', title: 'stories' },
-        { label: 'Overall Model', title: 'crc_cards' },
-        { label: 'Matriz de Priorização', title: 'prioritizations' },
-        { label: 'Change Log', title: 'change_requests' },
+        { label: 'Overall Model', title: 'overallModel' },
+        { label: 'Matriz de Priorização', title: 'prioritizationMatrix' },
+        { label: 'Change Log', title: 'changeLog' },
       ],
     },
     {
       title: 'refining',
       artifacts: [
-        { label: 'Epic Stories', title: 'Epic Stories' },
-        { label: 'Business Rules', title: 'Business Rules' },
-        { label: 'Usage Scenarios', title: 'usage_scenarios' },
+        { label: 'Epic Stories', title: 'epicStories' },
+        { label: 'Business Rules', title: 'businessRules' },
+        { label: 'Usage Scenarios', title: 'usageScenarios' },
       ],
     },
     {
       title: 'modeling',
       artifacts: [
-        { label: 'Overall Model', title: 'crc_cards' },
+        { label: 'Overall Model', title: 'overallModel' },
         { label: 'Interfaces Internas e Externas', title: 'interfaces' },
         { label: 'Storyboards', title: 'storyboards' },
       ],
@@ -309,10 +316,10 @@ const Dashboard = ({ project, setProject }) => {
   }, [date])
 
   return (
-    <main className="grid md:grid-cols-[1fr,1fr] lg:grid-cols-[1fr,1fr,1fr] xl:grid-cols-[1fr,1fr,1fr,1fr] gap-4 p-4 w-full ">
+    <main className="grid md:grid-cols-[1fr,1fr] lg:grid-cols-[30%,1fr,40%] grid-rows-[22rem,auto,auto] gap-4 p-4 w-full ">
       <Head title={project.title || 'Project Title'} />
       {/* progresso de conclusao*/}
-      <section className="bg-card rounded-lg flex flex-col text-muted-foreground p-2 gap-2 w-full h-full ">
+      <section className="bg-card rounded-lg flex flex-col justify-between text-muted-foreground p-2 gap-2 w-full h-full ">
         <div className=" flex flex-col gap-2 w-full">
           <span className=" flex-1 break-words text-lg text-foreground p-0 border-0 m-0 cursor-default z-10">
             {project.title}
@@ -348,62 +355,39 @@ const Dashboard = ({ project, setProject }) => {
             )}
           </div>
         </div>
+
+        <div className="flex items-center gap-2">
+          <ProgressIcon
+            value={project?.stories?.length || 0}
+            max={20}
+            colorClass="text-primary"
+            label="Stories"
+            icon={List}
+          />
+          <ProgressIcon
+            value={project?.sprints?.length || 0}
+            max={10}
+            colorClass="text-destructive"
+            label="Sprints"
+            icon={Users}
+          />
+        </div>
         {/* opcoes*/}
-        <div className="flex  gap-2">
+        <div className="flex items-center justify-center gap-2">
           <ProjectPermissions project={project} />
           <ProjectSettings project={project} />
         </div>
       </section>
 
-      {/* prazo*/}
-      {/* <section className="col-span-1 bg-card rounded-lg flex flex-col items-center justify-start gap-2 cursor-pointer select-none">*/}
-      {/* <p className="text-muted-foreground text-md m-0">Prazo</p>*/}
-      {/* <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={'outline'}
-              className={cn(
-                'w-[160px] justify-start text-left font-normal',
-                !date && 'text-muted-foreground',
-              )}
-            >
-              <CalendarIcon className="mr-2 size-4" />
-              {date ? (
-                format(date, 'dd/MM/yyyy', { locale: ptBR })
-              ) : (
-                <span>Definir prazo</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">*/}
-
-      <Calendar
-        mode="single"
-        selected={date}
-        onSelect={setDate}
-        disabled={{ before: new Date() }}
-        initialFocus
-        locale={ptBR}
-        className="bg-card mx-auto xl:col-start-2 xl:row-start-1 w-full"
-      />
-      {/* </PopoverContent>
-        </Popover>*/}
-      {/* Progress Indicators */}
-
-      <div className="flex lg:flex-col md:row-start-4 lg:row-start-2  lg:col-start-3 xl:row-start-1 xl:col-start-3 gap-2 items-center justify-center bg-card p-4 rounded-lg">
-        <ProgressIcon
-          value={project?.stories?.length || 0}
-          max={20}
-          colorClass="text-primary"
-          label="Stories"
-          icon={List}
-        />
-        <ProgressIcon
-          value={project?.sprints?.length || 0}
-          max={10}
-          colorClass="text-destructive"
-          label="Sprints"
-          icon={Users}
+      <div className="flex bg-card mx-auto py-2 w-full rounded">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          disabled={{ before: new Date() }}
+          initialFocus
+          locale={ptBR}
+          className="bg-card p-4 mx-auto"
         />
       </div>
       <ExpandableCard
@@ -415,20 +399,20 @@ const Dashboard = ({ project, setProject }) => {
         editable={false}
         defaultExpanded={true}
         placeholder="Describe your project..."
-        className="xl:row-start-3 md:col-span-2 xl:col-span-3 min-w-full "
-        // onContentUpdate={(content) => updateProject('description', content)}
+        className="md:row-start-2 md:col-span-2 min-w-full "
       />
       <Interview
-        className="xl:row-start-2 md:col-span-2 xl:col-span-3"
+        className="lg:col-span-2"
         projectId={project.id}
         interviews={project.interviews || []} // Passe a lista de entrevistas do seu projeto
       />
       {/* ceremonies*/}
-      <section className="ceremonies xl:col-start-4  lg:col-start-3 lg:row-start-1 xl:row-span-3 flex flex-col  justify-between items-center bg-card gap-2 p-2">
+      <section className="ceremonies lg:col-span-2 lg:col-start-3 lg:row-start-1 row-span-3 flex flex-col  items-center bg-card gap-2 p-2">
         {ceremonies.map((ceremony, index) => (
           <CeremonyCard
             project={project}
             key={ceremony.title}
+            ceremonyLink={ceremony.title}
             item={tooltipInfo[ceremony.title]}
             amount={ceremony?.amount || 0}
             artifacts={ceremony.artifacts}
