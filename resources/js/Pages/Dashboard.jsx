@@ -65,7 +65,7 @@ export const CeremonyCard = ({
         <AccordionTrigger
           // O padding p-2 do Card original foi movido para cá
           // hover:no-underline remove o sublinhado padrão do hover
-          className="p-2 hover:no-underline"
+          className="p-4 hover:no-underline"
         >
           <div className="flex w-full items-center gap-2">
             {Icon && (
@@ -80,11 +80,11 @@ export const CeremonyCard = ({
               </div>
             )}
             <div className="flex-grow">
-              <div className="flex justify-between">
+              <div className="flex gap-2 ">
                 <h3 className="text-md font-semibold text-foreground text-left">
-                  {item.title}{' '}
-                  {amount > 0 && <Badge variant="secondary">{amount}</Badge>}
-                </h3>
+                  {item.title}
+                </h3>{' '}
+                {amount > 0 && <Badge variant="secondary">{amount}</Badge>}
               </div>
             </div>
           </div>
@@ -104,7 +104,7 @@ export const CeremonyCard = ({
 
           {/* Lista de Artefatos (lógica idêntica) */}
           {artifacts.length > 0 && (
-            <p className="mt-4 mb-2 text-sm font-medium">Artefatos contidos:</p>
+            <p className="mt-2 text-sm font-medium">Artefatos presentes:</p>
           )}
           <div className="flex  items-start gap-1 text-sm">
             {artifacts.map((artifact, index) => {
@@ -113,6 +113,7 @@ export const CeremonyCard = ({
               return (
                 <Button
                   variant="link"
+                  title={`Ir até ${artifact.label}`}
                   key={index}
                   className="flex items-center gap-2"
                   onClick={() =>
@@ -121,7 +122,7 @@ export const CeremonyCard = ({
                         project: project.id,
                         ceremony: item.link || 'inception',
                       }),
-                      { artifact: artifact.title },
+                      { artifact: artifact.title || '' },
                     )
                   }
                 >
@@ -145,9 +146,9 @@ export const CeremonyCard = ({
               variant="link"
               size="sm"
               onClick={onClick}
-              className="p-0 mt-4 text-primary" // Dando a cor primária
+              className="p-0 mt-2 text-primary" // Dando a cor primária
             >
-              Ver mais
+              Ir para cerimônia
               <ArrowRight className="size-3 ml-1" />
             </Button>
           )}
@@ -412,7 +413,6 @@ const Dashboard = ({ project, setProject }) => {
           <CeremonyCard
             project={project}
             key={ceremony.title}
-            ceremonyLink={ceremony.title}
             item={tooltipInfo[ceremony.title]}
             amount={ceremony?.amount || 0}
             artifacts={ceremony.artifacts}

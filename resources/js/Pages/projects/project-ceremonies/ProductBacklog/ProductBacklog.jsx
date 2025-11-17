@@ -658,6 +658,7 @@ const ProductBacklog = ({ project, setProject }) => {
             </AlertDialogHeader>
             <section className="my-4">
               <Select
+                defaultOpen
                 value={data.destination} // O valor é controlado pelo 'data'
                 onValueChange={(value) => setData('destination', value)} // Atualiza o 'data'
               >
