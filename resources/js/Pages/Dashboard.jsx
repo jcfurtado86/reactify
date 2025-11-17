@@ -46,114 +46,116 @@ export const CeremonyCard = ({
   // O Card foi substituído por um AccordionItem.
   // Ele precisa de uma prop "value" única. Usaremos item.title.
   return (
-    <AccordionItem
-      value={item.title}
-      className={cn(
-        'group relative w-full overflow-hidden bg-background',
-        'transition-all duration-300 ease-in-out ',
-        'border-b', // O AccordionItem já tem uma borda por padrão
-        className,
-      )}
-    >
-      {/* HEADER (O QUE É CLICÁVEL) */}
-      <AccordionTrigger
-        // O padding p-2 do Card original foi movido para cá
-        // hover:no-underline remove o sublinhado padrão do hover
-        className="p-2 hover:no-underline"
+    <Accordion collapsible single className="w-full" defaultValue={item.title}>
+      <AccordionItem
+        value={item.title}
+        className={cn(
+          'group relative w-full overflow-hidden bg-background',
+          'transition-all duration-300 ease-in-out ',
+          'border-b', // O AccordionItem já tem uma borda por padrão
+          className,
+        )}
       >
-        <div className="flex w-full items-center gap-2">
-          {Icon && (
-            <div className="flex-shrink-0">
-              <Icon
-                className={cn(
-                  'size-8 text-muted-foreground transition-colors duration-300',
-                  // Muda a cor quando o accordion está aberto (substitui o group-hover)
-                  'data-[state=open]:text-primary',
-                )}
-              />
-            </div>
-          )}
-          <div className="flex-grow">
-            <div className="flex justify-between">
-              {/* text-left alinha o título à esquerda (trigger centraliza por padrão) */}
-              <h3 className="text-md font-semibold text-foreground text-left">
-                {item.title}{' '}
-                {amount > 0 && <Badge variant="secondary">{amount}</Badge>}
-              </h3>
+        {/* HEADER (O QUE É CLICÁVEL) */}
+        <AccordionTrigger
+          // O padding p-2 do Card original foi movido para cá
+          // hover:no-underline remove o sublinhado padrão do hover
+          className="p-2 hover:no-underline"
+        >
+          <div className="flex w-full items-center gap-2">
+            {Icon && (
+              <div className="flex-shrink-0">
+                <Icon
+                  className={cn(
+                    'size-8 text-muted-foreground transition-colors duration-300',
+                    // Muda a cor quando o accordion está aberto (substitui o group-hover)
+                    'data-[state=open]:text-primary',
+                  )}
+                />
+              </div>
+            )}
+            <div className="flex-grow">
+              <div className="flex justify-between">
+                {/* text-left alinha o título à esquerda (trigger centraliza por padrão) */}
+                <h3 className="text-md font-semibold text-foreground text-left">
+                  {item.title}{' '}
+                  {amount > 0 && <Badge variant="secondary">{amount}</Badge>}
+                </h3>
 
-              {/* O "ver mais" com seta foi removido daqui.
+                {/* O "ver mais" com seta foi removido daqui.
                 O AccordionTrigger já tem sua própria seta (chevron)
                 e colocar outra ficaria visualmente confuso.
               */}
+              </div>
             </div>
           </div>
-        </div>
-      </AccordionTrigger>
+        </AccordionTrigger>
 
-      {/* CONTEÚDO (O QUE ABRE E FECHA) */}
-      <AccordionContent
-        // Adiciona padding ao conteúdo, exceto no topo para ficar mais fluido
-        className="px-2 pt-0 pb-2"
-      >
-        {/* Descrição (descomentada do seu código original) */}
-        {item.description && (
-          <p className="pt-1 text-sm text-muted-foreground">
-            {item.description}
-          </p>
-        )}
+        {/* CONTEÚDO (O QUE ABRE E FECHA) */}
+        <AccordionContent
+          // Adiciona padding ao conteúdo, exceto no topo para ficar mais fluido
+          className="px-2 pt-0 pb-2"
+        >
+          {/* Descrição (descomentada do seu código original) */}
+          {/* {item.description && (
+            <p className="pt-1 text-sm text-muted-foreground">
+              {item.description}
+            </p>
+          )}*/}
 
-        {/* Lista de Artefatos (lógica idêntica) */}
-        {artifacts.length > 0 && (
-          <p className="mt-4 mb-2 text-sm font-medium">Artefatos contidos:</p>
-        )}
-        <div className="flex flex-col gap-2 text-sm">
-          {artifacts.map((artifact, index) => {
-            const artifactAmount = project?.[artifact?.title]?.length || 0
+          {/* Lista de Artefatos (lógica idêntica) */}
+          {artifacts.length > 0 && (
+            <p className="mt-4 mb-2 text-sm font-medium">Artefatos contidos:</p>
+          )}
+          <div className="flex flex-col gap-2 text-sm">
+            {artifacts.map((artifact, index) => {
+              const artifactAmount = project?.[artifact?.title]?.length || 0
 
-            return (
-              <div key={index} className="flex items-center gap-2">
-                {artifact.label}{' '}
-                {artifactAmount > 0 ? (
-                  <>
-                    {' '}
-                    <Badge variant="secondary">{artifactAmount}</Badge>{' '}
-                    <CircleCheckBig className="size-4 text-green-400" />
-                  </>
-                ) : (
-                  <CircleAlert className="size-4 text-destructive" />
-                )}
-              </div>
-            )
-          })}
-        </div>
+              return (
+                <div key={index} className="flex items-center gap-2">
+                  {artifact.label}{' '}
+                  {artifactAmount > 0 ? (
+                    <>
+                      {' '}
+                      <Badge variant="secondary">{artifactAmount}</Badge>{' '}
+                      <CircleCheckBig className="size-4 text-green-400" />
+                    </>
+                  ) : (
+                    <CircleAlert className="size-4 text-destructive" />
+                  )}
+                </div>
+              )
+            })}
+          </div>
 
-        {/* BOTÃO "VER MAIS"
+          {/* BOTÃO "VER MAIS"
           A prop "onClick" original do Card foi movida para este botão.
           Isso segue o padrão de design do Accordion, onde o 'trigger'
           apenas expande, e as ações ficam dentro do conteúdo.
         */}
-        {onClick && (
-          <Button
-            variant="link"
-            size="sm"
-            onClick={onClick}
-            className="p-0 mt-4 text-primary" // Dando a cor primária
-          >
-            Ver mais
-            <ArrowRight className="size-3 ml-1" />
-          </Button>
-        )}
-      </AccordionContent>
+          {onClick && (
+            <Button
+              variant="link"
+              size="sm"
+              onClick={onClick}
+              className="p-0 mt-4 text-primary" // Dando a cor primária
+            >
+              Ver mais
+              <ArrowRight className="size-3 ml-1" />
+            </Button>
+          )}
+        </AccordionContent>
 
-      {/* BorderBeam (mantido no root do AccordionItem) */}
-      {/* <BorderBeam
+        {/* BorderBeam (mantido no root do AccordionItem) */}
+        {/* <BorderBeam
         borderWidth={2}
         size={70}
         delay={delay}
         colorTo={'var(--primary)'}
         colorFrom={'var(--secondary)'}
       />*/}
-    </AccordionItem>
+      </AccordionItem>
+    </Accordion>
   )
 }
 
@@ -423,26 +425,24 @@ const Dashboard = ({ project, setProject }) => {
       />
       {/* ceremonies*/}
       <section className="ceremonies xl:col-start-4  lg:col-start-3 lg:row-start-1 xl:row-span-3 flex flex-col  justify-between items-center bg-card gap-2 p-2">
-        <Accordion collapsible multiple className="w-full">
-          {ceremonies.map((ceremony, index) => (
-            <CeremonyCard
-              project={project}
-              key={ceremony.title}
-              item={tooltipInfo[ceremony.title]}
-              amount={ceremony?.amount || 0}
-              artifacts={ceremony.artifacts}
-              delay={index * 1}
-              onClick={() =>
-                router.get(
-                  route('project.ceremony.show', {
-                    project: project.id,
-                    ceremony: ceremony.title,
-                  }),
-                )
-              }
-            />
-          ))}
-        </Accordion>
+        {ceremonies.map((ceremony, index) => (
+          <CeremonyCard
+            project={project}
+            key={ceremony.title}
+            item={tooltipInfo[ceremony.title]}
+            amount={ceremony?.amount || 0}
+            artifacts={ceremony.artifacts}
+            delay={index * 1}
+            onClick={() =>
+              router.get(
+                route('project.ceremony.show', {
+                  project: project.id,
+                  ceremony: ceremony.title,
+                }),
+              )
+            }
+          />
+        ))}
       </section>
     </main>
   )
