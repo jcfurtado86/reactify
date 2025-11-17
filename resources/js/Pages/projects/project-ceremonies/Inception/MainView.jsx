@@ -342,11 +342,11 @@ const ExpandableCard = ({
               >
                 {!expanded ? (
                   <>
-                    Show more <ChevronDown size={14} className="ml-1" />
+                    Mostrar mais <ChevronDown size={14} className="ml-1" />
                   </>
                 ) : (
                   <>
-                    Show less <ChevronUp size={14} className="ml-1" />
+                    Mostrar menos <ChevronUp size={14} className="ml-1" />
                   </>
                 )}
               </button>

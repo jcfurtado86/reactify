@@ -6,7 +6,7 @@ import {
   Check,
   X,
   ChevronsUp,
-  FileText
+  FileText,
 } from 'lucide-react'
 import { isTemporary } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
@@ -354,7 +354,7 @@ const ScenarioCard = ({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {isExpanded ? 'Show less' : 'Show more'}
+                      {isExpanded ? 'Mostrar menos' : 'Mostrar mais'}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

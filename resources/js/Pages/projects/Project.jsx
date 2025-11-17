@@ -35,9 +35,12 @@ import { tooltipInfo } from '@/lib/projectData.js'
 //chatbot
 import ChatBot from './ChatBot.jsx'
 import { ProjectSettings } from '@/Components/ProjectSettings.jsx'
-import { useMemo, useState, useEffect } from 'react'
 
-const ProjectView = ({ projectDB = [], page = 'inception' }) => {
+const ProjectView = ({
+  projectDB = [],
+  page = 'inception',
+  artifact = 'personas',
+}) => {
   const [project, setProject] = useState({ ...projectDB })
   const { can } = usePermissions()
 
@@ -102,7 +105,7 @@ const ProjectView = ({ projectDB = [], page = 'inception' }) => {
       ? [
           {
             label: 'Overall Model',
-            value: true,
+            value: false,
             tooltip: tooltipInfo.overallModel,
           },
         ]
