@@ -36,23 +36,17 @@ import { tooltipInfo } from '@/lib/projectData.js'
 import ChatBot from './ChatBot.jsx'
 import { ProjectSettings } from '@/Components/ProjectSettings.jsx'
 
-const ProjectView = ({
-  projectDB = [],
-  page = 'inception',
-  artifact = 'personas',
-}) => {
+const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
   const [project, setProject] = useState({ ...projectDB })
   const { can } = usePermissions()
-
   // Inception States
-  const [activeMenu, setActiveMenu] = useState(
-    () => localStorage.getItem('activeMenu') || 'Product Canvas',
-  )
+
   const [menuItems, setMenuItems] = useState([
     ...(can('productCanvas.view')
       ? [
           {
             label: 'Product Canvas',
+            link: 'productCanvas',
             value: true,
             tooltip: tooltipInfo.productCanvas,
           },
@@ -62,6 +56,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Personas',
+            link: 'personas',
             value: false,
             tooltip: tooltipInfo.personas,
           },
@@ -71,6 +66,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Goals',
+            link: 'goals',
             value: false,
             tooltip: tooltipInfo.goals,
           },
@@ -80,6 +76,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Journeys',
+            link: 'journeys',
             value: false,
             tooltip: tooltipInfo.journeys,
           },
@@ -88,14 +85,13 @@ const ProjectView = ({
   ])
 
   // Story Discovery States
-  const [activeStoryDiscoveryMenu, setActiveStoryDiscoveryMenu] = useState(
-    () => localStorage.getItem('activeStoryDiscoveryMenu') || 'Stories',
-  )
+
   const [storyDiscoveryMenuItems, setStoryDiscoveryMenuItems] = useState([
     ...(can('userStory.view')
       ? [
           {
             label: 'Stories',
+            link: 'stories',
             value: true,
             tooltip: tooltipInfo.stories,
           },
@@ -105,6 +101,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Overall Model',
+            link: 'overallModel',
             value: false,
             tooltip: tooltipInfo.overallModel,
           },
@@ -114,6 +111,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Matriz de Priorização',
+            link: 'prioritizationMatrix',
             value: false,
             tooltip: tooltipInfo.prioritizationMatrix,
           },
@@ -123,6 +121,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Change Log',
+            link: 'changeLog',
             value: false,
             tooltip: tooltipInfo.changeLog,
           },
@@ -131,14 +130,13 @@ const ProjectView = ({
   ])
 
   // Refining States
-  const [activeRefiningMenu, setActiveRefiningMenu] = useState(
-    () => localStorage.getItem('activeRefiningMenu') || 'Epic Stories',
-  )
+
   const [refiningMenuItems, setRefiningMenuItems] = useState([
     ...(can('userStory.view')
       ? [
           {
             label: 'Epic Stories',
+            link: 'epicStories',
             value: true,
             tooltip: tooltipInfo.epicStories,
           },
@@ -148,6 +146,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Business Rules',
+            link: 'businessRules',
             value: false,
             tooltip: tooltipInfo.businessRules,
           },
@@ -157,6 +156,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Usage Scenarios',
+            link: 'usageScenarios',
             value: false,
             tooltip: tooltipInfo.usageScenarios,
           },
@@ -165,14 +165,13 @@ const ProjectView = ({
   ])
 
   // Modeling States
-  const [activeModelingMenu, setActiveModelingMenu] = useState(
-    () => localStorage.getItem('activeModelingMenu') || 'Overall Model',
-  )
+
   const [modelingMenuItems, setModelingMenuItems] = useState([
     ...(can('overallModel.view')
       ? [
           {
             label: 'Overall Model',
+            link: 'overallModel',
             value: true,
             tooltip: tooltipInfo.overallModel,
           },
@@ -182,6 +181,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Interfaces Internas e Externas',
+            link: 'interfaces',
             value: false,
             tooltip: tooltipInfo.interfaces,
           },
@@ -191,6 +191,7 @@ const ProjectView = ({
       ? [
           {
             label: 'Storyboards',
+            link: 'storyboards',
             value: false,
             tooltip: tooltipInfo.storyboards,
           },
@@ -198,29 +199,16 @@ const ProjectView = ({
       : []),
   ])
 
-  const currentArtifact = useMemo(() => {
-    switch (page) {
-      case 'inception':
-        return activeMenu
-      case 'storyDiscovery':
-        return activeStoryDiscoveryMenu
-      case 'refining':
-        return activeRefiningMenu
-      case 'modeling':
-        return activeModelingMenu
-      case 'productBacklog':
-        // Para estes casos, o nome do artefato é o mesmo nome da página.
-        return page
-      default:
-        return page
-    }
-  }, [
-    page,
-    activeMenu,
-    activeStoryDiscoveryMenu,
-    activeRefiningMenu,
-    activeModelingMenu,
-  ])
+  const defaultArtifacts = useMemo(
+    () => ({
+      inception: 'productCanvas',
+      storyDiscovery: 'stories',
+      refining: 'epicStories',
+      modeling: 'overallModel',
+    }),
+    [],
+  )
+  const activeArtifact = artifact || defaultArtifacts[page]
 
   const artifactToDataKeyMap = useMemo(
     () => ({
@@ -243,13 +231,13 @@ const ProjectView = ({
     [],
   )
 
-  const currentArtifactData = useMemo(() => {
-    if (!projectDB || !currentArtifact) {
-      return null
-    }
-    const dataKey = artifactToDataKeyMap[currentArtifact]
-    return dataKey ? projectDB[dataKey] : null
-  }, [projectDB, currentArtifact, artifactToDataKeyMap])
+  // const currentArtifactData = useMemo(() => {
+  //   if (!projectDB || !currentArtifact) {
+  //     return null
+  //   }
+  //   const dataKey = artifactToDataKeyMap[currentArtifact]
+  //   return dataKey ? projectDB[dataKey] : null
+  // }, [projectDB, currentArtifact, artifactToDataKeyMap])
 
   const getUpdatedProject = async (projectID) => {
     try {
@@ -285,67 +273,67 @@ const ProjectView = ({
   useEffect(() => {
     const updatedMenuItems = menuItems.map((item) => ({
       ...item,
-      value: item.label === activeMenu,
+      value: item.label === activeArtifact,
     }))
     setMenuItems(updatedMenuItems)
-    localStorage.setItem('activeMenu', activeMenu)
-  }, [activeMenu])
+    localStorage.setItem('activeMenu', activeArtifact)
+  }, [activeArtifact])
 
   // Effect for Story Discovery menu
   useEffect(() => {
     const updatedMenuItems = storyDiscoveryMenuItems.map((item) => ({
       ...item,
-      value: item.label === activeStoryDiscoveryMenu,
+      value: item.label === activeArtifact,
     }))
     setStoryDiscoveryMenuItems(updatedMenuItems)
-    localStorage.setItem('activeStoryDiscoveryMenu', activeStoryDiscoveryMenu)
-  }, [activeStoryDiscoveryMenu])
+    localStorage.setItem('activeStoryDiscoveryMenu', activeArtifact)
+  }, [activeArtifact])
 
   // Effect for Refining menu
   useEffect(() => {
     const updatedMenuItems = refiningMenuItems.map((item) => ({
       ...item,
-      value: item.label === activeRefiningMenu,
+      value: item.label === activeArtifact,
     }))
     setRefiningMenuItems(updatedMenuItems)
-    localStorage.setItem('activeRefiningMenu', activeRefiningMenu)
-  }, [activeRefiningMenu])
+    localStorage.setItem('activeRefiningMenu', activeArtifact)
+  }, [activeArtifact])
 
   // Effect for Modeling menu
   useEffect(() => {
     const updatedMenuItems = modelingMenuItems.map((item) => ({
       ...item,
-      value: item.label === activeModelingMenu,
+      value: item.label === activeArtifact,
     }))
     setModelingMenuItems(updatedMenuItems)
-    localStorage.setItem('activeModelingMenu', activeModelingMenu)
-  }, [activeModelingMenu])
+    localStorage.setItem('activeModelingMenu', activeArtifact)
+  }, [activeArtifact])
 
   useEffect(() => {
     // console.log(project?.product_canvas)
   }, [project])
 
   const renderInceptionContent = () => {
-    switch (activeMenu) {
-      case 'Product Canvas':
+    switch (activeArtifact) {
+      case 'productCanvas':
         return (
           can('productCanvas.view') && (
             <MainView project={project} setProject={setProject} />
           )
         )
-      case 'Personas':
+      case 'personas':
         return (
           can('persona.view') && (
             <Personas project={project} setProject={setProject} />
           )
         )
-      case 'Goals':
+      case 'goals':
         return (
           can('goal.view') && (
             <Goals project={project} setProject={setProject} />
           )
         )
-      case 'Journeys':
+      case 'journeys':
         return (
           can('journey.view') && (
             <Journeys project={project} setProject={setProject} />
@@ -357,26 +345,26 @@ const ProjectView = ({
   }
 
   const renderStoryDiscoveryContent = () => {
-    switch (activeStoryDiscoveryMenu) {
-      case 'Stories':
+    switch (activeArtifact) {
+      case 'stories':
         return (
           can('userStory.view') && (
             <Stories project={project} setProject={setProject} />
           )
         )
-      case 'Overall Model':
+      case 'overallModel':
         return (
           can('overallModel.view') && (
             <OverallModel project={project} setProject={setProject} />
           )
         )
-      case 'Matriz de Priorização':
+      case 'prioritizationMatrix':
         return (
           can('prioritizationMatrix.view') && (
             <PrioritizationMatrix project={project} setProject={setProject} />
           )
         )
-      case 'Change Log':
+      case 'changeLog':
         return (
           can('changeLog.view') && (
             <ChangeLog project={project} setProject={setProject} />
@@ -388,20 +376,20 @@ const ProjectView = ({
   }
 
   const renderRefiningContent = () => {
-    switch (activeRefiningMenu) {
-      case 'Epic Stories':
+    switch (activeArtifact) {
+      case 'epicStories':
         return (
           can('userStory.view') && (
             <EpicStories project={project} setProject={setProject} />
           )
         )
-      case 'Business Rules':
+      case 'businessRules':
         return (
           can('businessRule.view') && (
             <BusinessRules project={project} setProject={setProject} />
           )
         )
-      case 'Usage Scenarios':
+      case 'usageScenarios':
         return (
           can('usageScenario.view') && (
             <UsageScenarios project={project} setProject={setProject} />
@@ -413,20 +401,20 @@ const ProjectView = ({
   }
 
   const renderModelingContent = () => {
-    switch (activeModelingMenu) {
-      case 'Overall Model':
+    switch (activeArtifact) {
+      case 'overallModel':
         return (
           can('overallModel.view') && (
             <OverallModel project={project} setProject={setProject} />
           )
         )
-      case 'Interfaces Internas e Externas':
+      case 'interfaces':
         return (
           can('interface.view') && (
             <Interfaces project={project} setProject={setProject} />
           )
         )
-      case 'Storyboards':
+      case 'storyboards':
         return (
           can('storyboard.view') && (
             <SidebarProvider className="min-h-[calc(100vh-100px)]">
@@ -439,6 +427,40 @@ const ProjectView = ({
     }
   }
 
+  // NOVO: Função que será chamada pelo NavMenu
+  const handleArtifactChange = (newArtifactLabel) => {
+    router.get(
+      // 1. Rota: A mesma rota que você já usa para as TABS principais
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: page, // 'page' é a prop da cerimônia atual
+        artifact: newArtifactLabel,
+      }),
+    )
+  }
+
+  const handleCeremonyChange = (newCeremonyLabel) => {
+    if (
+      newCeremonyLabel === 'productBacklog' ||
+      newCeremonyLabel === 'sprints'
+    ) {
+      router.get(
+        route('project.ceremony.show', {
+          project: project.id,
+          ceremony: newCeremonyLabel,
+        }),
+      )
+    } else {
+      router.get(
+        route('project.ceremony.show', {
+          project: project.id,
+          ceremony: newCeremonyLabel,
+          artifact: defaultArtifacts[newCeremonyLabel],
+        }),
+      )
+    }
+  }
+
   return (
     <div className="project-view flex flex-col items-center justify-start px-1 w-full text-foreground">
       <div
@@ -448,14 +470,7 @@ const ProjectView = ({
         {/* tabs para alternar entre fases do projeto */}
         <Tabs
           value={page}
-          onValueChange={(e) =>
-            router.get(
-              route('project.ceremony.show', {
-                project: project.id,
-                ceremony: e,
-              }),
-            )
-          }
+          onValueChange={handleCeremonyChange}
           className="w-full font-normal text-left"
         >
           <div className="flex justify-between items-center w-full gap-2">
@@ -506,27 +521,30 @@ const ProjectView = ({
           </div>
 
           <TabsContent value="inception">
-            <NavMenu menuItems={menuItems} setActiveMenu={setActiveMenu} />
+            <NavMenu
+              menuItems={menuItems}
+              setActiveMenu={handleArtifactChange}
+            />
             {renderInceptionContent()}
           </TabsContent>
           <TabsContent value="storyDiscovery">
             <NavMenu
               menuItems={storyDiscoveryMenuItems}
-              setActiveMenu={setActiveStoryDiscoveryMenu}
+              setActiveMenu={handleArtifactChange}
             />
             {renderStoryDiscoveryContent()}
           </TabsContent>
           <TabsContent value="refining">
             <NavMenu
               menuItems={refiningMenuItems}
-              setActiveMenu={setActiveRefiningMenu}
+              setActiveMenu={handleArtifactChange}
             />
             {renderRefiningContent()}
           </TabsContent>
           <TabsContent value="modeling">
             <NavMenu
               menuItems={modelingMenuItems}
-              setActiveMenu={setActiveModelingMenu}
+              setActiveMenu={handleArtifactChange}
             />
             {renderModelingContent()}
           </TabsContent>
@@ -540,14 +558,14 @@ const ProjectView = ({
         </Tabs>
         <ChatBot
           project={projectDB}
-          currentPage={{ page: page, artifact: currentArtifact }}
-          currentContextData={currentArtifactData}
+          currentPage={{ page: page, artifact: artifact }}
+          currentContextData={artifact}
         />
       </div>
     </div>
   )
 }
-const Project = ({ project, page }) => {
+const Project = ({ project, page, artifact }) => {
   const { auth, project: currentProject } = usePage().props
 
   const currentUserInProject = currentProject.users.find(
@@ -557,7 +575,7 @@ const Project = ({ project, page }) => {
   return (
     <PermissionProvider permissions={currentUserPermissions}>
       <Head title={project.title} />
-      <ProjectView projectDB={project} page={page} />
+      <ProjectView projectDB={project} page={page} artifact={artifact} />
     </PermissionProvider>
   )
 }

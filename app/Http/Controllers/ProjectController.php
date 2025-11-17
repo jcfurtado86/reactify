@@ -116,8 +116,11 @@ class ProjectController extends Controller
       'project' => $project,
     ]);
   }
-  public function ceremony(Project $project, string $ceremony): InertiaResponse
-  {
+  public function ceremony(
+    Project $project,
+    string $ceremony,
+    Request $request
+  ): InertiaResponse {
     $user = Auth::user();
 
     if (!$project->users()->where('users.id', $user->id)->exists()) {
@@ -146,10 +149,12 @@ class ProjectController extends Controller
         $query->select(['user_id', 'name', 'email', 'provider_avatar']);
       },
     ]);
+    $artifact = $request->query('artifact');
 
     return Inertia::render('projects/Project', [
       'project' => $project,
       'page' => $ceremony,
+      'artifact' => $artifact,
     ]);
   }
   public function store(ProjectRequest $request): RedirectResponse

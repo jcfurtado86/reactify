@@ -1,12 +1,13 @@
 import { Info } from 'lucide-react'
-
+import { usePage } from '@inertiajs/react'
 const NavMenu = ({ menuItems, setActiveMenu }) => {
   const [open, setOpen] = useState(false)
   // Calcula o número total de itens para distribuição do indicador
   const totalItems = menuItems.length
   // Função para lidar com o clique em um item
-  const handleItemClick = (menuItem) => setActiveMenu(menuItem.label)
-
+  const handleItemClick = (menuItem) => setActiveMenu(menuItem.link)
+  const props = usePage().props
+  const artifact = props.artifact || ''
   return (
     <>
       <div id="tab-menu" className="flex w-full">
@@ -21,7 +22,7 @@ const NavMenu = ({ menuItems, setActiveMenu }) => {
                   ? 'rounded-tr-md rounded-br-md'
                   : ''
               }
-              ${menuItem.value ? 'bg-primary text-background' : 'text-muted-foreground bg-card'}`}
+              ${menuItem.link === artifact ? 'bg-primary text-background' : 'text-muted-foreground bg-card'}`}
             onClick={() => handleItemClick(menuItem)}
           >
             {menuItem.label}
@@ -29,7 +30,9 @@ const NavMenu = ({ menuItems, setActiveMenu }) => {
               <PopoverTrigger onClick={(e) => e.stopPropagation()}>
                 <Info
                   className={`${
-                    !menuItem.value ? 'text-foreground' : 'text-background'
+                    menuItem.link !== artifact
+                      ? 'text-foreground'
+                      : 'text-background'
                   }`}
                   size={15}
                 />

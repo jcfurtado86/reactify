@@ -120,7 +120,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('/{project}/', [ProjectController::class, 'show'])->name(
       'project.show'
     );
-    Route::get('/{project}/ceremony/{ceremony}', [
+    Route::get('/{project}/ceremony/{ceremony}/', [
       ProjectController::class,
       'ceremony',
     ])->name('project.ceremony.show');
