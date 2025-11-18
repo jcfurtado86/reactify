@@ -480,7 +480,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
         </div>
         {/* conteiner de stories*/}
         <section className=" bg-card text-card-foreground border-0 rounded-xl shadow-sm  w-full ">
-          <span className="h-11 py-1 m-2 t-4">Stories</span>
+          {/* <span className="h-11 py-1 m-2 t-4">Stories</span>*/}
           <DroppableCell
             id="story-list"
             className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 p-1 items-start border-0"
