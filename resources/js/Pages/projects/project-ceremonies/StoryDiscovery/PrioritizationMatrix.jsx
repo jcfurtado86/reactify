@@ -511,25 +511,24 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                 <p className="mb-2 text-sm text-center font-medium text-foreground">
                   Todas as stories foram priorizadas
                 </p>
-                <p className="text-sm text-center">
+                <p className="text-sm text-center mb-2">
                   Arraste uma story da matriz aqui para "despriorizá-la".
                 </p>
-                <Button asChild variant="ghost" size="sm">
-                  <Link
-                    href={route('project.ceremony.show', {
-                      project: project.id,
-                      ceremony: 'storyDiscovery',
-                    })}
-                    onClick={() =>
-                      localStorage.setItem(
-                        'activeStoryDiscoveryMenu',
-                        'Stories',
-                      )
-                    }
-                  >
-                    Ir para Stories
-                    <ExternalLink className="size-4 ml-2" />
-                  </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    router.get(
+                      route('project.ceremony.show', {
+                        project: project.id,
+                        ceremony: 'storyDiscovery',
+                      }),
+                      { artifact: 'stories' },
+                    )
+                  }
+                >
+                  Ir para Stories
+                  <ExternalLink className="size-4 ml-2" />
                 </Button>
               </div>
             )}
