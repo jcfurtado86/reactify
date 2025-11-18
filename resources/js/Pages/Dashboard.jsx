@@ -14,6 +14,7 @@ import {
   CircleAlert,
   Calendar as CalendarIcon,
 } from 'lucide-react'
+import SpanButton from '@/Components/SpanButton'
 import MainLayout from '@/Layouts/MainLayout'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -43,8 +44,27 @@ export const CeremonyCard = ({
   project,
 }) => {
   const Icon = item?.icon
+  const getArtifactKey = (artifactTitle) => {
+    switch (artifactTitle) {
+      case 'overallModel':
+        return 'crc_cards'
+      case 'businessRules':
+        return 'business_rules'
+      case 'usageScenarios':
+        return 'usage_scenarios'
+      case 'prioritizationMatrix':
+        return 'prioritizations'
+      case 'goals':
+        return 'goal_sketches'
+      case 'interfaces':
+        return 'system_interfaces'
+      case 'changeLog':
+        return 'change_requests'
+      default:
+        return artifactTitle
+    }
+  }
 
-  console.log(item)
   return (
     <Accordion
       collapsible
@@ -73,7 +93,7 @@ export const CeremonyCard = ({
                 <Icon
                   className={cn(
                     'size-8 text-muted-foreground transition-colors duration-300',
-                    // Muda a cor quando o accordion está aberto (substitui o group-hover)
+
                     'data-[state=open]:text-primary',
                   )}
                 />
@@ -84,7 +104,10 @@ export const CeremonyCard = ({
                 <h3 className="text-md font-semibold text-foreground text-left">
                   {item.title}
                 </h3>{' '}
-                {amount > 0 && <Badge variant="secondary">{amount}</Badge>}
+                {/* {amount > 0 && <Badge variant="secondary">{amount}</Badge>}*/}
+                <SpanButton title={`Ir até ${item.title}`} onClick={onClick}>
+                  <ArrowRight className="size-3 ml-1" />
+                </SpanButton>
               </div>
             </div>
           </div>
@@ -97,18 +120,22 @@ export const CeremonyCard = ({
         >
           {/* Descrição (descomentada do seu código original) */}
           {item.description && (
-            <p className="pt-1 text-sm text-muted-foreground ">
-              {item.description}
+            <p className="text-sm text-muted-foreground ">
+              {item.description}{' '}
             </p>
           )}
 
-          {/* Lista de Artefatos (lógica idêntica) */}
-          {artifacts.length > 0 && (
-            <p className="mt-2 text-sm font-medium">Artefatos presentes:</p>
-          )}
-          <div className="flex  items-start gap-1 text-sm">
+          <div className="flex items-start gap-1 text-sm">
             {artifacts.map((artifact, index) => {
-              const artifactAmount = project?.[artifact?.title]?.length || 0
+              const artifactKey = getArtifactKey(artifact.title)
+
+              let artifactAmount
+              if (artifact.title === 'productCanvas') artifactAmount = 1
+              else if (artifact.title === 'epicStories')
+                artifactAmount = project?.stories.filter(
+                  (story) => story.epic_id,
+                ).length
+              else artifactAmount = project?.[artifactKey]?.length || 0
 
               return (
                 <Button
@@ -126,11 +153,10 @@ export const CeremonyCard = ({
                     )
                   }
                 >
-                  {artifact.label}{' '}
+                  {artifact.label}
                   {artifactAmount > 0 ? (
                     <>
-                      {' '}
-                      <Badge variant="secondary">{artifactAmount}</Badge>{' '}
+                      {/* <Badge variant="secondary">{artifactAmount}</Badge>*/}
                       <CircleCheckBig className="size-4 text-green-400" />
                     </>
                   ) : (
@@ -140,28 +166,7 @@ export const CeremonyCard = ({
               )
             })}
           </div>
-
-          {onClick && (
-            <Button
-              variant="link"
-              size="sm"
-              onClick={onClick}
-              className="p-0 mt-2 text-primary" // Dando a cor primária
-            >
-              Ir para cerimônia
-              <ArrowRight className="size-3 ml-1" />
-            </Button>
-          )}
         </AccordionContent>
-
-        {/* BorderBeam (mantido no root do AccordionItem) */}
-        {/* <BorderBeam
-        borderWidth={2}
-        size={70}
-        delay={delay}
-        colorTo={'var(--primary)'}
-        colorFrom={'var(--secondary)'}
-      />*/}
       </AccordionItem>
     </Accordion>
   )
@@ -252,7 +257,7 @@ const Dashboard = ({ project, setProject }) => {
       title: 'modeling',
       artifacts: [
         { label: 'Overall Model', title: 'overallModel' },
-        { label: 'Interfaces Internas e Externas', title: 'interfaces' },
+        { label: 'Interfaces', title: 'interfaces' },
         { label: 'Storyboards', title: 'storyboards' },
       ],
     },
@@ -317,7 +322,7 @@ const Dashboard = ({ project, setProject }) => {
   }, [date])
 
   return (
-    <main className="grid md:grid-cols-[1fr,1fr] lg:grid-cols-[30%,1fr,40%] grid-rows-[22rem,auto,auto] gap-4 p-4 w-full ">
+    <main className="grid md:grid-cols-[1fr,1fr] lg:grid-cols-[35%,20%,1fr] grid-rows-[22rem,auto,auto] gap-2 p-2 w-full ">
       <Head title={project.title || 'Project Title'} />
       {/* progresso de conclusao*/}
       <section className="bg-card rounded-lg flex flex-col justify-between text-muted-foreground p-2 gap-2 w-full h-full ">

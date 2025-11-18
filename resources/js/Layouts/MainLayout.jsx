@@ -52,11 +52,11 @@ const AuthenticatedLayout = ({ children }) => {
     }
   }, [flash_key])
   return (
-    <div className="flex flex-col justify-start min-h-screen bg-background w-min-full">
+    <div className="flex flex-col justify-start min-h-screen bg-background min-w-full">
       <TopMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <main className="flex-1 grid grid-rows-[1fr] grid-cols-[auto_1fr] bg-background text-foreground items-start ">
         <LeftMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-        <section className="flex items-center justify-center pt-2">
+        <section className="flex items-center justify-center">
           {children}
         </section>
       </main>
