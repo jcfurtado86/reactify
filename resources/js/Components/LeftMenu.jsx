@@ -107,16 +107,11 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
           transition={cardVariants.transition}
           className="flex-1 flex flex-col p-2 gap-2"
         >
-          <Item variant="default">
-            <div className="flex items-center gap-2">
-              <Grid className="size-5" />
-              {isOpen && (
-                <span className="font-medium hidden md:inline truncate">
-                  Projects
-                </span>
-              )}
-            </div>
-          </Item>
+          {isOpen && (
+            <span className="font-medium text-center hidden md:inline truncate">
+              Projects
+            </span>
+          )}
 
           <section className=" flex flex-col gap-2">
             {/* Mapeando cada projeto para um Accordion aninhado */}
@@ -134,7 +129,7 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
                   side="right"
                 >
                   <div>
-                    {isCurrentProject ? (
+                    {!project.emoji ? (
                       <BadgeCheckIcon className="size-5" />
                     ) : (
                       <p> {project.emoji}</p>

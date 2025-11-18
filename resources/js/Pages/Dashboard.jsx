@@ -1,3 +1,4 @@
+import React from 'react'
 import { Head, Link, router } from '@inertiajs/react'
 import ProgressIcon from '@/Components/ProgressIcon'
 import { ExpandableCard } from './projects/project-ceremonies/Inception/MainView'
@@ -415,22 +416,25 @@ const Dashboard = ({ project, setProject }) => {
       {/* ceremonies*/}
       <section className="ceremonies lg:col-span-2 lg:col-start-3 lg:row-start-1 row-span-3 row-start-4 md:col-span-2 flex flex-col  items-center bg-card gap-2 p-2">
         {ceremonies.map((ceremony, index) => (
-          <CeremonyCard
-            project={project}
-            key={ceremony.title}
-            item={tooltipInfo[ceremony.title]}
-            amount={ceremony?.amount || 0}
-            artifacts={ceremony.artifacts}
-            delay={index * 1}
-            onClick={() =>
-              router.get(
-                route('project.ceremony.show', {
-                  project: project.id,
-                  ceremony: ceremony.title,
-                }),
-              )
-            }
-          />
+          <React.Fragment key={ceremony.title}>
+            {ceremony.title === 'inception' && <p>Cerimônias</p>}
+            {ceremony.title === 'productBacklog' && <p>Backlog</p>}
+            <CeremonyCard
+              project={project}
+              item={tooltipInfo[ceremony.title]}
+              amount={ceremony?.amount || 0}
+              artifacts={ceremony.artifacts}
+              delay={index * 1}
+              onClick={() =>
+                router.get(
+                  route('project.ceremony.show', {
+                    project: project.id,
+                    ceremony: ceremony.title,
+                  }),
+                )
+              }
+            />
+          </React.Fragment>
         ))}
       </section>
     </main>
