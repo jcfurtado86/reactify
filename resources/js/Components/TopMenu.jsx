@@ -26,7 +26,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
   return (
     <div
       id="top-menu"
-      className="flex justify-between items-center bg-background text-foreground p-2 border-b border-border"
+      className="flex justify-between items-center bg-background text-foreground p-1 border-b border-border"
     >
       <div className="flex items-center gap-2">
         <Button
@@ -52,7 +52,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           <img
             src={RaccoonIcon}
             alt="Raccoon"
-            className="rounded-full object-contain bg-white size-12"
+            className="rounded-full object-contain bg-white size-10"
           />
           Reactify
         </Link>
@@ -76,8 +76,8 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           variant="ghost"
           size="icon"
           onClick={() => router.get(route('notifications.index'))}
-          aria-label="Notifications"
-          title="Notifications"
+          aria-label="Notificações"
+          title="Notificações"
         >
           <Bell className="!size-5" />
           <Badge
@@ -93,8 +93,8 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
               variant="ghost"
               size="icon"
               className="rounded-full"
-              aria-label="Profile"
-              title="Profile"
+              aria-label="Perfil"
+              title="Perfil"
             >
               {user?.provider_avatar ? (
                 <img
@@ -108,24 +108,17 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="start">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onSelect={() => router.get(route('profile.edit'))}
               >
-                Profile
+                Perfil
               </DropdownMenuItem>
 
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>Configurações</DropdownMenuItem>
             </DropdownMenuGroup>
-            {/* <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>Team</DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>GitHub</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
-            <DropdownMenuItem disabled>API</DropdownMenuItem>*/}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => router.post(route('logout'))}>
               Log out
