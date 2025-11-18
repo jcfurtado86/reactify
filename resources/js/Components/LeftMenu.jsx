@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react'
 import { usePage, router } from '@inertiajs/react'
-import { Grid, Milestone } from 'lucide-react'
+import { Grid, Milestone, BadgeCheckIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
-
+import {
+  Item,
+  ItemTitle,
+  ItemMedia,
+  ItemContent,
+  ItemActions,
+} from '@/components/ui/item'
+import ButtonWithTooltip from './ButtonWithTooltip'
 const useOnClickOutside = (ref, handler) => {
   useEffect(() => {
     const listener = (event) => {
@@ -107,76 +113,49 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
           transition={cardVariants.transition}
           className="flex-1 flex flex-col p-2 gap-2"
         >
-          {/* Accordion Principal para "My Projects" */}
-          <Accordion
-            type="single"
-            collapsible
-            defaultValue={isProjectsSectionActive ? 'projects' : undefined}
-            title="My Projects"
-          >
-            <AccordionItem value="projects" className="border-b-0">
-              {isOpen ? (
-                <AccordionTrigger
-                  className={cn(
-                    'flex items-center p-2 rounded transition-colors hover:no-underline hover:bg-accent',
-                    isProjectsSectionActive &&
-                      'bg-accent text-accent-foreground',
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <Grid className="size-5" />
-                    {isOpen && (
-                      <span className="font-medium hidden md:inline truncate">
-                        My Projects
-                      </span>
-                    )}
-                  </div>
-                </AccordionTrigger>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={
-                    isProjectsSectionActive &&
-                    'bg-accent text-accent-foreground'
-                  }
-                >
-                  <Grid className="!size-5" />
-                </Button>
-              )}
+          <Item variant="default">
+            <div className="flex items-center gap-2">
+              <Grid className="size-5" />
               {isOpen && (
-                <AccordionContent className="pt-1 pl-4">
-                  {/* Mapeando cada projeto para um Accordion aninhado */}
-                  {projects.map((project) => {
-                    const isCurrentProject =
-                      Number(currentProjectId) === project.id
-                    return (
-                      <AccordionItem
-                        key={project.id}
-                        value={
-                          isCurrentProject ? `project-${project.id}` : undefined
-                        }
-                        className="border-b-0"
-                      >
-                        <Button
-                          variant={`${isCurrentProject ? 'secondary' : 'link'}`}
-                          className="w-full justify-start"
-                          onClick={() =>
-                            router.get(
-                              route('project.show', { id: project.id }),
-                            )
-                          }
-                        >
-                          {isCurrentProject ? <Milestone /> : null}
-                          {project.title}
-                        </Button>
-                      </AccordionItem>
-                    )
-                  })}
-                </AccordionContent>
+                <span className="font-medium hidden md:inline truncate">
+                  Projects
+                </span>
               )}
-            </AccordionItem>
-          </Accordion>
+            </div>
+          </Item>
+
+          <section className=" flex flex-col gap-2">
+            {/* Mapeando cada projeto para um Accordion aninhado */}
+            {projects.map((project) => {
+              const isCurrentProject = Number(currentProjectId) === project.id
+              return (
+                <ButtonWithTooltip
+                  key={project.id}
+                  title={project.title}
+                  variant={`${isCurrentProject ? 'secondary' : 'outline'}`}
+                  onClick={() =>
+                    router.get(route('project.show', { id: project.id }))
+                  }
+                  tooltipContent={isOpen ? null : project.title}
+                  side="right"
+                >
+                  <div>
+                    {isCurrentProject && <BadgeCheckIcon className="size-5" />}
+                  </div>
+                  {isOpen && (
+                    <>
+                      <ItemContent>
+                        <ItemTitle>{project.title}</ItemTitle>
+                      </ItemContent>
+                      <ItemActions>
+                        <ChevronRightIcon className="size-4" />
+                      </ItemActions>
+                    </>
+                  )}
+                </ButtonWithTooltip>
+              )
+            })}
+          </section>
         </motion.nav>
       </motion.aside>
     </AnimatePresence>

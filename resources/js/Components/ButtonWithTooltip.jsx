@@ -2,6 +2,7 @@ const ButtonWithTooltip = ({
   children,
   className,
   size,
+  side = 'top',
   variant,
   tooltipContent,
   onClick,
@@ -19,7 +20,9 @@ const ButtonWithTooltip = ({
             {children}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{tooltipContent}</TooltipContent>
+        {tooltipContent && (
+          <TooltipContent side={side}>{tooltipContent}</TooltipContent>
+        )}
       </Tooltip>
     </TooltipProvider>
   )
