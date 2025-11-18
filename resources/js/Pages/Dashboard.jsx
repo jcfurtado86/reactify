@@ -322,7 +322,7 @@ const Dashboard = ({ project, setProject }) => {
   }, [date])
 
   return (
-    <main className="grid md:grid-cols-[1fr,1fr] lg:grid-cols-[35%,20%,1fr] grid-rows-[22rem,auto,auto] gap-2 p-2 w-full ">
+    <main className="grid md:grid-cols-[1fr,16rem] lg:grid-cols-[35%,16rem,1fr] grid-rows-[22rem,auto,auto] gap-2 p-2 w-full ">
       <Head title={project.title || 'Project Title'} />
       {/* progresso de conclusao*/}
       <section className="bg-card rounded-lg flex flex-col justify-between text-muted-foreground p-2 gap-2 w-full h-full ">
@@ -408,12 +408,12 @@ const Dashboard = ({ project, setProject }) => {
         className="md:row-start-2 md:col-span-2 min-w-full "
       />
       <Interview
-        className="lg:col-span-2"
+        className="md:col-span-2"
         projectId={project.id}
         interviews={project.interviews || []} // Passe a lista de entrevistas do seu projeto
       />
       {/* ceremonies*/}
-      <section className="ceremonies lg:col-span-2 lg:col-start-3 lg:row-start-1 row-span-3 flex flex-col  items-center bg-card gap-2 p-2">
+      <section className="ceremonies lg:col-span-2 lg:col-start-3 lg:row-start-1 row-span-3 row-start-4 md:col-span-2 flex flex-col  items-center bg-card gap-2 p-2">
         {ceremonies.map((ceremony, index) => (
           <CeremonyCard
             project={project}
