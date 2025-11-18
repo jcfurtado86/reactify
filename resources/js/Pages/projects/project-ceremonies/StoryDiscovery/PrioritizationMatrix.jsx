@@ -516,8 +516,16 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                 </p>
                 <Button asChild variant="ghost" size="sm">
                   <Link
-                    href={route('project.ceremony.show', { project: project.id, ceremony: 'storyDiscovery' })}
-                    onClick={() => localStorage.setItem('activeStoryDiscoveryMenu', 'Stories')}
+                    href={route('project.ceremony.show', {
+                      project: project.id,
+                      ceremony: 'storyDiscovery',
+                    })}
+                    onClick={() =>
+                      localStorage.setItem(
+                        'activeStoryDiscoveryMenu',
+                        'Stories',
+                      )
+                    }
                   >
                     Ir para Stories
                     <ExternalLink className="size-4 ml-2" />
@@ -534,22 +542,22 @@ const PrioritizationMatrix = ({ project, setProject }) => {
               <span className="h-11 py-1 ">Goals</span>
               {hasGoals ? (
                 project.goal_sketches
-                .sort((a, b) => {
-                  const priorityA = priorityOrder[a.priority] // Pega o valor numérico para o tipo de 'a'
-                  const priorityB = priorityOrder[b.priority] // Pega o valor numérico para o tipo de 'b'
+                  .sort((a, b) => {
+                    const priorityA = priorityOrder[a.priority] // Pega o valor numérico para o tipo de 'a'
+                    const priorityB = priorityOrder[b.priority] // Pega o valor numérico para o tipo de 'b'
 
-                  return priorityB - priorityA // Subtrai para ordenar
-                })
-                .map((goal) => (
-                  <GoalCard
-                    key={goal.id}
-                    goal={goal}
-                    systemColors={project?.system_colors}
-                  >
-                    {goal.title}
-                  </GoalCard>
-                ))
-                ) : (
+                    return priorityB - priorityA // Subtrai para ordenar
+                  })
+                  .map((goal) => (
+                    <GoalCard
+                      key={goal.id}
+                      goal={goal}
+                      systemColors={project?.system_colors}
+                    >
+                      {goal.title}
+                    </GoalCard>
+                  ))
+              ) : (
                 <div className="flex flex-col items-center justify-center p-6 text-muted-foreground border-2 border-dashed border-border rounded-lg w-full min-h-[150px]">
                   <Target
                     size={32}
@@ -559,68 +567,77 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   <p className="text-sm text-center font-medium text-foreground">
                     Nenhum Goal
                   </p>
-                  <p className="text-xs text-center">
-                    Crie Goals primeiro.
-                  </p>
+                  <p className="text-xs text-center">Crie Goals primeiro.</p>
                   <Button asChild variant="ghost" size="sm">
                     <Link
-                      href={route('project.ceremony.show', { project: project.id, ceremony: 'inception' })}
-                      onClick={() => localStorage.setItem('activeMenu', 'Goals')}
-                    > Ir para Goals
+                      href={route('project.ceremony.show', {
+                        project: project.id,
+                        ceremony: 'inception',
+                      })}
+                      onClick={() =>
+                        localStorage.setItem('activeMenu', 'Goals')
+                      }
+                    >
+                      {' '}
+                      Ir para Goals
                       <ExternalLink className="size-4" />
                     </Link>
                   </Button>
                 </div>
               )}
             </aside>
-            <div className="flex-1 grid grid-flow-col auto-cols-max gap-2 pr-2">
+            <div className="flex-1  gap-2 pr-2">
               {orderedPriorities.length > 0 ? (
                 <SortableContext
                   items={priorityIds}
                   strategy={horizontalListSortingStrategy}
                 >
                   {orderedPriorities.map((priority) => {
-                  const itemCount = Object.values(prioritizationMatrix).filter(
-                    (story) => story && story.priority_id == priority.id,
-                  ).length
-                  return (
-                    <SortablePriorityColumn
-                      key={priority.id}
-                      priority={priority}
-                      itemCount={itemCount}
-                    >
-                      {Array.from({ length: GRID_ROWS }).map((_, rowIndex) => {
-                        const cellId = `cell-${priority.id}-${rowIndex}`
-                        const storiesInCell = prioritizationMatrix[cellId]
+                    const itemCount = Object.values(
+                      prioritizationMatrix,
+                    ).filter(
+                      (story) => story && story.priority_id == priority.id,
+                    ).length
+                    return (
+                      <SortablePriorityColumn
+                        key={priority.id}
+                        priority={priority}
+                        itemCount={itemCount}
+                      >
+                        {Array.from({ length: GRID_ROWS }).map(
+                          (_, rowIndex) => {
+                            const cellId = `cell-${priority.id}-${rowIndex}`
+                            const storiesInCell = prioritizationMatrix[cellId]
 
-                        return (
-                          <DroppableCell
-                            key={cellId}
-                            id={cellId}
-                            className={`h-44 min-w-60`}
-                          >
-                            {storiesInCell && storiesInCell.length > 0 ? (
-                              storiesInCell.map((story) => (
-                                <StoryCard
-                                  key={story.id} // Use the prioritization ID for the key
-                                  story={story}
-                                  priority={priority}
-                                  systemColors={project?.system_colors}
-                                />
-                              ))
-                            ) : (
-                              // Placeholder for empty cells
-                              <div className="h-full w-full flex items-center justify-center"></div>
-                            )}
-                          </DroppableCell>
-                        )
-                      })}
-                    </SortablePriorityColumn>
-                  )
-                })}
-              </SortableContext>
+                            return (
+                              <DroppableCell
+                                key={cellId}
+                                id={cellId}
+                                className={`h-44 min-w-60`}
+                              >
+                                {storiesInCell && storiesInCell.length > 0 ? (
+                                  storiesInCell.map((story) => (
+                                    <StoryCard
+                                      key={story.id} // Use the prioritization ID for the key
+                                      story={story}
+                                      priority={priority}
+                                      systemColors={project?.system_colors}
+                                    />
+                                  ))
+                                ) : (
+                                  // Placeholder for empty cells
+                                  <div className="h-full w-full flex items-center justify-center"></div>
+                                )}
+                              </DroppableCell>
+                            )
+                          },
+                        )}
+                      </SortablePriorityColumn>
+                    )
+                  })}
+                </SortableContext>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px] w-full">
+                <div className="flex flex-col  items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px] h-full w-full">
                   <LayoutGrid
                     size={40}
                     className="mb-4 text-primary flex-shrink-0" // Adicionado flex-shrink-0
@@ -630,8 +647,8 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                     Nenhuma coluna de Prioridade definida
                   </p>
                   <p className="text-sm text-center max-w-xs">
-                    Clique em "Editar Prioridades" para criar as colunas(baixa, média, alta) da sua
-                    matriz.
+                    Clique em "Editar Prioridades" para criar as colunas(baixa,
+                    média, alta) da sua matriz.
                   </p>
                 </div>
               )}
