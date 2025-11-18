@@ -58,12 +58,6 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
       duration: 0.22,
     },
   }
-  const handleThemeToggle = () => {
-    const isDark = document.documentElement.classList.toggle('dark')
-    const newTheme = isDark ? 'dark' : 'light'
-    localStorage.setItem('theme', newTheme)
-    setTheme(newTheme)
-  }
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -140,7 +134,11 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
                   side="right"
                 >
                   <div>
-                    {isCurrentProject && <BadgeCheckIcon className="size-5" />}
+                    {isCurrentProject ? (
+                      <BadgeCheckIcon className="size-5" />
+                    ) : (
+                      <p> {project.emoji}</p>
+                    )}
                   </div>
                   {isOpen && (
                     <>

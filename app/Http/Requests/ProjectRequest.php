@@ -24,6 +24,7 @@ class ProjectRequest extends FormRequest
     return [
       'title' => 'required|string|max:150',
       'description' => 'required|string|max:1000',
+      'emoji' => 'nullable|string|max:150',
       // Adicione outras regras de validação conforme necessário
     ];
   }

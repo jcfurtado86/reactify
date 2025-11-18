@@ -24,6 +24,7 @@ class UpdateProjectRequest extends FormRequest
     return [
       'title' => 'sometimes|string|max:150',
       'description' => 'sometimes|string|max:1000',
+      'emoji' => 'nullable|string|max:150',
       'status' => 'sometimes|string',
       'due_date' => 'sometimes|nullable|date',
     ];

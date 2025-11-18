@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from '@inertiajs/react'
-import { Settings, LoaderCircle } from 'lucide-react'
+import { Settings, LoaderCircle, MousePointerClick, Trash2 } from 'lucide-react'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 
 export function ProjectSettings({ project }) {
@@ -10,6 +10,7 @@ export function ProjectSettings({ project }) {
   const { data, setData, patch, processing, errors, reset } = useForm({
     title: project.title || '',
     description: project.description || '',
+    emoji: project.emoji || '',
   })
 
   // Efeito para resetar o formulário com os dados mais recentes
@@ -67,6 +68,39 @@ export function ProjectSettings({ project }) {
               {errors.title && (
                 <p className="text-sm text-destructive">{errors.title}</p>
               )}
+            </div>
+            <div className="flex items-center gap-3">
+              <Label htmlFor="description">Emoji</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    {data.emoji || <MousePointerClick />}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-fit p-0">
+                  <EmojiPicker
+                    className="h-[342px]"
+                    onEmojiSelect={({ emoji }) => {
+                      setData('emoji', emoji)
+                    }}
+                  >
+                    <EmojiPickerSearch />
+                    <EmojiPickerContent />
+                    <EmojiPickerFooter />
+                  </EmojiPicker>
+                </PopoverContent>
+              </Popover>
+              <Button
+                variant="outline"
+                size="icon"
+                title="Remover emoji"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setData('emoji', null)
+                }}
+              >
+                <Trash2 />
+              </Button>
             </div>
             <div className="space-y-2">
               <Label htmlFor="description" className="text-left">

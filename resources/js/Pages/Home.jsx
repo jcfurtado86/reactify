@@ -5,6 +5,7 @@ import {
   CircleOff,
   PowerCircle,
   Trash2,
+  MousePointerClick,
 } from 'lucide-react'
 import { router, usePage, Head } from '@inertiajs/react'
 import MainLayout from '@/Layouts/MainLayout'
@@ -14,10 +15,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+
 import TableComponent from '@/Components/TableComponent'
 
-const Dashboard = ({}) => {
+const Home = ({}) => {
   const props = usePage().props
+  const { errors } = props
   const projects = props.auth.projects || []
   const [currentProjects, setCurrentProjects] = useState(projects)
   const commandInputRef = useRef(null)
@@ -27,6 +30,7 @@ const Dashboard = ({}) => {
   const [newProject, setNewProject] = useState({
     title: '',
     description: '',
+    emoji: '',
   })
 
   const columns = [
@@ -246,18 +250,26 @@ const Dashboard = ({}) => {
             </Button>
           </DialogTrigger>
 
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="">
             <form className="space-y-4" onSubmit={createProject}>
               <DialogHeader>
                 <DialogTitle>Criar Novo Projeto</DialogTitle>
                 <DialogDescription>
                   Preencha os campos abaixo para criar um novo projeto.
+                  <br />
+                  Os campos obrigatórios estão marcados com um asterisco{' '}
+                  <span className="text-destructive">*</span>
                 </DialogDescription>
               </DialogHeader>
 
               <div className="grid gap-4">
                 <div className="grid gap-3">
-                  <Label htmlFor="title-1">Nome</Label>
+                  <Label htmlFor="title-1">
+                    Nome <span className="text-destructive">*</span>
+                  </Label>
+                  <span className="text-destructive text-sm">
+                    {errors?.title}
+                  </span>
                   <Input
                     placeholder="Nome do Projeto"
                     id="title-1"
@@ -269,7 +281,12 @@ const Dashboard = ({}) => {
                   />
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="description">Descrição</Label>
+                  <Label htmlFor="description">
+                    Descrição <span className="text-destructive">*</span>
+                  </Label>
+                  <span className="text-destructive text-sm">
+                    {errors?.description}
+                  </span>
                   <Input
                     placeholder="Descrição do Projeto"
                     id="description-1"
@@ -283,6 +300,45 @@ const Dashboard = ({}) => {
                       })
                     }
                   />
+                </div>
+                <div className="flex items-center gap-3">
+                  <Label htmlFor="description">Emoji</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        {newProject.emoji || <MousePointerClick />}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-fit p-0">
+                      <EmojiPicker
+                        className="h-[342px]"
+                        onEmojiSelect={({ emoji }) => {
+                          setNewProject({
+                            ...newProject,
+                            emoji: emoji,
+                          })
+                        }}
+                      >
+                        <EmojiPickerSearch />
+                        <EmojiPickerContent />
+                        <EmojiPickerFooter />
+                      </EmojiPicker>
+                    </PopoverContent>
+                  </Popover>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    title="Remover emoji"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setNewProject({
+                        ...newProject,
+                        emoji: null,
+                      })
+                    }}
+                  >
+                    <Trash2 />
+                  </Button>
                 </div>
               </div>
               <DialogFooter>
@@ -305,10 +361,6 @@ const Dashboard = ({}) => {
       </div>
     </div>
   )
-}
-
-const Home = ({}) => {
-  return <Dashboard />
 }
 
 Home.layout = (page) => <MainLayout children={page} />

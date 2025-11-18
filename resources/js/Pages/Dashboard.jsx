@@ -323,12 +323,12 @@ const Dashboard = ({ project, setProject }) => {
 
   return (
     <main className="grid md:grid-cols-[1fr,16rem] lg:grid-cols-[35%,16rem,1fr] grid-rows-[22rem,auto,auto] gap-2 p-2 w-full ">
-      <Head title={project.title || 'Project Title'} />
+      <Head title={project?.title || 'Project Title'} />
       {/* progresso de conclusao*/}
       <section className="bg-card rounded-lg flex flex-col justify-between text-muted-foreground p-2 gap-2 w-full h-full ">
         <div className=" flex flex-col gap-2 w-full">
           <span className=" flex-1 break-words text-lg text-foreground p-0 border-0 m-0 cursor-default z-10">
-            {project.title}
+            {project.title} {project.emoji}
             <Badge
               className="ml-2"
               variant={`${project.active ? 'secondary' : 'destructive'}`}

@@ -88,6 +88,7 @@ class HandleInertiaRequests extends Middleware
               'title',
               'projects.id',
               'description',
+              'emoji',
               'active',
               'projects.created_at',
               'projects.updated_at',
