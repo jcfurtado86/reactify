@@ -32,7 +32,7 @@ class ChatController extends Controller
       'message' => 'required|string|max:2000',
       'page_context' => 'required|array',
       'page_context.page' => 'required|string',
-      'page_context.artifact' => 'required|string',
+      'page_context.artifact' => 'nullable|string',
       'history' => 'present|array',
       //'context_data' => 'present|nullable|array'
     ]);
