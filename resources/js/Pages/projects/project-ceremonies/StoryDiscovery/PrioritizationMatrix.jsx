@@ -567,25 +567,28 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                     Nenhum Goal
                   </p>
                   <p className="text-xs text-center">Crie Goals primeiro.</p>
-                  <Button asChild variant="ghost" size="sm">
-                    <Link
-                      href={route('project.ceremony.show', {
-                        project: project.id,
-                        ceremony: 'inception',
-                      })}
-                      onClick={() =>
-                        localStorage.setItem('activeMenu', 'Goals')
-                      }
-                    >
-                      {' '}
-                      Ir para Goals
-                      <ExternalLink className="size-4" />
-                    </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      router.get(
+                        route('project.ceremony.show', {
+                          project: project.id,
+                          ceremony: 'inception',
+                        }),
+                        { artifact: 'goals' },
+                      )
+                    }
+                  >
+                    Ir para Goals
+                    <ExternalLink className="size-4" />
                   </Button>
                 </div>
               )}
             </aside>
-            <div className="flex-1 grid grid-flow-col auto-cols-max gap-2 pr-2">
+            <div
+              className={`${orderedPriorities.length > 0 ? 'grid grid-flow-col auto-cols-max' : 'flex'} flex-1  gap-2 pr-2`}
+            >
               {orderedPriorities.length > 0 ? (
                 <SortableContext
                   items={priorityIds}
@@ -636,7 +639,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   })}
                 </SortableContext>
               ) : (
-                <div className="flex flex-col  items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px] h-full w-full">
+                <div className="flex flex-col  items-center justify-start p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px] h-full w-full">
                   <LayoutGrid
                     size={40}
                     className="mb-4 text-primary flex-shrink-0" // Adicionado flex-shrink-0
