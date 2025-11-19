@@ -126,7 +126,7 @@ export const CeremonyCard = ({
             </p>
           )}
 
-          <div className="flex items-start gap-1 text-sm">
+          <div className="flex flex-wrap items-start gap-1 text-sm">
             {artifacts.map((artifact, index) => {
               const artifactKey = getArtifactKey(artifact.title)
 
@@ -157,7 +157,6 @@ export const CeremonyCard = ({
                   {artifact.label}
                   {artifactAmount > 0 ? (
                     <>
-                      {/* <Badge variant="secondary">{artifactAmount}</Badge>*/}
                       <CircleCheckBig className="size-4 text-green-400" />
                     </>
                   ) : (

@@ -195,60 +195,91 @@ const PersonaCard = ({
   const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <Card
-      key={persona.id}
-      className="group relative col-span-1 bg-card border-0 animate-fade-in rounded"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <CardHeader
-        data-card-id={persona.id}
-        className="flex-row items-center justify-between"
+    <Accordion type="single" collapsible>
+      <AccordionItem
+        value={persona.id}
+        className="group relative col-span-1 bg-card border-0 animate-fade-in rounded"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="flex items-center gap-3 w-full">
-          <UserCircle2 className=" shrink-0 size-8 text-primary" />
-          {editingPersona === persona.id ? (
-            <Input
-              type="text"
-              value={editPersonaName}
-              onChange={(e) => setEditPersonaName(e.target.value)}
-              onKeyUp={(e) => {
-                if (e.key === 'Enter') saveEditPersona()
-              }}
-              className="!text-xl font-bold"
-              autoFocus
-            />
-          ) : (
-            <CardTitle className="ml-3 text-xl">{persona.name}</CardTitle>
-          )}
-        </div>
-        {/* <div className="flex items-center gap-1">
-        {editingPersona === persona.id ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={saveEditPersona}
-          >
-            <Check className="h-4 w-4 text-green-500" />
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => startEditPersona(persona.id)}
-          >
-            <Edit className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive/80 hover:text-destructive"
-          onClick={() => confirmDeletePersona(persona.id)}
+        <AccordionTrigger
+          data-card-id={persona.id}
+          className="p-4 hover:no-underline flex-row items-center justify-between"
         >
-          <Trash className="h-4 w-4" />
-        </Button>
-      </div>*/}
+          <div className="flex items-center gap-3 w-full">
+            <UserCircle2 className=" shrink-0 size-8 text-primary" />
+            {editingPersona === persona.id ? (
+              <Input
+                type="text"
+                value={editPersonaName}
+                onChange={(e) => setEditPersonaName(e.target.value)}
+                onKeyUp={(e) => {
+                  if (e.key === 'Enter') saveEditPersona()
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="!text-xl font-bold"
+                autoFocus
+              />
+            ) : (
+              <CardTitle className="ml-3 text-xl">{persona.name}</CardTitle>
+            )}
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="persona grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
+          {['profile', 'expectations', 'goals'].map((field) => (
+            <div
+              key={field}
+              className="flex flex-col gap-2 p-3 rounded-lg bg-card border-border border-2"
+            >
+              <div className="flex items-center justify-between">
+                <h4
+                  className={`font-semibold text-sm ${personaFieldVariants[field].text}`}
+                >
+                  {getFieldTitle(field)}
+                </h4>
+                {!disabled && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-6"
+                    onClick={() => addNewItem(persona.id, field)}
+                  >
+                    <Plus className="size-4" />
+                  </Button>
+                )}
+              </div>
+              <Separator />
+              <div className="flex flex-col gap-2">
+                {persona[field].map((item, itemIndex) => (
+                  <PersonaItem
+                    key={itemIndex}
+                    item={item}
+                    disabled={disabled}
+                    isEditing={
+                      editingField.personaId === persona.id &&
+                      editingField.field === field &&
+                      editingField.itemIndex === itemIndex
+                    }
+                    editValue={editValue}
+                    onValueChange={(e) => setEditValue(e.target.value)}
+                    onEdit={() => startEditField(persona.id, field, itemIndex)}
+                    onSave={saveEditField}
+                    onDelete={() =>
+                      confirmDeleteItem(persona.id, field, itemIndex)
+                    }
+                    textareaRef={
+                      editingField.personaId === persona.id &&
+                      editingField.field === field &&
+                      editingField.itemIndex === itemIndex
+                        ? textareaRef
+                        : null
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </AccordionContent>
         <MotionDivOptions
           disabled={disabled}
           isHovered={isHovered}
@@ -256,64 +287,8 @@ const PersonaCard = ({
           onDelete={() => confirmDeletePersona(persona.id)}
           onInspect={() => inspectPersona(persona.id)}
         />
-      </CardHeader>
-
-      <CardContent className="persona grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
-        {['profile', 'expectations', 'goals'].map((field) => (
-          <div
-            key={field}
-            className="flex flex-col gap-2 p-3 rounded-lg bg-card border-border border-2"
-          >
-            <div className="flex items-center justify-between">
-              <h4
-                className={`font-semibold text-sm ${personaFieldVariants[field].text}`}
-              >
-                {getFieldTitle(field)}
-              </h4>
-              {!disabled && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-6"
-                  onClick={() => addNewItem(persona.id, field)}
-                >
-                  <Plus className="size-4" />
-                </Button>
-              )}
-            </div>
-            <Separator />
-            <div className="flex flex-col gap-2">
-              {persona[field].map((item, itemIndex) => (
-                <PersonaItem
-                  key={itemIndex}
-                  item={item}
-                  disabled={disabled}
-                  isEditing={
-                    editingField.personaId === persona.id &&
-                    editingField.field === field &&
-                    editingField.itemIndex === itemIndex
-                  }
-                  editValue={editValue}
-                  onValueChange={(e) => setEditValue(e.target.value)}
-                  onEdit={() => startEditField(persona.id, field, itemIndex)}
-                  onSave={saveEditField}
-                  onDelete={() =>
-                    confirmDeleteItem(persona.id, field, itemIndex)
-                  }
-                  textareaRef={
-                    editingField.personaId === persona.id &&
-                    editingField.field === field &&
-                    editingField.itemIndex === itemIndex
-                      ? textareaRef
-                      : null
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+      </AccordionItem>
+    </Accordion>
   )
 }
 const PersonaItem = ({
@@ -352,24 +327,6 @@ const PersonaItem = ({
             className="bg-transparent border-0  w-full rounded text-sm"
             autoFocus
           />
-          {/* <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-green-500 hover:bg-green-500/10 hover:text-green-500"
-              onClick={onSave}
-            >
-              <Check className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => onEdit(null)}
-            >
-              <X className="size-4" />
-            </Button>
-          </div>*/}
         </div>
       ) : (
         <p
@@ -769,7 +726,7 @@ const Personas = ({ project, setProject }) => {
           setInspectionId={setInspectionId}
         />
       )}
-      
+
       {project.personas && project.personas.length > 0 ? (
         project.personas
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
@@ -802,9 +759,12 @@ const Personas = ({ project, setProject }) => {
       ) : (
         <div className="col-span-1 xl:col-span-2 flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border">
           <UserCircle2 size={40} className="mb-4 text-primary" />
-          <p className="mb-2 font-medium text-foreground">Nenhuma persona definida</p>
+          <p className="mb-2 font-medium text-foreground">
+            Nenhuma persona definida
+          </p>
           <p className="mb-4 text-sm text-center max-w-xs">
-            Crie uma nova persona para mapear os perfis de usuário do seu projeto.
+            Crie uma nova persona para mapear os perfis de usuário do seu
+            projeto.
           </p>
         </div>
       )}
