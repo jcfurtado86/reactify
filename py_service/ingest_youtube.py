@@ -18,7 +18,7 @@ TRANSCRIPTIONS_DIR = "./transcriptions"
 MODEL_DIR = ".whisper_models"
 
 os.makedirs(TEMP_AUDIO_DIR, exist_ok=True)
-os.makedirs(TRANSCRIPTIONS_DIR, exist_ok=True) c
+os.makedirs(TRANSCRIPTIONS_DIR, exist_ok=True)
 
 # 2. Configuração do Banco (Igual ao ingest_database.py)
 embeddings = HuggingFaceEmbeddings(
@@ -98,6 +98,7 @@ def process_links():
             print(f"❌ Erro ao processar {url}: {e}")
 
         finally:
+            # Garante que o áudio temporário seja apagado mesmo se der erro
             if audio_path and os.path.exists(audio_path):
                 os.remove(audio_path)
 
