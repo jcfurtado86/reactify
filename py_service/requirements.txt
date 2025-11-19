@@ -1,9 +1,17 @@
 flask
 openai-whisper
+sentence-transformers
 requests
 python-dotenv
 pdfplumber
 python-docx
+docling
 langchain
+langchain-community
+langchain-postgres
+langchain-huggingface
 langchain-google-genai
 langchain-core
+psycopg2-binary
+pgvector
+yt-dlp
