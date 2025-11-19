@@ -229,6 +229,7 @@ const Dashboard = ({ project, setProject }) => {
   const ceremonies = [
     {
       title: 'inception',
+      defaultArtifact: 'productCanvas',
       artifacts: [
         { label: 'Product Canvas', title: 'productCanvas' },
         { label: 'Personas', title: 'personas' },
@@ -238,6 +239,7 @@ const Dashboard = ({ project, setProject }) => {
     },
     {
       title: 'storyDiscovery',
+      defaultArtifact: 'stories',
       artifacts: [
         { label: 'Stories', title: 'stories' },
         { label: 'Overall Model', title: 'overallModel' },
@@ -247,6 +249,7 @@ const Dashboard = ({ project, setProject }) => {
     },
     {
       title: 'refining',
+      defaultArtifact: 'epicStories',
       artifacts: [
         { label: 'Epic Stories', title: 'epicStories' },
         { label: 'Business Rules', title: 'businessRules' },
@@ -255,6 +258,7 @@ const Dashboard = ({ project, setProject }) => {
     },
     {
       title: 'modeling',
+      defaultArtifact: 'overallModel',
       artifacts: [
         { label: 'Overall Model', title: 'overallModel' },
         { label: 'Interfaces', title: 'interfaces' },
@@ -430,6 +434,7 @@ const Dashboard = ({ project, setProject }) => {
                     project: project.id,
                     ceremony: ceremony.title,
                   }),
+                  { artifact: ceremony.defaultArtifact || null },
                 )
               }
             />
