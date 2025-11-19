@@ -10,7 +10,9 @@ from langchain.agents import create_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import tool 
 from langchain_core.tracers.langchain import wait_for_all_tracers
-
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_postgres import PGVector
+from langchain_classic.tools.retriever  import create_retriever_tool
 
 # Carrega variáveis de ambiente (ex: GOOGLE_API_KEY, PYTHON_SERVICE_API_KEY)
 load_dotenv()
@@ -24,12 +26,89 @@ if not os.getenv("GOOGLE_API_KEY"):
 model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash") 
 llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.7)
 langchain.debug = True
-# --- Configuração das Ferramentas (Tools) ---
+
+print("🔄 Inicializando sistema RAG e Embeddings...")
+
+# Caminho para o modelo local (mesmo do hf.py)
+HF_MODEL_PATH = ".hf_models" 
+# Se estiver rodando na mesma pasta, pode ser apenas "./.hf_models" ou o caminho absoluto
+if not os.path.exists(HF_MODEL_PATH):
+    # Fallback caso a pasta não seja encontrada imediatamente, ajusta para o diretório atual se necessário
+    print("🔄 Pasta do modelo de embedding nao encontrado...")
+    HF_MODEL_PATH = "./.hf_models" 
+
+print("🔄 Inicializando Embeddings...")
+embeddings = HuggingFaceEmbeddings(
+    model_name=HF_MODEL_PATH, 
+    model_kwargs={'device': 'cpu'},
+    encode_kwargs={'normalize_embeddings': True}
+)
+
+# Conexão com o Banco Vetorial
+connection_string = os.getenv("DATABASE_URL") # Certifique-se que isso está no .env
+collection_name = "react"
+
+print("🔄 Criando Vector Store...")
+vector_store = PGVector(
+    embeddings=embeddings,
+    collection_name=collection_name,
+    connection=connection_string,
+    use_jsonb=True,
+)
+
+retriever = vector_store.as_retriever(search_kwargs={"k": 4})
+
+# Cria a Ferramenta de RAG
+# rag_tool = create_retriever_tool(
+#     retriever,
+#     "search_knowledge_base",
+#     "Use esta ferramenta para buscar informações técnicas em documentos PDF, dissertações e manuais carregados no sistema. Útil para dúvidas sobre teoria, conceitos ou conteúdo específico dos arquivos."
+# )
+# --- Configuraçãco das Ferramentas (Tools) ---
 
 # URL da API de Ferramentas do Laravel
 LARAVEL_TOOL_API_URL = os.getenv("LARAVEL_TOOL_API_URL", "http://127.0.0.1:8001/api/tools/get-artifact-data")
 # Chave secreta para autenticar no Laravel
 LARAVEL_API_KEY = os.getenv("PYTHON_SERVICE_API_KEY", "")
+
+@tool
+def search_knowledge_base(query: str) -> str:
+    """
+    Use esta ferramenta para buscar informações técnicas em documentos PDF, 
+    manuais e transcrições de vídeo. Útil para explicar conceitos teóricos do REACT-M.
+    """
+    print(f"\n🔎 --- Tool Call: search_knowledge_base(query='{query}') ---")
+    
+    # 1. Executa a busca no Postgres
+    docs = retriever.invoke(query)
+    results = vector_store.similarity_search_with_score(query, k=4)
+    print("-" * 70)
+    print(f"QUERY: {query}")
+
+    for doc, score in results:
+        print(f"   Score: {score:.4f} | Fonte: {doc.metadata.get('source')}")
+        print(f"   Texto: {doc.page_content}...")
+        print("-" * 70)
+    
+    if not docs:
+        print("❌ Nenhum documento relevante encontrado.")
+        return "Não encontrei informações relevantes na base de conhecimento."
+
+    # 2. Loga (Printa) o que foi recuperado para você ver no terminal
+    results_text = []
+    print(f"✅ Recuperados {len(docs)} trechos de contexto:\n")
+    
+    for i, doc in enumerate(docs):
+        source = doc.metadata.get("source", "Desconhecido")
+        content_preview = doc.page_content[:200].replace('\n', ' ') # Primeiros 200 chars
+        
+        print(f"   [Doc {i+1}] Fonte: {source}")
+        print(f"   [Conteúdo]: {content_preview}...\n")
+        
+        # Monta o texto que será devolvido para o LLM ler
+        results_text.append(f"--- Fonte: {source} ---\n{doc.page_content}\n")
+
+    return "\n\n".join(results_text)
 
 @tool
 def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
@@ -69,7 +148,7 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
         print(f"Erro inesperado na ferramenta: {str(e)}")
         return f"Erro ao chamar a ferramenta: {str(e)}"
 
-tools = [get_data_for_artifact]
+tools = [get_data_for_artifact, search_knowledge_base]
 
 def get_methodology_context():
     return """
@@ -201,29 +280,30 @@ def build_system_prompt(data) -> str:
         user_role = user.get('pivot', {}).get('role', {}).get('value', 'Não definido')
     except Exception: pass
         
-    project_id = project.get('id', 'desconhecido') # <--- IMPORTANTE
+    project_id = project.get('id', 'desconhecido') 
     project_title = project.get('title', 'Meu Projeto')
     project_desc = project.get('description', '')
 
-    methodology_context = get_methodology_context()
+    methodology_context = ""#get_methodology_context()
 
     # O prompt de sistema é quase o mesmo, mas a Instrução 4 mudou.
-    system_prompt_content = f"""Você é um Assistente de IA atuando como **Facilitator** da metodologia ágil de requisitos REACT-M. Seu papel **NÃO** é apenas responder perguntas, mas **agir como um coach e guia** para o usuário, conforme descrito na metodologia.
+    system_prompt_content = f"""Você é um Assistente de IA atuando como **Facilitador** da metodologia ágil de requisitos REACT-M. Seu papel **NÃO** é apenas responder perguntas, mas **agir como um coach e guia** para o usuário, conforme descrito na metodologia.
 
-    **Seu Objetivo (O Papel do Facilitator):** Guiar todos os envolvidos a aplicar o REACT-M da melhor forma possível. Você deve ser proativo, colaborativo e ajudar a equipe a executar as cerimônias.
+    **Ferramentas Disponíveis:**
+    1. Se precisar de dados do projeto (personas, stories), use `get_data_for_artifact`.
+    2. Se precisar de embasamento teórico e metodológico, use `search_knowledge_base`.
+
+    **Seu Objetivo (O Papel do Facilitador):** Guiar todos os envolvidos a aplicar o REACT-M da melhor forma possível. Você deve ser proativo, colaborativo e ajudar a equipe a executar as cerimônias.
 
     **Instruções de Tom e Ação:**
     1. **Seja um Guia, Não um Dicionário:** ... (ex: 'Vejo que estamos em Inception, na tela de Personas...').
     2. **Use o Contexto da Página:** Sempre relacione sua resposta à página ('{page_name}') e ao artefato ('{artifact_name}') que o usuário está vendo.
     3. **Seja Proativo:** Faça perguntas que guiem o usuário...
     4. **Use os Dados Atuais:** Se o usuário perguntar sobre os dados, use o JSON fornecido (abaixo) para responder...
-    5. **Mantenha-se na Metodologia:** Sua única fonte de verdade sobre o processo é a base de conhecimento abaixo. Não invente cerimônias ou passos.
+    5. **Use o contexto metodológico:** Se você achar que precisa consultar a metodologia para responder um input mesmo que ele nao especifique que quer um embasamento, consulte mesmo assim. Entenda que seu papel de Facilitator está descrito na metodologia  
+
 
     **Instruções de Formatação:** ... Exemplo: '* Item 1\\n  * Sub-item 1.1'.**
-
-    ==== INÍCIO DA BASE DE CONHECIMENTO DA METODOLOGIA ====
-    {methodology_context}
-    ==== FIM DA BASE DE CONHECIMENTO DA METODOLOGIA ====
 
     Contexto do Usuário:
     - Nome: {user_name}
@@ -268,6 +348,7 @@ def chat_stream():
         #                 json.dumps(request_data, indent=2))
 
         system_prompt = build_system_prompt(request_data)
+        #app.logger.info("\n------------ SYSTEM PROMPT --------------\n%s\n", system_prompt)
         
         chat_history_raw = request_data.get('history', [])
         
@@ -296,7 +377,7 @@ def chat_stream():
              else:
                  return jsonify({"error": "Mensagem do usuário vazia"}), 400
 
-        app.logger.info(f"\n------------ HISTÓRICO ENVIADO AO AGENTE ({len(langchain_messages)} mensagens) --------------\n")
+        #app.logger.info(f"\n------------ HISTÓRICO ENVIADO AO AGENTE ({len(langchain_messages)} mensagens) --------------\n")
         
         log_messages_formatadas = []
         for msg in langchain_messages:
@@ -311,8 +392,8 @@ def chat_stream():
         readable_history = "\n".join(log_messages_formatadas)
         
         # Imprime o log formatado
-        app.logger.info(readable_history)
-        app.logger.info("\n---------------------------------------------------------------------------------------\n")
+        #app.logger.info(readable_history)
+        #app.logger.info("\n---------------------------------------------------------------------------------------\n")
 
 
         agent = create_agent(

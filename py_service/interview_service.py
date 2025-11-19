@@ -9,7 +9,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-MODEL_DIR = ".whisper_models"
+MODEL_DIR = "py_service/.whisper_models"
 os.makedirs(MODEL_DIR, exist_ok=True) 
 
 print("Carregando o modelo Whisper...")
