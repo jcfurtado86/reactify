@@ -138,7 +138,7 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
         )
         response.raise_for_status() # Lança erro se a resposta for 4xx ou 5xx
         print("--- Resposta da Ferramenta (JSON): ---")
-        #print(response.json())
+        print(response.json())
         wait_for_all_tracers()
         return response.json() # Retorna os dados
     except requests.exceptions.HTTPError as e:
@@ -273,7 +273,42 @@ def build_system_prompt(data) -> str:
     page_context = data.get('page_context', {})
     
     page_name = page_context.get('page', 'Página Desconhecida')
-    artifact_name = page_context.get('artifact', 'Artefato Desconhecido')
+    artifact_name = page_context.get('artifact', 'Artefato Desconhecida')
+    match artifact_name:
+        case 'productCanvas':
+            artifact_name = 'product_canvas'
+        case 'goals':
+            artifact_name = 'goal_sketches'
+        case 'personas':
+            artifact_name = 'personas'
+        case 'journeys':
+            artifact_name = 'journeys'
+        case 'stories':
+            artifact_name = 'stories'
+        case 'overallModel':
+            artifact_name = 'overall_model_classes'
+        case 'prioritizationMatrix':
+            artifact_name = 'prioritizations'
+        case 'changeLog':
+            artifact_name = 'change_requests'
+        case 'epicStories':
+            artifact_name = 'epicStories'
+        case 'businessRules':
+            artifact_name = 'business_rules'
+        case 'usageScenarios':
+            artifact_name = 'usage_scenarios'
+        case 'interfaces':
+            artifact_name = 'system_interfaces'
+        case 'storyboards':
+            artifact_name = 'storyboards'
+        case _:
+            artifact_name = 'Artefato'
+    match page_name:
+        case 'productBacklog':
+            artifact_name = 'productBacklog'
+        case 'sprint':
+            artifact_name = 'sprint'
+
     user_name = user.get('name', 'Usuário')
     user_role = "Não definido"
     try:
@@ -300,8 +335,6 @@ def build_system_prompt(data) -> str:
     2. **Use o Contexto da Página:** Sempre relacione sua resposta à página ('{page_name}') e ao artefato ('{artifact_name}') que o usuário está vendo.
     3. **Seja Proativo:** Faça perguntas que guiem o usuário...
     4. **Use os Dados Atuais:** Se o usuário perguntar sobre os dados, use o JSON fornecido (abaixo) para responder...
-    5. **Use o contexto metodológico:** Se você achar que precisa consultar a metodologia para responder um input mesmo que ele nao especifique que quer um embasamento, consulte mesmo assim. Entenda que seu papel de Facilitator está descrito na metodologia  
-
 
     **Instruções de Formatação:** ... Exemplo: '* Item 1\\n  * Sub-item 1.1'.**
 
@@ -348,7 +381,7 @@ def chat_stream():
         #                 json.dumps(request_data, indent=2))
 
         system_prompt = build_system_prompt(request_data)
-        #app.logger.info("\n------------ SYSTEM PROMPT --------------\n%s\n", system_prompt)
+        app.logger.info("\n------------ SYSTEM PROMPT --------------\n%s\n", system_prompt)
         
         chat_history_raw = request_data.get('history', [])
         

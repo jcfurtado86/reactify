@@ -30,88 +30,62 @@ class ToolController extends Controller
         
         switch (strtolower($artifact)) {
             // --- INCEPTION ---
-            case 'product canvas':
-            case 'productCanvas':
             case 'product_canvas':
-                $data = $project->productCanvas()->first();
+                $data = $project->product_canvas()->first();
                 break;
-            case 'goals':
-            case 'goal sketch':
-            case 'goalSketch':
-            case 'goal_sketch':
-                $data = $project->goals()->get();
+            case 'goal_sketches':
+                $data = $project->goal_sketches()->get();
                 break;
             case 'personas':
                 $data = $project->personas()->get();
                 break;
             case 'journeys':
-            case 'user journeys':
                 $data = $project->journeys()->get();
                 break;
             
             // --- STORY DISCOVERY ---
             case 'stories':
-            case 'user stories':
-            case 'system stories':
-            case 'userStories':
-            case 'systemStories':
-            case 'user_stories':
-            case 'system_stories':
                 $data = $project->stories()->get();
                 break;
-            case 'overall model':
-            case 'crc cards':
-            case 'overallModel':
-            case 'crcCards':
-            case 'overall_model':
-            case 'crc_cards':
-                $data = $project->overallModelClasses()->get();
+            case 'overall_model_classes':
+                $data = $project->overall_model_classes()->get();
                 break;
-            case 'prioritization':
-            case 'matriz de priorização':
-            case 'matriz_de_priorização':
-            case 'matrizPriorização':
+            case 'prioritizations':
                 // Você pode querer buscar a priorização ativa ou todas
                 $data = $project->prioritizations()->with('matrix')->get();
                 break;
+            case 'change_requests':
+                // Eager loads o requerente e as histórias impactadas para contexto completo.
+                $data = $project->change_requests()
+                    ->with(['requester', 'stories'])
+                    ->get();
+                break;
 
             // --- REFINING ---
-            case 'business rules':
-            case 'regras de negócio':
-            case 'businessRules':
-            case 'regrasDeNegócio':
-            case 'business_rules':
-            case 'regras_de_negócio':
-                $data = $project->businessRules()->get();
+            case 'epicStories':
+                $data = $project->stories()->get();
                 break;
-            case 'usage scenarios':
-            case 'cenários de uso':
-            case 'usageScenarios':
-            case 'cenáriosDeUso':
+            case 'business_rules':
+                $data = $project->business_rules()->get();
+                break;
             case 'usage_scenarios':
-            case 'cenários_de_uso':
-                $data = $project->usageScenarios()->get();
+                $data = $project->usage_scenarios()->get();
                 break;
 
             // --- MODELING ---
-            case 'interfaces':
-            case 'system interfaces':
-            case 'systemInterfaces':
             case 'system_interfaces':
-                $data = $project->systemInterfaces()->get();
+                $data = $project->system_interfaces()->get();
                 break;
             case 'storyboards':
-            case 'prototypes':
                 $data = $project->storyboards()->get();
                 break;
 
             // --- SPRINT ---
-            case 'sprints':
+            case 'sprint':
                 $data = $project->sprints()->with('stories')->get();
                 break;
-            case 'product backlog':
+            // --- PRODUCT BACKLOG ---
             case 'productBacklog':
-            case 'product_backlog':
                 // Retorna histórias que não estão em nenhum sprint
                 $data = $project->stories()->doesntHave('sprints')->get();
                 break;
