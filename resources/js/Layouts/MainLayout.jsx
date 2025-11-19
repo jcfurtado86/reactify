@@ -56,7 +56,7 @@ const AuthenticatedLayout = ({ children }) => {
       <TopMenu isOpen={isOpen} setIsOpen={setIsOpen} />
       <main className="flex-1 grid grid-rows-[1fr] grid-cols-[auto_1fr] bg-background text-foreground items-start ">
         <LeftMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-        <section className="flex items-center justify-center">
+        <section className="flex items-center justify-center pt-2">
           {children}
         </section>
       </main>

@@ -927,7 +927,6 @@ const OverallModel = ({ project, setProject }) => {
           type="single"
           collapsible
           className="w-full bg-card border rounded-lg"
-          defaultValue="item-1"
         >
           <AccordionItem value="item-1" className="border-b-0">
             <AccordionTrigger className="px-4 py-3 text-sm font-semibold hover:no-underline">

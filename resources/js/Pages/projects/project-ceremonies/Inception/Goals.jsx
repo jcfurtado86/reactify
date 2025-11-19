@@ -8,7 +8,7 @@ import {
   ChevronDown,
   ChevronsUp,
   EllipsisVertical,
-  Goal
+  Goal,
 } from 'lucide-react'
 import rainbowIcon from '/resources/images/rainbow.png'
 import TextareaAutosize from 'react-textarea-autosize'
@@ -235,13 +235,13 @@ const GoalItem = ({
       <Card className="bg-card border-0 transition-all duration-300 ease-in-out rounded">
         <CardContent className="p-2 flex flex-col gap-2">
           {/* Badge Row for Type and Priority */}
-          <div className="flex items-center justify-between">
+          <div className="flex ">
             <div className="flex items-center gap-2">
               <Popover
                 open={!disabled && typeSelectId === goal.id}
                 onOpenChange={onToggleTypeSelect}
               >
-                <PopoverTrigger disabled={isTemporary}>
+                <PopoverTrigger disabled={isTemporary} className="flex">
                   <Badge
                     style={{ backgroundColor: selectedType }}
                     className={cn(
@@ -306,7 +306,7 @@ const GoalItem = ({
                 open={!disabled && prioritySelectId === goal.id}
                 onOpenChange={onTogglePrioritySelect}
               >
-                <PopoverTrigger disabled={isTemporary}>
+                <PopoverTrigger disabled={isTemporary} className="flex">
                   <Badge
                     style={{ backgroundColor: selectedPriority }}
                     className={cn(
