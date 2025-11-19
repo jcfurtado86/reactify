@@ -585,7 +585,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                 </div>
               )}
             </aside>
-            <div className="flex-1  gap-2 pr-2">
+            <div className="flex-1 grid grid-flow-col auto-cols-max gap-2 pr-2">
               {orderedPriorities.length > 0 ? (
                 <SortableContext
                   items={priorityIds}

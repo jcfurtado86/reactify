@@ -62,11 +62,33 @@ class Story extends Model
       ->withTimestamps();
   }
 
+  protected static function boot()
+  {
+    parent::boot();
+
+    static::deleted(function ($story) {
+      // Se for um Soft Delete, o registro ainda existe,
+      // mas queremos soltar os filhos.
+
+      // Verifica se foi apenas um soft delete (não force delete)
+      if (!$story->isForceDeleting()) {
+        // Atualiza todas as stories que têm esta story como pai (epic_id)
+        $story->stories()->update(['epic_id' => null]);
+      }
+    });
+  }
+
+  // Relacionamento para isso funcionar
+  public function stories()
+  {
+    return $this->hasMany(Story::class, 'epic_id');
+  }
+
   /**
    * Get the parent story (the epic).
    */
 
   /**
-   * Get the child stories.
-   */
+ * Get the child stories.
+ */
 }
