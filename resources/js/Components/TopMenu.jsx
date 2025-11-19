@@ -9,7 +9,7 @@ import {
   PanelLeftOpen,
   Bell,
 } from 'lucide-react'
-import RaccoonIcon from '/resources/images/raccoon.png'
+import RaccoonIcon from '/resources/images/raccoonIconHeadTransparent.png'
 const TopMenu = ({ isOpen, setIsOpen }) => {
   const { props } = usePage()
   const { user, notifications } = props.auth
@@ -52,7 +52,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           <img
             src={RaccoonIcon}
             alt="Raccoon"
-            className="rounded-full object-contain bg-white size-10"
+            className="object-contain  size-10"
           />
           Reactify
         </Link>

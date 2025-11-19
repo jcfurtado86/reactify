@@ -15,6 +15,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import SpanButton from '@/Components/SpanButton'
 import TableComponent from '@/Components/TableComponent'
 import { toast } from 'sonner'
 
@@ -240,56 +241,29 @@ const SprintTable = ({
             )}
             {sprint.status === 'active' && (
               <>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  className="border border-border px-2 hover:bg-accent"
-                  onClick={(e) => {
+                <SpanButton
+                  onClick={() => {
                     !isSprintActive(sprint)
-                      ? openEditSprintForm(e, sprint, true)
-                      : openEndSprintForm(e, sprint)
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      return !isSprintActive(sprint)
-                        ? openEditSprintForm(e, sprint, true)
-                        : openEndSprintForm(e, sprint)
-                    }
+                      ? openEditSprintForm(sprint, true)
+                      : openEndSprintForm(sprint)
                   }}
                 >
                   {!isSprintActive(sprint)
                     ? 'Iniciar Sprint'
                     : 'Finalizar Sprint'}
-                </span>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  className="border border-border px-2 hover:bg-accent"
-                  onClick={(e) => openEditSprintForm(e, sprint)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      openEditSprintForm(e, sprint)
-                    }
-                  }}
-                >
+                </SpanButton>
+                <SpanButton onClick={() => openEditSprintForm(sprint)}>
                   Editar sprint
-                </span>
+                </SpanButton>
               </>
             )}
-            <span
-              role="button"
-              tabIndex={0}
-              title="Deletar sprint"
-              className="flex border border-border items-center px-2 bg-destructive/20 hover:bg-destructive/50"
-              onClick={(e) => openDeleteSprintForm(e, sprint)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  openDeleteSprintForm(e, sprint)
-                }
-              }}
+            <SpanButton
+              title="Deletar Sprint"
+              className={'bg-destructive/20 hover:bg-destructive/50'}
+              onClick={() => openDeleteSprintForm(sprint)}
             >
               <TrashIcon className="size-3" />
-            </span>
+            </SpanButton>
           </div>
         </AccordionTrigger>
 
@@ -588,9 +562,7 @@ const ProductBacklog = ({ project, setProject }) => {
     )
   }
 
-  const openEditSprintForm = (e, sprint, startSprint = false) => {
-    e.preventDefault()
-
+  const openEditSprintForm = (sprint, startSprint = false) => {
     if (startSprint) {
       setStartDate(new Date())
       setSprintOperation('start')
@@ -604,8 +576,7 @@ const ProductBacklog = ({ project, setProject }) => {
     setOpenDeleteForm(!openDeleteForm)
     setSelectedSprint(sprint)
   }
-  const openEndSprintForm = (e, sprint) => {
-    e.preventDefault()
+  const openEndSprintForm = (sprint) => {
     setOpenEndForm(!openEndForm)
     setSelectedSprint(sprint)
   }
@@ -842,23 +813,10 @@ const ProductBacklog = ({ project, setProject }) => {
                 Product Backlog ({productBacklogTable.getRowCount()} items)
               </span>
 
-              <span
-                role="button"
-                tabIndex={0}
-                className="border border-border px-2 hover:bg-accent"
-                onClick={(e) => createSprint(e)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    createSprint(e)
-                  }
-                }}
-              >
+              <SpanButton onClick={(e) => createSprint(e)}>
                 Criar sprint
-              </span>
-              <span
-                role="button"
-                tabIndex={0}
-                className="border border-border px-2 hover:bg-accent"
+              </SpanButton>
+              <SpanButton
                 onClick={(e) => {
                   e.preventDefault()
                   router.get(
@@ -869,21 +827,9 @@ const ProductBacklog = ({ project, setProject }) => {
                     { artifact: 'prioritizationMatrix' },
                   )
                 }}
-                onKeyDown={(e) => {
-                  e.preventDefault()
-                  if (e.key === 'Enter') {
-                    router.get(
-                      route('project.ceremony.show', {
-                        project: project.id,
-                        ceremony: 'storyDiscovery',
-                      }),
-                      { artifact: 'prioritizationMatrix' },
-                    )
-                  }
-                }}
               >
                 Ir para matriz
-              </span>
+              </SpanButton>
             </div>
           </AccordionTrigger>
           <AccordionContent>

@@ -15,7 +15,7 @@ const SpanButton = ({ children, className, onClick, ...props }) => {
       tabIndex={0}
       {...props}
       className={cn(
-        'flex items-center gap-2 w-fit rounded border border-border px-2 hover:bg-accent',
+        'flex items-center gap-2 w-fit rounded border border-border px-2 hover:bg-accent transition-colors',
         className,
       )}
       onClick={handleInteraction}
