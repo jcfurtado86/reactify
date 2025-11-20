@@ -15,6 +15,15 @@ class Prioritization extends Model
 
   public function matrixPriority()
   {
-    return $this->belongsTo(MatrixPriority::class);
+    // Adicionado 'priority_id' como chave estrangeira
+    return $this->belongsTo(MatrixPriority::class, 'priority_id');
   }
+  /**
+     * Relacionamento com a Estória.
+     * Permite acessar $prioritization->story->title
+     */
+  public function story()
+  {
+      return $this->belongsTo(Story::class);
+  } 
 }

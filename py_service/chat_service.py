@@ -292,7 +292,7 @@ def build_system_prompt(data) -> str:
         case 'changeLog':
             artifact_name = 'change_requests'
         case 'epicStories':
-            artifact_name = 'epicStories'
+            artifact_name = 'epic_stories'
         case 'businessRules':
             artifact_name = 'business_rules'
         case 'usageScenarios':
@@ -305,7 +305,7 @@ def build_system_prompt(data) -> str:
             artifact_name = 'Artefato'
     match page_name:
         case 'productBacklog':
-            artifact_name = 'productBacklog'
+            artifact_name = 'product_backlog'
         case 'sprint':
             artifact_name = 'sprint'
 

@@ -48,22 +48,43 @@ class ToolController extends Controller
                 $data = $project->stories()->get();
                 break;
             case 'overall_model_classes':
-                $data = $project->overall_model_classes()->get();
+                $data = [
+                    // Classes e Interfaces
+                    'classes' => $project->overall_model_classes()
+                        ->with('system_interfaces') 
+                        ->get(),
+                    
+                    // Responsabilidades e Colaboradores
+                    'crc_cards' => $project->crc_cards()->get() 
+                ];
                 break;
             case 'prioritizations':
-                // Você pode querer buscar a priorização ativa ou todas
-                $data = $project->prioritizations()->with('matrix')->get();
+                $data = [
+                    // As colunas da matriz com as estórias já priorizadas
+                    'matrix' => $project->matrix_priorities()
+                        ->with('prioritizations.story')
+                        ->orderBy('order_column')
+                        ->get(),
+
+                    // Estórias que NÃO estão na tabela de priorizações
+                    'unprioritized' => $project->stories()
+                        ->doesntHave('prioritization')
+                        ->where('type', '!=', 'epic') // Opcional: geralmente épicas não são priorizadas diretamente
+                        ->get()
+                ];
                 break;
             case 'change_requests':
-                // Eager loads o requerente e as histórias impactadas para contexto completo.
                 $data = $project->change_requests()
                     ->with(['requester', 'stories'])
                     ->get();
                 break;
 
             // --- REFINING ---
-            case 'epicStories':
-                $data = $project->stories()->get();
+            case 'epic_stories':
+                $data = $project->stories()
+                    ->whereNull('epic_id')
+                    ->with('stories') 
+                    ->get();
                 break;
             case 'business_rules':
                 $data = $project->business_rules()->get();
@@ -77,17 +98,51 @@ class ToolController extends Controller
                 $data = $project->system_interfaces()->get();
                 break;
             case 'storyboards':
+                // Se Storyboard tiver relacionamento com 'story', pode adicionar ->with('story')
                 $data = $project->storyboards()->get();
                 break;
 
             // --- SPRINT ---
             case 'sprint':
-                $data = $project->sprints()->with('stories')->get();
+                // Definimos os campos com o prefixo 'stories.' para evitar ambiguidade
+                $storyFields = [
+                    'stories.id', 
+                    'stories.title', 
+                    'stories.invest_card', 
+                    'stories.value', 
+                    'stories.complexity', 
+                    'stories.epic_id', 
+                    'stories.type'
+                ];
+
+                $data = $project->sprints()
+                    ->select(['id', 'name', 'start_date', 'end_date', 'status'])
+                    ->where('status', 'active') 
+                    ->with(['stories' => function($query) use ($storyFields) {
+                        // Usamos a lista com prefixos aqui
+                        $query->select($storyFields);
+                    }])
+                    ->get();  // Se é normal ter sprints paralelas, mude para get(). Caso contrario, usar first()
                 break;
             // --- PRODUCT BACKLOG ---
-            case 'productBacklog':
-                // Retorna histórias que não estão em nenhum sprint
-                $data = $project->stories()->doesntHave('sprints')->get();
+            case 'product_backlog':
+                $storyFields = ['id', 'title', 'invest_card', 'value', 'complexity', 'epic_id', 'type'];
+
+                $data = $project->stories()
+                    ->select($storyFields)
+                    ->where('type', '!=', 'epic')
+                    // Carrega as sprints para a IA saber onde a estória está
+                    ->with(['sprints' => function($query) {
+                        // CORREÇÃO: Adicionado o prefixo 'sprints.' para evitar ambiguidade com a tabela pivô
+                        $query->select([
+                            'sprints.id', 
+                            'sprints.name', 
+                            'sprints.status', 
+                            'sprints.start_date', 
+                            'sprints.end_date'
+                        ]);
+                    }])
+                    ->get();
                 break;
                 
             default:

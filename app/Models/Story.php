@@ -85,10 +85,10 @@ class Story extends Model
   }
 
   /**
-   * Get the parent story (the epic).
-   */
-
-  /**
- * Get the child stories.
- */
+     * Relacionamento com a Priorização (se houver).
+     */
+  public function prioritization()
+  {
+      return $this->hasOne(Prioritization::class);
+  }
 }

@@ -10,7 +10,8 @@ class MatrixPriority extends Model
 
   public function prioritizations()
   {
-    return $this->hasMany(Prioritization::class);
+    // Adicionado 'priority_id' como chave estrangeira
+    return $this->hasMany(Prioritization::class, 'priority_id');
   }
 
   public function project()
