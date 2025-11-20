@@ -8,6 +8,7 @@ import {
   Trash2Icon as TrashIcon,
   ClipboardList,
   ExternalLink,
+  Undo2
 } from 'lucide-react'
 import { getStatusColor } from '@/lib/utils'
 import {
@@ -23,8 +24,10 @@ const getSharedColumns = ({
   storyVariants,
   project,
   onMoveRequest,
+  onRemoveRequest, 
   selectedStories,
   status,
+  isBacklog = false, 
 }) => [
   {
     id: 'select',
@@ -134,6 +137,17 @@ const getSharedColumns = ({
                 </DropdownMenuPortal>
               </DropdownMenuSub>
             )}
+            {!isBacklog && sprintId && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => onRemoveRequest(sprintId, story.id)}
+                  className="text-red-600 focus:text-red-600"
+                >
+                  <Undo2 className="mr-2 size-4" /> Mover para Backlog
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -152,6 +166,7 @@ const selectItems = (itemList, rowSelection, setItems) => {
 const SprintTable = ({
   sprint,
   moveToSprint,
+  removeFromSprint,
   storyVariants,
   project,
   openDeleteSprintForm,
@@ -166,6 +181,14 @@ const SprintTable = ({
   useEffect(() => {
     selectItems(sprint.stories, rowSelection, setSelectedStories)
   }, [rowSelection])
+
+  const handleRemoveRequest = useCallback(
+    (sprintId, clickedStoryId) => {
+      removeFromSprint(sprintId, clickedStoryId)
+      setRowSelection({})
+    },
+    [removeFromSprint],
+  )
 
   const handleMoveRequest = useCallback(
     (sprintId, clickedStoryId) => {
@@ -189,10 +212,12 @@ const SprintTable = ({
         storyVariants,
         project,
         onMoveRequest: handleMoveRequest, // Passe o handler LOCAL
+        onRemoveRequest: handleRemoveRequest,
         selectedStories,
         status: sprint.status,
+        isBacklog: false
       }),
-    [storyVariants, project, handleMoveRequest, selectedStories, status],
+    [storyVariants, project, handleMoveRequest, handleRemoveRequest, selectedStories, status],
   )
 
   const table = useReactTable({
@@ -299,6 +324,28 @@ const ProductBacklog = ({ project, setProject }) => {
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState([])
+
+  const removeFromSprint = (sprintId, storyId) => {
+    if (!sprintId || !storyId) return
+
+    router.delete(
+      route('sprint-stories.destroy', { sprint: sprintId, story: storyId }),
+      {
+        preserveScroll: true,
+        onSuccess: (page) => {
+          toast.success('Story movida de volta para o Backlog')
+          
+          if (page.props.project) {
+            setProject(page.props.project)
+            setLocalProject(page.props.project)
+          }
+        },
+        onError: () => {
+          toast.error('Erro ao mover story para o Backlog')
+        },
+      },
+    )
+  }
 
   const moveToSprint = async (sprintId, storyIdsToMove = []) => {
     if (storyIdsToMove.length === 0) return
@@ -879,6 +926,7 @@ const ProductBacklog = ({ project, setProject }) => {
             sprint={sprint}
             storyVariants={storyVariants}
             moveToSprint={moveToSprint}
+            removeFromSprint={removeFromSprint}
             project={project}
             openEditSprintForm={openEditSprintForm}
             openDeleteSprintForm={openDeleteSprintForm}
