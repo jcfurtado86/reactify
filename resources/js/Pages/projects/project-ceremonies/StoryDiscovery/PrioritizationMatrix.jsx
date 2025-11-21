@@ -1,4 +1,9 @@
-import { darkenColor } from '@/lib/utils'
+import React from 'react'
+import {
+  darkenColor,
+  isTemporary as getIsTemporary,
+  useGroupedStories,
+} from '@/lib/utils'
 import {
   DndContext,
   PointerSensor,
@@ -76,6 +81,7 @@ const SortablePriorityColumn = ({
 }
 const StoryCard = ({
   story,
+
   priority = null,
   isDragOverlay = false,
   className = '',
@@ -93,8 +99,11 @@ const StoryCard = ({
     backgroundColor: priority?.color ? darkenColor(priority.color, 0.4) : '',
     visibility: isDragging ? 'hidden' : 'visible',
   }
+  const realStoryId = story.epic_id
+    ? `${story.epic_id}.${story.epicStoryId}`
+    : `${story.story_id}`
 
-  const isTemporary = story.story_id ? false : true
+  const isTemporary = getIsTemporary(story.story_id)
 
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.story_type] || '#f97316'
@@ -123,7 +132,7 @@ const StoryCard = ({
             variant="outline"
             className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer mb-2`}
           >
-            {`${story.story_type === 'system' ? 'SS' : 'US'}${isTemporary ? '' : story.story_id}`.toUpperCase()}
+            {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
           </Badge>
         </div>
       )}
@@ -187,7 +196,11 @@ const DroppableCell = ({ id, children, className = '' }) => {
 }
 
 // Function helper to transform the API array into our state object
-const transformArrayToMatrixObject = (prioritizations, allProjectStories) => {
+const transformArrayToMatrixObject = (
+  prioritizations,
+  allProjectStories,
+  childrenByEpicId,
+) => {
   if (!prioritizations || !allProjectStories) return {}
 
   return prioritizations.reduce((matrix, item) => {
@@ -199,11 +212,29 @@ const transformArrayToMatrixObject = (prioritizations, allProjectStories) => {
       if (!matrix[cellId]) {
         matrix[cellId] = []
       }
+      // --- AQUI ESTÁ A PROTEÇÃO ---
+      // Verifica se childrenByEpicId existe E se é um Map de verdade
+      const relatedEpics =
+        childrenByEpicId instanceof Map && storyDetails.epic_id
+          ? childrenByEpicId.get(storyDetails.epic_id) || []
+          : []
+      // ----------------------------
+
+      let epicStoryId = null
+      if (storyDetails.epic_id) {
+        // Se for uma story filha de épico, atribui o ID correto
+        const indexInEpic = relatedEpics
+          .sort((a, b) => a.id - b.id)
+          .findIndex((s) => s.id === storyDetails.id)
+        epicStoryId = indexInEpic + 1 // +1 para começar do 1
+      }
 
       // Push the story into the array for that cell
       matrix[cellId].push({
         id: item.id, // This is the prioritization ID
         story_id: storyDetails.id,
+        epic_id: storyDetails.epic_id,
+        epicStoryId: epicStoryId,
         story_title: storyDetails.title,
         story_type: storyDetails.type,
         project_id: storyDetails.project_id,
@@ -216,6 +247,7 @@ const transformArrayToMatrixObject = (prioritizations, allProjectStories) => {
   }, {})
 }
 const PrioritizationMatrix = ({ project, setProject }) => {
+  const childrenByEpicId = useGroupedStories(project?.stories)
   const GRID_ROWS = project.goal_sketches.length || 4
   const priorityOrder = {
     low: 0,
@@ -224,7 +256,11 @@ const PrioritizationMatrix = ({ project, setProject }) => {
   }
   const [activeItem, setActiveItem] = useState(null)
   const [prioritizationMatrix, setPrioritizationMatrix] = useState(() =>
-    transformArrayToMatrixObject(project?.prioritizations, project?.stories),
+    transformArrayToMatrixObject(
+      project?.prioritizations,
+      project?.stories,
+      childrenByEpicId,
+    ),
   )
 
   const [orderedPriorities, setOrderedPriorities] = useState(
@@ -247,6 +283,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
     const newMatrix = transformArrayToMatrixObject(
       project.prioritizations,
       project.stories,
+      childrenByEpicId,
     )
 
     // Atualiza o estado interno para refletir as novas props
@@ -401,13 +438,14 @@ const PrioritizationMatrix = ({ project, setProject }) => {
               delete newMatrix[oldCellKey]
             }
           }
-
           // Prepare the story object to be added
           const storyToAdd = {
             id: draggedPrioritization?.id || `temp-${Date.now()}`,
             story_id: draggedStoryData.story_id,
             story_title: draggedStoryData.story_title,
             story_type: draggedStoryData.story_type,
+            epic_id: draggedStoryData.epic_id,
+            epicStoryId: draggedStoryData.epicStoryId,
             priority_id: priority_id,
             position: Number(position),
             isTemporary: !draggedPrioritization,
@@ -487,11 +525,23 @@ const PrioritizationMatrix = ({ project, setProject }) => {
           >
             {unassignedStories.length > 0 ? (
               unassignedStories.map((story) => {
+                const relatedEpics = childrenByEpicId.get(story.epic_id) || []
                 const unassignedStory = {
                   story_id: story.id,
                   story_title: story.title,
                   story_type: story.type,
+                  epic_id: story.epic_id,
                 }
+                let epicStoryId = null
+                if (story.epic_id) {
+                  // Se for uma story filha de épico, atribui o ID correto
+                  const indexInEpic = relatedEpics
+                    .sort((a, b) => a.id - b.id)
+                    .findIndex((s) => s.id === story.id)
+                  epicStoryId = indexInEpic + 1 // +1 para começar do 1
+                }
+                unassignedStory.epicStoryId = epicStoryId
+                //
                 return (
                   <StoryCard
                     key={story.id}
