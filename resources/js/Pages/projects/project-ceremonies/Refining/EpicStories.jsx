@@ -5,7 +5,7 @@ import {
   Check,
   X,
   ChevronsUp,
-  Layers
+  Layers,
 } from 'lucide-react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import React from 'react'
@@ -564,6 +564,7 @@ const EpicStories = ({ project, setProject }) => {
             </section>
           )
         })}
+
       <GenerateAIButton
         isGenerating={isGenerating}
         onClick={generateEpicStories}
