@@ -1,3 +1,4 @@
+import React from 'react'
 import { router } from '@inertiajs/react'
 import {
   ArrowRight,
@@ -8,7 +9,7 @@ import {
   ChevronsUp,
   FileText,
 } from 'lucide-react'
-import { isTemporary } from '@/lib/utils'
+import { isTemporary, useGroupedStories } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
@@ -192,9 +193,12 @@ const GeneratedItemsModal = ({
   )
 }
 
-const StoryCard = ({ story, addScenario, systemColors }) => {
+const StoryCard = ({ story, epicStoryId, addScenario, systemColors }) => {
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.type] || '#f97316'
+  const realStoryId = story.epic_id
+    ? `${story.epic_id}.${epicStoryId}`
+    : `${story.id}`
 
   return (
     <div className="relative group w-52 flex-shrink-0 text-left">
@@ -207,7 +211,7 @@ const StoryCard = ({ story, addScenario, systemColors }) => {
             variant="outline"
             className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
-            {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
+            {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
           </Badge>
         </div>
         <p className="text-sm ">{story.title}</p>
@@ -512,6 +516,8 @@ const UsageScenarios = ({ project, setProject }) => {
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const hasStories = project?.stories && project.stories.length > 0
+  const childrenByEpicId = useGroupedStories(project?.stories)
+
   // Memoize scenarios grouped by their parent `story_id`.
   const scenariosByStoryId = useMemo(() => {
     if (!project?.usage_scenarios) return new Map()
@@ -729,67 +735,148 @@ const UsageScenarios = ({ project, setProject }) => {
         </div>
       )}
       {project?.stories
-        ?.filter((story) => story.type === 'user')
+        ?.filter((story) => story.type === 'user' && !story.epic_id)
         .map((story) => {
+          const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
           return (
-            <section className="py-1 flex gap-2 min-h-48" key={story.id}>
-              <StoryCard
-                story={story}
-                addScenario={() => addScenario(story.id)}
-                systemColors={project?.system_colors}
-              />
+            <React.Fragment key={story.id}>
+              <section className="py-1 flex gap-2 min-h-48" key={story.id}>
+                <StoryCard
+                  story={story}
+                  addScenario={() => addScenario(story.id)}
+                  systemColors={project?.system_colors}
+                />
 
-              <div className="flex flex-col gap-2 w-full">
-                {relatedScenarios
-                  .sort((a, b) => a.id - b.id)
-                  .map((scenario, index, array) => (
-                    <ScenarioCard
-                      key={scenario.id}
-                      scenario={scenario}
-                      story={story}
-                      setProject={setProject}
-                      lastElement={
-                        index === array.length - 1 && array.length > 1
-                      }
-                      onInspect={() => inspectScenario(scenario.id)}
-                      systemColors={project?.system_colors}
-                    />
-                  ))}
-              </div>
-            </section>
+                <div className="flex flex-col gap-2 w-full">
+                  {relatedScenarios
+                    .sort((a, b) => a.id - b.id)
+                    .map((scenario, index, array) => (
+                      <ScenarioCard
+                        key={scenario.id}
+                        scenario={scenario}
+                        story={story}
+                        setProject={setProject}
+                        lastElement={
+                          index === array.length - 1 && array.length > 1
+                        }
+                        onInspect={() => inspectScenario(scenario.id)}
+                        systemColors={project?.system_colors}
+                      />
+                    ))}
+                </div>
+              </section>
+              {[...relatedEpics]
+                ?.sort((a, b) => a.id - b.id)
+                .map((currentStory, index) => {
+                  const epicScenarios =
+                    scenariosByStoryId.get(currentStory.id) || []
+                  return (
+                    <section
+                      className="py-1 flex gap-2 min-h-48"
+                      key={currentStory.id}
+                    >
+                      <StoryCard
+                        story={currentStory}
+                        epicStoryId={index + 1}
+                        addScenario={() => addScenario(currentStory.id)}
+                        systemColors={project?.system_colors}
+                      />
+
+                      <div className="flex flex-col gap-2 w-full">
+                        {epicScenarios
+                          .sort((a, b) => a.id - b.id)
+                          .map((scenario, index, array) => (
+                            <ScenarioCard
+                              key={scenario.id}
+                              scenario={scenario}
+                              story={story}
+                              setProject={setProject}
+                              lastElement={
+                                index === array.length - 1 && array.length > 1
+                              }
+                              onInspect={() => inspectScenario(scenario.id)}
+                              systemColors={project?.system_colors}
+                            />
+                          ))}
+                      </div>
+                    </section>
+                  )
+                })}
+            </React.Fragment>
           )
         })}
+      {/* system  */}
       {project?.stories
-        ?.filter((story) => story.type === 'system')
+        ?.filter((story) => story.type === 'system' && !story.epic_id)
         .map((story) => {
+          const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
           return (
-            <section className="py-1 flex gap-2 min-h-48" key={story.id}>
-              <StoryCard
-                story={story}
-                addScenario={() => addScenario(story.id)}
-                systemColors={project?.system_colors}
-              />
+            <React.Fragment key={story.id}>
+              <section className="py-1 flex gap-2 min-h-48" key={story.id}>
+                <StoryCard
+                  story={story}
+                  addScenario={() => addScenario(story.id)}
+                  systemColors={project?.system_colors}
+                />
 
-              <div className="flex flex-col gap-2 w-full">
-                {relatedScenarios
-                  .sort((a, b) => a.id - b.id)
-                  .map((scenario, index, array) => (
-                    <ScenarioCard
-                      key={scenario.id}
-                      scenario={scenario}
-                      story={story}
-                      setProject={setProject}
-                      lastElement={
-                        index === array.length - 1 && array.length > 1
-                      }
-                      onInspect={() => inspectScenario(scenario.id)}
-                      systemColors={project?.system_colors}
-                    />
-                  ))}
-              </div>
-            </section>
+                <div className="flex flex-col gap-2 w-full">
+                  {relatedScenarios
+                    .sort((a, b) => a.id - b.id)
+                    .map((scenario, index, array) => (
+                      <ScenarioCard
+                        key={scenario.id}
+                        scenario={scenario}
+                        story={story}
+                        setProject={setProject}
+                        lastElement={
+                          index === array.length - 1 && array.length > 1
+                        }
+                        onInspect={() => inspectScenario(scenario.id)}
+                        systemColors={project?.system_colors}
+                      />
+                    ))}
+                </div>
+              </section>
+              {[...relatedEpics]
+                ?.sort((a, b) => a.id - b.id)
+                .map((currentStory, index) => {
+                  const epicScenarios =
+                    scenariosByStoryId.get(currentStory.id) || []
+                  return (
+                    <section
+                      className="py-1 flex gap-2 min-h-48"
+                      key={currentStory.id}
+                    >
+                      <StoryCard
+                        story={currentStory}
+                        epicStoryId={index + 1}
+                        addScenario={() => addScenario(currentStory.id)}
+                        systemColors={project?.system_colors}
+                      />
+
+                      <div className="flex flex-col gap-2 w-full">
+                        {epicScenarios
+                          .sort((a, b) => a.id - b.id)
+                          .map((scenario, index, array) => (
+                            <ScenarioCard
+                              key={scenario.id}
+                              scenario={scenario}
+                              story={story}
+                              setProject={setProject}
+                              lastElement={
+                                index === array.length - 1 && array.length > 1
+                              }
+                              onInspect={() => inspectScenario(scenario.id)}
+                              systemColors={project?.system_colors}
+                            />
+                          ))}
+                      </div>
+                    </section>
+                  )
+                })}
+            </React.Fragment>
           )
         })}
       <GenerateAIButton

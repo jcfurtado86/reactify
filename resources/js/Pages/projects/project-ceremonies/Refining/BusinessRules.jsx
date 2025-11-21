@@ -168,6 +168,7 @@ const StoryCard = ({ story, epicStoryId, addBusinessRule, systemColors }) => {
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${epicStoryId}`
     : `${story.id}`
+
   return (
     <div className="relative group text-left">
       {/* O onAdd agora chama a função para adicionar uma regra de negócio */}
