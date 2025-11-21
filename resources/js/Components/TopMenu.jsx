@@ -3,8 +3,6 @@ import {
   User,
   Sun,
   Moon,
-  Settings,
-  Squirrel,
   PanelLeftClose,
   PanelLeftOpen,
   Bell,
@@ -52,7 +50,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           <img
             src={RaccoonIcon}
             alt="Raccoon"
-            className="object-contain  size-10"
+            className="object-contain bg-muted rounded-full p-1 size-11"
           />
           Reactify
         </Link>

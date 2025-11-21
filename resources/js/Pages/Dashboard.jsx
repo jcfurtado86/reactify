@@ -20,6 +20,7 @@ import MainLayout from '@/Layouts/MainLayout'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const getDateObject = (dateInput) => {
   if (!dateInput) {
@@ -66,6 +67,29 @@ export const CeremonyCard = ({
     }
   }
 
+  const getMessage = (artifactTitle, amount) => {
+    if (amount > 0) return null
+
+    switch (artifactTitle) {
+      case 'prioritizationMatrix':
+        return 'Algumas estórias não foram priorizadas'
+
+      default:
+        return 'Preenchimento pendente'
+    }
+  }
+  const getProductCanvasAmount = (canvas) => {
+    if (
+      canvas.product_is &&
+      canvas.product_is_not &&
+      canvas.restrictions &&
+      canvas.personas &&
+      canvas.issues &&
+      canvas.solutions
+    )
+      return 1
+    else return 0
+  }
   return (
     <Accordion
       collapsible
@@ -131,15 +155,26 @@ export const CeremonyCard = ({
               const artifactKey = getArtifactKey(artifact.title)
 
               let artifactAmount
-              if (artifact.title === 'productCanvas') artifactAmount = 1
+              if (artifact.title === 'productCanvas')
+                artifactAmount = getProductCanvasAmount(project?.product_canvas)
               else if (artifact.title === 'epicStories')
                 artifactAmount = project?.stories.filter(
                   (story) => story.epic_id,
                 ).length
-              else artifactAmount = project?.[artifactKey]?.length || 0
+              else if (artifact.title === 'prioritizationMatrix') {
+                const allStories = project?.stories || []
+                const prioritizedStories = allStories.filter((story) =>
+                  project?.prioritizations?.some(
+                    (prioritization) => prioritization.story_id === story.id,
+                  ),
+                )
+                artifactAmount = prioritizedStories.length
+              } else artifactAmount = project?.[artifactKey]?.length || 0
+
+              const message = getMessage(artifact.title, artifactAmount)
 
               return (
-                <Button
+                <ButtonWithTooltip
                   variant="link"
                   title={`Ir até ${artifact.label}`}
                   key={index}
@@ -153,6 +188,7 @@ export const CeremonyCard = ({
                       { artifact: artifact.title || '' },
                     )
                   }
+                  tooltipContent={message}
                 >
                   {artifact.label}
                   {artifactAmount > 0 ? (
@@ -162,7 +198,7 @@ export const CeremonyCard = ({
                   ) : (
                     <CircleAlert className="size-4 text-destructive" />
                   )}
-                </Button>
+                </ButtonWithTooltip>
               )
             })}
           </div>
