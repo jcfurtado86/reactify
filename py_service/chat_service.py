@@ -11,7 +11,6 @@ from langchain.tools import tool
 from langchain_core.tracers.langchain import wait_for_all_tracers
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_postgres import PGVector
-from langchain_classic.tools.retriever  import create_retriever_tool
 
 # Carrega variáveis de ambiente (ex: GOOGLE_API_KEY, PYTHON_SERVICE_API_KEY)
 load_dotenv()
@@ -164,10 +163,21 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
             }
         )
         response.raise_for_status() # Lança erro se a resposta for 4xx ou 5xx
-        print("--- Resposta da Ferramenta (JSON): ---")
-        print(response.json())
+        #print("--- Resposta da Ferramenta (JSON): ---")
+        #print(response.json())
         wait_for_all_tracers()
-        return response.json() # Retorna os dados
+
+        raw_data = response.json()
+        clean_data = sanitize_data(raw_data)
+        print(f"✅ Dados limpos recebidos. Tamanho reduzido de {len(str(raw_data))} para {len(str(clean_data))} caracteres.")
+        print("-" * 80)
+        print(json.dumps(clean_data, indent=4, ensure_ascii=False ))
+        print("-" * 80)
+        print(f"✅ Dados SUJOS.")
+        print(json.dumps(raw_data, indent=4, ensure_ascii=False))
+        print("-" * 80)
+        
+        return json.dumps(clean_data, ensure_ascii=False)
     except requests.exceptions.HTTPError as e:
         print(f"Erro HTTP: {e.response.text}")
         return f"Erro ao buscar dados: {e.response.status_code} - {e.response.text}"
@@ -177,6 +187,28 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
 
 tools = [get_data_for_artifact, search_knowledge_base]
 
+def sanitize_data(data):
+    """
+    Remove campos técnicos do Laravel (timestamps, soft deletes, pivots)
+    para limpar o contexto enviado para a IA.
+    """
+    if isinstance(data, dict):
+        # Lista de campos para remover
+        keys_to_remove = [
+            'created_at', 'updated_at', 'deleted_at', 'email_verified_at', 
+            'two_factor_secret', 'two_factor_recovery_codes', 'remember_token',
+            'profile_photo_path', 'email', 'pivot', 'email_verified_at'
+        ]
+        return {
+            k: sanitize_data(v) 
+            for k, v in data.items() 
+            if k not in keys_to_remove and v is not None
+        }
+    elif isinstance(data, list):
+        return [sanitize_data(item) for item in data]
+    else:
+        return data
+    
 def get_methodology_context():
     return """
     As cerimônias do REACT e REACT-M são etapas estruturadas para o desenvolvimento e gerenciamento de requisitos de software. 
