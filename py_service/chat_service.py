@@ -112,10 +112,44 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
     Use esta ferramenta sempre que o usuário perguntar sobre
     dados específicos do projeto (ex: 'quantas personas temos?',
     'liste as jornadas').
+    
+    Args:
+        project_id: ID do projeto
+        artifact_name: O nome técnico do artefato. Deve ser um dos seguintes:
+            - product_canvas
+            - goal_sketches
+            - personas
+            - journeys
+            - stories
+            - overall_model_classes
+            - prioritizations
+            - change_requests
+            - epic_stories
+            - business_rules
+            - usage_scenarios
+            - system_interfaces
+            - storyboards
+            - product_backlog
+            - sprint
     """
     print(f"🔎 --- Tool Call: get_data_for_artifact(artifact='{artifact_name}', project_id={project_id}) ---")
     if not LARAVEL_API_KEY:
         return "Erro de configuração: PYTHON_SERVICE_API_KEY não definida no .env"
+
+    valid_artifacts = [
+        "product_canvas",
+        "goal_sketches",
+        "personas",
+        "journeys",
+        "stories",
+        "sprint",
+        "product_backlog"
+    ]
+    
+    if artifact_name not in valid_artifacts:
+        return {
+            "error": f"Artefato '{artifact_name}' inválido. Escolha entre: {', '.join(valid_artifacts)}"
+        }
     
     try:
         response = requests.post(
@@ -343,6 +377,7 @@ def build_system_prompt(data) -> str:
 
     Contexto do Projeto '{project_title}':
     - Descrição: {project_desc}
+    - ID: {project_id} (Não exponha esse dados para o Usuário nem solicite dele)
 
     Contexto da Cerimônia Atual: '{page_name}'
     Contexto do Artefato Atual: '{artifact_name}'
