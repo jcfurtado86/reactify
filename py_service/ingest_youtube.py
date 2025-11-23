@@ -13,8 +13,8 @@ load_dotenv()
 # 1. Configurações
 LINKS_FILE = "react_m/links.txt" # Seu arquivo enviado
 HF_MODEL_PATH = ".hf_models"
-TEMP_AUDIO_DIR = "./temp_audio"
-TRANSCRIPTIONS_DIR = "./transcriptions"
+TEMP_AUDIO_DIR = "temp_audio"
+TRANSCRIPTIONS_DIR = "transcriptions"
 MODEL_DIR = ".whisper_models"
 
 os.makedirs(TEMP_AUDIO_DIR, exist_ok=True)
@@ -35,7 +35,7 @@ vector_store = PGVector(
 
 # 3. Carrega Modelo Whisper (Pode demorar na 1ª vez)
 print("🎧 Carregando modelo Whisper (pode levar um tempo)...")
-whisper_model = whisper.load_model("medium", download_root=MODEL_DIR, device="cpu") #para rodar na cpu: device="cpu"
+whisper_model = whisper.load_model("large", download_root=MODEL_DIR, device="cpu") #para rodar na cpu: device="cpu"
  # Use "small" ou "medium" se tiver boa CPU/GPU
 
 def sanitize_filename(name):
@@ -91,16 +91,16 @@ def process_links():
             vector_store.add_documents(chunks)
             
             # Limpeza
-            os.remove(audio_path)
-            print("✅ Concluído.")
+            # os.remove(audio_path)
+            # print("✅ Concluído.")
             
         except Exception as e:
             print(f"❌ Erro ao processar {url}: {e}")
 
-        finally:
-            # Garante que o áudio temporário seja apagado mesmo se der erro
-            if audio_path and os.path.exists(audio_path):
-                os.remove(audio_path)
+        # finally:
+        #     Garante que o áudio temporário seja apagado mesmo se der erro
+        #     if audio_path and os.path.exists(audio_path):
+        #         os.remove(audio_path)
 
 if __name__ == "__main__":
     process_links()
