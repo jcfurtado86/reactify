@@ -7,7 +7,6 @@ import langchain
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain.agents import create_agent
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import tool 
 from langchain_core.tracers.langchain import wait_for_all_tracers
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -100,7 +99,7 @@ def search_knowledge_base(query: str) -> str:
     
     for i, doc in enumerate(docs):
         source = doc.metadata.get("source", "Desconhecido")
-        content_preview = doc.page_content[:200].replace('\n', ' ') # Primeiros 200 chars
+        content_preview = doc.page_content.replace('\n', ' ') # Primeiros 200 chars
         
         print(f"   [Doc {i+1}] Fonte: {source}")
         print(f"   [Conteúdo]: {content_preview}...\n")
@@ -120,7 +119,7 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
     dados específicos do projeto (ex: 'quantas personas temos?',
     'liste as jornadas').
     """
-    print(f"--- Chamando Ferramenta: get_data_for_artifact(artifact='{artifact_name}', project_id={project_id}) ---")
+    print(f"🔎 --- Tool Call: get_data_for_artifact(artifact='{artifact_name}', project_id={project_id}) ---")
     if not LARAVEL_API_KEY:
         return "Erro de configuração: PYTHON_SERVICE_API_KEY não definida no .env"
     
@@ -325,10 +324,16 @@ def build_system_prompt(data) -> str:
     system_prompt_content = f"""Você é um Assistente de IA atuando como **Facilitador** da metodologia ágil de requisitos REACT-M. Seu papel **NÃO** é apenas responder perguntas, mas **agir como um coach e guia** para o usuário, conforme descrito na metodologia.
 
     **Ferramentas Disponíveis:**
-    1. Se precisar de dados do projeto (personas, stories), use `get_data_for_artifact`.
+    1. Se precisar de dados do banco de dados do projeto relacionados aos artefatos e cerimônias, use `get_data_for_artifact`.
     2. Se precisar de embasamento teórico e metodológico, use `search_knowledge_base`.
 
     **Seu Objetivo (O Papel do Facilitador):** Guiar todos os envolvidos a aplicar o REACT-M da melhor forma possível. Você deve ser proativo, colaborativo e ajudar a equipe a executar as cerimônias.
+
+    **Instruções de Ferramentas:**
+    1. Use quantas tools achar necessário
+    2. Sempre prefira chamadas paralelas quando possível
+    3. Sempre analise os dados retornados das tools antes de concluir
+    4. Forneça um resumo com insights principais na resposta final
 
     **Instruções de Tom e Ação:**
     1. **Seja um Guia, Não um Dicionário:** ... (ex: 'Vejo que estamos em Inception, na tela de Personas...').
@@ -343,10 +348,9 @@ def build_system_prompt(data) -> str:
     - Papel no Projeto: {user_role}
 
     Contexto do Projeto '{project_title}':
-    - ID: {project_id}
     - Descrição: {project_desc}
 
-    Contexto da Página Atual: '{page_name}'
+    Contexto da Cerimônia Atual: '{page_name}'
     Contexto do Artefato Atual: '{artifact_name}'
     """
     return system_prompt_content
@@ -381,7 +385,7 @@ def chat_stream():
         #                 json.dumps(request_data, indent=2))
 
         system_prompt = build_system_prompt(request_data)
-        app.logger.info("\n------------ SYSTEM PROMPT --------------\n%s\n", system_prompt)
+        #app.logger.info("\n------------ SYSTEM PROMPT --------------\n%s\n", system_prompt)
         
         chat_history_raw = request_data.get('history', [])
         
@@ -431,7 +435,7 @@ def chat_stream():
 
         agent = create_agent(
           model=llm,
-          tools=tools, 
+          tools=tools,
           system_prompt=system_prompt
         )
 
