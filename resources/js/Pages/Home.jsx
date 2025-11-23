@@ -355,13 +355,33 @@ const Home = ({}) => {
       </div>
 
       {/* Task Overview */}
-
-      <div className="overflow-hidden rounded-md border">
-        <TableComponent table={table} />
-      </div>
-    </div>
-  )
-}
+        {projects.length > 0 ? (
+          <div className="overflow-hidden rounded-md border">
+            <TableComponent table={table} />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-[60vh] border border-dashed rounded-lg bg-card/50 text-center p-8">
+            <div className="bg-accent/50 p-4 rounded-full mb-4">
+              <MousePointerClick className="h-12 w-12 text-foreground/80" />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              Bem-vindo ao Reactify
+            </h3>
+            <p className="text-muted-foreground max-w-md mb-8">
+              Você ainda não tem nenhum projeto. Crie seu primeiro espaço de trabalho para começar a gerenciar suas tarefas com IA.
+            </p>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="lg" className="rounded-full font-semibold">
+                  Criar meu primeiro projeto
+                </Button>
+              </DialogTrigger>
+            </Dialog>
+          </div>
+        )} 
+            </div>
+          )
+        }
 
 Home.layout = (page) => <MainLayout children={page} />
 
