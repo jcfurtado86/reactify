@@ -57,12 +57,6 @@ vector_store = PGVector(
 
 retriever = vector_store.as_retriever(search_kwargs={"k": 4})
 
-# Cria a Ferramenta de RAG
-# rag_tool = create_retriever_tool(
-#     retriever,
-#     "search_knowledge_base",
-#     "Use esta ferramenta para buscar informações técnicas em documentos PDF, dissertações e manuais carregados no sistema. Útil para dúvidas sobre teoria, conceitos ou conteúdo específico dos arquivos."
-# )
 # --- Configuraçãco das Ferramentas (Tools) ---
 
 # URL da API de Ferramentas do Laravel
