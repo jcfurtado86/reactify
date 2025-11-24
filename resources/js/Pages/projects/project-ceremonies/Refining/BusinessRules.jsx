@@ -162,11 +162,11 @@ const GeneratedItemsModal = ({
   )
 }
 
-const StoryCard = ({ story, epicStoryId, addBusinessRule, systemColors }) => {
+const StoryCard = ({ story, addBusinessRule, systemColors }) => {
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.type] || '#f97316'
   const realStoryId = story.epic_id
-    ? `${story.epic_id}.${epicStoryId}`
+    ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.id}`
 
   return (
@@ -570,7 +570,7 @@ const BusinessRules = ({ project, setProject }) => {
       )}
       {/* user stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'user' && !story.epic_id)
+        ?.filter((story) => story.type === 'user')
         .map((story) => {
           const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedBusinessRules =
@@ -602,49 +602,12 @@ const BusinessRules = ({ project, setProject }) => {
                     ))}
                 </div>
               </section>
-              {[...relatedEpics]
-                ?.sort((a, b) => a.id - b.id)
-                .map((currentStory, index) => {
-                  const relatedCurrentBusinessRules =
-                    businessRulesByStoryId.get(currentStory.id) || []
-                  return (
-                    <section
-                      className="py-1 flex gap-1 items-stretch"
-                      key={currentStory.id}
-                    >
-                      <StoryCard
-                        story={currentStory}
-                        epicStoryId={index + 1}
-                        addBusinessRule={() => addBusinessRule(currentStory.id)}
-                        systemColors={project?.system_colors}
-                      />
-
-                      <div className="flex flex-col gap-1 w-full">
-                        {[...relatedCurrentBusinessRules]
-                          .sort((a, b) => a.id - b.id)
-                          .map((businessRule, index, array) => (
-                            <BusinessRuleCard
-                              key={businessRule.id}
-                              story={currentStory}
-                              businessRule={businessRule}
-                              lastElement={
-                                index === array.length - 1 && array.length > 1
-                              }
-                              setProject={setProject}
-                              onInspect={() => inspectRule(businessRule.id)}
-                              systemColors={project?.system_colors}
-                            />
-                          ))}
-                      </div>
-                    </section>
-                  )
-                })}
             </React.Fragment>
           )
         })}
       {/* system stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'system' && !story.epic_id)
+        ?.filter((story) => story.type === 'system')
         .map((story) => {
           const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedBusinessRules =
@@ -676,43 +639,6 @@ const BusinessRules = ({ project, setProject }) => {
                     ))}
                 </div>
               </section>
-              {[...relatedEpics]
-                ?.sort((a, b) => a.id - b.id)
-                .map((currentStory, index) => {
-                  const relatedCurrentBusinessRules =
-                    businessRulesByStoryId.get(currentStory.id) || []
-                  return (
-                    <section
-                      className="py-1 flex gap-1 items-stretch"
-                      key={currentStory.id}
-                    >
-                      <StoryCard
-                        story={currentStory}
-                        epicStoryId={index + 1}
-                        addBusinessRule={() => addBusinessRule(currentStory.id)}
-                        systemColors={project?.system_colors}
-                      />
-
-                      <div className="flex flex-col gap-1 w-full">
-                        {[...relatedCurrentBusinessRules]
-                          .sort((a, b) => a.id - b.id)
-                          .map((businessRule, index, array) => (
-                            <BusinessRuleCard
-                              key={businessRule.id}
-                              story={currentStory}
-                              businessRule={businessRule}
-                              lastElement={
-                                index === array.length - 1 && array.length > 1
-                              }
-                              setProject={setProject}
-                              onInspect={() => inspectRule(businessRule.id)}
-                              systemColors={project?.system_colors}
-                            />
-                          ))}
-                      </div>
-                    </section>
-                  )
-                })}
             </React.Fragment>
           )
         })}

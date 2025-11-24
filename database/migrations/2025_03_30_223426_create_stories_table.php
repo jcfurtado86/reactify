@@ -15,6 +15,7 @@ return new class extends Migration {
       $table->text('title');
       $table->jsonb('invest_card')->nullable();
       $table->enum('type', ['user', 'system']); // Tipo fixo
+      $table->integer('epic_index')->nullable();
       $table
         ->enum('status', ['draft', 'prioritized', 'in_progress', 'done'])
         ->default('draft');

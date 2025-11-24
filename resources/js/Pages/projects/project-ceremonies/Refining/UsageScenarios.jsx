@@ -193,11 +193,11 @@ const GeneratedItemsModal = ({
   )
 }
 
-const StoryCard = ({ story, epicStoryId, addScenario, systemColors }) => {
+const StoryCard = ({ story, addScenario, systemColors }) => {
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.type] || '#f97316'
   const realStoryId = story.epic_id
-    ? `${story.epic_id}.${epicStoryId}`
+    ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.id}`
 
   return (
@@ -808,7 +808,7 @@ const UsageScenarios = ({ project, setProject }) => {
         })}
       {/* system  */}
       {project?.stories
-        ?.filter((story) => story.type === 'system' && !story.epic_id)
+        ?.filter((story) => story.type === 'system')
         .map((story) => {
           const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
@@ -839,43 +839,6 @@ const UsageScenarios = ({ project, setProject }) => {
                     ))}
                 </div>
               </section>
-              {[...relatedEpics]
-                ?.sort((a, b) => a.id - b.id)
-                .map((currentStory, index) => {
-                  const epicScenarios =
-                    scenariosByStoryId.get(currentStory.id) || []
-                  return (
-                    <section
-                      className="py-1 flex gap-2 min-h-48"
-                      key={currentStory.id}
-                    >
-                      <StoryCard
-                        story={currentStory}
-                        epicStoryId={index + 1}
-                        addScenario={() => addScenario(currentStory.id)}
-                        systemColors={project?.system_colors}
-                      />
-
-                      <div className="flex flex-col gap-2 w-full">
-                        {epicScenarios
-                          .sort((a, b) => a.id - b.id)
-                          .map((scenario, index, array) => (
-                            <ScenarioCard
-                              key={scenario.id}
-                              scenario={scenario}
-                              story={story}
-                              setProject={setProject}
-                              lastElement={
-                                index === array.length - 1 && array.length > 1
-                              }
-                              onInspect={() => inspectScenario(scenario.id)}
-                              systemColors={project?.system_colors}
-                            />
-                          ))}
-                      </div>
-                    </section>
-                  )
-                })}
             </React.Fragment>
           )
         })}

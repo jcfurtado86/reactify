@@ -16,6 +16,7 @@ class Story extends Model
     'type',
     'project_id',
     'epic_id',
+    'epic_index',
     'invest_card',
     'value',
     'complexity',
@@ -62,9 +63,44 @@ class Story extends Model
       ->withTimestamps();
   }
 
+  // Relacionamento para isso funcionar
+  public function stories()
+  {
+    return $this->hasMany(Story::class, 'epic_id');
+  }
+
+  /**
+   * Relacionamento com a Priorização (se houver).
+   */
+  public function prioritization()
+  {
+    return $this->hasOne(Prioritization::class);
+  }
+
   protected static function boot()
   {
     parent::boot();
+
+    // Evento disparado ANTES de salvar (criação ou atualização)
+    static::saving(function ($story) {
+      // Verifica se o epic_id foi preenchido e se o epic_index ainda está vazio
+      // OU se o epic_id mudou (moveu a story de um épico para outro)
+      if ($story->epic_id && ($story->isDirty('epic_id') || is_null($story->epic_index))) {
+
+        // Busca o maior índice atual DENTRO deste épico específico
+        $maxIndex = Story::where('epic_id', $story->epic_id)
+          ->max('epic_index'); // Retorna ex: 5
+
+        // Define o novo índice como o máximo + 1 (ex: 6)
+        // Se não houver filhos, max retorna null, então vira 1.
+        $story->epic_index = $maxIndex ? $maxIndex + 1 : 1;
+      }
+
+      // Opcional: Se remover o epic_id, limpa o index
+      if (is_null($story->epic_id)) {
+        $story->epic_index = null;
+      }
+    });
 
     static::deleted(function ($story) {
       // Se for um Soft Delete, o registro ainda existe,
@@ -75,20 +111,25 @@ class Story extends Model
         // Atualiza todas as stories que têm esta story como pai (epic_id)
         $story->stories()->update(['epic_id' => null]);
       }
+
+      //
+      // Só precisa reordenar se a story tinha um pai (epic_id)
+      if ($story->epic_id && !is_null($story->epic_index)) {
+        static::reorderEpicIndices($story->epic_id, $story->epic_index);
+      }
     });
   }
-
-  // Relacionamento para isso funcionar
-  public function stories()
+  protected static function reorderEpicIndices($epicId, $removedIndex)
   {
-    return $this->hasMany(Story::class, 'epic_id');
-  }
-
-  /**
-     * Relacionamento com a Priorização (se houver).
-     */
-  public function prioritization()
-  {
-      return $this->hasOne(Prioritization::class);
+    Story::where('epic_id', $epicId)
+      ->where('epic_index', '>', $removedIndex)
+      ->orderBy('epic_index')
+      ->chunk(50, function ($stories) { // Chunk para não sobrecarregar memória se tiver muitos
+        foreach ($stories as $story) {
+          $story->epic_index -= 1;
+          // saveQuietly é ESSENCIAL para não disparar o 'saving' de novo
+          $story->saveQuietly();
+        }
+      });
   }
 }

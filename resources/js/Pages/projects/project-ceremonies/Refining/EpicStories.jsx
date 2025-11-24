@@ -182,7 +182,6 @@ const StoryCard = ({ story, addEpicStory, systemColors }) => {
 const EpicStoryCard = ({
   story,
   epicStory,
-  epicStoryId,
   lastElement = false,
   setProject,
   systemColors,
@@ -194,6 +193,9 @@ const EpicStoryCard = ({
 
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.type] || '#f97316'
+  const realStoryId = epicStory.epic_id
+    ? `${epicStory.epic_id}.${epicStory.epic_index || 0}`
+    : `${story.id}`
   // ⚡️ FUNÇÕES PARA MANIPULAR A EDIÇÃO
   const handleEdit = () => {
     setEditValue(epicStory.title) // Garante que o input comece com o valor atual
@@ -269,8 +271,8 @@ const EpicStoryCard = ({
             variant="outline"
             className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
           >
-            {`${story.type === 'system' ? 'SS' : 'US'}${story.id}.${
-              isTemporary(epicStory.id) ? '' : epicStoryId
+            {`${story.type === 'system' ? 'SS' : 'US'}${
+              realStoryId
             }`.toUpperCase()}
           </Badge>
 
@@ -551,7 +553,6 @@ const EpicStories = ({ project, setProject }) => {
                     <EpicStoryCard
                       key={epicStory.id}
                       story={story}
-                      epicStoryId={index + 1}
                       epicStory={epicStory}
                       lastElement={
                         index === array.length - 1 && array.length > 1

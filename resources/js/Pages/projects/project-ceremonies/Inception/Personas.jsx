@@ -78,7 +78,7 @@ const GeneratedItemsModal = ({
             </div>
 
             <div className=" px-6 overflow-y-auto min-h-0">
-              <div className="flex flex-col gap-4 py-2">
+              <div className="flex flex-col gap-2 py-2">
                 {generatedItems.map((persona, index) => (
                   <div
                     key={persona.id || `temp-${index}`}
@@ -103,13 +103,13 @@ const GeneratedItemsModal = ({
                       </div>
 
                       {/* Corpo do Card */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm text-left">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-left">
                         {/* Seção de Perfil */}
                         <div className="flex flex-col gap-2">
                           <h4 className="font-semibold text-foreground mb-1">
                             Perfil
                           </h4>
-                          <ul className="list-disc list-inside space-y-1.5 text-muted-foreground">
+                          <ul className="list-disc list-inside text-muted-foreground">
                             {persona.profile.map((item, i) => (
                               <li key={`profile-${persona.id}-${i}`}>{item}</li>
                             ))}
@@ -121,7 +121,7 @@ const GeneratedItemsModal = ({
                           <h4 className="font-semibold text-foreground mb-1">
                             Expectativas
                           </h4>
-                          <ul className="list-disc list-inside space-y-1.5 text-muted-foreground">
+                          <ul className="list-disc list-inside text-muted-foreground">
                             {persona.expectations.map((item, i) => (
                               <li key={`expectation-${persona.id}-${i}`}>
                                 {item}
@@ -135,7 +135,7 @@ const GeneratedItemsModal = ({
                           <h4 className="font-semibold text-foreground mb-1">
                             Objetivos
                           </h4>
-                          <ul className="list-disc list-inside space-y-1.5 text-muted-foreground">
+                          <ul className="list-disc list-inside text-muted-foreground">
                             {persona.goals.map((item, i) => (
                               <li key={`goal-${persona.id}-${i}`}>{item}</li>
                             ))}
@@ -229,7 +229,7 @@ const PersonaCard = ({
           {['profile', 'expectations', 'goals'].map((field) => (
             <div
               key={field}
-              className="flex flex-col gap-2 p-3 rounded-lg bg-card border-border border-2"
+              className="flex flex-col gap-2 p-2 rounded-lg bg-card border-border border-2"
             >
               <div className="flex items-center justify-between">
                 <h4
@@ -249,7 +249,7 @@ const PersonaCard = ({
                 )}
               </div>
               <Separator />
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1">
                 {persona[field].map((item, itemIndex) => (
                   <PersonaItem
                     key={itemIndex}

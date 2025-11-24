@@ -47,7 +47,7 @@ const TableComponent = ({ table }) => {
         ) : (
           <TableRow>
             <TableCell colSpan={columns} className="h-24 text-center">
-              No results.
+              Sem resultados
             </TableCell>
           </TableRow>
         )}

@@ -81,7 +81,6 @@ const SortablePriorityColumn = ({
 }
 const StoryCard = ({
   story,
-
   priority = null,
   isDragOverlay = false,
   className = '',
@@ -100,7 +99,7 @@ const StoryCard = ({
     visibility: isDragging ? 'hidden' : 'visible',
   }
   const realStoryId = story.epic_id
-    ? `${story.epic_id}.${story.epicStoryId}`
+    ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.story_id}`
 
   const isTemporary = getIsTemporary(story.story_id)
@@ -220,21 +219,12 @@ const transformArrayToMatrixObject = (
           : []
       // ----------------------------
 
-      let epicStoryId = null
-      if (storyDetails.epic_id) {
-        // Se for uma story filha de épico, atribui o ID correto
-        const indexInEpic = relatedEpics
-          .sort((a, b) => a.id - b.id)
-          .findIndex((s) => s.id === storyDetails.id)
-        epicStoryId = indexInEpic + 1 // +1 para começar do 1
-      }
-
       // Push the story into the array for that cell
       matrix[cellId].push({
         id: item.id, // This is the prioritization ID
         story_id: storyDetails.id,
         epic_id: storyDetails.epic_id,
-        epicStoryId: epicStoryId,
+        epic_index: storyDetails.epic_index,
         story_title: storyDetails.title,
         story_type: storyDetails.type,
         project_id: storyDetails.project_id,
@@ -445,7 +435,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
             story_title: draggedStoryData.story_title,
             story_type: draggedStoryData.story_type,
             epic_id: draggedStoryData.epic_id,
-            epicStoryId: draggedStoryData.epicStoryId,
+            epic_index: draggedStoryData.epic_index,
             priority_id: priority_id,
             position: Number(position),
             isTemporary: !draggedPrioritization,
@@ -525,23 +515,14 @@ const PrioritizationMatrix = ({ project, setProject }) => {
           >
             {unassignedStories.length > 0 ? (
               unassignedStories.map((story) => {
-                const relatedEpics = childrenByEpicId.get(story.epic_id) || []
                 const unassignedStory = {
                   story_id: story.id,
                   story_title: story.title,
                   story_type: story.type,
                   epic_id: story.epic_id,
+                  epic_index: story.epic_index,
                 }
-                let epicStoryId = null
-                if (story.epic_id) {
-                  // Se for uma story filha de épico, atribui o ID correto
-                  const indexInEpic = relatedEpics
-                    .sort((a, b) => a.id - b.id)
-                    .findIndex((s) => s.id === story.id)
-                  epicStoryId = indexInEpic + 1 // +1 para começar do 1
-                }
-                unassignedStory.epicStoryId = epicStoryId
-                //
+
                 return (
                   <StoryCard
                     key={story.id}

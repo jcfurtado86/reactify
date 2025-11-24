@@ -39,6 +39,9 @@ const KanbanStoryCard = ({ story, columnKey, isOverlay, systemColors }) => {
     : 'cursor-grab active:cursor-grabbing'
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.type] || '#fff'
+  const realStoryId = story.epic_id
+    ? `${story.epic_id}.${story.epic_index || 0}`
+    : `${story.id}`
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <Card className={`p-3 ${overlayClasses}`}>
@@ -49,7 +52,7 @@ const KanbanStoryCard = ({ story, columnKey, isOverlay, systemColors }) => {
               variant="outline"
               className="border-transparent text-primary-foreground font-bold cursor-pointer"
             >
-              US{story.id}
+              {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
             </Badge>
           </div>
           <p className="text-sm font-medium text-left">{story.title}</p>

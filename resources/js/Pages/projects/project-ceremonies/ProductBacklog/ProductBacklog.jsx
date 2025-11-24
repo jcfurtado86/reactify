@@ -8,7 +8,7 @@ import {
   Trash2Icon as TrashIcon,
   ClipboardList,
   ExternalLink,
-  Undo2
+  Undo2,
 } from 'lucide-react'
 import { getStatusColor } from '@/lib/utils'
 import {
@@ -24,10 +24,10 @@ const getSharedColumns = ({
   storyVariants,
   project,
   onMoveRequest,
-  onRemoveRequest, 
+  onRemoveRequest,
   selectedStories,
   status,
-  isBacklog = false, 
+  isBacklog = false,
 }) => [
   {
     id: 'select',
@@ -55,9 +55,12 @@ const getSharedColumns = ({
     cell: ({ row }) => {
       const story = row.original
       const selectedVariant = storyVariants[story.type] || '#f97316'
+      const realStoryId = story.epic_id
+        ? `${story.epic_id}.${story.epic_index || 0}`
+        : `${story.id}`
       return (
         <Badge style={{ backgroundColor: selectedVariant }} variant="badge">
-          {`${story.type === 'system' ? 'SS' : 'US'}${story.id}`.toUpperCase()}
+          {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
         </Badge>
       )
     },
@@ -215,9 +218,16 @@ const SprintTable = ({
         onRemoveRequest: handleRemoveRequest,
         selectedStories,
         status: sprint.status,
-        isBacklog: false
+        isBacklog: false,
       }),
-    [storyVariants, project, handleMoveRequest, handleRemoveRequest, selectedStories, status],
+    [
+      storyVariants,
+      project,
+      handleMoveRequest,
+      handleRemoveRequest,
+      selectedStories,
+      status,
+    ],
   )
 
   const table = useReactTable({
@@ -334,7 +344,7 @@ const ProductBacklog = ({ project, setProject }) => {
         preserveScroll: true,
         onSuccess: (page) => {
           toast.success('Story movida de volta para o Backlog')
-          
+
           if (page.props.project) {
             setProject(page.props.project)
             setLocalProject(page.props.project)
