@@ -23,6 +23,11 @@
    pip install -r requirements.txt
    ```
 
+- Baixar modelo de embeddings:
+   ```bash
+   python hf.py
+   ```
+
 ### (Caso necessário) Rodar serviços separadamente 
      
 - Ativar o ambiente virtual na raiz em todos os terminais novos(linux):
