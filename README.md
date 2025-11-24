@@ -12,7 +12,7 @@
    source .venv/bin/activate
    ```
 
-- Ativar o ambiente virtual (fishgit a):
+- Ativar o ambiente virtual (fish):
    ```bash
    . .venv/bin/activate.fish
    ```
@@ -25,9 +25,15 @@
 
 ### (Caso necessário) Rodar serviços separadamente 
      
-- Ativar o ambiente virtua na raiz em todos os terminais novos(linux):
+- Ativar o ambiente virtual na raiz em todos os terminais novos(linux):
+- (bash/zsh):
    ```bash
    source .venv/bin/activate
+   ```
+
+- (fish):
+   ```bash
+   . .venv/bin/activate.fish
    ```
 
 - Em um terminal, serviço de chat (linux):
