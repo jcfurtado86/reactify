@@ -7,9 +7,14 @@
    python -m venv .venv
    ```
    
-- Ativar o ambiente virtual (linux):
+- Ativar o ambiente virtual (bash/zsh):
    ```bash
    source .venv/bin/activate
+   ```
+
+- Ativar o ambiente virtual (fishgit a):
+   ```bash
+   . .venv/bin/activate.fish
    ```
    
 - Baixar as dependencias do projeto:
