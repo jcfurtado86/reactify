@@ -1,4 +1,5 @@
 import { Info, Sparkles, Loader2 } from 'lucide-react'
+import ButtonWithTooltip from './ButtonWithTooltip'
 const GenerateAIButton = ({
   isGenerating,
   onClick,
@@ -14,11 +15,12 @@ const GenerateAIButton = ({
           : 'bg-card text-foreground'
       }`}
     >
-      <Button
+      <ButtonWithTooltip
         onClick={onClick}
         disabled={isGenerating}
         variant="hollow"
         className="flex flex-1 items-center justify-center py-2"
+        tooltipContent={tooltip?.description || null}
       >
         {isGenerating ? (
           <Loader2 size={18} className="mr-2 animate-spin" />
@@ -26,19 +28,8 @@ const GenerateAIButton = ({
           <Sparkles size={18} className="mr-2" />
         )}
         <span>AI</span>
-      </Button>
+      </ButtonWithTooltip>
 
-      {/* <Popover>
-        <PopoverTrigger asChild>
-          <div className="flex items-center justify-center h-full px-2">
-            <Info size={15} />
-          </div>
-        </PopoverTrigger>
-        <PopoverContent className="bg-popover text-popover-foreground">
-          <PopoverArrow className="fill-popover" />
-          {tooltip.description}
-        </PopoverContent>
-      </Popover>*/}
       <ShineBorder
         borderWidth={2}
         shineColor={[

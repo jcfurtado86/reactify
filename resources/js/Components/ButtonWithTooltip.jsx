@@ -21,7 +21,9 @@ const ButtonWithTooltip = ({
           </Button>
         </TooltipTrigger>
         {tooltipContent && (
-          <TooltipContent side={side}>{tooltipContent}</TooltipContent>
+          <TooltipContent side={side} n className="max-w-64">
+            {tooltipContent}
+          </TooltipContent>
         )}
       </Tooltip>
     </TooltipProvider>
