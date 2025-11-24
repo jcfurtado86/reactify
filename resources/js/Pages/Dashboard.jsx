@@ -193,10 +193,10 @@ export const CeremonyCard = ({
                   {artifact.label}
                   {artifactAmount > 0 ? (
                     <>
-                      <CircleCheckBig className="size-4 text-green-400" />
+                      <CircleCheckBig className="size-4 text-green-600" />
                     </>
                   ) : (
-                    <CircleAlert className="size-4 text-destructive" />
+                    <CircleAlert className="size-4 text-amber-600" />
                   )}
                 </ButtonWithTooltip>
               )
