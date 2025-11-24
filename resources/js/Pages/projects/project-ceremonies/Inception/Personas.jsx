@@ -15,6 +15,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import TextareaAutosize from 'react-textarea-autosize'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
+import { tooltipInfo } from '@/lib/projectData'
 
 const GeneratedItemsModal = ({
   isModalMinimized,
@@ -783,7 +784,7 @@ const Personas = ({ project, setProject }) => {
           <GenerateAIButton
             isGenerating={isGenerating}
             onClick={generatePersonas}
-            // tooltip={tooltipInfo.aiGeneratedStory}
+            tooltip={tooltipInfo.aiGeneratedPersonas}
             className="xl:col-span-2"
           />
         </>

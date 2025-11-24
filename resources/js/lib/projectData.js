@@ -76,11 +76,7 @@ const tooltipInfo = {
     description:
       'Sequências de etapas (jornadas) que descrevem o caminho do usuário ou do administrador para atingir um objetivo no sistema.',
   },
-  aiGeneratedJourney: {
-    title: 'AI Generated Journeys',
-    description:
-      ' This function uses AI to generate journeys based on the Goals defined in the Personas.',
-  },
+  
   //story discovery
   stories: {
     title: 'Stories',
@@ -176,11 +172,7 @@ const tooltipInfo = {
       badge: 'bg-orange-600 ',
     },
   },
-  aiGeneratedStory: {
-    title: 'Gerar com IA',
-    description:
-      'Esta função utiliza IA para gerar Users Stories baseadas nos Objetivos das Personas e Journeys do Produto e gerar System Stories baseadas nas do e Goals do tipo Constraint(CG).',
-  },
+  
   epicStory: {
     title: 'O que é uma História Epica?',
     description:
@@ -214,6 +206,63 @@ const tooltipInfo = {
     classNames: {
       badge: 'bg-purple-600 ',
     },
+  },
+  aiGeneratedGoals: {
+    title: 'Gerar Objetivos com IA',
+    description:
+      'Usa IA para analisar a descrição inicial do projeto e gerar Business Goals (metas) e Constraint Goals (restrições) com base na Entrevista de Requisitos fornecida.',
+  },
+  aiGeneratedPersonas: {
+    title: 'Gerar Personas com IA',
+    description:
+      'Usa IA para criar perfis detalhados de usuários com base na Entrevista de Requisitos fornecida.',
+  },
+  aiGeneratedJourney: {
+    title: 'Gerar Jornadas com IA',
+    description:
+      'Usa IA para estruturar as jornadas do usuário passo a passo, mapeando o caminho ideal dentro do sistema com base nas Goals das Personas.',
+  },
+  aiGeneratedProductCanvas: {
+    title: 'Gerar Product Canvas com IA',
+    description:
+      'Usa IA para mapear Problemas, Soluções, Personas, Restrições e o escopo do projeto (É/Não É) a partir da Entrevista de Requisitos fornecida.',
+  },  
+  aiGeneratedStory: {
+    title: 'Gerar Histórias com IA',
+    description:
+      'Usa IA para elaborar User Stories baseadas nas Goals das Personas e Journeys do Produto, além de System Stories baseadas nas Constraint Goals do Produto.',
+  },
+
+  aiGeneratedEpic: {
+    title: 'Gerar Épicos com IA',
+    description:
+      'Usa IA para analisar Stories Épicos e separar os requisitos complexos.',
+  },
+  aiGeneratedBusinessRule: {
+    title: 'Gerar Regras de Negócio com IA',
+    description:
+      'Usa IA para gerar novas regras analisando a Story do projeto, seus Goals e as Regras atuais.',
+  },
+  aiGeneratedUsageScenario: {
+    title: 'Gerar Cenários com IA',
+    description:
+      'Usa IA para descrever narrativas detalhadas de interação (casos de uso), exemplificando como o usuário deve interagir para completar uma tarefa.',
+  },
+
+  aiGeneratedOverallModel: {
+    title: 'Gerar Modelo Geral com IA',
+    description:
+      'Usa IA para sintetizar todo o escopo definido em uma visão arquitetural unificada, destacando os principais fluxos e componentes do sistema. Se baseia nas Stories do Projeto',
+  },
+  aiGeneratedInterface: {
+    title: 'Sugerir Interfaces com IA',
+    description:
+      'Usa IA para propor a estrutura visual, campos necessários e a disposição dos elementos (wireframe textual). Se baseando nos CRC Cards e Stories.',
+  },
+  aiGeneratedStoryboard: {
+    title: 'Gerar Storyboard com IA',
+    description:
+      'Usa IA para criar uma sequência narrativa que ilustra a navegação do usuário entre as interfaces sugeridas, validando o fluxo visual.',
   },
 }
 

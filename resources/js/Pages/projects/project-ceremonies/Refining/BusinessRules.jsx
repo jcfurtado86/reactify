@@ -11,6 +11,7 @@ import {
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
+import { tooltipInfo } from '@/lib/projectData'
 import { isTemporary, useGroupedStories } from '@/lib/utils'
 import InvestCard from '../Inspection/InvestCard'
 import GenerateAIButton from '@/Components/GenerateAIButton'
@@ -645,7 +646,7 @@ const BusinessRules = ({ project, setProject }) => {
       <GenerateAIButton
         isGenerating={isGenerating}
         onClick={generateBusinessRules}
-        // tooltip={tooltipInfo.aiGeneratedStory}
+        tooltip={tooltipInfo.aiGeneratedBusinessRule}
         className="w-1/2"
       />
     </section>

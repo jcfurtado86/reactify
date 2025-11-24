@@ -20,6 +20,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
+import { tooltipInfo } from '@/lib/projectData'
 
 const cardVariants = {
   destructive: 'border-t-destructive text-destructive',
@@ -594,7 +595,7 @@ const MainView = ({ project = {}, setProject }) => {
         <GenerateAIButton
           isGenerating={isGenerating}
           onClick={generateProductCanvas}
-          // tooltip={tooltipInfo.aiGeneratedStory}
+          tooltip={tooltipInfo.aiGeneratedProductCanvas}
           className="w-1/2"
         />
       )}

@@ -14,6 +14,7 @@ import { router } from '@inertiajs/react'
 import { isTemporary, useGroupedStories } from '@/lib/utils'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
+import { tooltipInfo } from '@/lib/projectData'
 /**
  * Componente para renderizar um único card de estória.
  * Gerencia seu próprio estado de hover para exibir o botão de adicionar.
@@ -569,7 +570,7 @@ const EpicStories = ({ project, setProject }) => {
       <GenerateAIButton
         isGenerating={isGenerating}
         onClick={generateEpicStories}
-        // tooltip={tooltipInfo.aiGeneratedStory}
+        tooltip={tooltipInfo.aiGeneratedEpic}
         className="w-1/2"
       />
     </section>

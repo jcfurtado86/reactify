@@ -1,7 +1,7 @@
 import React from 'react'
 import { Head, Link, router } from '@inertiajs/react'
 import ProgressIcon from '@/Components/ProgressIcon'
-import { ExpandableCard } from './projects/project-ceremonies/Inception/MainView'
+import { ExpandableCard } from './projects/project-ceremonies/Inception/ProductCanvas'
 import Interview from '@/Components/Interview'
 import { tooltipInfo } from '@/lib/projectData'
 import { ProjectPermissions } from '@/Components/ProjectPermissions'

@@ -14,7 +14,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
-
+import { tooltipInfo } from '@/lib/projectData'
 /**
  * Renders the parent Story card on the left.
  * Its primary purpose is to display story info and provide an "add scenario" action.
@@ -845,7 +845,7 @@ const UsageScenarios = ({ project, setProject }) => {
       <GenerateAIButton
         isGenerating={isGenerating}
         onClick={generateUsageScenarios}
-        // tooltip={tooltipInfo.aiGeneratedStory}
+        tooltip={tooltipInfo.aiGeneratedUsageScenario}
         className="w-1/2"
       />
     </section>

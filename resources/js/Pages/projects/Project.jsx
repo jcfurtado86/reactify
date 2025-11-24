@@ -3,7 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react'
 import NavMenu from '@/Components/NavMenu'
 import { ProjectPermissions } from '@/Components/ProjectPermissions'
 // inception
-import MainView from './project-ceremonies/Inception/MainView.jsx'
+import MainView from './project-ceremonies/Inception/ProductCanvas.jsx'
 import Personas from './project-ceremonies/Inception/Personas'
 import Journeys from './project-ceremonies/Inception/Journeys'
 import Goals from './project-ceremonies/Inception/Goals'

@@ -3,7 +3,7 @@ import { Minus, Check, X, ChevronsUp, Network } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
-
+import { tooltipInfo } from '@/lib/projectData'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 /**
  * Componente para gerenciar as interfaces de um projeto (criação e edição).
@@ -722,7 +722,7 @@ const Interfaces = ({ project, setProject }) => {
       <GenerateAIButton
         isGenerating={isGenerating}
         onClick={generateInterfaces}
-        // tooltip={tooltipInfo.aiGeneratedStory}
+        tooltip={tooltipInfo.aiGeneratedInterface}
         className="md:col-span-2 w-1/2"
       />
     </div>

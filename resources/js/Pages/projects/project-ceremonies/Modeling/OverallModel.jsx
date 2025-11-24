@@ -3,7 +3,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import { Plus, Minus, Check, X, ChevronsUp, StickyNote } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
-
+import { tooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
 
 const GeneratedItemsModal = ({
@@ -1057,7 +1057,7 @@ const OverallModel = ({ project, setProject }) => {
       <GenerateAIButton
         isGenerating={isGenerating}
         onClick={generateCRCCards}
-        // tooltip={tooltipInfo.aiGeneratedStory}
+        tooltip={tooltipInfo.aiGeneratedOverallModel}
         className="w-1/2"
       />
     </div>

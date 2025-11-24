@@ -882,7 +882,7 @@ const Goals = ({ project, setProject }) => {
             <GenerateAIButton
               isGenerating={isGenerating}
               onClick={generateGoals}
-              // tooltip={tooltipInfo.aiGeneratedStory}
+              tooltip={tooltipInfo.aiGeneratedGoals}
               className="w-1/2"
             />
           </>
