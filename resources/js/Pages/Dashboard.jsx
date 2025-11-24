@@ -440,7 +440,7 @@ const Dashboard = ({ project, setProject }) => {
         title={project?.title || 'Project'}
         content={project?.description}
         col={1}
-        variant="secondary"
+        variant="primary"
         icon={List}
         editable={false}
         defaultExpanded={true}
