@@ -856,7 +856,7 @@ const Goals = ({ project, setProject }) => {
                 onToggleTypeSelect={() => toggleTypeSelect(goal.id)}
                 onChangeGoalType={changeGoalType}
                 prioritySelectId={prioritySelectId}
-                onTogglePrioritySelect={() => togglePrioritySelect(locagoal.id)}
+                onTogglePrioritySelect={() => togglePrioritySelect(goal.id)}
                 onChangeGoalPriority={changeGoalPriority}
                 systemColors={project?.system_colors}
                 disabled={!can('goal.manage')}

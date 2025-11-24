@@ -101,7 +101,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
                   className="size-7 rounded-full object-contain"
                 />
               ) : (
-                <User className="size-7 text-primary-foreground" />
+                <User className="size-7 text-foreground" />
               )}
             </Button>
           </DropdownMenuTrigger>

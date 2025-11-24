@@ -231,7 +231,6 @@ const Journeys = ({ project, setProject }) => {
       setAnchorEl(null)
     } else {
       const element = document.querySelector(`[data-card-id="${journeyId}"]`)
-      console.log(element)
       setAnchorEl(element)
       setInspectionId(journeyId)
     }
@@ -239,7 +238,6 @@ const Journeys = ({ project, setProject }) => {
   // Função que será chamada quando o arrasto terminar
   const handleDragEnd = (event, journeyId) => {
     const { active, over } = event
-    console.log(active, over)
     if (over && active.id !== over.id) {
       const journey = project.journeys.find((j) => j.id === journeyId)
       const steps = journey.steps
@@ -439,7 +437,6 @@ const Journeys = ({ project, setProject }) => {
 
   // Função para adicionar um novo step a uma journey
   const addNewStep = (JourneyId) => {
-    console.log(project.journeys)
     if (!project.journeys) return
     const currentSteps =
       project.journeys.find((journey) => journey.id === JourneyId)?.steps || []
@@ -904,7 +901,9 @@ const Journeys = ({ project, setProject }) => {
                   </DndContext>
                 ) : (
                   <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
-                    <p className="mb-2">Essa Jornada não possui nenhum passo.</p>
+                    <p className="mb-2">
+                      Essa Jornada não possui nenhum passo.
+                    </p>
                     {can('journey.manage') && (
                       <Button
                         variant="outline"

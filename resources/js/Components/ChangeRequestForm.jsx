@@ -99,7 +99,7 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
                 <Button
                   variant={'outline'}
                   className={cn(
-                    'w-44 justify-start text-left font-normal',
+                    ' justify-start text-left font-normal',
                     !date && 'text-muted-foreground',
                   )}
                 >

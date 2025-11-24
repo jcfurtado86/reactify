@@ -123,7 +123,7 @@ const StoryCard = ({
       {...listeners}
       {...attributes}
       className={`
-         flex flex-col flex-1 w-full min-w-24 max-w-60 text-left p-2 items-center justify-start text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
+         flex flex-col flex-1 w-full min-w-52 max-w-60 text-left p-2 items-center justify-start text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
     >
       {!story.isTemporary && (
         <div className="mr-auto">
