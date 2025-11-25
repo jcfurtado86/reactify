@@ -1,4 +1,5 @@
 import { usePage, Link, router } from '@inertiajs/react'
+import { cn } from '@/lib/utils'
 import {
   User,
   Sun,
@@ -6,15 +7,27 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Bell,
+  Check,
 } from 'lucide-react'
 import RaccoonIcon from '/resources/images/raccoonIconHeadTransparent.png'
+import { useTheme } from '@/Context/ThemeContext'
+
 const TopMenu = ({ isOpen, setIsOpen }) => {
   const { props } = usePage()
   const { user, notifications } = props.auth
+  const themes = [
+    { name: 'zinc', color: 'bg-zinc-900' },
+    { name: 'blue', color: 'bg-blue-600' },
+    { name: 'green', color: 'bg-green-600' },
+    { name: 'rose', color: 'bg-rose-600' },
+    { name: 'beige', color: 'bg-amber-600' },
+  ]
 
   const [theme, setTheme] = useState(() =>
     document.documentElement.classList.contains('dark') ? 'dark' : 'light',
   )
+  const { themeColor, setThemeColor } = useTheme()
+
   const handleThemeToggle = () => {
     const isDark = document.documentElement.classList.toggle('dark')
     const newTheme = isDark ? 'dark' : 'light'
@@ -56,6 +69,32 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
         </Link>
       </div>
       <div className=" z-10 flex items-center gap-2 justify-center">
+        <div className="flex items-center gap-2">
+          <Select
+            value={themeColor}
+            onValueChange={(value) => setThemeColor(value)}
+            defaultOpen
+          >
+            <SelectTrigger
+              className={'rounded-full size-10'}
+              title="Select Theme"
+            >
+              <SelectValue placeholder="Selecione um tema" />
+            </SelectTrigger>
+            <SelectContent>
+              {themes.map((theme) => (
+                <SelectItem
+                  value={theme.name}
+                  key={theme.name}
+                  title={theme.name}
+                  className={'rounded-full size-10'}
+                >
+                  {theme.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button
           variant="ghost"
           size="icon"

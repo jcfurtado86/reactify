@@ -5,6 +5,7 @@ import { usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
 import { Link } from '@inertiajs/react'
 import { Particles } from '@/components/magicui/particles'
+import { ThemeProvider } from '@/Context/ThemeContext'
 
 const GuestLayout = ({ children }) => {
   return (
@@ -52,15 +53,17 @@ const AuthenticatedLayout = ({ children }) => {
     }
   }, [flash_key])
   return (
-    <div className="flex flex-col justify-start min-h-screen bg-background min-w-full">
-      <TopMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <main className="flex-1 grid grid-rows-[1fr] grid-cols-[auto_1fr] bg-background text-foreground items-start ">
-        <LeftMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-        <section className="flex items-center justify-center pt-2">
-          {children}
-        </section>
-      </main>
-    </div>
+    <ThemeProvider>
+      <div className="flex flex-col justify-start min-h-screen bg-background min-w-full">
+        <TopMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+        <main className="flex-1 grid grid-rows-[1fr] grid-cols-[auto_1fr] bg-background text-foreground items-start ">
+          <LeftMenu isOpen={isOpen} setIsOpen={setIsOpen} />
+          <section className="flex items-center justify-center pt-2">
+            {children}
+          </section>
+        </main>
+      </div>
+    </ThemeProvider>
   )
 }
 
