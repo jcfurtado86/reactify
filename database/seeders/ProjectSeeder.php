@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use App\Models\User;
+use App\Models\Story;
 use App\Models\Project;
 use App\Models\ProjectInvitation;
 
@@ -25,7 +26,7 @@ class ProjectSeeder extends Seeder
         'email' => 'admin@example.com',
         'password' => Hash::make('senha123'),
         'provider_avatar' =>
-          'https://www.allthingswild.co.uk/wp-content/uploads/2022/01/IMG_4702.jpg',
+        'https://www.allthingswild.co.uk/wp-content/uploads/2022/01/IMG_4702.jpg',
         'active' => true,
         'email_verified_at' => now(),
         'created_at' => now(),
@@ -212,7 +213,7 @@ class ProjectSeeder extends Seeder
       Desinteresse de plataformas tradicionais de streaming em preservação histórica de filmes clássicos.
       As plataformas de streaming praticam preços de assinatura muito elevados.",
       'solutions' =>
-        'Criar uma plataforma de streaming para filmes em domínio público, com legendas em português e preços de assinaturas acessíveis.',
+      'Criar uma plataforma de streaming para filmes em domínio público, com legendas em português e preços de assinaturas acessíveis.',
       'personas' => "Leon Cardoso - Administrador da plataforma.
       Thiago Guimarães - Usuário.",
       'restrictions' => "A plataforma deve funcionar em qualquer navegador web baseado no Chromium, no Opera, no Safari e no Mozilla Firefox. \nA plataforma deve exigir um cadastro do usuário.
@@ -236,7 +237,7 @@ class ProjectSeeder extends Seeder
     DB::table('goal_sketches')->insert([
       [
         'title' =>
-          'Atendimento às leis de direitos autorais e relacionadas à conteúdo em domínio público.',
+        'Atendimento às leis de direitos autorais e relacionadas à conteúdo em domínio público.',
         'type' => 'cg',
         'priority' => 'high',
         'project_id' => $projectId,
@@ -269,7 +270,7 @@ class ProjectSeeder extends Seeder
       ],
       [
         'title' =>
-          'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
+        'Assegurar que a plataforma funcione adequadamente nos navegadores web baseados no Chromium, Opera, Safari e Mozilla Firefox.',
         'type' => 'cg',
         'priority' => 'high',
         'project_id' => $projectId,
@@ -310,7 +311,7 @@ class ProjectSeeder extends Seeder
       ],
       [
         'title' =>
-          'Criar uma comunidade virtual ativa em torno dos filmes da plataforma.',
+        'Criar uma comunidade virtual ativa em torno dos filmes da plataforma.',
         'type' => 'bg',
         'priority' => 'medium',
         'project_id' => $projectId,
@@ -319,7 +320,7 @@ class ProjectSeeder extends Seeder
       ],
       [
         'title' =>
-          'Estabelecer parcerias estratégicas com anunciantes, instituições educacionais ou outros colaboradores para criar oportunidades de receitas financeiras.',
+        'Estabelecer parcerias estratégicas com anunciantes, instituições educacionais ou outros colaboradores para criar oportunidades de receitas financeiras.',
         'type' => 'bg',
         'priority' => 'medium',
         'project_id' => $projectId,
@@ -340,22 +341,22 @@ class ProjectSeeder extends Seeder
     $storiesData = [
       [
         'title' =>
-          'Como usuário, quero criar uma conta para acessar o aplicativo',
+        'Como usuário, quero criar uma conta para acessar o aplicativo',
         'type' => 'user',
       ],
       [
         'title' =>
-          'Eu como Thiago Guimarães quero criar listas e adicionar a elas obras disponíveis na plataforma para criar playlists de filmes',
+        'Eu como Thiago Guimarães quero criar listas e adicionar a elas obras disponíveis na plataforma para criar playlists de filmes',
         'type' => 'user',
       ],
       [
         'title' =>
-          'Como administrador, quero gerenciar usuários para manter o controle de acesso ao sistema',
+        'Como administrador, quero gerenciar usuários para manter o controle de acesso ao sistema',
         'type' => 'system',
       ],
       [
         'title' =>
-          'Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência',
+        'Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência',
         'type' => 'system',
         'epic_id' => 3,
       ],
@@ -375,9 +376,10 @@ class ProjectSeeder extends Seeder
             'testable' => 'no',
           ]),
         ]);
+        $story = Story::create($dataToCreate);
 
-        // Execute a action com os dados combinados
-        DB::table('stories')->insert($dataToCreate);
+        // // Execute a action com os dados combinados
+        // DB::table('stories')->insert($dataToCreate);
       }
     });
     //inserir cards
@@ -485,7 +487,7 @@ class ProjectSeeder extends Seeder
         'id' => uniqid(),
         'step' => 11,
         'description' =>
-          'Exibir opção "iniciar filme", "assistir depois" e "escrever comentário"',
+        'Exibir opção "iniciar filme", "assistir depois" e "escrever comentário"',
         'is_touchpoint' => false,
       ],
       [
@@ -654,7 +656,7 @@ class ProjectSeeder extends Seeder
         'project_id' => $projectId,
         'file_name' => 'classicflix.pdf',
         'file_path' =>
-          'https://res.cloudinary.com/dlbpjcsvm/image/upload/v1759674129/reactify/interviews/1/classicflix.pdf',
+        'https://res.cloudinary.com/dlbpjcsvm/image/upload/v1759674129/reactify/interviews/1/classicflix.pdf',
         'public_id' => 'reactify/interviews/1/classicflix',
         'resource_type' => 'image',
         'extraction_status' => 'completed',
