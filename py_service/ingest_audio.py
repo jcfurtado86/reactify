@@ -1,6 +1,4 @@
 import os
-import json
-import whisper
 import glob
 from dotenv import load_dotenv
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -11,14 +9,16 @@ from langchain_core.documents import Document
 load_dotenv()
 
 # Configurações
-DOWNLOAD_DIR = "temp_audio"
 TRANSCRIPTIONS_DIR = "transcriptions"
-MODEL_DIR = ".whisper_models"
 HF_MODEL_PATH = ".hf_models"
 
-os.makedirs(TRANSCRIPTIONS_DIR, exist_ok=True)
+# Verifica se a pasta existe
+if not os.path.exists(TRANSCRIPTIONS_DIR):
+    print(f"❌ A pasta '{TRANSCRIPTIONS_DIR}' não foi encontrada.")
+    exit()
 
 # 1. Configuração do Banco e Embeddings
+print("⚙️  Carregando modelos de Embedding...")
 embeddings = HuggingFaceEmbeddings(
     model_name=HF_MODEL_PATH,
     model_kwargs={'device': 'cpu'},
@@ -32,84 +32,91 @@ vector_store = PGVector(
     use_jsonb=True,
 )
 
-# 2. Carrega Modelo Whisper
-print("🎧 Carregando modelo Whisper...")
-whisper_model = whisper.load_model("large", download_root=MODEL_DIR, device="cpu")
-
-def get_metadata(file_path_base):
+def parse_transcription_file(file_path):
     """
-    Tenta ler o arquivo .info.json gerado pelo yt-dlp para pegar Título e URL reais.
-    Se não existir, usa o nome do arquivo.
+    Lê o arquivo .txt gerado pelo script anterior.
+    Espera-se o formato:
+    Linha 1: URL: ...
+    Linha 2: Título: ...
+    Linha 3: --------------------
+    Linha 4+: Conteúdo
     """
-    json_path = f"{file_path_base}.info.json"
-    meta = {"source": "Desconhecido", "url": "N/A", "title": os.path.basename(file_path_base)}
-    
-    if os.path.exists(json_path):
-        try:
-            with open(json_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                meta["source"] = f"YouTube: {data.get('title')}"
-                meta["title"] = data.get('title')
-                meta["url"] = data.get('webpage_url')
-        except Exception as e:
-            print(f"⚠️ Erro ao ler metadados JSON: {e}")
-    
-    return meta
+    metadata = {
+        "source": "Arquivo Local", 
+        "title": os.path.basename(file_path),
+        "url": "N/A"
+    }
+    content = ""
 
-def ingest_files():
-    # Lista todos os mp3 na pasta de downloads
-    audio_files = glob.glob(os.path.join(DOWNLOAD_DIR, "*.mp3"))
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            
+            # Verifica se o arquivo tem o cabeçalho esperado (mínimo 3 linhas de header + conteúdo)
+            if len(lines) > 3 and lines[0].startswith("URL:") and lines[1].startswith("Título:"):
+                raw_url = lines[0].replace("URL:", "").strip()
+                raw_title = lines[1].replace("Título:", "").strip()
+                
+                metadata["url"] = raw_url
+                metadata["title"] = raw_title
+                metadata["source"] = f"YouTube: {raw_title}" if raw_url != "N/A" else "Arquivo Transcrito"
+                
+                # O conteúdo começa após a linha tracejada (linha 3 em diante, índice 3)
+                content = "".join(lines[3:])
+            else:
+                # Fallback: Se não tiver o cabeçalho padrão, lê o arquivo inteiro
+                content = "".join(lines)
+                
+    except Exception as e:
+        print(f"⚠️ Erro ao ler {file_path}: {e}")
+        return None, None
+
+    return content, metadata
+
+def ingest_transcriptions():
+    # Lista todos os txt na pasta de transcrições
+    txt_files = glob.glob(os.path.join(TRANSCRIPTIONS_DIR, "*.txt"))
     
-    if not audio_files:
-        print("📭 Nenhum arquivo de áudio encontrado para processar.")
+    if not txt_files:
+        print("📭 Nenhum arquivo de texto encontrado na pasta de transcrições.")
         return
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
-    print(f"🚀 Encontrados {len(audio_files)} arquivos para processar.")
+    print(f"🚀 Encontrados {len(txt_files)} arquivos para processar.")
 
-    for audio_path in audio_files:
+    for txt_path in txt_files:
         try:
-            file_base = os.path.splitext(audio_path)[0] # Remove a extensão .mp3
-            metadata = get_metadata(file_base)
-            title = metadata["title"]
+            print(f"\n📄 Processando: {os.path.basename(txt_path)}...")
             
-            print(f"\n🎙️  Transcrevendo: {title}...")
+            content, metadata = parse_transcription_file(txt_path)
             
-            # Transcrição
-            result = whisper_model.transcribe(audio_path)
-            transcription_text = result["text"]
+            if not content:
+                print(f"⚠️ Arquivo vazio ou ilegível: {txt_path}")
+                continue
 
-            # Salva Backup TXT
-            # Usamos o ID do arquivo para o txt para evitar erros de caracteres no nome
-            txt_filename = f"{os.path.basename(file_base)}.txt"
-            txt_path = os.path.join(TRANSCRIPTIONS_DIR, txt_filename)
-            
-            with open(txt_path, "w", encoding="utf-8") as f:
-                f.write(f"URL: {metadata['url']}\n")
-                f.write(f"Título: {title}\n")
-                f.write("-" * 40 + "\n")
-                f.write(transcription_text)
-            
-            print(f"📝 Backup salvo: {txt_path}")
-            
             # Cria documento LangChain
             doc = Document(
-                page_content=transcription_text,
+                page_content=content,
                 metadata=metadata
             )
             
-            # Chunking e Ingestão
+            # Chunking
             chunks = text_splitter.split_documents([doc])
+            
+            if not chunks:
+                print("⚠️ Nenhum trecho gerado (conteúdo muito curto?).")
+                continue
+
             print(f"💾 Salvando {len(chunks)} trechos no banco...")
+            
+            # Ingestão
             vector_store.add_documents(chunks)
             
-            # Opcional: Mover ou renomear arquivos processados para não processar de novo
-            # shutil.move(audio_path, "processed/") 
-            print(f"✅ Processamento concluído para: {title}")
+            print(f"✅ Ingestão concluída para: {metadata['title']}")
 
         except Exception as e:
-            print(f"❌ Erro ao processar {audio_path}: {e}")
+            print(f"❌ Erro ao processar {txt_path}: {e}")
 
 if __name__ == "__main__":
-    ingest_files()
+    ingest_transcriptions()
