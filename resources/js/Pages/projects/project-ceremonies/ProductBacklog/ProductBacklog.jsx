@@ -929,6 +929,7 @@ const ProductBacklog = ({ project, setProject }) => {
         </AccordionItem>
       </Accordion>
       {project.sprints
+        .filter((sprint) => sprint.status !== 'completed')
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
         .map((sprint) => (
           <SprintTable
