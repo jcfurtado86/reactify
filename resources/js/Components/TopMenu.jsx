@@ -38,9 +38,6 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
     setTheme(newTheme)
   }
 
-  useEffect(() => {
-    console.log(themeColor)
-  }, [themeColor])
   return (
     <div
       id="top-menu"

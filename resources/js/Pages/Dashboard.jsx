@@ -45,7 +45,6 @@ export const CeremonyCard = ({
   delay = 0,
   project,
 }) => {
-  const Icon = item?.icon
   const getArtifactKey = (artifactTitle) => {
     switch (artifactTitle) {
       case 'overallModel':
@@ -66,7 +65,6 @@ export const CeremonyCard = ({
         return artifactTitle
     }
   }
-
   const getMessage = (artifactTitle, amount) => {
     if (amount > 0) return null
 
@@ -113,28 +111,15 @@ export const CeremonyCard = ({
           className="p-4 hover:no-underline"
         >
           <div className="flex w-full items-center gap-2">
-            {Icon && (
-              <div className="flex-shrink-0">
-                <Icon
-                  className={cn(
-                    'size-8 text-muted-foreground transition-colors duration-300',
-
-                    'data-[state=open]:text-primary',
-                  )}
-                />
-              </div>
-            )}
-            <div className="flex-grow">
-              <div className="flex gap-2 ">
-                <h3 className="text-md font-semibold text-foreground text-left">
-                  {item.title}
-                </h3>{' '}
-                {/* {amount > 0 && <Badge variant="secondary">{amount}</Badge>}*/}
-                <SpanButton title={`Ir até ${item.title}`} onClick={onClick}>
-                  <ArrowRight className="size-3 ml-1" />
-                </SpanButton>
-              </div>
-            </div>
+            {/* {amount > 0 && <Badge variant="secondary">{amount}</Badge>}*/}
+            <SpanButton
+              title={`Ir até ${item.title}`}
+              onClick={onClick}
+              className={'border-0 hover:underline hover:bg-inherit'}
+            >
+              {item.title}
+              <ArrowRight className="size-3 ml-1" />
+            </SpanButton>
           </div>
         </AccordionTrigger>
 
