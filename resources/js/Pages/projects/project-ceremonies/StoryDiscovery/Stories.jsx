@@ -79,7 +79,7 @@ const GeneratedItemsModal = ({
               </span>
               <Button
                 onClick={toggleAllItems}
-                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
+                className="px-3 py-1 bg-primary hover:bg-primary/90 text-foreground text-sm rounded transition-colors"
               >
                 {generatedItems.every((story) => story.selected)
                   ? 'Desmarcar Todas'
@@ -107,7 +107,7 @@ const GeneratedItemsModal = ({
                               backgroundColor: selectedVariant,
                             }}
                             variant="outline"
-                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
+                            className={`border-transparent text-foreground font-bold w-fit cursor-pointer`}
                           >
                             {story.type === 'system' ? 'SS' : 'US'}
                           </Badge>
@@ -213,7 +213,7 @@ const StoryItem = ({
                   <Badge
                     style={{ backgroundColor: selectedVariant }}
                     variant="outline"
-                    className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
+                    className={`border-transparent text-black font-bold w-fit cursor-pointer`}
                   >
                     {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
                     <ChevronDown className="ml-1 size-3" />
@@ -235,7 +235,7 @@ const StoryItem = ({
                           <Badge
                             style={{ backgroundColor: color }}
                             variant="outline"
-                            className={`border-transparent text-primary-foreground font-bold w-full cursor-pointer`}
+                            className={`border-transparent text-black font-bold w-full cursor-pointer`}
                           >
                             {`${key === 'system' ? 'ss' : 'us'}`.toUpperCase()}
                           </Badge>
@@ -274,7 +274,7 @@ const StoryItem = ({
               <Badge
                 style={{ backgroundColor: selectedVariant }}
                 variant="outline"
-                className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+                className={`border-transparent text-black font-bold w-fit cursor-pointer `}
               >
                 {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
               </Badge>

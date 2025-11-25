@@ -167,3 +167,8 @@ export const parseDateAsLocal = (dateString) => {
   // Aplica o "truque" para forçar a interpretação como fuso local
   return new Date(String(dateString) + 'T00:00:00')
 }
+
+export function capitalizeFirstLetter(string) {
+  if (!string) return string // Proteção contra strings vazias ou nulas
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}

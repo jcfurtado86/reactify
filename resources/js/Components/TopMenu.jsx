@@ -1,5 +1,5 @@
 import { usePage, Link, router } from '@inertiajs/react'
-import { cn } from '@/lib/utils'
+import { cn, capitalizeFirstLetter } from '@/lib/utils'
 import {
   User,
   Sun,
@@ -8,6 +8,7 @@ import {
   PanelLeftOpen,
   Bell,
   Check,
+  Dot,
 } from 'lucide-react'
 import RaccoonIcon from '/resources/images/raccoonIconHeadTransparent.png'
 import { useTheme } from '@/Context/ThemeContext'
@@ -16,11 +17,13 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
   const { props } = usePage()
   const { user, notifications } = props.auth
   const themes = [
-    { name: 'zinc', color: 'bg-zinc-900' },
-    { name: 'blue', color: 'bg-blue-600' },
-    { name: 'green', color: 'bg-green-600' },
-    { name: 'rose', color: 'bg-rose-600' },
-    { name: 'beige', color: 'bg-amber-600' },
+    { name: 'zinc', label: 'Default (Zinc)', color: 'oklch(0.922 0 0)' },
+    { name: 'doom64', label: 'Doom 64', color: '#e53935' },
+    { name: 'neobrutalism', label: 'Neo Brutalism', color: '#ff6666' },
+    { name: 'retroarcade', label: 'Retro Arcade', color: '#d33682' },
+    { name: 'coffee', label: 'Coffee', color: '#ffe0c2' },
+    { name: 'supabase', label: 'Supabase', color: '#006239' },
+    { name: 'violetbloom', label: 'Violet Bloom', color: '#8c5cff' },
   ]
 
   const [theme, setTheme] = useState(() =>
@@ -34,6 +37,10 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
     localStorage.setItem('theme', newTheme)
     setTheme(newTheme)
   }
+
+  useEffect(() => {
+    console.log(themeColor)
+  }, [themeColor])
   return (
     <div
       id="top-menu"
@@ -73,12 +80,8 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           <Select
             value={themeColor}
             onValueChange={(value) => setThemeColor(value)}
-            defaultOpen
           >
-            <SelectTrigger
-              className={'rounded-full size-10'}
-              title="Select Theme"
-            >
+            <SelectTrigger title="Selecione um tema">
               <SelectValue placeholder="Selecione um tema" />
             </SelectTrigger>
             <SelectContent>
@@ -87,9 +90,14 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
                   value={theme.name}
                   key={theme.name}
                   title={theme.name}
-                  className={'rounded-full size-10'}
                 >
-                  {theme.name}
+                  <section className="flex items-center gap-1">
+                    <div
+                      style={{ background: theme.color }}
+                      className={cn('flex size-4 rounded-lg shadow')}
+                    />
+                    {theme.label}
+                  </section>
                 </SelectItem>
               ))}
             </SelectContent>

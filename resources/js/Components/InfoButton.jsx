@@ -26,10 +26,7 @@ const InfoButton = ({
           {badgeContent !== null && (
             <Badge
               variant="outline"
-              className={cn(
-                `${data.classNames?.badge}`,
-                'border-0 text-primary-foreground',
-              )}
+              className={cn(`${data.classNames?.badge}`, 'border-0 text-black')}
               style={badgeStyle}
             >
               {badgeContent}
