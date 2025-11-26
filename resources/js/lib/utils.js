@@ -183,3 +183,36 @@ export function completedStoriesCount(stories) {
     return count
   }, 0)
 }
+
+export function inspectionStatus(item) {
+  const investCardObject = item.invest_card
+  if (!investCardObject) return null
+  const investCard = Object.values(investCardObject)
+  if (investCard.length === 0) {
+    return 'pending' // ou 'idle'
+  }
+  const allAreYes = investCard.every(
+    (value) => value === 'yes' || value === 'na',
+  )
+  if (allAreYes) {
+    return 'validated'
+  }
+
+  const anyIsNo = investCard.some((value) => value === 'no')
+  if (anyIsNo) {
+    return 'rejected'
+  }
+}
+
+export function inspectionColor(status) {
+  switch (status) {
+    case 'validated':
+      return 'oklch(72.3% 0.219 149.579)'
+    case 'pending':
+      return 'oklch(68.5% 0.169 237.323)' //sky 500
+    case 'rejected':
+      return 'oklch(63.7% 0.237 25.331)'
+    default:
+      return ''
+  }
+}

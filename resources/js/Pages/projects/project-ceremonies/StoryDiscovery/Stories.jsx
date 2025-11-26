@@ -16,14 +16,19 @@ import { router } from '@inertiajs/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import axios from 'axios'
 import { toast } from 'sonner'
-import { PREDEFINED_COLORS, useGroupedStories, isTemporary } from '@/lib/utils'
+import {
+  PREDEFINED_COLORS,
+  isTemporary,
+  inspectionStatus,
+  inspectionColor,
+  cn,
+} from '@/lib/utils'
 import { ColorOptions } from '@/Components/ColorComponents'
 import InfoButton from '@/Components/InfoButton'
 import { tooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
-
 import InvestCard from '../Inspection/InvestCard'
-
+import StatusBadge from '@/Components/StatusBadge'
 const GeneratedItemsModal = ({
   isModalMinimized,
   changeModalState,
@@ -169,6 +174,8 @@ const StoryItem = ({
   disabled = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
+  const status = inspectionStatus(story)
+
   const handleColorSelect = (colorValue, variantTitle) => {
     const selectedColor = PREDEFINED_COLORS.find(
       (color) => color.color === colorValue,
@@ -200,85 +207,95 @@ const StoryItem = ({
       className="relative group"
       data-card-id={story.id}
     >
-      <Card className="bg-card border-0 transition-all duration-300 ease-in-out rounded">
-        <CardContent className="p-2 flex items-center justify-between gap-2">
+      <Card
+        style={{ borderColor: inspectionColor(status) }}
+        className={cn(
+          'bg-card border transition-all duration-300 ease-in-out rounded',
+        )}
+      >
+        <CardContent
+          className={cn('p-2 flex items-center justify-between gap-2')}
+        >
           <div className="flex flex-col items-start justify-between gap-2 flex-1 min-w-0">
-            {/* exibe o popover apenas se a story nao for filha*/}
-            {story.epic_id === null ? (
-              <Popover
-                open={!disabled && typeSelectId === story.id}
-                onOpenChange={onToggleTypeSelect}
-              >
-                <PopoverTrigger className="flex">
-                  <Badge
-                    style={{ backgroundColor: selectedVariant }}
-                    variant="outline"
-                    className={`border-transparent text-black font-bold w-fit cursor-pointer`}
-                  >
-                    {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
-                    <ChevronDown className="ml-1 size-3" />
-                  </Badge>
-                </PopoverTrigger>
-                <PopoverContent
-                  align="start"
-                  alignOffset={-8}
-                  className="w-auto bg-popover p-1 border border-border"
+            <div className="flex gap-2 items-center">
+              {/* exibe o popover apenas se a story nao for filha*/}
+              {story.epic_id === null ? (
+                <Popover
+                  open={!disabled && typeSelectId === story.id}
+                  onOpenChange={onToggleTypeSelect}
                 >
-                  <div className="flex flex-col gap-1 w-24 ">
-                    {Object.entries(storyVariants).map(([key, color], i) => (
-                      <div key={`temp-${i}`} className="flex items-center ">
-                        <Button
-                          variant="ghost"
-                          className="h-auto w-20 p-1 justify-start "
-                          onClick={() => onChangeStoryType(story.id, key)}
-                        >
-                          <Badge
-                            style={{ backgroundColor: color }}
-                            variant="outline"
-                            className={`border-transparent text-black font-bold w-full cursor-pointer`}
+                  <PopoverTrigger className="flex">
+                    <Badge
+                      style={{ backgroundColor: selectedVariant }}
+                      variant="outline"
+                      className={`border-transparent text-black font-bold w-fit cursor-pointer`}
+                    >
+                      {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
+                      <ChevronDown className="ml-1 size-3" />
+                    </Badge>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    alignOffset={-8}
+                    className="w-auto bg-popover p-1 border border-border"
+                  >
+                    <div className="flex flex-col gap-1 w-24 ">
+                      {Object.entries(storyVariants).map(([key, color], i) => (
+                        <div key={`temp-${i}`} className="flex items-center ">
+                          <Button
+                            variant="ghost"
+                            className="h-auto w-20 p-1 justify-start "
+                            onClick={() => onChangeStoryType(story.id, key)}
                           >
-                            {`${key === 'system' ? 'ss' : 'us'}`.toUpperCase()}
-                          </Badge>
-                        </Button>
-                        {/* editar cores*/}
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="ghost" className="h-full w-6">
-                              <img
-                                src={rainbowIcon}
-                                alt="color-picker-icon"
-                                className="object-contain z-20 max-w-5 h-full"
-                              />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-52 p-2" align="start">
-                            <div className="space-y-1">
-                              <h4 className="font-medium text-sm px-2 py-1.5">
-                                Cores
-                              </h4>
-                              <ColorOptions
-                                handleColorSelect={(e) =>
-                                  handleColorSelect(e, key)
-                                }
-                                selectedValue={color}
-                              />
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            ) : (
-              <Badge
-                style={{ backgroundColor: selectedVariant }}
-                variant="outline"
-                className={`border-transparent text-black font-bold w-fit cursor-pointer `}
-              >
-                {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
-              </Badge>
-            )}
+                            <Badge
+                              style={{ backgroundColor: color }}
+                              variant="outline"
+                              className={`border-transparent text-black font-bold w-full cursor-pointer`}
+                            >
+                              {`${key === 'system' ? 'ss' : 'us'}`.toUpperCase()}
+                            </Badge>
+                          </Button>
+                          {/* editar cores*/}
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="ghost" className="h-full w-6">
+                                <img
+                                  src={rainbowIcon}
+                                  alt="color-picker-icon"
+                                  className="object-contain z-20 max-w-5 h-full"
+                                />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-52 p-2" align="start">
+                              <div className="space-y-1">
+                                <h4 className="font-medium text-sm px-2 py-1.5">
+                                  Cores
+                                </h4>
+                                <ColorOptions
+                                  handleColorSelect={(e) =>
+                                    handleColorSelect(e, key)
+                                  }
+                                  selectedValue={color}
+                                />
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Badge
+                  style={{ backgroundColor: selectedVariant }}
+                  variant="outline"
+                  className={`border-transparent text-black font-bold w-fit cursor-pointer `}
+                >
+                  {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
+                </Badge>
+              )}
+              <StatusBadge status={status} />
+            </div>
 
             {isEditing ? (
               <div className="flex w-full items-center gap-2">

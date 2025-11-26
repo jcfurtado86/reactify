@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { X, Check, LoaderCircle } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { isTemporary } from '@/lib/utils'
-
+import StatusBadge from '@/Components/StatusBadge'
 const routerNames = {
   // local state name -> route name
   stories: 'story',
@@ -13,37 +13,6 @@ const routerNames = {
   business_rules: 'business-rule',
   usage_scenarios: 'usage-scenario',
   system_interfaces: 'system-interface',
-}
-
-const IndicatorBadge = ({ status }) => {
-  let message = ''
-  let element = null
-
-  switch (status) {
-    case 'validated':
-      message = 'Critérios aceitos'
-      element = <Check className="text-green-500" />
-      break
-    case 'pending':
-      message = 'Avaliação pendente'
-      element = <LoaderCircle className="text-blue-500" />
-      break
-    case 'rejected':
-      message = 'Critérios recusados'
-      element = <X className="text-red-500" />
-      break
-    default:
-      return null
-  }
-
-  return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip>
-        <TooltipTrigger>{element}</TooltipTrigger>
-        <TooltipContent>{message}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
 }
 
 const InvestCard = ({
@@ -153,7 +122,7 @@ const InvestCard = ({
           </Button>
           <section className="investCard flex flex-col flex-1 items-center justify-end gap-2 ">
             <section className="flex gap-2 w-full">
-              <IndicatorBadge status={investStatus} />
+              <StatusBadge status={investStatus} />
               <LoaderCircle
                 className={`${isLoading ? 'animate-spin' : 'hidden'} text-foreground`}
               />
