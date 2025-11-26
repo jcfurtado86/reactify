@@ -1,5 +1,5 @@
 import React from 'react'
-import { Head, Link, router } from '@inertiajs/react'
+import { Head, router } from '@inertiajs/react'
 import ProgressIcon from '@/Components/ProgressIcon'
 import { ExpandableCard } from './projects/project-ceremonies/Inception/ProductCanvas'
 import Interview from '@/Components/Interview'
@@ -19,7 +19,7 @@ import SpanButton from '@/Components/SpanButton'
 import MainLayout from '@/Layouts/MainLayout'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { cn } from '@/lib/utils'
+import { cn, completedStoriesCount } from '@/lib/utils'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const getDateObject = (dateInput) => {
@@ -290,42 +290,16 @@ const Dashboard = ({ project, setProject }) => {
     { title: 'sprint', amount: project?.sprints?.length },
   ]
   useEffect(() => {
-    // console.clear();
-    if (!date || !project.created_at) {
-      // console.log(
-      //   'PARADA: A data do deadline ou a data de criação do projeto não existem.',
-      // )
+    const completedStories = completedStoriesCount(project.stories || [])
+    const totalStories = project.stories?.length || 0
+    if (totalStories < 1) {
       setProgress(0)
       return
     }
-
-    const startDate = new Date(project.created_at)
-    const endDate = new Date(date)
-    const now = new Date()
-
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      console.error(
-        'ERRO CRÍTICO: A `startDate` ou `endDate` é inválida. Não é possível calcular.',
-      )
-      setProgress(0)
-      return
-    }
-    startDate.setHours(0, 0, 0, 0)
-    endDate.setHours(0, 0, 0, 0)
-    now.setHours(0, 0, 0, 0)
-
-    const totalDuration = endDate.getTime() - startDate.getTime()
-    const elapsedDuration = now.getTime() - startDate.getTime()
-    if (totalDuration <= 0) {
-      const finalProgress = now.getTime() >= endDate.getTime() ? 100 : 0
-      setProgress(finalProgress)
-      return
-    }
-
     const progressPercentage =
-      (Math.max(0, elapsedDuration) / totalDuration) * 100
+      (Math.max(0, completedStories) / totalStories) * 100
     setProgress(progressPercentage)
-  }, [date, project.created_at])
+  }, [project.stories])
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -362,16 +336,10 @@ const Dashboard = ({ project, setProject }) => {
             </Badge>
           </span>
           Progresso da Conclusão
-          {date ? (
-            <div className="flex items-center">
-              <Progress value={progress} className="w-32 h-2 mr-2" />
-              <span className="text-sm font-medium">{`${Math.round(progress)}%`}</span>
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground italic">
-              Defina um prazo de conclusão para visualizar o progresso.
-            </div>
-          )}
+          <div className="flex items-center">
+            <Progress value={progress} className="w-32 h-2 mr-2" />
+            <span className="text-sm font-medium">{`${Math.round(progress)}% de estórias concluídas`}</span>
+          </div>
           <div className="flex items-center">
             <Clock size={16} className="mr-3.5" />
             {project.updated_at ? (

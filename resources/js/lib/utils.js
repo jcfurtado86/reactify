@@ -172,3 +172,14 @@ export function capitalizeFirstLetter(string) {
   if (!string) return string // Proteção contra strings vazias ou nulas
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
+
+export function completedStoriesCount(stories) {
+  if (!Array.isArray(stories)) return 0
+
+  return stories.reduce((count, story) => {
+    if (story.status === 'done') {
+      return count + 1
+    }
+    return count
+  }, 0)
+}
