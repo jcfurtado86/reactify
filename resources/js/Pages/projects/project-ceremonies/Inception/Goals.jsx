@@ -13,16 +13,20 @@ import {
 import rainbowIcon from '/resources/images/rainbow.png'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
-import { cn } from '@/lib/utils'
+import {
+  PREDEFINED_COLORS,
+  cn,
+  inspectionStatus,
+  inspectionColor,
+} from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { tooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { ColorOptions } from '@/Components/ColorComponents'
-import { PREDEFINED_COLORS } from '@/lib/utils'
 import { toast } from 'sonner'
 import InvestCard from '../Inspection/InvestCard'
-
+import StatusBadge from '@/Components/StatusBadge'
 const GeneratedItemsModal = ({
   isModalMinimized,
   changeModalState,
@@ -181,6 +185,7 @@ const GoalItem = ({
   systemColors,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
+  const status = inspectionStatus(goal)
 
   const handleColorSelect = (colorValue, variantTitle) => {
     const selectedColor = PREDEFINED_COLORS.find(
@@ -232,7 +237,10 @@ const GoalItem = ({
       className="relative group"
       data-card-id={goal.id}
     >
-      <Card className="bg-card border-0 transition-all duration-300 ease-in-out rounded">
+      <Card
+        style={{ borderColor: inspectionColor(status) }}
+        className="bg-card border transition-all duration-300 ease-in-out rounded"
+      >
         <CardContent className="p-2 flex flex-col gap-2">
           {/* Badge Row for Type and Priority */}
           <div className="flex ">
@@ -245,7 +253,7 @@ const GoalItem = ({
                   <Badge
                     style={{ backgroundColor: selectedType }}
                     className={cn(
-                      'border-transparent text-background font-bold cursor-pointer',
+                      'border-transparent text-black font-bold cursor-pointer',
                     )}
                   >
                     {goal.type.toUpperCase()} {goal.id}
@@ -267,7 +275,7 @@ const GoalItem = ({
                         >
                           <Badge
                             style={{ backgroundColor: color }}
-                            className={cn('w-full text-background')}
+                            className={cn('w-full text-black')}
                           >
                             {key.toUpperCase()}
                           </Badge>
@@ -310,7 +318,7 @@ const GoalItem = ({
                   <Badge
                     style={{ backgroundColor: selectedPriority }}
                     className={cn(
-                      'border-transparent text-background font-bold cursor-pointer',
+                      'border-transparent text-black font-bold cursor-pointer',
                     )}
                   >
                     {goal.priority.toUpperCase()}
@@ -332,7 +340,7 @@ const GoalItem = ({
                         >
                           <Badge
                             style={{ backgroundColor: color }}
-                            className={cn('w-full text-background')}
+                            className={cn('w-full text-black')}
                           >
                             {key.toUpperCase()}
                           </Badge>
@@ -367,6 +375,7 @@ const GoalItem = ({
                   </div>
                 </PopoverContent>
               </Popover>
+              <StatusBadge status={status} />
             </div>
             {isTemporary && (
               <LoaderCircle className="text-primary animate-spin size-4" />
