@@ -106,7 +106,7 @@ const GeneratedItemsModal = ({
                           <Badge
                             style={{ backgroundColor: selectedVariant }}
                             variant="outline"
-                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+                            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
                           >
                             {`${story.type === 'user' ? 'US' : 'SS'}${story.new_epic_identifier}`.toUpperCase()}
                           </Badge>
@@ -168,7 +168,7 @@ const StoryCard = ({ story, addEpicStory, systemColors }) => {
           <Badge
             style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${isTemporary(story.id) ? 'Temp-Id' : story.id}`.toUpperCase()}
           </Badge>
@@ -270,7 +270,7 @@ const EpicStoryCard = ({
           <Badge
             style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${
               realStoryId

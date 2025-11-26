@@ -47,11 +47,7 @@ const KanbanStoryCard = ({ story, columnKey, isOverlay, systemColors }) => {
       <Card className={`p-3 ${overlayClasses}`}>
         <div className="space-y-2">
           <div className="flex justify-between items-start">
-            <Badge
-              style={{ backgroundColor: selectedVariant }}
-              variant="outline"
-              className="border-transparent text-primary-foreground font-bold cursor-pointer"
-            >
+            <Badge style={{ backgroundColor: selectedVariant }} variant="badge">
               {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
             </Badge>
           </div>
@@ -235,7 +231,7 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
         <CardHeader>
           <div className="flex items-center gap-4">
             <CardTitle>{'Sprints'}</CardTitle>
-            <Badge variant="outline">{totalStories} stories total</Badge>
+            <Badge variant="outline">{totalStories} Estória(s)</Badge>
           </div>
         </CardHeader>
       </Card>

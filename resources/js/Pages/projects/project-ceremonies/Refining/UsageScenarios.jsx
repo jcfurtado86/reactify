@@ -112,7 +112,7 @@ const GeneratedItemsModal = ({
                             <Badge
                               style={{ backgroundColor: selectedVariant }}
                               variant="outline"
-                              className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+                              className={`border-transparent text-black font-bold w-fit cursor-pointer `}
                             >
                               {`${story.type === 'user' ? 'US' : 'SS'}${story.id}`.toUpperCase()}
                             </Badge>
@@ -209,7 +209,7 @@ const StoryCard = ({ story, addScenario, systemColors }) => {
           <Badge
             style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
           </Badge>
@@ -454,7 +454,7 @@ const ScenarioCard = ({
                 <Badge
                   style={{ backgroundColor: selectedVariant }}
                   variant="outline"
-                  className="border-transparent text-primary-foreground font-bold w-fit cursor-pointer"
+                  className="border-transparent text-black font-bold w-fit cursor-pointer"
                 >
                   {`US${scenario.id}`.toUpperCase()}
                 </Badge>

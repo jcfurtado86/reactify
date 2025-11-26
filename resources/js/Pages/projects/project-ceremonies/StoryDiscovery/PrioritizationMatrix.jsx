@@ -129,7 +129,7 @@ const StoryCard = ({
           <Badge
             style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer mb-2`}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer mb-2`}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
           </Badge>
@@ -154,14 +154,14 @@ const GoalCard = ({ goal, systemColors }) => {
           <Badge
             style={{ backgroundColor: selectedType }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
           >
             {`${goal.type.toUpperCase()}${goal.id}`}
           </Badge>
           <Badge
             style={{ backgroundColor: selectedPriority }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
           >
             {`${goal.priority.toUpperCase()}`}
           </Badge>

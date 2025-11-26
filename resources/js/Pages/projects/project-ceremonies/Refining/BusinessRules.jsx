@@ -108,7 +108,7 @@ const GeneratedItemsModal = ({
                           <Badge
                             style={{ backgroundColor: selectedVariant }}
                             variant="outline"
-                            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
+                            className={`border-transparent text-black font-bold w-fit cursor-pointer`}
                           >
                             {`${storyType === 'system' ? 'SS' : 'US'}${story.story_id}`.toUpperCase()}
                           </Badge>
@@ -185,7 +185,7 @@ const StoryCard = ({ story, addBusinessRule, systemColors }) => {
           <Badge
             style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
           </Badge>
