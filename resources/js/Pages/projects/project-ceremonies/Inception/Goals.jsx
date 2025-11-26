@@ -13,12 +13,7 @@ import {
 import rainbowIcon from '/resources/images/rainbow.png'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
-import {
-  PREDEFINED_COLORS,
-  cn,
-  inspectionStatus,
-  inspectionColor,
-} from '@/lib/utils'
+import { PREDEFINED_COLORS, cn, inspectionStatus } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { tooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
@@ -237,10 +232,7 @@ const GoalItem = ({
       className="relative group"
       data-card-id={goal.id}
     >
-      <Card
-        style={{ borderColor: inspectionColor(status) }}
-        className="bg-card border transition-all duration-300 ease-in-out rounded"
-      >
+      <Card className="bg-card border transition-all duration-300 ease-in-out rounded">
         <CardContent className="p-2 flex flex-col gap-2">
           {/* Badge Row for Type and Priority */}
           <div className="flex ">

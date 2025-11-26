@@ -16,7 +16,8 @@ import TextareaAutosize from 'react-textarea-autosize'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { tooltipInfo } from '@/lib/projectData'
-
+import { inspectionStatus } from '@/lib/utils'
+import StatusBadge from '@/Components/StatusBadge'
 const GeneratedItemsModal = ({
   isModalMinimized,
   changeModalState,
@@ -194,7 +195,7 @@ const PersonaCard = ({
   confirmDeletePersona,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
-
+  const status = inspectionStatus(persona)
   return (
     <Accordion type="single" collapsible>
       <AccordionItem
@@ -224,6 +225,7 @@ const PersonaCard = ({
             ) : (
               <CardTitle className="ml-3 text-xl">{persona.name}</CardTitle>
             )}
+            <StatusBadge status={status} />
           </div>
         </AccordionTrigger>
         <AccordionContent className="persona grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
@@ -719,7 +721,7 @@ const Personas = ({ project, setProject }) => {
       )}
       {inspectionId && can('persona.manage') && (
         <InvestCard
-          itemCategory={'stories'}
+          itemCategory={'personas'}
           itemId={inspectionId}
           anchorEl={anchorEl}
           project={project}

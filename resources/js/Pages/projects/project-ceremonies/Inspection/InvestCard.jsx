@@ -8,6 +8,7 @@ const routerNames = {
   stories: 'story',
   goal_sketches: 'goal',
   journeys: 'journey',
+  personas: 'persona',
   system_interfaces: 'system_interface',
   crc_cards: 'overall',
   business_rules: 'business-rule',

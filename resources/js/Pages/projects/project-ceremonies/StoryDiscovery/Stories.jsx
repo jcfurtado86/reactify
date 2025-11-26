@@ -20,7 +20,6 @@ import {
   PREDEFINED_COLORS,
   isTemporary,
   inspectionStatus,
-  inspectionColor,
   cn,
 } from '@/lib/utils'
 import { ColorOptions } from '@/Components/ColorComponents'
@@ -208,7 +207,6 @@ const StoryItem = ({
       data-card-id={story.id}
     >
       <Card
-        style={{ borderColor: inspectionColor(status) }}
         className={cn(
           'bg-card border transition-all duration-300 ease-in-out rounded',
         )}
