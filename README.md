@@ -1,7 +1,7 @@
 ### Configurar serviço python(uma vez)
  
 >**Necessário** ter o Python previamente instalado
-
+<!-- Congelar uma versao python e pacotes -->
 - Criar ambiente virtual(raiz):
    ```bash
    python -m venv .venv
@@ -26,6 +26,17 @@
 - Baixar modelo de embeddings:
    ```bash
    python hf.py
+   ```
+
+>**Necessário** ter o pgvector instalado e a extensão criada!
+>**Necessário** no .env:
+   ```bash
+   DATABASE_URL=postgresql+psycopg2://usuario:senha@host:porta/nome_do_banco
+   ```
+
+- Vetorizar as transcricoes dos videos:
+   ```bash
+   python ingest_audio.py
    ```
 
 ### (Caso necessário) Rodar serviços separadamente 
