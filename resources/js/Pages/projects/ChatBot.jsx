@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageSquare, X, SendHorizontal, LoaderCircle } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const AIMessage = ({ fullContent, animate }) => {
   const [displayedContent, setDisplayedContent] = useState(
@@ -14,7 +15,7 @@ const AIMessage = ({ fullContent, animate }) => {
       const interval = setInterval(() => {
         setDisplayedContent((prev) => fullContent.slice(0, prev.length + 1))
       }, 20)
-      
+
       return () => clearInterval(interval)
     } else {
       setDisplayedContent(fullContent)
@@ -45,7 +46,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
         'Olá! 👋 Eu sou seu assistente REACT-M e atuarei como seu Facilitador. Como posso **guiar** você ou sua equipe na cerimônia de hoje?',
       sender: 'bot',
       timestamp: new Date().toISOString(),
-      animate: false, 
+      animate: false,
     },
   ])
   const [isOpen, setIsOpen] = useState(false)
@@ -106,20 +107,20 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
       sender: 'user',
       message: inputMessage,
       created_at: new Date().toISOString(),
-      animate: false, 
+      animate: false,
     }
 
     const newMessages = [...messages, userMessage]
 
     const placeholderMessage = {
       id: 'ai-loading-placeholder',
-      message: '', 
+      message: '',
       sender: 'model',
       timestamp: new Date().toISOString(),
       isLoading: true,
     }
 
-    setMessages([...newMessages, placeholderMessage]) 
+    setMessages([...newMessages, placeholderMessage])
     setInputMessage('')
     setIsLoading(true)
 
@@ -131,20 +132,19 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
           sender: m.sender,
           message: m.message,
         })),
-      };
+      }
 
       router.post(route('chat.store', project.id), data, {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          console.log('Mensagem enviada para a fila com sucesso.');
+          console.log('Mensagem enviada para a fila com sucesso.')
         },
         onError: (errors) => {
-          const firstError = errors[Object.keys(errors)[0]];
-          throw new Error(firstError || 'Erro ao processar a requisição.');
+          const firstError = errors[Object.keys(errors)[0]]
+          throw new Error(firstError || 'Erro ao processar a requisição.')
         },
-      });
-
+      })
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error)
       const errorMessage = {
@@ -273,12 +273,13 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
         )}
       </AnimatePresence>
 
-      <Button
+      <ButtonWithTooltip
         onClick={toggleChat}
         size="icon"
         className="fixed bottom-2 right-2 size-12 rounded-full shadow-lg transition-transform transform hover:scale-110 z-50"
         aria-label={isOpen ? 'Fechar chat' : 'Abrir chat'}
         aria-expanded={isOpen}
+        tooltipContent={isOpen ? null : <div>Pergunte qualquer coisa</div>}
       >
         <AnimatePresence initial={false} mode="wait">
           <motion.div
@@ -295,7 +296,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
             )}
           </motion.div>
         </AnimatePresence>
-      </Button>
+      </ButtonWithTooltip>
     </>
   )
 }
