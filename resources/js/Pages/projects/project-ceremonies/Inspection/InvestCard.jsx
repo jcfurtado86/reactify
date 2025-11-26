@@ -55,12 +55,12 @@ const InvestCard = ({
 }) => {
   const item = project[itemCategory]?.find((element) => element.id === itemId)
   const [investState, setInvestState] = useState({
-    independent: item?.invest_card?.independent || 'no',
-    negotiable: item?.invest_card?.negotiable || 'no',
-    valuable: item?.invest_card?.valuable || 'no',
-    estimable: item?.invest_card?.estimable || 'no',
-    small: item?.invest_card?.small || 'no',
-    testable: item?.invest_card?.testable || 'no',
+    independent: item?.invest_card?.independent || 'na',
+    negotiable: item?.invest_card?.negotiable || 'na',
+    valuable: item?.invest_card?.valuable || 'na',
+    estimable: item?.invest_card?.estimable || 'na',
+    small: item?.invest_card?.small || 'na',
+    testable: item?.invest_card?.testable || 'na',
   })
   const [isLoading, setIsLoading] = useState(false)
   const [investStatus, setInvestStatus] = useState('rejected')
@@ -83,7 +83,7 @@ const InvestCard = ({
       setInvestStatus('pending') // ou 'idle'
       return
     }
-    const allAreYes = values.every((value) => value === 'yes')
+    const allAreYes = values.every((value) => value === 'yes' || value === 'na')
     if (allAreYes) {
       setInvestStatus('validated')
       return // A validação para aqui
