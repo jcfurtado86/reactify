@@ -17,7 +17,6 @@ const StoryCard = ({
   onSelect,
   isSelected = false,
   isCollapsed = false,
-  epicStoryId,
   systemColors,
 }) => {
   const storyVariants = systemColors?.stories || {}
@@ -35,11 +34,7 @@ const StoryCard = ({
     >
       {story && (
         <div className="mr-auto">
-          <Badge
-            style={{ backgroundColor: selectedVariant }}
-            variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer`}
-          >
+          <Badge style={{ backgroundColor: selectedVariant }} variant="badge">
             {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
           </Badge>
         </div>
@@ -308,13 +303,12 @@ const Storyboards = ({ project }) => {
           className="relative z-40 w-[--width] h-full"
         >
           <SidebarHeader
-            className={`${open ? 'items-end flex-row justify-between' : 'items-center'}  w-full `}
+            className={`${open ? 'items-end flex-row justify-evenly' : 'items-center'}  w-full text-foreground`}
           >
             {!open ? (
               <></>
             ) : (
               <>
-                <p></p>
                 <p className="text-2xl"> Stories</p>
               </>
             )}

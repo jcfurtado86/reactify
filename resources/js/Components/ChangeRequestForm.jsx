@@ -14,7 +14,7 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
     impacted_stories: [],
     new_stories: [],
   })
-
+  const storyVariants = project.system_colors?.stories || {}
   const handleStorySelection = (storyId, impactType, checked) => {
     setSelectedStories((prev) => {
       const updated = { ...prev }
@@ -94,28 +94,16 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
 
           {/* Data da Solicitação */}
           <div className="space-y-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    ' justify-start text-left font-normal',
-                    !date && 'text-muted-foreground',
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, 'PPP') : <span>Set deadline</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <Button
+              variant={'outline'}
+              className={cn(
+                ' justify-start text-left font-normal',
+                !date && 'text-muted-foreground',
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date ? format(date, 'PPP') : <span>Set deadline</span>}
+            </Button>
             {/* <Label htmlFor="request_date">Data da Solicitação *</Label>
             <Input
               id="request_date"
@@ -136,44 +124,57 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
                 User Stories Relacionadas
               </Label>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2  overflow-y-auto border border-border rounded-lg p-2">
-                {stories.map((story) => (
-                  <div
-                    key={story.id}
-                    className="space-y-2 p-2 border border-border rounded text-xs"
-                  >
-                    <div className="font-medium">
-                      {story.code || `US-${story.id}`}: {story.title}
-                    </div>
-
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2  overflow-y-auto  rounded p-2">
+                {stories.map((story) => {
+                  const selectedVariant = storyVariants[story.type] || '#f97316'
+                  const realStoryId = story.epic_id
+                    ? `${story.epic_id}.${story.epic_index || 0}`
+                    : `${story.id}`
+                  return (
                     <div
-                      className="flex gap-2
+                      key={story.id}
+                      className="space-y-2 p-2 border border-border rounded text-sm"
+                    >
+                      <Badge
+                        style={{ backgroundColor: selectedVariant }}
+                        variant="badge"
+                      >
+                        {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
+                      </Badge>
+                      <p className="text-left">{story?.title}</p>
+                      <div
+                        className="flex gap-2
 
 
                       "
-                    >
-                      <label className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={selectedStories[story.id] === 'IMPACTADA'}
-                          onCheckedChange={(checked) =>
-                            handleStorySelection(story.id, 'IMPACTADA', checked)
-                          }
-                        />
-                        <span>Impactada</span>
-                      </label>
+                      >
+                        <label className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={selectedStories[story.id] === 'IMPACTADA'}
+                            onCheckedChange={(checked) =>
+                              handleStorySelection(
+                                story.id,
+                                'IMPACTADA',
+                                checked,
+                              )
+                            }
+                          />
+                          <span>Impactada</span>
+                        </label>
 
-                      <label className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={selectedStories[story.id] === 'NOVA'}
-                          onCheckedChange={(checked) =>
-                            handleStorySelection(story.id, 'NOVA', checked)
-                          }
-                        />
-                        <span>Nova</span>
-                      </label>
+                        <label className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={selectedStories[story.id] === 'NOVA'}
+                            onCheckedChange={(checked) =>
+                              handleStorySelection(story.id, 'NOVA', checked)
+                            }
+                          />
+                          <span>Nova</span>
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}

@@ -126,7 +126,7 @@ export function ProjectPermissions({ project }) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline">Permissões</Button>
+        <Button variant="secondary">Permissões</Button>
       </SheetTrigger>
       <SheetContent className="max-w-[370px] sm:max-w-[450px] md:max-w-[470px]">
         <SheetHeader>

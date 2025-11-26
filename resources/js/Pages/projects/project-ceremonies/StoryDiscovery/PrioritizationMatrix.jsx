@@ -122,7 +122,7 @@ const StoryCard = ({
       {...listeners}
       {...attributes}
       className={`
-         flex flex-col flex-1 w-full min-w-52 max-w-60 text-left p-2 items-center justify-start text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
+         flex flex-col  w-full min-w-52 max-w-60 text-left p-2 items-center justify-start text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
     >
       {!story.isTemporary && (
         <div className="mr-auto">
@@ -184,7 +184,7 @@ const DroppableCell = ({ id, children, className = '' }) => {
     <div
       ref={setNodeRef}
       className={`
-        flex flex-row justify-center w-full rounded-md transition-all duration-150 gap-2 border border-slate-100/20
+        rounded-md transition-all duration-150 gap-2 border border-slate-100/20
         ${isOver ? ' bg-card/60' : ''}
         ${className}
       `}
@@ -511,7 +511,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
           {/* <span className="h-11 py-1 m-2 t-4">Stories</span>*/}
           <DroppableCell
             id="story-list"
-            className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 p-1 items-start border-0"
+            className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1 p-1 items-start border-0"
           >
             {unassignedStories.length > 0 ? (
               unassignedStories.map((story) => {
@@ -646,7 +646,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                               <DroppableCell
                                 key={cellId}
                                 id={cellId}
-                                className={`h-44 min-w-60`}
+                                className={`h-44 min-w-60 flex flex-row justify-center w-full  `}
                               >
                                 {storiesInCell && storiesInCell.length > 0 ? (
                                   storiesInCell.map((story) => (

@@ -39,7 +39,7 @@ const ChangeLog = ({ project }) => {
       <div className="w-full flex justify-between items-center p-4">
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogTrigger asChild>
-            <Button>Nova Solicitação</Button>
+            <Button variant="secondary">Nova Solicitação</Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl h-content p-0 border-0">
             <ChangeRequestForm

@@ -2,8 +2,8 @@ import { router } from '@inertiajs/react'
 import { Trash2, Check, Bookmark, Info } from 'lucide-react'
 import { darkenColor, PREDEFINED_COLORS } from '@/lib/utils'
 import { ColorOptions, ColorPickerPopover } from '@/Components/ColorComponents'
-import { useState, useEffect } from 'react' 
-import { toast } from 'sonner' 
+import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 
 const PriorityEditPopover = ({ priority, children, setProject, project }) => {
   const [name, setName] = useState(priority.name)
@@ -214,7 +214,6 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
             matrix_priorities: oldPriorities,
           }))
 
-         
           if (errors.name) {
             toast.error(errors.name)
           } else if (errors.error) {
@@ -233,7 +232,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">Editar Prioridades</Button>
+        <Button variant="secondary">Editar Prioridades</Button>
       </SheetTrigger>
       <SheetContent
         style={{
@@ -258,7 +257,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
               <PriorityEditPopover
                 key={p.id}
                 priority={p}
-                project={project} 
+                project={project}
                 setProject={setProject}
               >
                 <Button
