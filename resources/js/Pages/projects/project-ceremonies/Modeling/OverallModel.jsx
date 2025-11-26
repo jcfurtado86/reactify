@@ -975,11 +975,7 @@ const OverallModel = ({ project, setProject }) => {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-        <Button
-          variant="secondary"
-          className="h-11 flex items-center justify-center py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
-          onClick={handleAddCard}
-        >
+        <Button variant="secondary" className="h-12 " onClick={handleAddCard}>
           <Plus size={18} className="mr-2" />
           Adicionar CRC Card
         </Button>

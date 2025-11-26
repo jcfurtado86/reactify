@@ -810,10 +810,7 @@ const Goals = ({ project, setProject }) => {
           </div>
         )}
         {can('goal.manage') && (
-          <Button
-            className="col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
-            onClick={() => addNewGoal('cg')}
-          >
+          <Button variant="secondary" onClick={() => addNewGoal('cg')}>
             <Plus size={18} className="mr-2" />
             <span>Nova Constraint Goal</span>
           </Button>
@@ -871,10 +868,7 @@ const Goals = ({ project, setProject }) => {
         )}
         {can('goal.manage') && (
           <>
-            <Button
-              className="col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
-              onClick={() => addNewGoal('bg')}
-            >
+            <Button variant="secondary" onClick={() => addNewGoal('bg')}>
               <Plus size={18} className="mr-2" />
               <span>Nova Business Goal</span>
             </Button>

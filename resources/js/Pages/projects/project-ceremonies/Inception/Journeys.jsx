@@ -936,7 +936,7 @@ const Journeys = ({ project, setProject }) => {
           <>
             <Button
               variant="secondary"
-              className="flex-1 flex items-center justify-center py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
+              className="w-full"
               onClick={addNewJourney}
             >
               <Plus size={18} className="mr-2" /> Nova Jornada

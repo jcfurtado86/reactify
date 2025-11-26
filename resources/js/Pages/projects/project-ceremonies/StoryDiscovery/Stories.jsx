@@ -350,7 +350,6 @@ const Stories = ({ project, setProject }) => {
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   //
   const { can } = usePermissions()
-  const childrenByEpicId = useGroupedStories(project?.stories)
   const handleInputChange = (e) => {
     setEditValue(e.target.value)
   }
@@ -629,7 +628,6 @@ const Stories = ({ project, setProject }) => {
             .filter((story) => story.type === 'user' && !story.epic_id)
             .sort((a, b) => a.id - b.id)
             .map((story, i) => {
-              const relatedEpics = childrenByEpicId.get(story.id) || []
               return (
                 <React.Fragment key={story.id}>
                   <StoryItem
@@ -665,7 +663,6 @@ const Stories = ({ project, setProject }) => {
         {can('userStory.manage') && (
           <Button
             variant="secondary"
-            className="flex items-center justify-center py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
             onClick={() => addNewStory('user')}
             disabled={!can('userStory.manage')}
           >
@@ -688,7 +685,6 @@ const Stories = ({ project, setProject }) => {
             .filter((story) => story.type === 'system')
             .sort((a, b) => a.id - b.id)
             .map((story, i) => {
-              const relatedEpics = childrenByEpicId.get(story.id) || []
               return (
                 <React.Fragment key={story.id}>
                   <StoryItem
@@ -724,7 +720,6 @@ const Stories = ({ project, setProject }) => {
           <>
             <Button
               variant="secondary"
-              className="flex items-center justify-center py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
               disabled={!can('userStory.manage')}
               onClick={() => addNewStory('system')}
             >

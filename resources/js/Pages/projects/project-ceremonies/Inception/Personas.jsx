@@ -776,7 +776,7 @@ const Personas = ({ project, setProject }) => {
             variant="secondary"
             onClick={addNewPersona}
             disabled={isSubmitting}
-            className="xl:col-span-2 flex items-center justify-center w-full py-1 bg-card hover:bg-accent text-primary rounded-lg transition-colors shadow-md"
+            className="xl:col-span-2 flex "
           >
             <Plus size={18} className="mr-2" />
             {isSubmitting ? 'Criando...' : 'Nova Persona'}
