@@ -749,17 +749,16 @@ const Goals = ({ project, setProject }) => {
           systemColors={project?.system_colors}
         />
       )}
-      {inspectionId &&
-        can('goal.manage')(
-          <InvestCard
-            itemCategory={'goal_sketches'}
-            itemId={inspectionId}
-            anchorEl={anchorEl}
-            project={project}
-            setProject={setProject}
-            setInspectionId={setInspectionId}
-          />,
-        )}
+      {inspectionId && can('goal.manage') && (
+        <InvestCard
+          itemCategory={'goal_sketches'}
+          itemId={inspectionId}
+          anchorEl={anchorEl}
+          project={project}
+          setProject={setProject}
+          setInspectionId={setInspectionId}
+        />
+      )}
       <div className="flex flex-col gap-2">
         <InfoButton
           data={tooltipInfo.constraintGoal}
