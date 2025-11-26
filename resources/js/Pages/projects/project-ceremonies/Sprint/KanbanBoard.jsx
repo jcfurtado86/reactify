@@ -10,7 +10,7 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { getStatusColor } from '@/lib/utils'
+import { getStatusColor, isSprintActive } from '@/lib/utils'
 // ============================================================================
 // Subcomponente para o Card da Story (Item Arrastável)
 // ============================================================================
@@ -111,7 +111,9 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
 
   useEffect(() => {
     if (sprints) {
-      const sprintStories = sprints.flatMap((sprint) => sprint.stories || [])
+      const sprintStories = sprints
+        .filter((s) => s.status !== 'completed' && isSprintActive(s))
+        .flatMap((sprint) => sprint.stories || [])
       setLocalStories(sprintStories)
     }
   }, [sprints])

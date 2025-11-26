@@ -76,6 +76,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
         <div className="flex items-center gap-2">
           <Select
             value={themeColor}
+            defaultValue="zinc"
             onValueChange={(value) => setThemeColor(value)}
           >
             <SelectTrigger title="Selecione um tema">
