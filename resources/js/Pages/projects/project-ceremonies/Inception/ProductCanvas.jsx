@@ -25,9 +25,11 @@ import { tooltipInfo } from '@/lib/projectData'
 const cardVariants = {
   destructive: 'border-t-destructive text-destructive',
   warning: 'border-t-orange-400 text-orange-400',
-  accent: 'border-t-indigo-500 text-indigo-500',
-  success: 'border-t-emerald-500 text-emerald-500',
-  info: 'border-t-cyan-500 text-cyan-500',
+  chart_1: 'border-t-chart-1 text-chart-1',
+  chart_2: 'border-t-chart-2 text-chart-2',
+  chart_3: 'border-t-chart-3 text-chart-3',
+  chart_4: 'border-t-chart-4 text-chart-4',
+  chart_5: 'border-t-chart-5 text-chart-5',
   secondary: 'border-t-rose-500 text-rose-500',
   primary: 'border-t-primary text-primary',
   main: '',
@@ -539,7 +541,7 @@ const MainView = ({ project = {}, setProject }) => {
           editable={can('productCanvas.manage')}
           title="Solutions"
           content={project?.product_canvas?.solutions}
-          variant="warning"
+          variant="chart_1"
           icon={CheckCircle}
           placeholder="How does the project solve the problems?"
           onContentUpdate={(content) =>
@@ -550,7 +552,7 @@ const MainView = ({ project = {}, setProject }) => {
           editable={can('productCanvas.manage')}
           title="Involved Personas"
           content={project?.product_canvas?.personas}
-          variant="accent"
+          variant="chart_2"
           icon={Users}
           placeholder="Who are the main users?"
           onContentUpdate={(content) =>
@@ -561,7 +563,7 @@ const MainView = ({ project = {}, setProject }) => {
           editable={can('productCanvas.manage')}
           title="Restrictions"
           content={project?.product_canvas?.restrictions}
-          variant="success"
+          variant="chart_3"
           icon={X}
           placeholder="What are the project's limitations?"
           onContentUpdate={(content) =>
@@ -572,7 +574,7 @@ const MainView = ({ project = {}, setProject }) => {
           editable={can('productCanvas.manage')}
           title="Is"
           content={project?.product_canvas?.product_is}
-          variant="info"
+          variant="chart_4"
           icon={Check}
           placeholder="What this product IS..."
           onContentUpdate={(content) =>
@@ -583,7 +585,7 @@ const MainView = ({ project = {}, setProject }) => {
           editable={can('productCanvas.manage')}
           title="Is Not"
           content={project?.product_canvas?.product_is_not}
-          variant="secondary"
+          variant="chart_5"
           icon={X}
           placeholder="What this product IS NOT..."
           onContentUpdate={(content) =>

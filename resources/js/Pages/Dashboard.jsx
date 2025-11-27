@@ -115,7 +115,7 @@ export const CeremonyCard = ({
             <SpanButton
               title={`Ir até ${item.title}`}
               onClick={onClick}
-              className={'border-0 hover:underline hover:bg-inherit'}
+              variant="link"
             >
               {item.title}
               <ArrowRight className="size-3 ml-1" />
@@ -393,7 +393,7 @@ const Dashboard = ({ project, setProject }) => {
         title={project?.title || 'Project'}
         content={project?.description}
         col={1}
-        variant="primary"
+        variant="chart_1"
         icon={List}
         editable={false}
         defaultExpanded={true}

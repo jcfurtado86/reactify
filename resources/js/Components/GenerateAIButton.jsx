@@ -1,7 +1,7 @@
 import { Info, Sparkles, Loader2 } from 'lucide-react'
 import ButtonWithTooltip from './ButtonWithTooltip'
 const GenerateAIButton = ({
-  isGenerating,
+  isGenerating = false,
   onClick,
   tooltip,
 
@@ -21,6 +21,7 @@ const GenerateAIButton = ({
         variant="hollow"
         className="flex flex-1 items-center justify-center py-2"
         tooltipContent={tooltip?.description || null}
+        side="left"
       >
         {isGenerating ? (
           <Loader2 size={18} className="mr-2 animate-spin" />

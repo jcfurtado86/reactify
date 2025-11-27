@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react' 
+import React, { useState, useRef, useEffect } from 'react'
 import { router } from '@inertiajs/react'
 import {
   UploadCloud,
@@ -10,7 +10,7 @@ import {
   Trash2,
   X,
   Check,
-  Pencil
+  Pencil,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -39,7 +39,7 @@ const InterviewEditModal = ({ interview, onClose }) => {
         preserveScroll: true,
         onSuccess: () => {
           toast.success('Transcrição atualizada com sucesso!')
-          onClose() 
+          onClose()
         },
         onError: (errors) => {
           console.error('Erro ao salvar:', errors)
@@ -94,9 +94,7 @@ const InterviewEditModal = ({ interview, onClose }) => {
           <button
             onClick={handleSaveTranscript}
             className="flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            disabled={
-              editedTranscript === interview.transcript || isSaving
-            }
+            disabled={editedTranscript === interview.transcript || isSaving}
           >
             {isSaving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -198,7 +196,7 @@ const InterviewListItem = ({ interview, onEditClick }) => {
           interview.transcript &&
           !showConfirmDelete && (
             <button
-              onClick={() => onEditClick(interview)} 
+              onClick={() => onEditClick(interview)}
               className="ml-4 text-muted-foreground opacity-60 transition-opacity hover:opacity-100"
               title={'Visualizar/Editar Transcrição'}
             >
@@ -253,20 +251,20 @@ const InterviewUploadCard = ({
   const validateFile = (file) => {
     const allowedTypes = ['pdf', 'mp3', 'mp4']
     const maxSize = 51200 * 1024 // 50MB em bytes
-    
+
     const fileExtension = file.name.split('.').pop().toLowerCase()
 
     // console.error(fileExtension)
     // console.error(file.size)
-    
+
     if (!allowedTypes.includes(fileExtension)) {
       return 'Tipo de arquivo não permitido'
     }
-    
+
     if (file.size > maxSize) {
       return 'Arquivo muito grande (máx: 50MB)'
     }
-    
+
     return null
   }
 
@@ -330,21 +328,21 @@ const InterviewUploadCard = ({
     setSelectedInterview(null)
   }
 
-  const acceptedFileTypes = '.pdf,.mp3,.mp4';
+  const acceptedFileTypes = '.pdf,.mp3,.mp4'
 
   return (
     <div
-      className={`${className}  rounded-lg border-t-4 border-t-primary bg-card p-4 shadow-lg transition-all duration-300 hover:shadow-xl`}
+      className={`${className}  rounded-lg border-t-4 border-t-chart-2 bg-card p-4 shadow-lg transition-all duration-300 hover:shadow-xl`}
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center text-lg font-bold text-card-foreground">
           <Mic className="mr-2 h-5 w-5 text-primary" />
           Entrevistas
         </h3>
-        <button
+        <Button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+          variant="secondary"
         >
           {isUploading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -354,7 +352,7 @@ const InterviewUploadCard = ({
           {isUploading
             ? `Enviando... ${uploadProgress}%`
             : 'Carregar Entrevista'}
-        </button>
+        </Button>
         <input
           type="file"
           ref={fileInputRef}
@@ -379,7 +377,7 @@ const InterviewUploadCard = ({
             <InterviewListItem
               key={interview.id}
               interview={interview}
-              onEditClick={handleOpenEditModal} 
+              onEditClick={handleOpenEditModal}
             />
           ))
         ) : (

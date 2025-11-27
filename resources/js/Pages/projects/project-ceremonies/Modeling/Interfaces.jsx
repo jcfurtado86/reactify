@@ -527,7 +527,9 @@ const Interfaces = ({ project, setProject }) => {
         )}
         {/* dialog for adding interface*/}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <Button onClick={handleOpenForCreate}>ADICIONAR INTERFACE</Button>
+          <Button variant="secondary" onClick={handleOpenForCreate}>
+            Adicionar Interface
+          </Button>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -659,7 +661,7 @@ const Interfaces = ({ project, setProject }) => {
         <section className="flex flex-col items-center gap-2 w-1/2">
           <h3 className="text-2xl font-bold mb-4">Interfaces Internas</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* ADICIONADO: Verificação de Empty State para Internas */}
+            {/* ADICIONADO: Verificação de Empty State para Internas */}
             {internalInterfaces.length > 0 ? (
               internalInterfaces.map((item) => (
                 <InterfaceCard
@@ -691,7 +693,7 @@ const Interfaces = ({ project, setProject }) => {
         <section className="flex flex-col items-center gap-2 border-l border-border pl-2 w-1/2">
           <h3 className="text-2xl font-bold mb-4">Interfaces Externas</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {externalInterfaces.length > 0 ? (
+            {externalInterfaces.length > 0 ? (
               externalInterfaces.map((item) => (
                 <InterfaceCard
                   key={`external-${item.id}`}

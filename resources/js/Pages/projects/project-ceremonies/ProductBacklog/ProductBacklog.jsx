@@ -256,8 +256,10 @@ const SprintTable = ({
       >
         <AccordionTrigger className="hover:no-underline">
           <div className="flex gap-4">
-            <span className="font-bold hover:underline">{sprint.name}</span>
-            <span className="text-muted-foreground">
+            <span className="font-bold hover:underline my-auto">
+              {sprint.name}
+            </span>
+            <span className="text-muted-foreground my-auto">
               {' '}
               {formatDate(sprint.start_date)} - {formatDate(sprint.end_date)} (
               {table.getRowCount()} items)
