@@ -7,6 +7,7 @@ use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use DB;
+
 class SprintController extends Controller
 {
   public function index()
@@ -43,7 +44,7 @@ class SprintController extends Controller
   public function store(Request $request)
   {
     $validated = $request->validate([
-      'name' => 'required|string|max:255',
+      'name' => 'required|string|max:30',
       'start_date' => 'required|date',
       'end_date' => 'required|date|after:start_date',
       'status' => 'required|in:active,completed',
@@ -62,7 +63,7 @@ class SprintController extends Controller
   public function update(Request $request, Sprint $sprint)
   {
     $validated = $request->validate([
-      'name' => 'sometimes|string|max:255',
+      'name' => 'sometimes|string|max:30',
       'start_date' => 'sometimes|date_format:Y-m-d|after_or_equal:today',
       'end_date' => 'sometimes|date_format:Y-m-d|after:start_date',
       'status' => 'sometimes|in:active,completed',
@@ -92,7 +93,7 @@ class SprintController extends Controller
     if ($newSprintId == $sprint->id) {
       back()->with([
         'message' =>
-          'Você não pode mover as stories para a mesma sprint que está finalizando.',
+        'Você não pode mover as stories para a mesma sprint que está finalizando.',
         'status' => 'error',
       ]);
     }
