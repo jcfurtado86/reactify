@@ -14,7 +14,13 @@ import { getStatusColor, isSprintActive } from '@/lib/utils'
 // ============================================================================
 // Subcomponente para o Card da Story (Item Arrastável)
 // ============================================================================
-const KanbanStoryCard = ({ story, columnKey, isOverlay, systemColors }) => {
+const KanbanStoryCard = ({
+  story,
+  sprints,
+  columnKey,
+  isOverlay,
+  systemColors,
+}) => {
   // ✅ Hook do dnd-kit para tornar este componente arrastável
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -42,6 +48,7 @@ const KanbanStoryCard = ({ story, columnKey, isOverlay, systemColors }) => {
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.id}`
+  console.log(story)
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <Card className={`p-3 ${overlayClasses}`}>

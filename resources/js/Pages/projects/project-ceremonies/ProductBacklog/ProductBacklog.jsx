@@ -140,7 +140,7 @@ const getSharedColumns = ({
                 </DropdownMenuPortal>
               </DropdownMenuSub>
             )}
-            {!isBacklog && sprintId && (
+            {!isBacklog && sprintId && status !== 'completed' && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
