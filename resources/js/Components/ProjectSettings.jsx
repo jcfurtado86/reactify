@@ -36,7 +36,11 @@ export function ProjectSettings({ project }) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="secondary" size="icon">
+        <Button
+          variant="secondary"
+          size="icon"
+          title="Configurações do Projeto"
+        >
           <Settings className="size-4" />
           <span className="sr-only">Configurações do Projeto</span>
         </Button>

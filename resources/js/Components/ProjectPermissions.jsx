@@ -1,4 +1,4 @@
-import { Plus, LoaderCircle, X } from 'lucide-react'
+import { Plus, LoaderCircle, X, UserCog } from 'lucide-react'
 import { usePage, router } from '@inertiajs/react'
 import axios from 'axios'
 import { toast } from 'sonner'
@@ -126,7 +126,9 @@ export function ProjectPermissions({ project }) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="secondary">Permissões</Button>
+        <Button variant="secondary" title="Gerenciar permissões" size="icon">
+          <UserCog className="size-4" />
+        </Button>
       </SheetTrigger>
       <SheetContent className="max-w-[370px] sm:max-w-[450px] md:max-w-[470px]">
         <SheetHeader>
