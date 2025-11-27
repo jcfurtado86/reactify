@@ -870,8 +870,7 @@ const ProductBacklog = ({ project, setProject }) => {
         >
           <AccordionTrigger className="hover:no-underline">
             <div className="flex gap-4">
-              <span className="hover:underline">
-                {' '}
+              <span className="hover:underline my-auto">
                 Product Backlog ({productBacklogTable.getRowCount()} items)
               </span>
 
