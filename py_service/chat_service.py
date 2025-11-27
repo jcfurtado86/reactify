@@ -129,8 +129,9 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
             - usage_scenarios
             - system_interfaces
             - storyboards
-            - product_backlog
             - sprint
+            - product_backlog
+            - interviews
     """
     print(f"🔎 --- Tool Call: get_data_for_artifact(artifact='{artifact_name}', project_id={project_id}) ---")
     if not LARAVEL_API_KEY:
@@ -142,11 +143,21 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
         "personas",
         "journeys",
         "stories",
+        "overall_model_classes",
+        "prioritizations",
+        "change_requests",
+        "epic_stories",
+        "business_rules",
+        "usage_scenarios",
+        "system_interfaces",
+        "storyboards",
         "sprint",
-        "product_backlog"
+        "product_backlog",
+        "interviews"
     ]
     
     if artifact_name not in valid_artifacts:
+        print(f"Artefato '{artifact_name}' inválido. Fora da lista da tool: {', '.join(valid_artifacts)}")
         return {
             "error": f"Artefato '{artifact_name}' inválido. Escolha entre: {', '.join(valid_artifacts)}"
         }
@@ -164,8 +175,8 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
             }
         )
         response.raise_for_status() # Lança erro se a resposta for 4xx ou 5xx
-        #print("--- Resposta da Ferramenta (JSON): ---")
-        #print(response.json())
+        # print("--- Resposta da Ferramenta (JSON): ---")
+        # print(response.json())
         wait_for_all_tracers()
 
         raw_data = response.json()
@@ -174,9 +185,9 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
         print("-" * 80)
         print(json.dumps(clean_data, indent=4, ensure_ascii=False ))
         print("-" * 80)
-        print(f"✅ Dados SUJOS.")
-        print(json.dumps(raw_data, indent=4, ensure_ascii=False))
-        print("-" * 80)
+        # print(f"✅ Dados SUJOS.")
+        # print(json.dumps(raw_data, indent=4, ensure_ascii=False))
+        # print("-" * 80)
         
         return json.dumps(clean_data, ensure_ascii=False)
     except requests.exceptions.HTTPError as e:
@@ -382,11 +393,11 @@ def build_system_prompt(data) -> str:
     methodology_context = ""#get_methodology_context()
 
     # O prompt de sistema é quase o mesmo, mas a Instrução 4 mudou.
-    system_prompt_content = f"""Você é um Assistente de IA atuando como **Facilitador** da metodologia ágil de requisitos REACT-M. Seu papel **NÃO** é apenas responder perguntas, mas **agir como um coach e guia** para o usuário, conforme descrito na metodologia.
+    system_prompt_content = f"""Você é um Assistente de IA atuando como **Facilitador** da metodologia ágil de requisitos REACT-M. Seu papel **NÃO** é apenas responder perguntas, mas **agir como um coach e guia,** para o usuário, conforme descrito na metodologia.
 
     **Ferramentas Disponíveis:**
-    1. Se precisar de dados do banco de dados do projeto relacionados aos artefatos e cerimônias, use `get_data_for_artifact`.
-    2. Se precisar de embasamento teórico e metodológico, use `search_knowledge_base`.
+    1. Se precisar de dados do banco de dados do projeto relacionados aos artefatos e cerimônias inclusive as entrevistas de requisitos, use `get_data_for_artifact`.
+    2. Se precisar de embasamento teórico e metodológico e especialmente, se precisar saber qual seu papel durante as interações com o usuário se comportantodo como o Facilitator, use `search_knowledge_base`. Com ela você saberá tudo que precisa.
 
     **Seu Objetivo (O Papel do Facilitador):** Guiar todos os envolvidos a aplicar o REACT-M da melhor forma possível. Você deve ser proativo, colaborativo e ajudar a equipe a executar as cerimônias.
 

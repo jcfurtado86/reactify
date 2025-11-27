@@ -144,6 +144,14 @@ class ToolController extends Controller
                     }])
                     ->get();
                 break;
+
+            case 'interviews':
+                $data = $project->interviews()
+                    ->select(['id', 'file_name', 'resource_type', 'transcript', 'created_at'])
+                    ->where('extraction_status', 'completed')
+                    ->whereNotNull('transcript')
+                    ->get();
+                break;
                 
             default:
                 Log::warning("Artefato '$artifact' não conhecido pela ToolController.");
