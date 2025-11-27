@@ -35,13 +35,8 @@ const useOnClickOutside = (ref, handler) => {
 }
 
 const LeftMenu = ({ isOpen, setIsOpen }) => {
-  const [isHovered, setIsHovered] = useState(false)
   const { props } = usePage()
-  const { user, notifications } = props.auth
   const projects = props.auth.projects || []
-  const [theme, setTheme] = useState(() =>
-    document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-  )
 
   const menuRef = useRef(null)
 
@@ -60,32 +55,12 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
   }
 
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const newTheme = document.documentElement.classList.contains('dark')
-        ? 'dark'
-        : 'light'
-      setTheme(newTheme)
-    })
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    })
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
     console.log(props)
   }, [props])
 
   const currentRouteName = route().current()
   const currentProjectId = route().params.project
 
-  const isProjectsSectionActive =
-    currentRouteName &&
-    currentRouteName.startsWith('project') &&
-    !route().current('projects.index')
-
-  useOnClickOutside(menuRef, () => setIsHovered(false))
   return (
     <AnimatePresence>
       <motion.aside
