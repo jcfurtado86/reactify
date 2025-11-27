@@ -277,6 +277,7 @@ const SprintTable = ({
             {sprint.status === 'active' && (
               <>
                 <SpanButton
+                  variant="secondary"
                   onClick={() => {
                     !isSprintActive(sprint)
                       ? openEditSprintForm(sprint, true)
@@ -287,14 +288,17 @@ const SprintTable = ({
                     ? 'Iniciar Sprint'
                     : 'Finalizar Sprint'}
                 </SpanButton>
-                <SpanButton onClick={() => openEditSprintForm(sprint)}>
+                <SpanButton
+                  variant="secondary"
+                  onClick={() => openEditSprintForm(sprint)}
+                >
                   Editar sprint
                 </SpanButton>
               </>
             )}
             <SpanButton
               title="Deletar Sprint"
-              className={'bg-destructive/20 hover:bg-destructive/50'}
+              variant="destructive"
               onClick={() => openDeleteSprintForm(sprint)}
             >
               <TrashIcon className="size-3" />
@@ -628,8 +632,7 @@ const ProductBacklog = ({ project, setProject }) => {
     setOpen(!open)
     setSelectedSprint(sprint)
   }
-  const openDeleteSprintForm = (e, sprint) => {
-    e.preventDefault()
+  const openDeleteSprintForm = (sprint) => {
     setOpenDeleteForm(!openDeleteForm)
     setSelectedSprint(sprint)
   }
@@ -870,10 +873,11 @@ const ProductBacklog = ({ project, setProject }) => {
                 Product Backlog ({productBacklogTable.getRowCount()} items)
               </span>
 
-              <SpanButton onClick={(e) => createSprint(e)}>
+              <SpanButton variant="secondary" onClick={(e) => createSprint(e)}>
                 Criar sprint
               </SpanButton>
               <SpanButton
+                variant="secondary"
                 onClick={(e) => {
                   e.preventDefault()
                   router.get(
@@ -929,7 +933,7 @@ const ProductBacklog = ({ project, setProject }) => {
         </AccordionItem>
       </Accordion>
       {project.sprints
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+        .sort((a, b) => a.id - b.id)
         .map((sprint) => (
           <SprintTable
             key={sprint.id}

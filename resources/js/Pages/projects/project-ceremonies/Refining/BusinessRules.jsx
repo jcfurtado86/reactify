@@ -12,10 +12,12 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import { tooltipInfo } from '@/lib/projectData'
-import { isTemporary, useGroupedStories } from '@/lib/utils'
+import { isTemporary, inspectionStatus } from '@/lib/utils'
 import InvestCard from '../Inspection/InvestCard'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
+import StatusBadge from '@/Components/StatusBadge'
+
 /**
  * Componente para renderizar um único card de estória.
  * Gerencia seu próprio estado de hover para exibir o botão de adicionar.
@@ -209,9 +211,9 @@ const BusinessRuleCard = ({
   const [isHovered, setIsHovered] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(businessRule.title)
-
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.type] || '#f97316'
+  const status = inspectionStatus(businessRule)
 
   // ⚡️ FUNÇÕES PARA MANIPULAR A EDIÇÃO
   const handleEdit = () => {
@@ -295,13 +297,13 @@ const BusinessRuleCard = ({
           <Badge
             style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-primary-foreground font-bold w-fit cursor-pointer `}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
           >
             {`BR${
               isTemporary(businessRule.id) ? '' : businessRule.id
             }`.toUpperCase()}
           </Badge>
-
+          <StatusBadge status={status} />
           {/* 🎨 RENDERIZAÇÃO CONDICIONAL: MODO DE EDIÇÃO OU VISUALIZAÇÃO */}
           {isEditing ? (
             <div className="w-full flex flex-col items-center gap-2">
@@ -342,7 +344,6 @@ const BusinessRules = ({ project, setProject }) => {
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const hasStories = project?.stories && project.stories.length > 0
-  const childrenByEpicId = useGroupedStories(project?.stories)
 
   // Memoriza o estado das business_rules
   const businessRulesByStoryId = useMemo(() => {
@@ -572,8 +573,8 @@ const BusinessRules = ({ project, setProject }) => {
       {/* user stories*/}
       {project?.stories
         ?.filter((story) => story.type === 'user')
+        .sort((a, b) => a.id - b.id)
         .map((story) => {
-          const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedBusinessRules =
             businessRulesByStoryId.get(story.id) || []
           return (
@@ -609,8 +610,8 @@ const BusinessRules = ({ project, setProject }) => {
       {/* system stories*/}
       {project?.stories
         ?.filter((story) => story.type === 'system')
+        .sort((a, b) => a.id - b.id)
         .map((story) => {
-          const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedBusinessRules =
             businessRulesByStoryId.get(story.id) || []
           return (

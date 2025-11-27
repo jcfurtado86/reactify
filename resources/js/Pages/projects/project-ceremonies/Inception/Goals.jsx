@@ -775,7 +775,7 @@ const Goals = ({ project, setProject }) => {
         0 ? (
           project.goal_sketches
             .filter((goal) => goal.type === 'cg')
-            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            .sort((a, b) => a.id - b.id)
             .map((goal) => (
               <GoalItem
                 key={goal.id}
@@ -834,7 +834,7 @@ const Goals = ({ project, setProject }) => {
         0 ? (
           project.goal_sketches
             .filter((goal) => goal.type === 'bg')
-            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            .sort((a, b) => a.id - b.id)
             .map((goal) => (
               <GoalItem
                 key={goal.id}

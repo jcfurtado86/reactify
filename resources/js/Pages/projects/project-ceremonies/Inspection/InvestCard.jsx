@@ -94,6 +94,10 @@ const InvestCard = ({
         invest_card: investState,
       },
       {
+        onSuccess: () => {
+          setInspectionId(null)
+        },
+
         onStart: () => {
           setIsLoading(true)
         },

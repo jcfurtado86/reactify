@@ -1,4 +1,5 @@
 import { X, Check, LoaderCircle } from 'lucide-react'
+import SpanButton from './SpanButton'
 const StatusBadge = ({ status }) => {
   let message = ''
   let element = null
@@ -23,7 +24,11 @@ const StatusBadge = ({ status }) => {
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
-        <TooltipTrigger>{element}</TooltipTrigger>
+        <TooltipTrigger asChild>
+          <SpanButton variant={'ghost'} className="hover:bg-transparent ">
+            {element}
+          </SpanButton>
+        </TooltipTrigger>
         <TooltipContent>{message}</TooltipContent>
       </Tooltip>
     </TooltipProvider>

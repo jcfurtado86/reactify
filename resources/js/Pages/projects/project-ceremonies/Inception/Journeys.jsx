@@ -31,11 +31,12 @@ import {
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import TextareaAutosize from 'react-textarea-autosize'
-import { cn } from '@/lib/utils'
+import { cn, inspectionStatus } from '@/lib/utils'
 import { tooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import InvestCard from '../Inspection/InvestCard'
+import StatusBadge from '@/Components/StatusBadge'
 
 const SortableJourneyStepItem = (props) => {
   const {
@@ -651,7 +652,7 @@ const Journeys = ({ project, setProject }) => {
                         className={cn(
                           'rounded-lg p-4 border-2 transition-colors',
                           journey.selected
-                            ? 'bg-accent border-primary'
+                            ? 'bg-muted border-primary'
                             : 'bg-muted/50 border-border',
                         )}
                       >
@@ -671,7 +672,7 @@ const Journeys = ({ project, setProject }) => {
                           {journey.steps.map((step, stepIndex) => (
                             <div
                               key={stepIndex}
-                              className="flex items-center text-sm text-muted-foreground"
+                              className="flex items-center text-sm text-foreground"
                             >
                               <span
                                 className={cn(
@@ -719,206 +720,212 @@ const Journeys = ({ project, setProject }) => {
       {/* Journeys List */}
       {project.journeys && project.journeys.length > 0 ? (
         project.journeys
-          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-          .map((journey, i) => (
-            <div
-              key={i}
-              className={` bg-card rounded shadow-md overflow-hidden border border-border`}
-            >
+          .sort((a, b) => a.id - b.id)
+          .map((journey, i) => {
+            const status = inspectionStatus(journey)
+            return (
               <div
-                className="flex items-center justify-between py-2 px-3 cursor-pointer bg-card hover:bg-accent/50 transition-colors"
-                data-card-id={journey.id}
-                onClick={() => toggleJourney(journey.id)}
+                key={i}
+                className={` bg-card rounded shadow-md overflow-hidden border border-border`}
               >
-                <div className="flex items-center text-2xl">
-                  <Map className="text-primary mr-2" size={20} />
-                  {editingJourney === journey.id ? (
-                    <input
-                      type="text"
-                      value={editJourneyName}
-                      onChange={(e) => setEditJourneyTitle(e.target.value)}
-                      onKeyUp={(e) => {
-                        if (e.key === 'Enter') saveEditJourney()
-                      }}
-                      className="text-foreground p-0 bg-transparent border-none focus:ring-0 font-medium text-2xl rounded h-full focus:outline-none"
-                      autoFocus
-                    />
-                  ) : (
-                    <h4 className="text-foreground font-medium m-0">
-                      {journey.title}
-                    </h4>
-                  )}
-                </div>
+                <div
+                  className="flex items-center justify-between py-2 px-3 cursor-pointer bg-card hover:bg-accent/50 transition-colors"
+                  data-card-id={journey.id}
+                  onClick={() => toggleJourney(journey.id)}
+                >
+                  <div className="flex items-center text-2xl">
+                    <Map className="text-primary mr-2" size={20} />
+                    {editingJourney === journey.id ? (
+                      <input
+                        type="text"
+                        value={editJourneyName}
+                        onChange={(e) => setEditJourneyTitle(e.target.value)}
+                        onKeyUp={(e) => {
+                          if (e.key === 'Enter') saveEditJourney()
+                        }}
+                        className="text-foreground p-0 bg-transparent border-none focus:ring-0 font-medium text-2xl rounded h-full focus:outline-none"
+                        autoFocus
+                      />
+                    ) : (
+                      <h4 className="text-foreground font-medium m-0">
+                        {journey.title}
+                      </h4>
+                    )}{' '}
+                    <StatusBadge status={status} />
+                  </div>
 
-                <div className="flex items-center">
-                  {can('journey.manage') && (
-                    <>
-                      <ButtonWithTooltip
-                        tooltipContent="Inspecionar (INVEST Card)"
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-foreground"
-                        onClick={(e) => inspectJourney(e, journey.id)}
-                      >
-                        <ChartArea size={20} />
-                      </ButtonWithTooltip>
-                      {editingJourney === journey.id ? (
+                  <div className="flex items-center">
+                    {can('journey.manage') && (
+                      <>
                         <ButtonWithTooltip
-                          tooltipContent={'Salvar titulo'}
-                          variant="success"
-                          size="icon"
-                          className=""
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            saveEditJourney()
-                          }}
-                        >
-                          <Check size={20} />
-                        </ButtonWithTooltip>
-                      ) : (
-                        <ButtonWithTooltip
-                          tooltipContent={'Editar titulo'}
+                          tooltipContent="Inspecionar (INVEST Card)"
                           variant="ghost"
                           size="icon"
                           className="text-muted-foreground hover:text-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            startEditJourney(journey.id)
-                          }}
+                          onClick={(e) => inspectJourney(e, journey.id)}
                         >
-                          <Edit size={20} />
+                          <ChartArea size={20} />
                         </ButtonWithTooltip>
-                      )}
-                      <Popover>
-                        <PopoverTrigger asChild>
+                        {editingJourney === journey.id ? (
                           <ButtonWithTooltip
-                            tooltipContent={'Deletar journey'}
+                            tooltipContent={'Salvar titulo'}
+                            variant="success"
+                            size="icon"
+                            className=""
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              saveEditJourney()
+                            }}
+                          >
+                            <Check size={20} />
+                          </ButtonWithTooltip>
+                        ) : (
+                          <ButtonWithTooltip
+                            tooltipContent={'Editar titulo'}
                             variant="ghost"
                             size="icon"
-                            className="text-destructive/80 hover:text-destructive"
+                            className="text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              startEditJourney(journey.id)
+                            }}
+                          >
+                            <Edit size={20} />
+                          </ButtonWithTooltip>
+                        )}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <ButtonWithTooltip
+                              tooltipContent={'Deletar journey'}
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive/80 hover:text-destructive"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Trash size={20} />
+                            </ButtonWithTooltip>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="w-60 bg-popover border-border text-popover-foreground"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <Trash size={20} />
-                          </ButtonWithTooltip>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-60 bg-popover border-border text-popover-foreground"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="space-y-3">
-                            <h4 className="font-medium">Delete Journey</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Are you sure? All steps will be lost.
-                            </p>
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => deleteJourney(journey.id)}
-                              >
-                                Delete
-                              </Button>
+                            <div className="space-y-3">
+                              <h4 className="font-medium">Delete Journey</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Are you sure? All steps will be lost.
+                              </p>
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => deleteJourney(journey.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </>
-                  )}
-                  <ChevronRight
-                    className={cn(
-                      'text-foreground transition-transform',
-                      expandedJourney === journey.id && 'rotate-90',
+                          </PopoverContent>
+                        </Popover>
+                      </>
                     )}
-                    size={20}
-                  />
-                </div>
-              </div>
-
-              {/* {expandedJourney === journey.id && (*/}
-              <>
-                {journey.steps && journey.steps.length > 0 ? (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={(event) => handleDragEnd(event, journey.id)}
-                  >
-                    <SortableContext
-                      items={journey.steps.map((s) => s.id)}
-                      strategy={rectSortingStrategy}
-                    >
-                      <div
-                        className={`${expandedJourney === journey.id ? 'max-h-screen opacity-1 p-4' : 'max-h-0 opacity-0'} transition-all duration-300 grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start justify-center  `}
-                      >
-                        {journey.steps.map((step, stepIndex) => {
-                          const isCurrentlyEditing =
-                            editingStep.journeyId === journey.id &&
-                            editingStep.stepIndex === stepIndex
-                          return (
-                            <SortableJourneyStepItem
-                              key={step.id}
-                              step={step}
-                              stepIndex={stepIndex}
-                              isLastStep={
-                                stepIndex === journey.steps.length - 1
-                              }
-                              disabled={!can('journey.manage')}
-                              color={colors[stepIndex % colors.length]}
-                              isEditing={isCurrentlyEditing}
-                              editValue={
-                                isCurrentlyEditing
-                                  ? editValue
-                                  : step.description
-                              }
-                              onValueChange={(e) =>
-                                setEditValue(e.target.value)
-                              }
-                              onEdit={() =>
-                                startEditStep(journey.id, stepIndex)
-                              }
-                              onSave={saveEditStep}
-                              onCancel={cancelEditStep}
-                              onDelete={() => deleteStep(journey.id, stepIndex)}
-                              textareaRef={
-                                isCurrentlyEditing ? textareaRef : null
-                              }
-                            />
-                          )
-                        })}
-                        <div className="flex justify-start items-center h-full">
-                          {can('journey.manage') && (
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="text-primary"
-                              onClick={() => addNewStep(journey.id)}
-                            >
-                              <Plus size={18} />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
-                    <p className="mb-2">
-                      Essa Jornada não possui nenhum passo.
-                    </p>
-                    {can('journey.manage') && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-primary"
-                        onClick={() => addNewStep(journey.id)}
-                      >
-                        <Plus size={16} className="mr-1" /> Adicionar passo
-                      </Button>
-                    )}
+                    <ChevronRight
+                      className={cn(
+                        'text-foreground transition-transform',
+                        expandedJourney === journey.id && 'rotate-90',
+                      )}
+                      size={20}
+                    />
                   </div>
-                )}
-              </>
-            </div>
-          ))
+                </div>
+
+                {/* {expandedJourney === journey.id && (*/}
+                <>
+                  {journey.steps && journey.steps.length > 0 ? (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={(event) => handleDragEnd(event, journey.id)}
+                    >
+                      <SortableContext
+                        items={journey.steps.map((s) => s.id)}
+                        strategy={rectSortingStrategy}
+                      >
+                        <div
+                          className={`${expandedJourney === journey.id ? 'max-h-screen opacity-1 p-4' : 'max-h-0 opacity-0'} transition-all duration-300 grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start justify-center  `}
+                        >
+                          {journey.steps.map((step, stepIndex) => {
+                            const isCurrentlyEditing =
+                              editingStep.journeyId === journey.id &&
+                              editingStep.stepIndex === stepIndex
+                            return (
+                              <SortableJourneyStepItem
+                                key={step.id}
+                                step={step}
+                                stepIndex={stepIndex}
+                                isLastStep={
+                                  stepIndex === journey.steps.length - 1
+                                }
+                                disabled={!can('journey.manage')}
+                                color={colors[stepIndex % colors.length]}
+                                isEditing={isCurrentlyEditing}
+                                editValue={
+                                  isCurrentlyEditing
+                                    ? editValue
+                                    : step.description
+                                }
+                                onValueChange={(e) =>
+                                  setEditValue(e.target.value)
+                                }
+                                onEdit={() =>
+                                  startEditStep(journey.id, stepIndex)
+                                }
+                                onSave={saveEditStep}
+                                onCancel={cancelEditStep}
+                                onDelete={() =>
+                                  deleteStep(journey.id, stepIndex)
+                                }
+                                textareaRef={
+                                  isCurrentlyEditing ? textareaRef : null
+                                }
+                              />
+                            )
+                          })}
+                          <div className="flex justify-start items-center h-full">
+                            {can('journey.manage') && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="text-primary"
+                                onClick={() => addNewStep(journey.id)}
+                              >
+                                <Plus size={18} />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
+                      <p className="mb-2">
+                        Essa Jornada não possui nenhum passo.
+                      </p>
+                      {can('journey.manage') && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-primary"
+                          onClick={() => addNewStep(journey.id)}
+                        >
+                          <Plus size={16} className="mr-1" /> Adicionar passo
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </>
+              </div>
+            )
+          })
       ) : (
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border">
           <Map size={40} className="mb-4 text-primary" />

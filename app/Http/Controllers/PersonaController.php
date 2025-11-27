@@ -25,7 +25,7 @@ class PersonaController extends Controller
       'count' => count($validatedData['personas']),
     ]);
 
-    return back()->with('success', 'Personas adicionadas com sucesso.');
+    return back()->with(['status' => 'success', 'message' => 'Personas adicionadas']);
   }
 
   public function store(Request $request)
@@ -40,7 +40,7 @@ class PersonaController extends Controller
 
     $persona = Persona::create($validated);
 
-    return back()->with('success', 'Persona atualizada.');
+    return back()->with(['status' => 'success', 'message' => 'Persona criada']);
   }
 
   public function update(Request $request, Persona $persona)
@@ -61,7 +61,7 @@ class PersonaController extends Controller
 
     $persona->update($validated);
 
-    return back()->with('success', 'Persona atualizada.');
+    return back()->with(['status' => 'success', 'message' => 'Persona atualizada']);
   }
 
   /**
@@ -71,6 +71,6 @@ class PersonaController extends Controller
   {
     $persona->delete();
 
-    return back()->with('success', 'Persona deletada.');
+    return back()->with(['status' => 'success', 'message' => 'Persona deletada.']);
   }
 }

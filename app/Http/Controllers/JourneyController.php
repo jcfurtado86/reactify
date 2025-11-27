@@ -22,7 +22,7 @@ class JourneyController extends Controller
     if ($journey->project) broadcast(new ProjectUpdated($journey->project));
 
     Log::info('Journey created', ['id' => $journey->id]);
-    return back();
+    return back()->with(['status' => 'success', 'message' => 'Journey criada com sucesso!']);
   }
 
   // Método para bulk store das journeys selecionadas
@@ -63,7 +63,7 @@ class JourneyController extends Controller
 
     Log::info('Journey updated', ['id' => $journey->id]);
 
-    return back();
+    return back()->with(['status' => 'success', 'message' => 'Journey atualizada!']);
   }
 
   public function destroy(Journey $journey)
@@ -71,6 +71,6 @@ class JourneyController extends Controller
     $journey->delete();
 
     Log::info('Journey deleted', ['id' => $journey->id]);
-    return back();
+    return back()->with(['status' => 'success', 'message' => 'Journey removida!']);
   }
 }

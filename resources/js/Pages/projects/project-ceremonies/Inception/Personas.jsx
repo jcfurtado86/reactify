@@ -732,7 +732,7 @@ const Personas = ({ project, setProject }) => {
 
       {project.personas && project.personas.length > 0 ? (
         project.personas
-          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+          .sort((a, b) => a.id - b.id)
           .map((persona) => {
             return (
               <PersonaCard

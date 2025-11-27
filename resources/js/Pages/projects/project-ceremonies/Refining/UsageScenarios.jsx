@@ -9,12 +9,13 @@ import {
   ChevronsUp,
   FileText,
 } from 'lucide-react'
-import { isTemporary, useGroupedStories } from '@/lib/utils'
+import { isTemporary, inspectionStatus } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
 import { tooltipInfo } from '@/lib/projectData'
+import StatusBadge from '@/Components/StatusBadge'
 /**
  * Renders the parent Story card on the left.
  * Its primary purpose is to display story info and provide an "add scenario" action.
@@ -239,6 +240,7 @@ const ScenarioCard = ({
   const [isExpanded, setIsExpanded] = useState(
     scenario.description.and ? true : false,
   )
+  const status = inspectionStatus(scenario)
   const [editValues, setEditValues] = useState({
     as: scenario.description.as || '',
     given: scenario.description.given || '',
@@ -458,6 +460,7 @@ const ScenarioCard = ({
                 >
                   {`US${scenario.id}`.toUpperCase()}
                 </Badge>
+                <StatusBadge status={status} />
                 <span className="font-bold text-sm">{scenario.title}</span>
               </div>
               <ul className="space-y-2 text-sm font-normal text-left mt-3 pl-1">
@@ -516,7 +519,6 @@ const UsageScenarios = ({ project, setProject }) => {
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const hasStories = project?.stories && project.stories.length > 0
-  const childrenByEpicId = useGroupedStories(project?.stories)
 
   // Memoize scenarios grouped by their parent `story_id`.
   const scenariosByStoryId = useMemo(() => {
@@ -736,81 +738,42 @@ const UsageScenarios = ({ project, setProject }) => {
       )}
       {project?.stories
         ?.filter((story) => story.type === 'user' && !story.epic_id)
+        .sort((a, b) => a.id - b.id)
         .map((story) => {
-          const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
           return (
-            <React.Fragment key={story.id}>
-              <section className="py-1 flex gap-2 min-h-48" key={story.id}>
-                <StoryCard
-                  story={story}
-                  addScenario={() => addScenario(story.id)}
-                  systemColors={project?.system_colors}
-                />
+            <section key={story.id} className="py-1 flex gap-2 min-h-48">
+              <StoryCard
+                story={story}
+                addScenario={() => addScenario(story.id)}
+                systemColors={project?.system_colors}
+              />
 
-                <div className="flex flex-col gap-2 w-full">
-                  {relatedScenarios
-                    .sort((a, b) => a.id - b.id)
-                    .map((scenario, index, array) => (
-                      <ScenarioCard
-                        key={scenario.id}
-                        scenario={scenario}
-                        story={story}
-                        setProject={setProject}
-                        lastElement={
-                          index === array.length - 1 && array.length > 1
-                        }
-                        onInspect={() => inspectScenario(scenario.id)}
-                        systemColors={project?.system_colors}
-                      />
-                    ))}
-                </div>
-              </section>
-              {[...relatedEpics]
-                ?.sort((a, b) => a.id - b.id)
-                .map((currentStory, index) => {
-                  const epicScenarios =
-                    scenariosByStoryId.get(currentStory.id) || []
-                  return (
-                    <section
-                      className="py-1 flex gap-2 min-h-48"
-                      key={currentStory.id}
-                    >
-                      <StoryCard
-                        story={currentStory}
-                        epicStoryId={index + 1}
-                        addScenario={() => addScenario(currentStory.id)}
-                        systemColors={project?.system_colors}
-                      />
-
-                      <div className="flex flex-col gap-2 w-full">
-                        {epicScenarios
-                          .sort((a, b) => a.id - b.id)
-                          .map((scenario, index, array) => (
-                            <ScenarioCard
-                              key={scenario.id}
-                              scenario={scenario}
-                              story={story}
-                              setProject={setProject}
-                              lastElement={
-                                index === array.length - 1 && array.length > 1
-                              }
-                              onInspect={() => inspectScenario(scenario.id)}
-                              systemColors={project?.system_colors}
-                            />
-                          ))}
-                      </div>
-                    </section>
-                  )
-                })}
-            </React.Fragment>
+              <div className="flex flex-col gap-2 w-full">
+                {relatedScenarios
+                  .sort((a, b) => a.id - b.id)
+                  .map((scenario, index, array) => (
+                    <ScenarioCard
+                      key={scenario.id}
+                      scenario={scenario}
+                      story={story}
+                      setProject={setProject}
+                      lastElement={
+                        index === array.length - 1 && array.length > 1
+                      }
+                      onInspect={() => inspectScenario(scenario.id)}
+                      systemColors={project?.system_colors}
+                    />
+                  ))}
+              </div>
+            </section>
           )
         })}
       {/* system  */}
       {project?.stories
         ?.filter((story) => story.type === 'system')
+        .sort((a, b) => a.id - b.id)
         .map((story) => {
-          const relatedEpics = childrenByEpicId.get(story.id) || []
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
           return (
             <React.Fragment key={story.id}>
