@@ -280,6 +280,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
         aria-label={isOpen ? 'Fechar chat' : 'Abrir chat'}
         aria-expanded={isOpen}
         tooltipContent={isOpen ? null : <div>Pergunte qualquer coisa</div>}
+        side="left"
       >
         <AnimatePresence initial={false} mode="wait">
           <motion.div
