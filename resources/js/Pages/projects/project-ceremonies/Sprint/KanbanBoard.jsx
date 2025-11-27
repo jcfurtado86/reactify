@@ -48,16 +48,17 @@ const KanbanStoryCard = ({
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.id}`
-  console.log(story)
+
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <Card className={`p-3 ${overlayClasses}`}>
-        <div className="space-y-2">
-          <div className="flex justify-between items-start">
-            <Badge style={{ backgroundColor: selectedVariant }} variant="badge">
-              {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
-            </Badge>
-          </div>
+        <div className="flex flex-col justify-between items-start gap-1">
+          <Badge style={{ backgroundColor: selectedVariant }} variant="badge">
+            {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
+          </Badge>
+          <Badge variant="outline">
+            {`${story?.sprint?.name || 'No Sprint'}`}
+          </Badge>
           <p className="text-sm font-medium text-left">{story.title}</p>
         </div>
       </Card>
@@ -78,7 +79,7 @@ const KanbanColumn = ({ id, variant, title, stories, systemColors }) => {
       ref={setNodeRef}
       className={`min-h-96 transition-colors ${isOver ? 'bg-muted/50' : ''}`} // Feedback visual ao passar por cima
     >
-      <CardHeader className="pb-4">
+      <CardHeader>
         <CardTitle className="flex justify-between items-center text-sm">
           <span className="capitalize">{title}</span>
           <Badge
@@ -89,7 +90,7 @@ const KanbanColumn = ({ id, variant, title, stories, systemColors }) => {
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="flex flex-col gap-1">
         {stories.map((story) => (
           <KanbanStoryCard
             key={story.id}
@@ -116,7 +117,18 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
     if (sprints) {
       const sprintStories = sprints
         .filter((s) => s.status !== 'completed' && isSprintActive(s))
-        .flatMap((sprint) => sprint.stories || [])
+        .flatMap((sprint) => {
+          const sprintStories = sprint.stories || []
+          return sprintStories.map((story) => ({
+            ...story,
+            sprint: {
+              id: sprint.id,
+              name: sprint.name,
+              start_date: sprint.start_date,
+              end_date: sprint.end_date,
+            },
+          }))
+        })
       setLocalStories(sprintStories)
     }
   }, [sprints])
@@ -233,11 +245,21 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
   const totalStories = localStories.length
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-y-2">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <CardTitle>{'Sprints'}</CardTitle>
+            <CardTitle>{'Sprints Ativas'}</CardTitle>
+
+            {/* {sprints
+              .filter(
+                (sprint) =>
+                  isSprintActive(sprint) && sprint.status === 'active',
+              )
+              .map((sprint) => (
+                <Badge variant="outline">{sprint.name}</Badge>
+              ))} */}
+
             <Badge variant="outline">{totalStories} Estória(s)</Badge>
           </div>
         </CardHeader>
@@ -262,7 +284,7 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
             {columns.map((column) => (
               <KanbanColumn
                 key={column.key}

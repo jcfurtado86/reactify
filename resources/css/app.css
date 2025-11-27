@@ -6,6 +6,10 @@
 /* Permite hover na v4 do tailwindcss */
 @custom-variant hover (&:hover);
 
+::selection {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
 .App {
   box-sizing: border-box;
   height: 100vh;

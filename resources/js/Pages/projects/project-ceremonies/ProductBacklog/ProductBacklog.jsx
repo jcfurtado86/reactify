@@ -774,6 +774,7 @@ const ProductBacklog = ({ project, setProject }) => {
                 <Input
                   id="name-1"
                   name="name"
+                  maxLength={30}
                   defaultValue={
                     selectedSprint?.name || 'Sprint 1 - Configuração Inicial'
                   }
@@ -934,6 +935,25 @@ const ProductBacklog = ({ project, setProject }) => {
         </AccordionItem>
       </Accordion>
       {project.sprints
+        ?.filter((sprint) => sprint.status === 'active')
+        .sort((a, b) => a.id - b.id)
+        .map((sprint) => (
+          <SprintTable
+            key={sprint.id}
+            sprint={sprint}
+            storyVariants={storyVariants}
+            moveToSprint={moveToSprint}
+            removeFromSprint={removeFromSprint}
+            project={project}
+            openEditSprintForm={openEditSprintForm}
+            openDeleteSprintForm={openDeleteSprintForm}
+            openEndSprintForm={openEndSprintForm}
+          />
+        ))}
+      <Separator className="my-4" />
+
+      {project.sprints
+        ?.filter((sprint) => sprint.status === 'completed')
         .sort((a, b) => a.id - b.id)
         .map((sprint) => (
           <SprintTable
