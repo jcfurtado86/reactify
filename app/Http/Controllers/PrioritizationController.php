@@ -17,6 +17,12 @@ class PrioritizationController extends Controller
       'position' => 'required|integer',
     ]);
 
+    $story = Story::find($validatedData['story_id']);
+
+    if ($story->status !== 'draft') {
+      return back()->with(['message' => 'Only stories in draft status can be prioritized', 'status' => 'error']);
+    }
+
     $prioritization = Prioritization::create($validatedData);
 
     Story::where('id', $validatedData['story_id'])->update(['status' => 'prioritized']);
@@ -30,6 +36,12 @@ class PrioritizationController extends Controller
       'priority_id' => 'required|exists:matrix_priorities,id',
       'position' => 'required|integer',
     ]);
+
+    $story = $prioritization->story;
+
+    if ($story->status !== 'draft') {
+      return back()->with(['message' => 'Only stories in draft status can be prioritized', 'status' => 'error']);
+    }
 
     $prioritization->update($validatedData);
 

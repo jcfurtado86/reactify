@@ -22,8 +22,15 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { router, Link } from '@inertiajs/react'
-import { BookText, Target, LayoutGrid, ExternalLink } from 'lucide-react'
+import {
+  BookText,
+  Target,
+  LayoutGrid,
+  ExternalLink,
+  AlertOctagonIcon,
+} from 'lucide-react'
 import EditPriorities from './EditPriorities'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const SortablePriorityColumn = ({
   priority,
@@ -86,10 +93,12 @@ const StoryCard = ({
   className = '',
   systemColors,
 }) => {
+  const isDisabled = story.status === 'done'
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: `story-${story.story_id}`,
       data: { story },
+      disabled: isDisabled,
     })
 
   const style = {
@@ -98,6 +107,7 @@ const StoryCard = ({
     backgroundColor: priority?.color ? darkenColor(priority.color, 0.4) : '',
     visibility: isDragging ? 'hidden' : 'visible',
   }
+  console.log(story)
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.story_id}`
@@ -125,14 +135,25 @@ const StoryCard = ({
          flex flex-col  w-full min-w-52 max-w-60 text-left p-2 items-center justify-start text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
     >
       {!story.isTemporary && (
-        <div className="mr-auto">
+        <div className="w-full flex items-center gap-2 justify-between">
           <Badge
             style={{ backgroundColor: selectedVariant }}
             variant="outline"
-            className={`border-transparent text-black font-bold w-fit cursor-pointer mb-2`}
+            className={`border-transparent text-black font-bold w-fit cursor-pointer `}
           >
             {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
           </Badge>
+          {isDisabled && (
+            <ButtonWithTooltip
+              size="icon"
+              variant="outline"
+              tooltipContent={
+                'Stories finalizadas em sprints não podem ser alteradas'
+              }
+            >
+              <AlertOctagonIcon />
+            </ButtonWithTooltip>
+          )}
         </div>
       )}
 
@@ -142,8 +163,6 @@ const StoryCard = ({
 }
 
 const GoalCard = ({ goal, systemColors }) => {
-  // const selectedType = goalTypeColors[goal.type] || goalTypeColors.bg
-  // const selectedPriority = goalTypeColors[goal.priority] || goalTypeColors.bg
   const goalVariants = systemColors?.goals || {}
   const selectedType = goalVariants[goal.type] || '#f97316'
   const selectedPriority = goalVariants[goal.priority] || '#f97316'
@@ -227,6 +246,7 @@ const transformArrayToMatrixObject = (
         epic_index: storyDetails.epic_index,
         story_title: storyDetails.title,
         story_type: storyDetails.type,
+        status: storyDetails.status,
         project_id: storyDetails.project_id,
         priority_id: item.priority_id,
         position: item.position,
@@ -519,6 +539,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   story_id: story.id,
                   story_title: story.title,
                   story_type: story.type,
+                  status: story.status,
                   epic_id: story.epic_id,
                   epic_index: story.epic_index,
                 }
