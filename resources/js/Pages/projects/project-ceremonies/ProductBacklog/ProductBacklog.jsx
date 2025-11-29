@@ -950,7 +950,7 @@ const ProductBacklog = ({ project, setProject }) => {
             openEndSprintForm={openEndSprintForm}
           />
         ))}
-      <Separator className="my-4" />
+      <Separator className="mt-12 mb-4" />
 
       {project.sprints
         ?.filter((sprint) => sprint.status === 'completed')
