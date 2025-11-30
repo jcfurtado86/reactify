@@ -7,7 +7,7 @@ import {
   Trash2,
   MousePointerClick,
 } from 'lucide-react'
-import { router, usePage, Head } from '@inertiajs/react'
+import { router, usePage, Head, useForm } from '@inertiajs/react'
 import MainLayout from '@/Layouts/MainLayout'
 import { toast } from 'sonner'
 import {
@@ -15,19 +15,28 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-
+import { useEffect, useRef, useState } from 'react'
 import TableComponent from '@/Components/TableComponent'
+import { cn } from '@/lib/utils'
+ 
+const NAME_MAX = 50
 
 const Home = ({}) => {
   const props = usePage().props
-  const { errors } = props
+  //const { errors } = props
   const projects = props.auth.projects || []
   const [currentProjects, setCurrentProjects] = useState(projects)
   const commandInputRef = useRef(null)
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState([])
-  const [newProject, setNewProject] = useState({
+  // const [newProject, setNewProject] = useState({
+  //   title: '',
+  //   description: '',
+  //   emoji: '',
+  // })
+
+  const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
     title: '',
     description: '',
     emoji: '',
@@ -156,7 +165,12 @@ const Home = ({}) => {
 
   const createProject = (e) => {
     e.preventDefault()
-    router.post(route('project.store'), newProject)
+    
+    post(route('project.store'), {
+        onSuccess: () => {
+            reset() 
+        }
+    })
   }
   const toggleActive = (projectId) => {
     if (!projectId) return
@@ -264,59 +278,85 @@ const Home = ({}) => {
 
               <div className="grid gap-4">
                 <div className="grid gap-3">
-                  <Label htmlFor="title-1">
-                    Nome <span className="text-destructive">*</span>
-                  </Label>
-                  <span className="text-destructive text-sm">
-                    {errors?.title}
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="title-1">
+                        Nome <span className="text-destructive">*</span>
+                    </Label>
+                    <span className={cn(
+                        "text-[10px]", 
+                        data.title.length >= NAME_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                    )}>
+                      {data.title.length}/{NAME_MAX}
+                    </span>
+                  </div>
+
+                <Input
+                  placeholder="Nome do Projeto"
+                  id="title-1"
+                  name="title"
+                  maxLength={NAME_MAX} // Bloqueio físico
+                  value={data.title}
+                  className={cn(errors.title ? 'border-destructive focus-visible:ring-destructive' : '')}
+                  onChange={(e) => {
+                      setData('title', e.target.value)
+                      if (errors.title) clearErrors('title')
+                  }}
+                />
+                {errors.title && (
+                  <span className="text-destructive text-sm font-medium">
+                      {errors.title}
                   </span>
-                  <Input
-                    placeholder="Nome do Projeto"
-                    id="title-1"
-                    name="title"
-                    value={newProject.title}
-                    onChange={(e) =>
-                      setNewProject({ ...newProject, title: e.target.value })
-                    }
-                  />
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <div className="flex justify-between items-center">
+                    <Label htmlFor="description-1">
+                        Descrição <span className="text-destructive">*</span>
+                    </Label>
+                    <span className={cn(
+                        "text-[10px]", 
+                        data.description.length >= 1000 ? "text-destructive font-bold" : "text-muted-foreground"
+                    )}>
+                        {data.description.length}/1000
+                    </span>
                 </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="description">
-                    Descrição <span className="text-destructive">*</span>
-                  </Label>
-                  <span className="text-destructive text-sm">
-                    {errors?.description}
+
+                <Input
+                  placeholder="Descrição do Projeto"
+                  id="description-1"
+                  name="description"
+                  maxLength={1000} // Bloqueio físico
+                  className={cn(
+                      "bg-background",
+                      errors.description ? 'border-destructive focus-visible:ring-destructive' : ''
+                  )}
+                  value={data.description}
+                  onChange={(e) => {
+                      setData('description', e.target.value)
+                      if (errors.description) clearErrors('description')
+                  }}
+                />
+                {errors.description && (
+                  <span className="text-destructive text-sm font-medium">
+                      {errors.description}
                   </span>
-                  <Input
-                    placeholder="Descrição do Projeto"
-                    id="description-1"
-                    name="description"
-                    className="bg-background "
-                    value={newProject.description}
-                    onChange={(e) =>
-                      setNewProject({
-                        ...newProject,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                </div>
+                )}
+              </div>
+
                 <div className="flex items-center gap-3">
                   <Label htmlFor="description">Emoji</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" size="icon">
-                        {newProject.emoji || <MousePointerClick />}
+                        {data.emoji || <MousePointerClick />}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-fit p-0">
                       <EmojiPicker
                         className="h-[342px]"
                         onEmojiSelect={({ emoji }) => {
-                          setNewProject({
-                            ...newProject,
-                            emoji: emoji,
-                          })
+                          setData('emoji', emoji)
                         }}
                       >
                         <EmojiPickerSearch />
@@ -331,16 +371,14 @@ const Home = ({}) => {
                     title="Remover emoji"
                     onClick={(e) => {
                       e.preventDefault()
-                      setNewProject({
-                        ...newProject,
-                        emoji: null,
-                      })
+                      setData('emoji', null)
                     }}
                   >
                     <Trash2 />
                   </Button>
                 </div>
               </div>
+              
               <DialogFooter>
                 <DialogClose asChild>
                   <Button type="button" variant="outline">

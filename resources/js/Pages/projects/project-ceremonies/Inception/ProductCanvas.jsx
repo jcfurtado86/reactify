@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
 import { tooltipInfo } from '@/lib/projectData'
+import { usePage } from '@inertiajs/react'
 
 const cardVariants = {
   destructive: 'border-t-destructive text-destructive',
@@ -166,6 +167,8 @@ const ExpandableCard = ({
   defaultExpanded = false,
   onContentUpdate,
   placeholder = 'Click to add content...',
+  maxLength = 2000, // Limite padrão seguro
+  error = null,     // Mensagem de erro específica para este card
 }) => {
   const [expanded, setExpanded] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -177,6 +180,12 @@ const ExpandableCard = ({
   useEffect(() => {
     setEditableContent(content || '')
   }, [content])
+
+  useEffect(() => {
+    if (error) {
+      setIsEditing(true)
+    }
+  }, [error])
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -223,10 +232,11 @@ const ExpandableCard = ({
     <div
       className={cn(
         className,
-        'bg-card rounded-lg border-t-4 transition-all duration-300 shadow-lg hover:shadow-xl h-full',
+        'bg-card rounded-lg border-t-4 transition-all duration-300 shadow-lg hover:shadow-xl h-full flex flex-col',
         col === 2 ? 'col-span-2' : '',
         expanded ? 'row-span-2' : '',
-        isEditing ? 'ring-2 ring-ring' : '',
+        // Visualmente indicamos erro na borda do card inteiro também
+        error ? 'ring-2 ring-destructive' : (isEditing ? 'ring-2 ring-ring' : ''),
         variantClasses.split(' ')[0],
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -286,21 +296,50 @@ const ExpandableCard = ({
         </div>
 
         {/* Card Content */}
-        <div className="flex-1 flex flex-col min-h-0 font-normal">
+        <div className="flex-1 flex flex-col min-h-0 font-normal relative">
           <div className="text-muted-foreground text-sm text-left transition-all duration-300 flex-1">
             {isEditing ? (
-              <div className="h-full">
-                <TextareaAutosize
-                  ref={textareaRef}
-                  value={editableContent}
-                  onChange={(e) => setEditableContent(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={placeholder}
-                  className="w-full resize-none bg-background  text-sm text-foreground rounded-md p-3 border border-border focus:border-primary focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
-                  disabled={isSaving}
-                />
-                <div className="text-xs text-muted-foreground/80 mt-2">
-                  Ctrl+Enter to save • Esc to cancel
+              <div className="h-full flex flex-col gap-1">
+                <div className="relative w-full">
+                    <TextareaAutosize
+                    ref={textareaRef}
+                    maxLength={maxLength} 
+                    value={editableContent}
+                    onChange={(e) => setEditableContent(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    className={cn(
+                        "w-full resize-none bg-background text-sm text-foreground rounded-md p-3 border transition-colors focus:outline-none focus:ring-1",
+                        // Muda a cor da borda baseado no erro
+                        error 
+                        ? "border-destructive focus:border-destructive focus:ring-destructive" 
+                        : "border-border focus:border-primary focus:ring-ring"
+                    )}
+                    disabled={isSaving}
+                    />
+                </div>
+                
+                {/* Rodapé do Editor: Erro e Contador */}
+                <div className="flex justify-between items-start text-xs mt-1 min-h-[20px]">
+                    <div className="flex-1 mr-2">
+                        {error ? (
+                             <span className="text-destructive font-medium animate-in fade-in slide-in-from-top-1 block">
+                                {error}
+                             </span>
+                        ) : (
+                            <span className="text-muted-foreground/80">
+                                Ctrl+Enter to save
+                            </span>
+                        )}
+                    </div>
+                    
+                    {/* Contador de Caracteres */}
+                    <span className={cn(
+                        "font-mono whitespace-nowrap transition-colors",
+                        editableContent.length >= maxLength ? "text-destructive font-bold" : "text-muted-foreground"
+                    )}>
+                        {editableContent.length}/{maxLength}
+                    </span>
                 </div>
               </div>
             ) : (
@@ -326,10 +365,13 @@ const ExpandableCard = ({
                   </div>
                 ) : (
                   <div
-                    className="text-muted-foreground italic cursor-pointer hover:text-foreground/80 transition-colors py-8 text-center border-2 border-dashed border-border hover:border-border/80 rounded-lg"
+                    className={cn(
+                        "text-muted-foreground italic cursor-pointer hover:text-foreground/80 transition-colors py-8 text-center border-2 border-dashed rounded-lg",
+                        error ? "border-destructive/50 bg-destructive/5 text-destructive" : "border-border hover:border-border/80"
+                    )}
                     onClick={() => setIsEditing(true)}
                   >
-                    {placeholder}
+                    {error ? error : placeholder}
                   </div>
                 )}
               </>
@@ -367,9 +409,10 @@ const MainView = ({ project = {}, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
-  //
+  const { errors } = usePage().props
   const { can } = usePermissions()
-
+  const TEXT_LIMIT = 2000;
+  
   const updateProductCanvas = async (prop, newContent) => {
     const productCanvasId = project.product_canvas.id
     if (!productCanvasId) return
@@ -536,6 +579,8 @@ const MainView = ({ project = {}, setProject }) => {
           icon={AlertCircle}
           placeholder="What problems does this project solve?"
           onContentUpdate={(content) => updateProductCanvas('issues', content)}
+          maxLength={TEXT_LIMIT}
+          error={errors.issues}
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
@@ -547,6 +592,8 @@ const MainView = ({ project = {}, setProject }) => {
           onContentUpdate={(content) =>
             updateProductCanvas('solutions', content)
           }
+          maxLength={TEXT_LIMIT}
+          error={errors.solutions}
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
@@ -558,6 +605,8 @@ const MainView = ({ project = {}, setProject }) => {
           onContentUpdate={(content) =>
             updateProductCanvas('personas', content)
           }
+          maxLength={TEXT_LIMIT}
+          error={errors.personas}
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
@@ -569,6 +618,8 @@ const MainView = ({ project = {}, setProject }) => {
           onContentUpdate={(content) =>
             updateProductCanvas('restrictions', content)
           }
+          maxLength={TEXT_LIMIT}
+          error={errors.restrictions}
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
@@ -580,6 +631,8 @@ const MainView = ({ project = {}, setProject }) => {
           onContentUpdate={(content) =>
             updateProductCanvas('product_is', content)
           }
+          maxLength={TEXT_LIMIT}
+          error={errors.product_is}
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
@@ -591,6 +644,8 @@ const MainView = ({ project = {}, setProject }) => {
           onContentUpdate={(content) =>
             updateProductCanvas('product_is_not', content)
           }
+          maxLength={TEXT_LIMIT}
+          error={errors.product_is_not}
         />
       </div>
       {can('productCanvas.manage') && (

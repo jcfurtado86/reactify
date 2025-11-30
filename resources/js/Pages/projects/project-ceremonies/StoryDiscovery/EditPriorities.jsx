@@ -1,15 +1,20 @@
-import { router } from '@inertiajs/react'
+import { router, usePage } from '@inertiajs/react'
 import { Trash2, Check, Bookmark, Info } from 'lucide-react'
-import { darkenColor, PREDEFINED_COLORS } from '@/lib/utils'
+import { darkenColor, PREDEFINED_COLORS, cn } from '@/lib/utils'
 import { ColorOptions, ColorPickerPopover } from '@/Components/ColorComponents'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+
+const NAME_MAX = 30;
 
 const PriorityEditPopover = ({ priority, children, setProject, project }) => {
   const [name, setName] = useState(priority.name)
   const [color, setColor] = useState(priority.color)
   const [isProcessing, setIsProcessing] = useState(false)
+  const { errors } = usePage().props
 
+  const nameError = errors?.name; 
+  
   function handleSubmit(e) {
     e.preventDefault()
     if (name === priority.name && color === priority.color) {
@@ -84,12 +89,34 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
         <form onSubmit={handleSubmit} className="space-y-2">
           {/* Campo de edição de nome */}
           <div className="relative">
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="pr-8"
-              disabled={isProcessing}
-            />
+             <div className="flex flex-col gap-1">
+                <Input
+                  value={name}
+                  maxLength={NAME_MAX} // Bloqueio físico
+                  onChange={(e) => setName(e.target.value)}
+                  className={cn(
+                      "pr-8",
+                      nameError ? "border-destructive focus-visible:ring-destructive" : ""
+                  )}
+                  disabled={isProcessing}
+                />
+                 {/* Contador e Erro */}
+                 <div className="flex justify-between items-center px-1">
+                     <span className="text-xs text-destructive font-medium h-4 block">
+                        {/* Mostra erro apenas se houver */}
+                        {/* Para evitar mostrar erro em todos os popovers, 
+                            o ideal seria limpar erros ao abrir/fechar, 
+                            mas aqui mostramos se existir */}
+                        {nameError} 
+                     </span>
+                     <span className={cn(
+                         "text-[10px]",
+                         (name.length || 0) >= NAME_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                     )}>
+                        {name.length}/{NAME_MAX}
+                     </span>
+                 </div>
+             </div>
             <Info className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
 
@@ -151,6 +178,9 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
   const [newColor, setNewColor] = useState('#ffffff')
   const [isStoring, setIsStoring] = useState(false)
   const [menuBottomPosition, setMenuBottomPosition] = useState('auto')
+
+  const { errors } = usePage().props
+  const nameError = errors?.name; // Erro de criação (geralmente vem na chave 'name')
 
   useEffect(() => {
     // Função para medir e definir a posição
@@ -287,13 +317,31 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
             </h4>
             <div className="flex items-end gap-2 mb-4">
               <div className="grid gap-1.5 flex-1">
+                <div className="flex flex-col gap-1">
                 <Input
                   id="new-name"
                   placeholder="Digite o nome da prioridade"
+                  maxLength={NAME_MAX} // Bloqueio físico
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
+                  className={cn(
+                      nameError ? "border-destructive focus-visible:ring-destructive" : ""
+                  )}
                   disabled={isStoring}
                 />
+                {/* Contador e Erro */}
+                <div className="flex justify-between items-center px-1">
+                    <span className="text-xs text-destructive font-medium min-h-[1rem]">
+                      {nameError}
+                    </span>
+                    <span className={cn(
+                        "text-[10px]",
+                        (newName.length || 0) >= NAME_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                    )}>
+                      {newName.length}/{NAME_MAX}
+                    </span>
+                  </div>
+                </div>
               </div>
               <div className="flex flex-col items-center justify-center gap-1">
                 <Label>Cor</Label>

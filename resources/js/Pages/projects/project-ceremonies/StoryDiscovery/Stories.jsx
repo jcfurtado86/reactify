@@ -12,7 +12,7 @@ import {
   BookText,
 } from 'lucide-react'
 import rainbowIcon from '/resources/images/rainbow.png'
-import { router } from '@inertiajs/react'
+import { router, usePage } from '@inertiajs/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import axios from 'axios'
 import { toast } from 'sonner'
@@ -171,9 +171,14 @@ const StoryItem = ({
   onToggleTypeSelect,
   onChangeStoryType,
   disabled = false,
+  errors
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const status = inspectionStatus(story)
+
+  const TITLE_MAX = 255;
+  // Verifica erro (assumindo edição única por vez)
+  const titleError = isEditing ? errors?.title : null;
 
   const handleColorSelect = (colorValue, variantTitle) => {
     const selectedColor = PREDEFINED_COLORS.find(
@@ -209,6 +214,7 @@ const StoryItem = ({
       <Card
         className={cn(
           'bg-card border transition-all duration-300 ease-in-out rounded',
+          titleError ? "border-destructive" : "" // Borda vermelha no Card se erro
         )}
       >
         <CardContent
@@ -296,34 +302,55 @@ const StoryItem = ({
             </div>
 
             {isEditing ? (
-              <div className="flex w-full items-center gap-2">
-                <TextareaAutosize
-                  ref={textareaRef}
-                  value={editValue}
-                  onChange={onValueChange}
-                  onKeyDown={handleKeyDown}
-                  className="w-full text-sm border-0 resize-none appearance-none overflow-hidden bg-transparent p-0 m-0 font-normal text-foreground focus-visible:outline-none focus-visible:ring-0"
-                  autoFocus
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-destructive/80 hover:bg-destructive/10"
-                  onClick={onCancel}
-                >
-                  <X className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-green-500 hover:bg-green-500/10"
-                  onClick={onSave}
-                >
-                  <Check className="size-4" />
-                </Button>
+              <div className="flex flex-col w-full gap-1">
+                  <div className="flex w-full items-center gap-2">
+                    <TextareaAutosize
+                      ref={textareaRef}
+                      maxLength={TITLE_MAX}
+                      value={editValue}
+                      onChange={onValueChange}
+                      onKeyDown={handleKeyDown}
+                      className={cn(
+                          "w-full text-sm border-0 resize-none appearance-none overflow-hidden bg-transparent p-0 m-0 font-normal focus-visible:outline-none focus-visible:ring-0",
+                          (titleError || !editValue.trim()) ? "text-foreground placeholder:text-destructive border-b border-destructive" : "text-foreground"
+                      )}
+                      autoFocus
+                    />
+                    <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 text-destructive/80 hover:bg-destructive/10"
+                          onClick={onCancel}
+                        >
+                          <X className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 text-green-500 hover:bg-green-500/10"
+                          onClick={onSave}
+                          disabled={!editValue.trim()}
+                        >
+                          <Check className="size-4" />
+                        </Button>
+                    </div>
+                  </div>
+                  {/* Contador e Erro */}
+                  <div className="flex justify-between items-center px-1">
+                     <span className="text-xs text-destructive font-bold">
+                        {titleError || (!editValue.trim() ? "O título é obrigatório" : "")}
+                     </span>
+                     <span className={cn(
+                         "text-[10px]",
+                         (editValue?.length || 0) >= TITLE_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                     )}>
+                        {(editValue?.length || 0)}/{TITLE_MAX}
+                     </span>
+                  </div>
               </div>
             ) : (
-              <p className="m-0 text-sm text-foreground break-words w-full">
+              <p className="m-0 text-sm text-foreground break-words whitespace-pre-wrap w-full min-w-0">
                 {story.title}
               </p>
             )}
@@ -365,6 +392,7 @@ const Stories = ({ project, setProject }) => {
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   //
   const { can } = usePermissions()
+  const { errors } = usePage().props
   const handleInputChange = (e) => {
     setEditValue(e.target.value)
   }
@@ -662,6 +690,7 @@ const Stories = ({ project, setProject }) => {
                     onChangeStoryType={changeStoryType}
                     systemColors={project?.system_colors}
                     disabled={!can('userStory.manage')}
+                    errors={errors}
                   />
                 </React.Fragment>
               )
@@ -719,6 +748,7 @@ const Stories = ({ project, setProject }) => {
                     onChangeStoryType={changeStoryType}
                     systemColors={project?.system_colors}
                     disabled={!can('userStory.manage')}
+                    errors={errors}
                   />
                 </React.Fragment>
               )

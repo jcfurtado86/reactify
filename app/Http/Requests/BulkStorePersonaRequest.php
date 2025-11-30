@@ -23,7 +23,7 @@ class BulkStorePersonaRequest extends FormRequest
     {
         return [
             'personas' => 'required|array',
-            'personas.*.name' => 'required|string|max:255',
+            'personas.*.name' => 'required|string|max:100',
             'personas.*.profile' => 'required|array',
             'personas.*.expectations' => 'required|array',
             'personas.*.goals' => 'required|array',

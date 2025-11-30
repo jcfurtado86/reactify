@@ -22,7 +22,7 @@ class UpdateProjectRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'title' => 'sometimes|string|max:150',
+      'title' => 'sometimes|string|max:50',
       'description' => 'sometimes|string|max:1000',
       'emoji' => 'nullable|string|max:150',
       'status' => 'sometimes|string',

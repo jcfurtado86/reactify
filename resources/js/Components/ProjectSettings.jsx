@@ -7,7 +7,7 @@ export function ProjectSettings({ project }) {
   const [isOpen, setIsOpen] = useState(false)
 
   // Usando o hook useForm do Inertia para gerenciar o formulário
-  const { data, setData, patch, processing, errors, reset } = useForm({
+  const { data, setData, patch, processing, errors, reset, clearErrors } = useForm({
     title: project.title || '',
     description: project.description || '',
     emoji: project.emoji || '',
@@ -20,7 +20,10 @@ export function ProjectSettings({ project }) {
       reset({
         title: project.title || '',
         description: project.description || '',
+        emoji: project.emoji || '',
       })
+      // Limpa erros residuais ao reabrir o modal
+      clearErrors()
     }
   }, [isOpen, project])
 
@@ -59,25 +62,40 @@ export function ProjectSettings({ project }) {
 
           <div className="py-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-left">
-                Título do Projeto
-              </Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="title" className="text-left">
+                  Título do Projeto
+                </Label>
+                {/* Contador de caracteres (limite 50) */}
+                <span className="text-xs text-muted-foreground">
+                  {data.title.length}/50
+                </span>
+              </div>
+
               <Input
                 id="title"
                 value={data.title}
-                onChange={(e) => setData('title', e.target.value)}
-                className="text-foreground"
+                maxLength={50} 
+                onChange={(e) => {
+                  setData('title', e.target.value)
+                  if (errors.title) clearErrors('title') 
+                }}
+                className={`text-foreground ${errors.title ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                 disabled={processing}
               />
+              
               {errors.title && (
-                <p className="text-sm text-destructive">{errors.title}</p>
+                <p className="text-sm text-destructive font-medium animate-in fade-in slide-in-from-top-1">
+                  {errors.title}
+                </p>
               )}
             </div>
+
             <div className="flex items-center gap-3">
               <Label htmlFor="description">Emoji</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" className={errors.emoji ? 'border-destructive' : ''}>
                     {data.emoji || <MousePointerClick />}
                   </Button>
                 </PopoverTrigger>
@@ -86,6 +104,7 @@ export function ProjectSettings({ project }) {
                     className="h-[342px]"
                     onEmojiSelect={({ emoji }) => {
                       setData('emoji', emoji)
+                      if (errors.emoji) clearErrors('emoji')
                     }}
                   >
                     <EmojiPickerSearch />
@@ -106,19 +125,43 @@ export function ProjectSettings({ project }) {
                 <Trash2 />
               </Button>
             </div>
+             {errors.emoji && (
+                <p className="text-sm text-destructive">{errors.emoji}</p>
+              )}
+
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-left">
-                Descrição
-              </Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="description" className="text-left">
+                  Descrição
+                </Label>
+                {/* Contador de caracteres (limite 1000) */}
+                <span className="text-xs text-muted-foreground">
+                  {data.description.length}/1000
+                </span>
+              </div>
+              
               <ReactTextareaAutosize
                 id="description"
+                maxLength={1000}
                 value={data.description}
-                onChange={(e) => setData('description', e.target.value)}
-                className="bg-transparent border-0  w-full rounded text-sm"
+                onChange={(e) => {
+                  setData('description', e.target.value)
+                  if (errors.description) clearErrors('description')
+                }}
+                className={`w-full rounded text-sm bg-transparent transition-colors disabled:opacity-50 resize-none
+                  ${errors.description 
+                    ? 'border border-destructive focus:outline-none p-2' 
+                    : 'border-0 focus:ring-0 px-0' 
+                  }`}
+                placeholder="Descreva o projeto..."
                 disabled={processing}
+                minRows={3}
               />
+              
               {errors.description && (
-                <p className="text-sm text-destructive">{errors.description}</p>
+                <p className="text-sm text-destructive font-medium animate-in fade-in slide-in-from-top-1">
+                  {errors.description}
+                </p>
               )}
             </div>
           </div>

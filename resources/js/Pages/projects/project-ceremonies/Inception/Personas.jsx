@@ -18,6 +18,11 @@ import InvestCard from '../Inspection/InvestCard'
 import { tooltipInfo } from '@/lib/projectData'
 import { inspectionStatus } from '@/lib/utils'
 import StatusBadge from '@/Components/StatusBadge'
+import { usePage } from '@inertiajs/react' 
+import { cn } from '@/lib/utils' 
+
+const NAME_MAX = 50; 
+
 const GeneratedItemsModal = ({
   isModalMinimized,
   changeModalState,
@@ -193,9 +198,13 @@ const PersonaCard = ({
   textareaRef,
   confirmDeleteItem,
   confirmDeletePersona,
+  errors
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const status = inspectionStatus(persona)
+
+  const nameError = errors?.name; 
+  
   return (
     <Accordion type="single" collapsible>
       <AccordionItem
@@ -210,18 +219,33 @@ const PersonaCard = ({
         >
           <div className="flex items-center gap-3 w-full">
             <UserCircle2 className=" shrink-0 size-8 text-primary" />
+            
             {editingPersona === persona.id ? (
-              <Input
-                type="text"
-                value={editPersonaName}
-                onChange={(e) => setEditPersonaName(e.target.value)}
-                onKeyUp={(e) => {
-                  if (e.key === 'Enter') saveEditPersona()
-                }}
-                onClick={(e) => e.stopPropagation()}
-                className="!text-xl font-bold"
-                autoFocus
-              />
+              <div className="flex flex-col w-full max-w-[300px]" onClick={(e) => e.stopPropagation()}>
+                  <Input
+                    type="text"
+                    value={editPersonaName}
+                    maxLength={NAME_MAX} // Bloqueio físico
+                    onChange={(e) => setEditPersonaName(e.target.value)}
+                    onKeyUp={(e) => {
+                      if (e.key === 'Enter') saveEditPersona()
+                    }}
+                    className={cn(
+                        "!text-xl font-bold h-10",
+                        (nameError || !editPersonaName.trim()) ? "border-destructive focus-visible:ring-destructive" : ""
+                    )}
+                    autoFocus
+                  />
+                   {/* Contador e Erro do Nome */}
+                   <div className="flex justify-between mt-1 px-1">
+                      <span className="text-xs text-destructive font-medium h-4 block">
+                          {nameError || (!editPersonaName.trim() ? "O nome é obrigatório" : "")}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                          {editPersonaName.length}/{NAME_MAX}
+                      </span>
+                   </div>
+              </div>
             ) : (
               <CardTitle className="ml-3 text-xl">{persona.name}</CardTitle>
             )}
@@ -277,6 +301,7 @@ const PersonaCard = ({
                         ? textareaRef
                         : null
                     }
+                    error={errors?.[`${field}.${itemIndex}`]}
                   />
                 ))}
               </div>
@@ -304,8 +329,10 @@ const PersonaItem = ({
   onSave,
   onDelete,
   textareaRef,
+  error
 }) => {
   const [isHovered, setIsHovered] = useState(false)
+  const ITEM_MAX = 255;
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -318,24 +345,44 @@ const PersonaItem = ({
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex min-h-[40px] items-center justify-between rounded p-2 transition-colors font-normal hover:bg-muted/50 cursor-default"
+      className={cn(
+        "group relative flex min-h-[40px] items-start justify-between rounded p-2 transition-colors font-normal cursor-default",
+        isEditing ? "" : "hover:bg-muted/50",
+        error ? "bg-destructive/10" : ""
+      )}
     >
       {isEditing ? (
         <div className="flex w-full items-center gap-2">
           <TextareaAutosize
             ref={textareaRef}
+            maxLength={ITEM_MAX}
             value={editValue || ''}
             onChange={onValueChange}
             onKeyDown={handleKeyDown}
-            className="bg-transparent border-0  w-full rounded text-sm"
+            className={cn(
+                "bg-transparent w-full rounded text-sm resize-none focus:outline-none p-1 border border-transparent focus:border-input focus:bg-background",
+                (error || !editValue?.trim()) ? "border-destructive focus:border-destructive" : ""
+            )}
             autoFocus
           />
+          <div className="flex justify-between items-center px-1">
+             <span className="text-xs text-destructive font-medium min-h-[1rem]">
+                {error || (!editValue?.trim() ? "O item não pode ser vazio" : "")}
+             </span>
+             <span className={cn(
+                 "text-[10px]",
+                 (editValue?.length || 0) >= ITEM_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+             )}>
+                {(editValue?.length || 0)}/{ITEM_MAX}
+             </span>
+          </div>
         </div>
       ) : (
         <p
-          className={`text-sm text-muted-foreground text-left pr-4 ${
+          className={cn(
+            "text-sm text-muted-foreground text-left pr-4 break-words whitespace-pre-wrap flex-1 min-w-0",
             !item ? 'italic text-muted-foreground/50' : ''
-          }`}
+          )}
         >
           {item || 'Clique em editar para adicionar'}
         </p>
@@ -379,6 +426,7 @@ const Personas = ({ project, setProject }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
+  const { errors } = usePage().props
 
   const personaFieldVariants = {
     profile: { text: 'text-primary' },
@@ -756,6 +804,7 @@ const Personas = ({ project, setProject }) => {
                 personaFieldVariants={personaFieldVariants}
                 addNewItem={addNewItem}
                 disabled={!can('persona.manage')}
+                errors={errors}
               />
             )
           })

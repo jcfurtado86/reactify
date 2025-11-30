@@ -22,6 +22,8 @@ import { ColorOptions } from '@/Components/ColorComponents'
 import { toast } from 'sonner'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
+import { usePage } from '@inertiajs/react' 
+
 const GeneratedItemsModal = ({
   isModalMinimized,
   changeModalState,
@@ -178,10 +180,14 @@ const GoalItem = ({
   onTogglePrioritySelect,
   onChangeGoalPriority,
   systemColors,
+  errors
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const status = inspectionStatus(goal)
 
+  const TITLE_MAX = 255; 
+  const titleError = isEditing ? errors?.title : null;
+  
   const handleColorSelect = (colorValue, variantTitle) => {
     const selectedColor = PREDEFINED_COLORS.find(
       (color) => color.color === colorValue,
@@ -232,7 +238,10 @@ const GoalItem = ({
       className="relative group"
       data-card-id={goal.id}
     >
-      <Card className="bg-card border transition-all duration-300 ease-in-out rounded">
+      <Card className={cn(
+          "bg-card border transition-all duration-300 ease-in-out rounded",
+          titleError ? "border-destructive" : "" // Borda vermelha no Card se houver erro
+      )}>
         <CardContent className="p-2 flex flex-col gap-2">
           {/* Badge Row for Type and Priority */}
           <div className="flex ">
@@ -379,6 +388,7 @@ const GoalItem = ({
             <div className="flex w-full items-center gap-2">
               <TextareaAutosize
                 ref={textareaRef}
+                maxLength={TITLE_MAX}
                 value={editValue}
                 onChange={onValueChange}
                 onKeyDown={handleKeyDown}
@@ -403,9 +413,20 @@ const GoalItem = ({
                   <Check className="size-4" />
                 </Button>
               </div>
+              <div className="flex justify-between items-center px-1">
+                    <span className="text-xs text-destructive font-medium">
+                        {titleError}
+                    </span>
+                    <span className={cn(
+                        "text-[10px]",
+                        (editValue?.length || 0) >= TITLE_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                    )}>
+                        {(editValue?.length || 0)}/{TITLE_MAX}
+                    </span>
+                </div>
             </div>
           ) : (
-            <p className="m-0 font-normal text-sm text-foreground break-words w-full min-h-[24px]">
+            <p className="m-0 font-normal text-sm text-foreground break-words whitespace-pre-wrap min-w-0 flex-1 min-h-[24px]">
               {goal.title}
             </p>
           )}
@@ -441,6 +462,8 @@ const Goals = ({ project, setProject }) => {
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const { can } = usePermissions()
+  const { errors } = usePage().props
+
   // inspection function
   const inspectGoal = (goalId) => {
     if (inspectionId === goalId) {
@@ -800,6 +823,7 @@ const Goals = ({ project, setProject }) => {
                 onChangeGoalPriority={changeGoalPriority}
                 systemColors={project?.system_colors}
                 disabled={!can('goal.manage')}
+                errors={errors}
               />
             ))
         ) : (
@@ -857,6 +881,7 @@ const Goals = ({ project, setProject }) => {
                 onChangeGoalPriority={changeGoalPriority}
                 systemColors={project?.system_colors}
                 disabled={!can('goal.manage')}
+                errors={errors}
               />
             ))
         ) : (

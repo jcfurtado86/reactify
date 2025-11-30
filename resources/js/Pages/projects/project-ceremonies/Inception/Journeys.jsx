@@ -28,7 +28,7 @@ import {
   ChevronsUp,
   ChartArea,
 } from 'lucide-react'
-import { router } from '@inertiajs/react'
+import { router, usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
 import TextareaAutosize from 'react-textarea-autosize'
 import { cn, inspectionStatus } from '@/lib/utils'
@@ -64,7 +64,10 @@ const SortableJourneyStepItem = (props) => {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <JourneyStepItem {...props} />
+      <JourneyStepItem 
+        {...props} 
+        error={props.error} 
+      />
     </div>
   )
 }
@@ -83,10 +86,12 @@ const JourneyStepItem = ({
   onDelete,
   disabled = false,
   textareaRef,
+  error
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [showDeletePopover, setShowDeletePopover] = useState(false)
   const [touchpointChecked, setTouchpointChecked] = useState(step.is_touchpoint)
+  const DESC_MAX = 255;
 
   useEffect(() => {
     setTouchpointChecked(step.is_touchpoint)
@@ -112,24 +117,49 @@ const JourneyStepItem = ({
         <p className="m-0 text-primary-foreground">{stepIndex + 1}</p>
       </Badge>
 
-      <Card className="w-full bg-card border-2 border-accent transition-shadow hover:shadow-lg z-20 font-normal">
+      <Card className={cn(
+        "w-full bg-card border-2 border-accent transition-shadow hover:shadow-lg z-20 font-normal",
+        error ? "border-destructive" : "" // Borda vermelha no Card se erro
+      )}>
         <CardContent className="flex flex-row items-start justify-between gap-2 p-2 min-h-[60px]">
           <section className="flex items-center flex-1">
             {isEditing ? (
               <>
-                <TextareaAutosize
-                  ref={textareaRef}
-                  value={editValue}
-                  onChange={onValueChange}
-                  onKeyDown={handleKeyDown}
-                  className="w-full text-sm border-0 resize-none appearance-none overflow-hidden bg-transparent p-0 m-0 font-normal text-foreground focus-visible:outline-none focus-visible:ring-0"
-                  autoFocus
-                />
-                <Switch
-                  id={`touchpoint-switch-${stepIndex}`}
-                  checked={touchpointChecked}
-                  onCheckedChange={setTouchpointChecked}
-                />
+                <div className="flex flex-col w-full gap-1">
+                  <TextareaAutosize
+                    ref={textareaRef}
+                    maxLength={DESC_MAX} // Bloqueio físico
+                    value={editValue}
+                    onChange={onValueChange}
+                    onKeyDown={handleKeyDown}
+                    className={cn(
+                        "w-full text-sm border-0 resize-none appearance-none overflow-hidden bg-transparent p-0 m-0 font-normal focus-visible:outline-none focus-visible:ring-0",
+                        (error || !editValue.trim()) ? "text-foreground placeholder:text-destructive border-b border-destructive" : "text-foreground"
+                    )}
+                    autoFocus
+                  />
+                  {/* Contador e Erro */}
+                  <div className="flex justify-between items-center w-full">
+                     <span className="text-xs text-destructive font-medium">
+                        {error || (!editValue.trim() ? "A descrição é obrigatória" : "")}
+                     </span>
+                     <span className={cn(
+                         "text-[10px]",
+                         (editValue?.length || 0) >= DESC_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                     )}>
+                        {(editValue?.length || 0)}/{DESC_MAX}
+                     </span>
+                  </div>
+                  
+                  {/* Switch do Touchpoint mantido aqui dentro ou abaixo conforme layout */}
+                  <div className="mt-2">
+                    <Switch
+                        id={`touchpoint-switch-${stepIndex}`}
+                        checked={touchpointChecked}
+                        onCheckedChange={setTouchpointChecked}
+                    />
+                  </div>
+              </div>
                 {/* <Button
                     variant="ghost"
                     size="icon"
@@ -192,6 +222,9 @@ const Journeys = ({ project, setProject }) => {
   const [generatedJourneys, setGeneratedJourneys] = useState([])
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
+  const { errors } = usePage().props
+  const TITLE_MAX = 50;
+
   const textareaRef = useRef(null)
   const { can } = usePermissions()
   const colors = [
@@ -466,7 +499,7 @@ const Journeys = ({ project, setProject }) => {
   // Função para salvar a edição de uma journey
   const saveEditJourney = () => {
     const journeyId = editingJourney
-    if (journeyId === null || !project.journeys) return
+    if (journeyId === null || !project.journeys || !editJourneyName.trim()) return
 
     const updatedJourneys = project.journeys.map((journey) =>
       journey.id === journeyId
@@ -723,6 +756,7 @@ const Journeys = ({ project, setProject }) => {
           .sort((a, b) => a.id - b.id)
           .map((journey, i) => {
             const status = inspectionStatus(journey)
+            const titleError = editingJourney === journey.id ? errors?.title : null;
             return (
               <div
                 key={i}
@@ -736,16 +770,29 @@ const Journeys = ({ project, setProject }) => {
                   <div className="flex items-center text-2xl">
                     <Map className="text-primary mr-2" size={20} />
                     {editingJourney === journey.id ? (
-                      <input
-                        type="text"
-                        value={editJourneyName}
-                        onChange={(e) => setEditJourneyTitle(e.target.value)}
-                        onKeyUp={(e) => {
-                          if (e.key === 'Enter') saveEditJourney()
-                        }}
-                        className="text-foreground p-0 bg-transparent border-none focus:ring-0 font-medium text-2xl rounded h-full focus:outline-none"
-                        autoFocus
-                      />
+                      <div className="flex flex-col w-full max-w-md">
+                          <input
+                            type="text"
+                            maxLength={TITLE_MAX} // Bloqueio físico
+                            value={editJourneyName}
+                            onChange={(e) => setEditJourneyTitle(e.target.value)}
+                            onKeyUp={(e) => {
+                              if (e.key === 'Enter') saveEditJourney()
+                            }}
+                            className={cn(
+                                "text-foreground p-0 bg-transparent border-none focus:ring-0 font-medium text-2xl h-full focus:outline-none w-full",
+                                (titleError || !editJourneyName.trim()) ? "border-b-2 border-destructive rounded-none" : ""
+                            )}
+                            autoFocus
+                          />
+                          {/* Contador simples para o título */}
+                          <div className="flex justify-between px-1">
+                             <span className="text-xs text-destructive font-bold">
+                                {titleError || (!editJourneyName.trim() ? "O título é obrigatório" : "")}
+                             </span>
+                             <span className="text-[10px] text-muted-foreground">{editJourneyName.length}/{TITLE_MAX}</span>
+                          </div>
+                      </div>
                     ) : (
                       <h4 className="text-foreground font-medium m-0">
                         {journey.title}
@@ -771,6 +818,7 @@ const Journeys = ({ project, setProject }) => {
                             tooltipContent={'Salvar titulo'}
                             variant="success"
                             size="icon"
+                            disabled={!editJourneyName.trim()}
                             className=""
                             onClick={(e) => {
                               e.stopPropagation()
@@ -887,6 +935,7 @@ const Journeys = ({ project, setProject }) => {
                                 textareaRef={
                                   isCurrentlyEditing ? textareaRef : null
                                 }
+                                error={errors?.[`steps.${stepIndex}.description`]}
                               />
                             )
                           })}
