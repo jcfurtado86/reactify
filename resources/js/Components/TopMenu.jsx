@@ -43,7 +43,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
       id="top-menu"
       className="flex justify-between items-center bg-background text-foreground p-1 border-b border-border"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4 ml-1">
         <Button
           variant="ghost"
           size="icon"
