@@ -17,7 +17,8 @@ import InvestCard from '../Inspection/InvestCard'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import StatusBadge from '@/Components/StatusBadge'
-
+import { usePage } from '@inertiajs/react' 
+import { cn } from '@/lib/utils'
 /**
  * Componente para renderizar um único card de estória.
  * Gerencia seu próprio estado de hover para exibir o botão de adicionar.
@@ -207,6 +208,7 @@ const BusinessRuleCard = ({
   onInspect,
   systemColors,
 }) => {
+  const { errors } = usePage().props
   // ✨ ESTADOS PARA CONTROLE DA EDIÇÃO
   const [isHovered, setIsHovered] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -214,6 +216,8 @@ const BusinessRuleCard = ({
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.type] || '#f97316'
   const status = inspectionStatus(businessRule)
+  const TITLE_MAX = 255;
+  const titleError = isEditing ? errors?.title : null;
 
   // ⚡️ FUNÇÕES PARA MANIPULAR A EDIÇÃO
   const handleEdit = () => {
@@ -226,7 +230,7 @@ const BusinessRuleCard = ({
   }
 
   const handleSave = () => {
-    if (editValue === businessRule.title) {
+    if (!editValue.trim() || editValue === businessRule.title) {
       setIsEditing(false)
       return
     }
@@ -289,10 +293,10 @@ const BusinessRuleCard = ({
         />
 
         <div
-          className={`
-            flex flex-row flex-1 items-start justify-start p-2 gap-2 text-xs font-normal text-foreground bg-card
-            border border-border rounded-md shadow-sm transition-opacity duration-300 min-h-16
-          `}
+          className={cn(
+            "flex flex-row flex-1 items-start justify-start p-2 gap-2 text-xs font-normal text-foreground bg-card border border-border rounded-md shadow-sm transition-opacity duration-300 min-h-16",
+            titleError ? "border-destructive" : ""
+          )}
         >
           <Badge
             style={{ backgroundColor: selectedVariant }}
@@ -309,17 +313,33 @@ const BusinessRuleCard = ({
             <div className="w-full flex flex-col items-center gap-2">
               <ReactTextareaAutosize
                 id="description"
+                maxLength={TITLE_MAX}
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="bg-transparent border-0 w-full rounded text-sm"
+                className={cn(
+                    "bg-transparent border-0 w-full rounded text-sm resize-none focus:outline-none p-0 focus:ring-0",
+                    titleError ? "placeholder:text-destructive" : ""
+                )}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSave()
+                  if (e.key === 'Enter' && editValue.trim()) handleSave()
                   if (e.key === 'Escape') handleCancel()
                 }}
+                autoFocus
               />
+              <div className="flex justify-between items-center w-full px-1 mt-1">
+                 <span className="text-[10px] text-destructive font-bold h-3 block">
+                    {titleError || (!editValue.trim() ? "Obrigatório" : "")}
+                 </span>
+                 <span className={cn(
+                     "text-[10px]",
+                     (editValue?.length || 0) >= TITLE_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                 )}>
+                    {(editValue?.length || 0)}/{TITLE_MAX}
+                 </span>
+              </div>
             </div>
           ) : (
-            <p className="text-sm w-full min-h-[32px] flex items-center justify-start">
+            <p className="text-sm w-full min-h-[32px] flex items-center justify-start break-words whitespace-pre-wrap">
               {businessRule.title}
             </p>
           )}

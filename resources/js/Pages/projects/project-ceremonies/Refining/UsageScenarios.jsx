@@ -16,6 +16,8 @@ import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
 import { tooltipInfo } from '@/lib/projectData'
 import StatusBadge from '@/Components/StatusBadge'
+import { usePage } from '@inertiajs/react' 
+import { cn } from '@/lib/utils'
 /**
  * Renders the parent Story card on the left.
  * Its primary purpose is to display story info and provide an "add scenario" action.
@@ -234,7 +236,8 @@ const ScenarioCard = ({
   onInspect,
   systemColors,
 }) => {
-  //
+  const { errors } = usePage().props
+  const FIELD_MAX = 100;
   const [isHovered, setIsHovered] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isExpanded, setIsExpanded] = useState(
@@ -268,6 +271,15 @@ const ScenarioCard = ({
   const handleCancel = () => setIsEditing(false)
 
   const handleSave = () => {
+    if (
+        !editValues.as.trim() || 
+        !editValues.given.trim() || 
+        !editValues.when.trim() || 
+        !editValues.then_1.trim()
+    ) {
+        toast.error("Preencha todos os campos obrigatórios (AS, GIVEN, WHEN, THEN).")
+        return; 
+    }
     // 1. Optimistic UI Update
     setProject((project) => ({
       ...project,
@@ -382,75 +394,133 @@ const ScenarioCard = ({
                   <Check className="size-4" />
                 </Button>
               </div>
-              {/* Edit form remains the same */}
-              <div className="flex text-xs items-center gap-2 text-primary w-full">
-                <span className="w-10 font-bold">AS</span>
-                <Input
-                  name="as"
-                  value={editValues.as}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  className="w-full text-sm h-8 font-semibold"
-                  autoFocus
-                />
-              </div>
-              <div className="flex text-xs items-center gap-2 text-primary w-full">
-                <span className="w-10 font-bold">GIVEN</span>
-                <Input
-                  name="given"
-                  value={editValues.given}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  className="w-full text-sm "
-                />
-              </div>
-              <div className="flex text-xs items-center gap-2 text-primary w-full">
-                <span className="w-10 font-bold">WHEN</span>
-                <Input
-                  name="when"
-                  value={editValues.when}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  className="w-full text-sm "
-                />
-              </div>
-              <div className="flex text-xs items-center gap-2 text-primary w-full">
-                <span className="w-10 font-bold">THEN</span>
-                <Input
-                  name="then_1"
-                  value={editValues.then_1}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  className="w-full text-sm "
-                />
-              </div>
-              {isExpanded ? (
-                <>
+              {/* CAMPO: AS */}
+              <div className="flex flex-col w-full gap-1">
                   <div className="flex text-xs items-center gap-2 text-primary w-full">
-                    <span className="w-10 font-bold">AND</span>
+                    <span className="w-10 font-bold shrink-0">AS</span>
                     <Input
-                      name="and"
-                      value={editValues.and}
+                      name="as"
+                      maxLength={FIELD_MAX} // [NOVO] LIMITE
+                      value={editValues.as}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
-                      className="w-full text-sm "
+                      className={cn(
+                          "w-full text-sm h-8 font-semibold",
+                          !editValues.as.trim() ? "border-destructive focus-visible:ring-destructive" : ""
+                      )}
+                      autoFocus
                     />
                   </div>
+                  <span className="text-[10px] text-muted-foreground self-end pr-1">
+                      {editValues.as.length}/{FIELD_MAX}
+                  </span>
+              </div>
+
+              {/* CAMPO: GIVEN */}
+              <div className="flex flex-col w-full gap-1">
                   <div className="flex text-xs items-center gap-2 text-primary w-full">
-                    <span className="w-10 font-bold">THEN</span>
+                    <span className="w-10 font-bold shrink-0">GIVEN</span>
                     <Input
-                      name="then_2"
-                      value={editValues.then_2}
+                      name="given"
+                      maxLength={FIELD_MAX}
+                      value={editValues.given}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyDown}
-                      className="w-full text-sm "
+                      className={cn(
+                          "w-full text-sm",
+                          !editValues.given.trim() ? "border-destructive focus-visible:ring-destructive" : ""
+                      )}
                     />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground self-end pr-1">
+                      {editValues.given.length}/{FIELD_MAX}
+                  </span>
+              </div>
+
+              {/* CAMPO: WHEN */}
+              <div className="flex flex-col w-full gap-1">
+                  <div className="flex text-xs items-center gap-2 text-primary w-full">
+                    <span className="w-10 font-bold shrink-0">WHEN</span>
+                    <Input
+                      name="when"
+                      maxLength={FIELD_MAX}
+                      value={editValues.when}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      className={cn(
+                          "w-full text-sm",
+                          !editValues.when.trim() ? "border-destructive focus-visible:ring-destructive" : ""
+                      )}
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground self-end pr-1">
+                      {editValues.when.length}/{FIELD_MAX}
+                  </span>
+              </div>
+
+              {/* CAMPO: THEN 1 */}
+              <div className="flex flex-col w-full gap-1">
+                  <div className="flex text-xs items-center gap-2 text-primary w-full">
+                    <span className="w-10 font-bold shrink-0">THEN</span>
+                    <Input
+                      name="then_1"
+                      maxLength={FIELD_MAX}
+                      value={editValues.then_1}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      className={cn(
+                          "w-full text-sm",
+                          !editValues.then_1.trim() ? "border-destructive focus-visible:ring-destructive" : ""
+                      )}
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground self-end pr-1">
+                      {editValues.then_1.length}/{FIELD_MAX}
+                  </span>
+              </div>
+
+              {isExpanded ? (
+                <>
+                  {/* CAMPO: AND (Opcional) */}
+                  <div className="flex flex-col w-full gap-1">
+                      <div className="flex text-xs items-center gap-2 text-primary w-full">
+                        <span className="w-10 font-bold shrink-0">AND</span>
+                        <Input
+                          name="and"
+                          maxLength={FIELD_MAX}
+                          value={editValues.and}
+                          onChange={handleInputChange}
+                          onKeyDown={handleKeyDown}
+                          className="w-full text-sm"
+                        />
+                      </div>
+                      <span className="text-[10px] text-muted-foreground self-end pr-1">
+                          {editValues.and.length}/{FIELD_MAX}
+                      </span>
+                  </div>
+
+                  {/* CAMPO: THEN 2 (Opcional) */}
+                  <div className="flex flex-col w-full gap-1">
+                      <div className="flex text-xs items-center gap-2 text-primary w-full">
+                        <span className="w-10 font-bold shrink-0">THEN</span>
+                        <Input
+                          name="then_2"
+                          maxLength={FIELD_MAX}
+                          value={editValues.then_2}
+                          onChange={handleInputChange}
+                          onKeyDown={handleKeyDown}
+                          className="w-full text-sm"
+                        />
+                      </div>
+                      <span className="text-[10px] text-muted-foreground self-end pr-1">
+                          {editValues.then_2.length}/{FIELD_MAX}
+                      </span>
                   </div>
                 </>
               ) : null}
             </div>
           ) : (
-            <div className="w-full bg-card rounded-lg p-2 shadow-sm">
+            <div className="w-full bg-card rounded-lg p-2 shadow-sm break-words">
               {/* 1. Cabeçalho (O que antes era o AccordionTrigger) */}
               <div className="flex items-center gap-2">
                 <Badge

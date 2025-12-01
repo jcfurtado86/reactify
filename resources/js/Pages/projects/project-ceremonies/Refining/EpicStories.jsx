@@ -14,6 +14,8 @@ import { router } from '@inertiajs/react'
 import { isTemporary, useGroupedStories } from '@/lib/utils'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
+import { usePage } from '@inertiajs/react' 
+import { cn } from '@/lib/utils' 
 import { tooltipInfo } from '@/lib/projectData'
 /**
  * Componente para renderizar um único card de estória.
@@ -187,11 +189,13 @@ const EpicStoryCard = ({
   setProject,
   systemColors,
 }) => {
+  const { errors } = usePage().props
+  const TITLE_MAX = 255; 
   // ✨ ESTADOS PARA CONTROLE DA EDIÇÃO
   const [isHovered, setIsHovered] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(epicStory.title)
-
+  const titleError = isEditing ? errors?.title : null;
   const storyVariants = systemColors?.stories || {}
   const selectedVariant = storyVariants[story.type] || '#f97316'
   const realStoryId = epicStory.epic_id
@@ -208,7 +212,7 @@ const EpicStoryCard = ({
   }
 
   const handleSave = () => {
-    if (editValue === epicStory.title) {
+    if (!editValue.trim() || editValue === epicStory.title) {
       setIsEditing(false)
       return
     }
@@ -262,10 +266,10 @@ const EpicStoryCard = ({
         />
 
         <div
-          className={`
-            flex flex-1 items-start justify-start p-2 gap-2 text-xs font-normal text-foreground bg-card text-left
-            border border-border rounded-md shadow-sm transition-opacity duration-300 min-h-16
-          `}
+          className={cn(
+            "flex flex-1 items-start justify-start p-2 gap-2 text-xs font-normal text-foreground bg-card text-left border border-border rounded-md shadow-sm transition-opacity duration-300 min-h-16",
+            titleError ? "border-destructive" : ""
+          )}
         >
           <Badge
             style={{ backgroundColor: selectedVariant }}
@@ -282,13 +286,18 @@ const EpicStoryCard = ({
             <div className="w-full flex flex-col items-center gap-2">
               <ReactTextareaAutosize
                 id="description"
+                maxLength={TITLE_MAX}
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="bg-transparent border-0  w-full rounded text-sm"
+                className={cn(
+                    "bg-transparent w-full rounded text-sm resize-none focus:outline-none p-0 border-0 focus:ring-0",
+                    titleError ? "placeholder:text-destructive" : ""
+                )}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSave()
+                  if (e.key === 'Enter' && editValue.trim()) handleSave()
                   if (e.key === 'Escape') handleCancel()
                 }}
+                autoFocus
               />
               {/* <div className="flex items-center gap-2 self-end">
                 <Button
@@ -308,9 +317,20 @@ const EpicStoryCard = ({
                   <Check className="size-4" />
                 </Button>
               </div>*/}
+              <div className="flex justify-between items-center w-full px-1 mt-1">
+                 <span className="text-[10px] text-destructive font-bold h-3 block">
+                    {titleError || (!editValue.trim() ? "Obrigatório" : "")}
+                 </span>
+                 <span className={cn(
+                     "text-[10px]",
+                     (editValue?.length || 0) >= TITLE_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                 )}>
+                    {(editValue?.length || 0)}/{TITLE_MAX}
+                 </span>
+              </div>
             </div>
           ) : (
-            <p className="text-sm w-full min-h-[32px] flex items-center justify-start">
+            <p className="text-sm w-full min-h-[32px] flex items-center justify-start break-words whitespace-pre-wrap">
               {epicStory.title}
             </p>
           )}
