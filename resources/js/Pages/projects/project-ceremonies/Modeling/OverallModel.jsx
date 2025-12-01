@@ -81,7 +81,7 @@ const GeneratedItemsModal = ({
                     return (
                       <div
                         key={'temp-' + index}
-                        className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
+                        className={`rounded-lg p-1 border-2 transition-colors flex items-center gap-4 ${
                           card.selected
                             ? 'bg-muted border-primary'
                             : 'bg-muted/50 border-border hover:border-muted-foreground'
@@ -104,7 +104,7 @@ const GeneratedItemsModal = ({
                             {/* Container Flex para as duas colunas */}
                             <div className="flex">
                               {/* Coluna da Esquerda: Responsabilidades */}
-                              <div className="w-1/2 px-3 flex flex-col gap-2">
+                              <div className="w-1/2 px-1 flex flex-col gap-2">
                                 <h5 className="font-semibold text-sm text-center text-primary my-2">
                                   Responsabilidades
                                 </h5>
@@ -119,7 +119,7 @@ const GeneratedItemsModal = ({
                               </div>
 
                               {/* Coluna da Direita: Colaboradores */}
-                              <div className="w-1/2 px-3 border-l border-border flex flex-col gap-2">
+                              <div className="w-1/2 px-1 border-l border-border flex flex-col gap-2">
                                 <h5 className="font-semibold text-sm text-center text-primary my-2">
                                   Colaboradores
                                 </h5>
@@ -439,7 +439,7 @@ const CRCCard = ({
         )}
       </div>
       <div className="flex flex-grow">
-        <div className="w-1/2 p-3 flex flex-col gap-1">
+        <div className="w-1/2 p-1 flex flex-col gap-1">
           <div className="flex justify-between items-center mb-1">
             <h4 className="font-semibold text-sm">Responsabilidades</h4>
             <Button
@@ -473,7 +473,7 @@ const CRCCard = ({
             />
           ))}
         </div>
-        <div className="w-1/2 bg-muted/50 p-3 border-l border-border rounded-br-lg flex flex-col gap-2">
+        <div className="w-1/2 bg-muted/50 p-1 border-l border-border rounded-br-lg flex flex-col gap-2">
           <div className="flex justify-between items-center mb-1">
             <h4 className="font-semibold text-sm">Colaboradores</h4>
             <Button
@@ -897,7 +897,7 @@ const OverallModel = ({ project, setProject }) => {
   }
 
   return (
-    <div className="p-4 flex flex-col gap-6">
+    <div className="p-4 flex flex-col gap-3">
       {showAiModal && (
         <GeneratedItemsModal
           isModalMinimized={isModalMinimized}
@@ -989,7 +989,7 @@ const OverallModel = ({ project, setProject }) => {
           ))}
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {/* Adicionada verificação de 'length > 0' */}
         {project?.crc_cards && project.crc_cards.length > 0 ? (
           project.crc_cards
