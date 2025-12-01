@@ -145,9 +145,9 @@ const getSharedColumns = ({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => onRemoveRequest(sprintId, story.id)}
-                  className="text-red-600 focus:text-red-600"
+                  className="text-red-600 focus:text-red-600 flex justify-start"
                 >
-                  <Undo2 className="mr-2 size-4" /> Mover para Backlog
+                  <Undo2 className="mr-2 size-4" /> Mover para o Backlog
                 </DropdownMenuItem>
               </>
             )}
