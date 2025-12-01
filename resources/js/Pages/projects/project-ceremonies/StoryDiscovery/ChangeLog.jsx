@@ -1,9 +1,19 @@
 import { router } from '@inertiajs/react'
 import ChangeRequestForm from '../../../../Components/ChangeRequestForm'
+import ChangeRequestDetails from '../../../../Components/ChangeRequestDetails'
+import { useState } from 'react' 
+import { Eye } from 'lucide-react' 
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const ChangeLog = ({ project }) => {
   const changeRequests = project.change_requests || []
   const [showForm, setShowForm] = useState(false)
+  const [selectedRequest, setSelectedRequest] = useState(null)
 
   const getStatusBadge = (status) => {
     const statusColors = {
@@ -17,7 +27,7 @@ const ChangeLog = ({ project }) => {
       SOLICITADA: 'Solicitada',
       APROVADA: 'Aprovada',
       REJEITADA: 'Rejeitada',
-      IMPLEMENTADA: 'Implementada',
+      EM_ANALISE: 'Em análise',
     }
 
     return (
@@ -42,6 +52,9 @@ const ChangeLog = ({ project }) => {
             <Button variant="secondary">Nova Solicitação</Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl h-content p-0 border-0">
+          <DialogTitle className="sr-only">
+            Nova Solicitação de Mudança
+          </DialogTitle>
             <ChangeRequestForm
               project={project}
               stories={project.stories || []}
@@ -51,6 +64,18 @@ const ChangeLog = ({ project }) => {
         </Dialog>
       </div>
 
+      {/* Modal de Detalhes / Edição de Status */}
+      <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && setSelectedRequest(null)}>
+        <DialogContent className="max-w-2xl">
+          {selectedRequest && (
+            <ChangeRequestDetails 
+              request={selectedRequest} 
+              onClose={() => setSelectedRequest(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -59,8 +84,9 @@ const ChangeLog = ({ project }) => {
             <TableHead className="text-center">Responsável</TableHead>
             <TableHead className="text-center">Descrição</TableHead>
             <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-center">Impacto</TableHead>
-            <TableHead className="text-center">Novas</TableHead>
+            <TableHead className="text-center">Ações</TableHead>
+            {/* <TableHead className="text-center">Impacto</TableHead>
+            <TableHead className="text-center">Novas</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,7 +98,7 @@ const ChangeLog = ({ project }) => {
                   {new Date(request.request_date).toLocaleDateString('pt-BR')}
                 </TableCell>
                 <TableCell className="text-center">
-                  {request.requester?.name || 'N/A'}
+                  {request.requester_name || request.requester?.name || 'N/A'}
                 </TableCell>
                 <TableCell
                   className="max-w-xs truncate"
@@ -83,14 +109,24 @@ const ChangeLog = ({ project }) => {
                 <TableCell className="text-center">
                   {getStatusBadge(request.status)}
                 </TableCell>
-                <TableCell className="text-center">
+                {/* <TableCell className="text-center">
                   {formatStories(request.stories || [], 'IMPACTADA') || '-'}
                 </TableCell>
                 <TableCell className="text-center">
                   {formatStories(request.stories || [], 'NOVA') || '-'}
-                </TableCell>
-                <TableCell className="text-center">
+                </TableCell> */}
+                {/* <TableCell className="text-center">
                   {request.effort || '-'}
+                </TableCell> */}
+                <TableCell className="text-center">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setSelectedRequest(request)}
+                    title="Ver Detalhes e Gerenciar"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))

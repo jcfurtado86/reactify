@@ -12,29 +12,31 @@ class ChangeRequestController extends Controller
     {
         $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
+            'requester_name' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             // 'effort' => 'nullable|integer|min:1|max:100',
             'request_date' => 'required|date',
-            'stories' => 'nullable|array',
-            'stories.*.story_id' => 'required|exists:stories,id',
-            'stories.*.impact_type' => 'required|string',
+            // 'stories' => 'nullable|array',
+            // 'stories.*.story_id' => 'required|exists:stories,id',
+            // 'stories.*.impact_type' => 'required|string',
         ]);
 
         $changeRequest = ChangeRequest::create([
             'project_id' => $validated['project_id'],
-            'requested_by_id' => Auth::id(),
+            'requester_name' => $validated['requester_name'],
+            // 'requested_by_id' => Auth::id(),
             'description' => $validated['description'],
             // 'effort' => $validated['effort'],
             'request_date' => $validated['request_date'],
         ]);
 
-        if (!empty($validated['stories'])) {
-            foreach ($validated['stories'] as $storyData) {
-                $changeRequest->stories()->attach($storyData['story_id'], [
-                    'impact_type' => $storyData['impact_type']
-                ]);
-            }
-        }
+        // if (!empty($validated['stories'])) {
+        //     foreach ($validated['stories'] as $storyData) {
+        //         $changeRequest->stories()->attach($storyData['story_id'], [
+        //             'impact_type' => $storyData['impact_type']
+        //         ]);
+        //     }
+        // }
 
         return back()->with('success', 'Solicitação de mudança criada.');
     }

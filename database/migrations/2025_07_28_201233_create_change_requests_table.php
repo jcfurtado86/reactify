@@ -16,10 +16,11 @@ return new class extends Migration
         Schema::create('change_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            $table->foreignId('requested_by_id')->constrained('users')->onDelete('cascade');
+            // $table->foreignId('requested_by_id')->constrained('users')->onDelete('cascade');
+            $table->string('requester_name');
             $table->text('description');
             $table->string('status')->default(ChangeRequestStatus::SOLICITADA->value);
-            $table->unsignedTinyInteger('effort')->nullable();
+            // $table->unsignedTinyInteger('effort')->nullable();
             $table->date('request_date');
             $table->timestamps();
         });

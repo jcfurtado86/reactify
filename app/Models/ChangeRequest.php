@@ -13,10 +13,11 @@ class ChangeRequest extends Model
 
     protected $fillable = [
         'project_id',
-        'requested_by_id',
+        // 'requested_by_id',
+        'requester_name',
         'description',
         'status',
-        'effort',
+        // 'effort',
         'request_date',
     ];
 

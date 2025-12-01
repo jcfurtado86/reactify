@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react'
+import { useForm, usePage } from '@inertiajs/react'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -6,10 +6,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 const ChangeRequestForm = ({ project, stories = [], onClose }) => {
   const [selectedStories, setSelectedStories] = useState({})
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const { auth } = usePage().props
+  const MAX_DESCRIPTION_CHARS = 1000
   const { data, setData, post, processing, errors, reset } = useForm({
     project_id: project.id,
+    requester_name: auth?.user?.name || '',
     description: '',
-    effort: '',
+    // effort: '',
     request_date: new Date().toISOString().split('T')[0],
     impacted_stories: [],
     new_stories: [],
@@ -76,17 +79,32 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Descrição */}
+          {/* Descrição com Limite e Contador */}
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição da Mudança *</Label>
+            <Label htmlFor="description" className="flex justify-between">
+              <span>Descrição da Mudança</span>
+            </Label>
+            
             <Textarea
               id="description"
               placeholder="Descreva detalhadamente a mudança solicitada..."
               value={data.description}
               onChange={(e) => setData('description', e.target.value)}
               required
+              maxLength={MAX_DESCRIPTION_CHARS} // Impede digitar além do limite
               rows={4}
             />
+            
+            {/* Contador de 'Restam X caracteres' no canto inferior direito */}
+            <div className="flex justify-end">
+              <span className={cn(
+                "text-xs font-normal",
+                data.description.length >= MAX_DESCRIPTION_CHARS ? "text-red-500" : "text-muted-foreground"
+              )}>
+                {data.description.length} / {MAX_DESCRIPTION_CHARS}
+              </span>
+            </div>
+
             {errors.description && (
               <p className="text-red-500 text-sm">{errors.description}</p>
             )}
@@ -94,31 +112,25 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
 
           {/* Data da Solicitação */}
           <div className="space-y-2">
-            <Button
-              variant={'outline'}
-              className={cn(
-                ' justify-start text-left font-normal',
-                !date && 'text-muted-foreground',
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, 'PPP') : <span>Set deadline</span>}
-            </Button>
-            {/* <Label htmlFor="request_date">Data da Solicitação *</Label>
-            <Input
-              id="request_date"
-              type="date"
-              value={data.request_date}
-              onChange={(e) => setData('request_date', e.target.value)}
-              required
-            />
-            {errors.request_date && (
-              <p className="text-red-500 text-sm">{errors.request_date}</p>
-            )}*/}
+          
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {date ? format(date, 'PPP') : <span>Set deadline</span>}
+          
+            <div className="space-y-2">
+              <Label htmlFor="requester_name">Solicitante (Pessoa ou Entidade)</Label>
+                <Input
+                    id="requester_name"
+                    value={data.requester_name}
+                    onChange={(e) => setData('requester_name', e.target.value)}
+                    required
+                    disabled
+                />
+                {errors.requester_name && <p className="text-red-500 text-sm">{errors.requester_name}</p>}
+            </div>
           </div>
 
           {/* Seleção de Stories */}
-          {stories.length > 0 && (
+          {/* {stories.length > 0 && (
             <div className="space-y-4">
               <Label className="text-base font-semibold">
                 User Stories Relacionadas
@@ -177,7 +189,7 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
                 })}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Botões de Ação */}
           <div className="flex gap-3 pt-4">

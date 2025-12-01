@@ -4,8 +4,8 @@ namespace App\Enums;
 
 enum ChangeRequestStatus: string
 {
-    case SOLICITADA = 'solicitada';
-    case EM_ANALISE = 'em_analise';
-    case APROVADA = 'aprovada';
-    case REJEITADA = 'rejeitada';
+    case SOLICITADA = 'SOLICITADA';
+    case EM_ANALISE = 'EM_ANALISE';
+    case IMPLEMENTADA = 'IMPLEMENTADA';
+    case REJEITADA = 'REJEITADA';
 }
