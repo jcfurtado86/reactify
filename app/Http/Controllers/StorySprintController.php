@@ -75,18 +75,32 @@ class StorySprintController extends Controller
   /**
    * Remover story da sprint
    */
-  public function destroy(Sprint $sprint, $storyId)
+  public function destroy(Request $request, Sprint $sprint)
   {
-    $sprint->stories()->detach($storyId);
-
-    Story::where('id', $storyId)->update([
-      'status' => 'prioritized',
+    $validated = $request->validate([
+      'story_ids' => 'required|array',
+      'story_ids.*' => 'exists:stories,id',
     ]);
 
-    Log::info("Story {$storyId} removed from sprint {$sprint->id}");
+    $storyIds = $validated['story_ids'];
+    $storiesLength = count($storyIds);
+    DB::transaction(function () use ($sprint, $storyIds) {
+      foreach ($storyIds as $storyId) {
+        $sprint->stories()->detach($storyId);
+
+        Story::where('id', $storyId)->update([
+          'status' => 'prioritized',
+        ]);
+
+        Log::info("Story {$storyId} removed from sprint {$sprint->id}");
+      }
+    });
+
+
+    Log::info("{$storiesLength} Stories removed from sprint {$sprint->id}");
 
     return back()->with([
-      'message' => 'Story movida de volta para o Backlog',
+      'message' => $storiesLength . ' ' . ($storiesLength > 1 ? 'Stories' : 'Story') . ' movidas ao Backlog movidas de ao Backlog',
       'status' => 'success',
     ]);
   }

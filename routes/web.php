@@ -259,7 +259,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
       StorySprintController::class,
       'store',
     ])->name('sprint-stories.store');
-    Route::delete('/{sprint}/stories/{story}', [
+    Route::delete('/{sprint}/delete-stories/', [
       StorySprintController::class,
       'destroy',
     ])->name('sprint-stories.destroy');

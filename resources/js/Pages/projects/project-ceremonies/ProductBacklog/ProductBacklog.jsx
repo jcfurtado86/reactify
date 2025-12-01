@@ -187,10 +187,16 @@ const SprintTable = ({
 
   const handleRemoveRequest = useCallback(
     (sprintId, clickedStoryId) => {
-      removeFromSprint(sprintId, clickedStoryId)
+      let idsToMove = []
+      if (selectedStories.length > 0) {
+        idsToMove = selectedStories
+      } else {
+        idsToMove = [clickedStoryId]
+      }
+      removeFromSprint(sprintId, idsToMove)
       setRowSelection({})
     },
-    [removeFromSprint],
+    [selectedStories, removeFromSprint],
   )
 
   const handleMoveRequest = useCallback(
@@ -201,7 +207,6 @@ const SprintTable = ({
       } else {
         idsToMove = [clickedStoryId]
       }
-
       // Chama a função 'moveToSprint' (do pai)
       moveToSprint(sprintId, idsToMove).then(() => {
         setRowSelection({}) // Limpa o estado LOCAL
@@ -341,12 +346,21 @@ const ProductBacklog = ({ project, setProject }) => {
   const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState([])
 
-  const removeFromSprint = (sprintId, storyId) => {
-    if (!sprintId || !storyId) return
-
+  const removeFromSprint = (sprintId, storyIdsToMove = []) => {
+    if (storyIdsToMove.length === 0) return
+    if (!sprintId) {
+      console.error('Sprint ID is required')
+      return
+    }
     router.delete(
-      route('sprint-stories.destroy', { sprint: sprintId, story: storyId }),
+      route('sprint-stories.destroy', {
+        sprint: sprintId,
+      }),
+
       {
+        data: {
+          story_ids: storyIdsToMove,
+        },
         preserveScroll: true,
         onSuccess: (page) => {
           if (page.props.project) {
