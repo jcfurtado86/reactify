@@ -1,4 +1,4 @@
-import { router, useForm, Link } from '@inertiajs/react'
+import { router, useForm, usePage } from '@inertiajs/react'
 import { cn, formatDate, isSprintActive, parseDateAsLocal } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -329,9 +329,10 @@ const ProductBacklog = ({ project, setProject }) => {
   const [endDate, setEndDate] = useState(
     new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // Default para 14 dias no futuro
   )
-  const { data, setData, post, processing } = useForm({
+  const { data, setData, processing } = useForm({
     destination: 'Backlog',
   })
+  const { errors } = usePage().props
   const [openDeleteForm, setOpenDeleteForm] = useState(false)
   const [open, setOpen] = useState(false)
   const [openEndForm, setOpenEndForm] = useState(null)
@@ -586,12 +587,14 @@ const ProductBacklog = ({ project, setProject }) => {
         {
           preserveState: true,
           preserveScroll: true,
+          onSuccess: () => {
+            setOpen(false)
+            setSelectedSprint(null)
+            setStartDate(new Date())
+            setEndDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))
+          },
         },
       )
-      setOpen(false)
-      setSelectedSprint(null)
-      setStartDate(new Date())
-      setEndDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))
     }
   }
 
@@ -791,6 +794,7 @@ const ProductBacklog = ({ project, setProject }) => {
                     selectedSprint?.name || 'Sprint 1 - Configuração Inicial'
                   }
                 />
+                <span className="text-destructive text-sm">{errors?.name}</span>
               </div>
               <div className="grid gap-3">
                 <label className="text-sm font-medium">
@@ -823,7 +827,10 @@ const ProductBacklog = ({ project, setProject }) => {
                       initialFocus
                     />
                   </PopoverContent>
-                </Popover>
+                </Popover>{' '}
+                <span className="text-destructive text-sm">
+                  {errors?.start_date}
+                </span>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">
@@ -857,6 +864,9 @@ const ProductBacklog = ({ project, setProject }) => {
                     />
                   </PopoverContent>
                 </Popover>
+                <span className="text-destructive text-sm">
+                  {errors?.end_date}
+                </span>
               </div>
             </div>
             <DialogFooter>
