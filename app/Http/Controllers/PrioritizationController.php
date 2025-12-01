@@ -20,7 +20,7 @@ class PrioritizationController extends Controller
     $story = Story::find($validatedData['story_id']);
 
     if ($story->status !== 'draft') {
-      return back()->with(['message' => 'Only stories in draft status can be prioritized', 'status' => 'error']);
+      return back()->with(['message' => 'Apenas estórias em draft podem ser priorizadas', 'status' => 'error']);
     }
 
     $prioritization = Prioritization::create($validatedData);
@@ -39,8 +39,8 @@ class PrioritizationController extends Controller
 
     $story = $prioritization->story;
 
-    if ($story->status !== 'draft') {
-      return back()->with(['message' => 'Only stories in draft status can be prioritized', 'status' => 'error']);
+    if ($story->status !== 'prioritized') {
+      return back()->with(['message' => 'Estórias presentes em sprints não podem ser movidas dentro da matriz ', 'status' => 'error']);
     }
 
     $prioritization->update($validatedData);
@@ -50,9 +50,17 @@ class PrioritizationController extends Controller
 
   public function destroy(Prioritization $prioritization)
   {
+    $story = $prioritization->story;
+
+    if ($story->status !== 'prioritized') {
+      return back()->with(['message' => 'Estórias presentes em sprints não podem ser removidas da matriz', 'status' => 'error']);
+    }
+
     Story::where('id', $prioritization->story_id)->update(['status' => 'draft']);
 
+
     $prioritization->delete();
+
 
     return back()->with(['message' => 'Story successfully removed from matrix', 'status' => 'success']);
   }

@@ -349,8 +349,6 @@ const ProductBacklog = ({ project, setProject }) => {
       {
         preserveScroll: true,
         onSuccess: (page) => {
-          toast.success('Story movida de volta para o Backlog')
-
           if (page.props.project) {
             setProject(page.props.project)
             setLocalProject(page.props.project)

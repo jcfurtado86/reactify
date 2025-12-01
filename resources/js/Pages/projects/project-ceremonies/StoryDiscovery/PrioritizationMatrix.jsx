@@ -93,7 +93,7 @@ const StoryCard = ({
   className = '',
   systemColors,
 }) => {
-  const isDisabled = story.status === 'done'
+  const isDisabled = story.status !== 'prioritized' && story.status !== 'draft'
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: `story-${story.story_id}`,
@@ -107,7 +107,6 @@ const StoryCard = ({
     backgroundColor: priority?.color ? darkenColor(priority.color, 0.4) : '',
     visibility: isDragging ? 'hidden' : 'visible',
   }
-  console.log(story)
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.story_id}`
@@ -148,7 +147,7 @@ const StoryCard = ({
               size="icon"
               variant="outline"
               tooltipContent={
-                'Stories finalizadas em sprints não podem ser alteradas'
+                'Estórias presentes em sprints não podem ser alteradas'
               }
             >
               <AlertOctagonIcon />

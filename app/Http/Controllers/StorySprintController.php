@@ -86,7 +86,7 @@ class StorySprintController extends Controller
     Log::info("Story {$storyId} removed from sprint {$sprint->id}");
 
     return back()->with([
-      'message' => 'Story removed from sprint',
+      'message' => 'Story movida de volta para o Backlog',
       'status' => 'success',
     ]);
   }
@@ -116,7 +116,7 @@ class StorySprintController extends Controller
     Log::info("Story {$validated['story_id']} updated in sprint {$sprint->id}");
 
     return back()->with([
-      'message' => 'Story updated successfully',
+      'message' => 'Story atualizada com sucesso',
       'status' => 'success',
     ]);
   }
