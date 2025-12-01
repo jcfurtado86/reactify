@@ -2,16 +2,13 @@ import { usePermissions } from '@/Context/PermissionContext'
 import {
   AlertCircle,
   Users,
-  Slash,
   CheckCircle,
   ChevronUp,
   PenLine as EditIcon,
   Save,
-  Plus,
   Minus,
   Check,
   X,
-  LoaderCircle,
   ChevronDown,
   ChevronsUp,
 } from 'lucide-react'
@@ -164,13 +161,12 @@ const ExpandableCard = ({
   icon: IconComponent = CheckCircle,
   col = 1,
   editable = true,
-  defaultExpanded = false,
+
   onContentUpdate,
   placeholder = 'Click to add content...',
   maxLength = 2000, // Limite padrão seguro
-  error = null,     // Mensagem de erro específica para este card
+  error = null, // Mensagem de erro específica para este card
 }) => {
-  const [expanded, setExpanded] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editableContent, setEditableContent] = useState(content || '')
   const [isHovered, setIsHovered] = useState(false)
@@ -224,7 +220,6 @@ const ExpandableCard = ({
     }
   }
 
-  const needsExpansion = typeof content === 'string' && content.length > 150
   const hasContent = content && content.trim().length > 0
   const variantClasses = cardVariants[variant] || cardVariants.primary
 
@@ -234,9 +229,8 @@ const ExpandableCard = ({
         className,
         'bg-card rounded-lg border-t-4 transition-all duration-300 shadow-lg hover:shadow-xl h-full flex flex-col',
         col === 2 ? 'col-span-2' : '',
-        expanded ? 'row-span-2' : '',
         // Visualmente indicamos erro na borda do card inteiro também
-        error ? 'ring-2 ring-destructive' : (isEditing ? 'ring-2 ring-ring' : ''),
+        error ? 'ring-2 ring-destructive' : isEditing ? 'ring-2 ring-ring' : '',
         variantClasses.split(' ')[0],
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -280,16 +274,18 @@ const ExpandableCard = ({
                   </button>
                 </>
               ) : (
-                <button
+                <Button
                   onClick={() => setIsEditing(true)}
+                  variant="ghost"
+                  size="icon"
                   className={cn(
-                    'text-muted-foreground hover:text-foreground transition-colors',
+                    ' transition-colors',
                     isHovered || !hasContent ? 'opacity-100' : 'opacity-0',
                   )}
-                  title="Edit content"
+                  title="Editar conteúdo"
                 >
                   <EditIcon size={16} />
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -301,45 +297,49 @@ const ExpandableCard = ({
             {isEditing ? (
               <div className="h-full flex flex-col gap-1">
                 <div className="relative w-full">
-                    <TextareaAutosize
+                  <TextareaAutosize
                     ref={textareaRef}
-                    maxLength={maxLength} 
+                    maxLength={maxLength}
                     value={editableContent}
                     onChange={(e) => setEditableContent(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     className={cn(
-                        "w-full resize-none bg-background text-sm text-foreground rounded-md p-3 border transition-colors focus:outline-none focus:ring-1",
-                        // Muda a cor da borda baseado no erro
-                        error 
-                        ? "border-destructive focus:border-destructive focus:ring-destructive" 
-                        : "border-border focus:border-primary focus:ring-ring"
+                      'w-full resize-none bg-background text-sm text-foreground rounded-md p-3 border transition-colors focus:outline-none focus:ring-1',
+                      // Muda a cor da borda baseado no erro
+                      error
+                        ? 'border-destructive focus:border-destructive focus:ring-destructive'
+                        : 'border-border focus:border-primary focus:ring-ring',
                     )}
                     disabled={isSaving}
-                    />
+                  />
                 </div>
-                
+
                 {/* Rodapé do Editor: Erro e Contador */}
                 <div className="flex justify-between items-start text-xs mt-1 min-h-[20px]">
-                    <div className="flex-1 mr-2">
-                        {error ? (
-                             <span className="text-destructive font-medium animate-in fade-in slide-in-from-top-1 block">
-                                {error}
-                             </span>
-                        ) : (
-                            <span className="text-muted-foreground/80">
-                                Ctrl+Enter to save
-                            </span>
-                        )}
-                    </div>
-                    
-                    {/* Contador de Caracteres */}
-                    <span className={cn(
-                        "font-mono whitespace-nowrap transition-colors",
-                        editableContent.length >= maxLength ? "text-destructive font-bold" : "text-muted-foreground"
-                    )}>
-                        {editableContent.length}/{maxLength}
-                    </span>
+                  <div className="flex-1 mr-2">
+                    {error ? (
+                      <span className="text-destructive font-medium animate-in fade-in slide-in-from-top-1 block">
+                        {error}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground/80">
+                        Ctrl+Enter to save
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Contador de Caracteres */}
+                  <span
+                    className={cn(
+                      'font-mono whitespace-nowrap transition-colors',
+                      editableContent.length >= maxLength
+                        ? 'text-destructive font-bold'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    {editableContent.length}/{maxLength}
+                  </span>
                 </div>
               </div>
             ) : (
@@ -348,26 +348,17 @@ const ExpandableCard = ({
                   <div
                     className={cn(
                       'whitespace-pre-wrap break-words leading-relaxed',
-                      !expanded && needsExpansion && 'overflow-hidden',
                     )}
-                    style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp:
-                        !expanded && needsExpansion && !defaultExpanded
-                          ? 4
-                          : 'none',
-                      WebkitBoxOrient: 'vertical',
-                      overflow:
-                        !expanded && needsExpansion ? 'hidden' : 'visible',
-                    }}
                   >
                     {content}
                   </div>
                 ) : (
                   <div
                     className={cn(
-                        "text-muted-foreground italic cursor-pointer hover:text-foreground/80 transition-colors py-8 text-center border-2 border-dashed rounded-lg",
-                        error ? "border-destructive/50 bg-destructive/5 text-destructive" : "border-border hover:border-border/80"
+                      'text-muted-foreground italic cursor-pointer hover:text-foreground/80 transition-colors py-8 text-center border-2 border-dashed rounded-lg',
+                      error
+                        ? 'border-destructive/50 bg-destructive/5 text-destructive'
+                        : 'border-border hover:border-border/80',
                     )}
                     onClick={() => setIsEditing(true)}
                   >
@@ -377,26 +368,6 @@ const ExpandableCard = ({
               </>
             )}
           </div>
-
-          {/* Expand Button */}
-          {!isEditing && hasContent && needsExpansion && !defaultExpanded && (
-            <div className="mt-3 pt-2 border-t border-border">
-              <button
-                onClick={() => setExpanded(!expanded)}
-                className="text-xs text-muted-foreground hover:text-foreground flex items-center justify-end w-full transition-colors"
-              >
-                {!expanded ? (
-                  <>
-                    Mostrar mais <ChevronDown size={14} className="ml-1" />
-                  </>
-                ) : (
-                  <>
-                    Mostrar menos <ChevronUp size={14} className="ml-1" />
-                  </>
-                )}
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -411,8 +382,8 @@ const MainView = ({ project = {}, setProject }) => {
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const { errors } = usePage().props
   const { can } = usePermissions()
-  const TEXT_LIMIT = 2000;
-  
+  const TEXT_LIMIT = 2000
+
   const updateProductCanvas = async (prop, newContent) => {
     const productCanvasId = project.product_canvas.id
     if (!productCanvasId) return
