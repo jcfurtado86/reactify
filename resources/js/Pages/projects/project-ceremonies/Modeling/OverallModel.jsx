@@ -5,6 +5,7 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { tooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 const GeneratedItemsModal = ({
   isModalMinimized,
@@ -237,7 +238,7 @@ const EditableListItem = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const inputRef = useRef(null)
-
+  const LIST_ITEM_MAX = 50;
   useEffect(() => {
     if (isEditing) {
       inputRef.current?.focus()
@@ -245,7 +246,7 @@ const EditableListItem = ({
   }, [isEditing])
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') onSave()
+    if (e.key === 'Enter' && editValue.trim()) onSave()
     else if (e.key === 'Escape') onCancel()
   }
 
@@ -256,17 +257,22 @@ const EditableListItem = ({
       className="group relative flex items-center min-h-8 rounded-md transition-colors p-0 border-border border"
     >
       {isEditing ? (
-        <div className="flex items-center gap-2 w-full p-0">
-          <Input
-            ref={inputRef}
-            type="text"
-            value={editValue}
-            maxLength={40}
-            onChange={onValueChange}
-            onKeyDown={handleKeyDown}
-            className="h-8 flex-1 text-left px-2 bg-secondary"
-            autoFocus
-          />
+        <div className="flex flex-col w-full">
+          <div className="flex items-center gap-2 w-full p-0">
+            <Input
+              ref={inputRef}
+              type="text"
+              value={editValue}
+              maxLength={LIST_ITEM_MAX} // [NOVO] LIMITE
+              onChange={onValueChange}
+              onKeyDown={handleKeyDown}
+              className={cn(
+                  "h-8 flex-1 text-left px-2 bg-secondary",
+                  !editValue.trim() ? "border-destructive focus-visible:ring-destructive" : ""
+              )}
+              autoFocus
+            />
+          </div>
           {/* <Button
             variant="ghost"
             size="icon"
@@ -283,6 +289,17 @@ const EditableListItem = ({
           >
             <X className="size-4" />
           </Button>*/}
+          <div className="flex justify-between px-1 bg-background/50">
+               <span className="text-[10px] text-destructive font-bold h-3 block">
+                  {!editValue.trim() ? "Obrigatório" : ""}
+               </span>
+               <span className={cn(
+                   "text-[10px]",
+                   (editValue?.length || 0) >= LIST_ITEM_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+               )}>
+                  {(editValue?.length || 0)}/{LIST_ITEM_MAX}
+               </span>
+            </div>
         </div>
       ) : (
         <>
@@ -352,6 +369,8 @@ const CRCCard = ({
   handleCollaboratorChange,
   onInspect,
 }) => {
+  const { errors } = usePage().props
+  const CLASS_NAME_MAX = 40
   const [isHeaderHovered, setIsHeaderHovered] = useState(false)
   const titleInputRef = useRef(null)
 
@@ -362,7 +381,7 @@ const CRCCard = ({
   }, [editingTitleId, card.id])
 
   const handleTitleKeyDown = (e) => {
-    if (e.key === 'Enter') saveEditTitle()
+    if (e.key === 'Enter' && editValue.trim()) saveEditTitle()
     if (e.key === 'Escape') cancelEditTitle()
   }
 
@@ -398,16 +417,21 @@ const CRCCard = ({
         data-card-id={card.id}
       >
         {editingTitleId === card.id ? (
-          <div className="flex items-center gap-2 w-full">
-            <Input
-              ref={titleInputRef}
-              type="text"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onKeyDown={handleTitleKeyDown}
-              className="h-9 text-lg font-semibold flex-1"
-              maxLength={30}
-            />
+          <div className="flex flex-col w-full">
+              <div className="flex items-center gap-2 w-full">
+                <Input
+                  ref={titleInputRef}
+                  type="text"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onKeyDown={handleTitleKeyDown}
+                  className={cn(
+                      "h-9 text-lg font-semibold flex-1",
+                      !editValue.trim() ? "border-destructive focus-visible:ring-destructive" : ""
+                  )}
+                  maxLength={CLASS_NAME_MAX} 
+                />
+              </div>
             {/* <Button
               variant="ghost"
               size="icon"
@@ -424,6 +448,17 @@ const CRCCard = ({
             >
               <X className="size-5" />
             </Button>*/}
+            <div className="flex justify-between px-1">
+                <span className="text-[10px] text-destructive font-bold h-3 block">
+                  {!editValue.trim() ? "Nome obrigatório" : ""}
+                </span>
+                <span className={cn(
+                    "text-[10px]",
+                    (editValue?.length || 0) >= CLASS_NAME_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                )}>
+                  {(editValue?.length || 0)}/{CLASS_NAME_MAX}
+                </span>
+            </div>
           </div>
         ) : (
           <>
@@ -519,7 +554,7 @@ const OverallModel = ({ project, setProject }) => {
   const [editValue, setEditValue] = useState('')
   const [newReusableName, setNewReusableName] = useState('')
   const [deleteConfirmCardId, setDeleteConfirmCardId] = useState(null)
-
+  const CLASS_NAME_MAX = 40
   const { errors } = usePage().props
 
   // inspection function
@@ -933,17 +968,33 @@ const OverallModel = ({ project, setProject }) => {
               Banco de Classes
             </AccordionTrigger>
             <AccordionContent className="p-4 pt-0">
-              <div className="flex items-center gap-2 my-2">
-                <Input
-                  placeholder="Adicionar nova classe ou colaborador..."
-                  value={newReusableName}
-                  onChange={(e) => setNewReusableName(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' && handleAddReusableName()
-                  }
-                  maxLength={30}
-                />
-                <Button onClick={handleAddReusableName}>Salvar</Button>
+              <div className="flex flex-col gap-1 my-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Adicionar nova classe ou colaborador..."
+                      value={newReusableName}
+                      maxLength={CLASS_NAME_MAX} 
+                      onChange={(e) => setNewReusableName(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === 'Enter' && newReusableName.trim() && handleAddReusableName()
+                      }
+                    />
+                    <Button 
+                        onClick={handleAddReusableName}
+                        disabled={!newReusableName.trim()} 
+                    >
+                        Salvar
+                    </Button>
+                  </div>
+                  
+                  <div className="flex justify-end px-1">
+                     <span className={cn(
+                         "text-[10px]",
+                         newReusableName.length >= CLASS_NAME_MAX ? "text-destructive font-bold" : "text-muted-foreground"
+                     )}>
+                        {newReusableName.length}/{CLASS_NAME_MAX}
+                     </span>
+                  </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(project.overall_model_classes || []).length > 0 ? (

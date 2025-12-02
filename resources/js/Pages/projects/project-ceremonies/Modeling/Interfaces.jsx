@@ -5,6 +5,7 @@ import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
 import { tooltipInfo } from '@/lib/projectData'
 import MotionDivOptions from '@/Components/MotionDivOptions'
+import { cn } from '@/lib/utils'
 /**
  * Componente para gerenciar as interfaces de um projeto (criação e edição).
  *
@@ -177,6 +178,7 @@ const Interfaces = ({ project, setProject }) => {
   const [showAiModal, setShowAiModal] = useState(false)
   const [isModalMinimized, setIsModalMinimized] = useState(false)
 
+  const MAX_LIMIT = 50
   const internalInterfaces =
     project?.system_interfaces?.filter((i) => i.type === 'internal') || []
   const externalInterfaces =
@@ -542,24 +544,39 @@ const Interfaces = ({ project, setProject }) => {
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-2 py-2 ">
-                {/* Título */}
-                <div className="grid grid-cols-5 items-center gap-4">
-                  <Label htmlFor="title" className="text-right">
-                    Título
+                
+                {/* --- TÍTULO --- */}
+                <div className="grid grid-cols-5 items-start gap-4">
+                  <Label htmlFor="title" className="text-right pt-2">
+                    Título <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="title"
-                    value={data.title}
-                    onChange={(e) => setData('title', e.target.value)}
-                    className="col-span-4"
-                  />
-                  {errors.title && (
-                    <p className="col-span-4 text-red-500 text-xs text-right">
-                      {errors.title}
-                    </p>
-                  )}
+                  <div className="col-span-4 flex flex-col gap-1">
+                      <Input
+                        id="title"
+                        maxLength={MAX_LIMIT}
+                        value={data.title}
+                        onChange={(e) => setData('title', e.target.value)}
+                        className={cn(
+                            (errors.title || !data.title.trim()) 
+                                ? "border-destructive focus-visible:ring-destructive placeholder:text-destructive" 
+                                : ""
+                        )}
+                      />
+                      <div className="flex justify-between px-1">
+                         <span className="text-[10px] text-destructive font-bold min-h-[15px] block">
+                            {errors.title || (!data.title.trim() ? "O título é obrigatório" : "")}
+                         </span>
+                         <span className={cn(
+                             "text-[10px]",
+                             data.title.length >= MAX_LIMIT ? "text-destructive font-bold" : "text-muted-foreground"
+                         )}>
+                            {data.title.length}/{MAX_LIMIT}
+                         </span>
+                      </div>
+                  </div>
                 </div>
-                {/* Tipo */}
+
+                {/* --- TIPO --- */}
                 <div className="grid grid-cols-5 items-center gap-4">
                   <Label htmlFor="type" className="text-right">
                     Tipo
@@ -577,70 +594,100 @@ const Interfaces = ({ project, setProject }) => {
                     </SelectContent>
                   </Select>
                 </div>
-                {/* Input */}
-                <div className="grid grid-cols-5 items-center gap-4">
-                  <Label htmlFor="input" className="text-right">
-                    Input
+
+                {/* --- INPUT --- */}
+                <div className="grid grid-cols-5 items-start gap-4">
+                  <Label htmlFor="input" className="text-right pt-2">
+                    Input <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="input"
-                    value={data.input}
-                    onChange={(e) => setData('input', e.target.value)}
-                    className="col-span-4"
-                  />
-                  {errors.input && (
-                    <p className="col-span-5 text-red-500 text-xs text-right">
-                      {errors.input}
-                    </p>
-                  )}
+                  <div className="col-span-4 flex flex-col gap-1">
+                      <Input
+                        id="input"
+                        maxLength={MAX_LIMIT}
+                        value={data.input}
+                        onChange={(e) => setData('input', e.target.value)}
+                        className={cn(
+                            (errors.input || !data.input.trim()) 
+                                ? "border-destructive focus-visible:ring-destructive placeholder:text-destructive" 
+                                : ""
+                        )}
+                      />
+                      <div className="flex justify-between px-1">
+                         <span className="text-[10px] text-destructive font-bold min-h-[15px] block">
+                            {errors.input || (!data.input.trim() ? "O input é obrigatório" : "")}
+                         </span>
+                         <span className={cn(
+                             "text-[10px]",
+                             data.input.length >= MAX_LIMIT ? "text-destructive font-bold" : "text-muted-foreground"
+                         )}>
+                            {data.input.length}/{MAX_LIMIT}
+                         </span>
+                      </div>
+                  </div>
                 </div>
-                {/* Output */}
-                <div className="grid grid-cols-5 items-center gap-4">
-                  <Label htmlFor="output" className="text-right">
-                    Output
+
+                {/* --- OUTPUT --- */}
+                <div className="grid grid-cols-5 items-start gap-4">
+                  <Label htmlFor="output" className="text-right pt-2">
+                    Output <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="output"
-                    value={data.output}
-                    onChange={(e) => setData('output', e.target.value)}
-                    className="col-span-4"
-                  />
-                  {errors.output && (
-                    <p className="col-span-5 text-red-500 text-xs text-right">
-                      {errors.output}
-                    </p>
-                  )}
+                  <div className="col-span-4 flex flex-col gap-1">
+                      <Input
+                        id="output"
+                        maxLength={MAX_LIMIT}
+                        value={data.output}
+                        onChange={(e) => setData('output', e.target.value)}
+                        className={cn(
+                            (errors.output || !data.output.trim()) 
+                                ? "border-destructive focus-visible:ring-destructive placeholder:text-destructive" 
+                                : ""
+                        )}
+                      />
+                      <div className="flex justify-between px-1">
+                         <span className="text-[10px] text-destructive font-bold min-h-[15px] block">
+                            {errors.output || (!data.output.trim() ? "O output é obrigatório" : "")}
+                         </span>
+                         <span className={cn(
+                             "text-[10px]",
+                             data.output.length >= MAX_LIMIT ? "text-destructive font-bold" : "text-muted-foreground"
+                         )}>
+                            {data.output.length}/{MAX_LIMIT}
+                         </span>
+                      </div>
+                  </div>
                 </div>
-                {/* Classes Relacionadas */}
+
+                {/* --- CLASSES RELACIONADAS --- */}
                 {data.type === 'internal' && (
                   <div className="grid grid-cols-5 items-start gap-4">
                     <Label className="text-right pt-2">Classes</Label>
-                    <div className="col-span-4 border rounded-md p-2">
-                      {allClassModels.map((model) => (
-                        <div
-                          key={model.id}
-                          className="flex items-center space-x-2 my-1"
-                        >
-                          <Checkbox
-                            id={`rel-${model.id}`}
-                            checked={data.overall_model_class_ids.includes(
-                              model.id,
-                            )}
-                            onCheckedChange={() =>
-                              handleMultiSelectChange(model.id)
-                            }
-                            className="form-checkbox h-4 w-4"
-                          />
-                          <label
-                            htmlFor={`rel-${model.id}`}
-                            className="text-sm font-medium"
-                          >
-                            {model.name}
-                          </label>
-                        </div>
-                      ))}
+                    <div className={cn(
+                        "col-span-4 border rounded-md p-2",
+                        data.overall_model_class_ids.length === 0 ? "border-destructive" : ""
+                    )}>
+                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                          {allClassModels.map((model) => (
+                            <div
+                              key={model.id}
+                              className="flex items-center space-x-2"
+                            >
+                              <Checkbox
+                                id={`rel-${model.id}`}
+                                checked={data.overall_model_class_ids.includes(model.id)}
+                                onCheckedChange={() => handleMultiSelectChange(model.id)}
+                                className="form-checkbox h-4 w-4"
+                              />
+                              <label
+                                htmlFor={`rel-${model.id}`}
+                                className="text-sm font-medium cursor-pointer"
+                              >
+                                {model.name}
+                              </label>
+                            </div>
+                          ))}
+                      </div>
                       {errors.overall_model_class_ids && (
-                        <p className="col-span-4 text-red-500 text-xs text-right">
+                        <p className="mt-2 text-destructive text-xs">
                           {errors.overall_model_class_ids}
                         </p>
                       )}
@@ -648,8 +695,18 @@ const Interfaces = ({ project, setProject }) => {
                   </div>
                 )}
               </div>
+              
               <DialogFooter>
-                <Button type="submit" disabled={processing}>
+                <Button 
+                    type="submit" 
+                    disabled={
+                        processing || 
+                        !data.title.trim() || 
+                        !data.input.trim() || 
+                        !data.output.trim() ||
+                        (data.type === 'internal' && data.overall_model_class_ids.length === 0)
+                    }
+                >
                   {processing ? 'Salvando...' : 'Salvar'}
                 </Button>
               </DialogFooter>
