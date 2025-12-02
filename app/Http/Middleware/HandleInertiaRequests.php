@@ -35,7 +35,7 @@ class HandleInertiaRequests extends Middleware
     return array_merge(parent::share($request), [
       'auth' => [
         'user' => fn() => $request->user()
-          ? $request->user()->only(['id', 'name', 'email', 'provider_avatar'])
+          ? $request->user()->only(['id', 'name', 'email', 'provider_avatar', 'avatar_url'])
           : null,
 
         'notifications' => function () use ($request) {
@@ -77,23 +77,23 @@ class HandleInertiaRequests extends Middleware
 
         'projects' => fn() => $request->user()
           ? $request
-            ->user()
-            ->projects()
-            ->with([
-              'users' => function ($query) {
-                $query->select(['user_id', 'name', 'email', 'provider_avatar']);
-              },
-            ])
-            ->select([
-              'title',
-              'projects.id',
-              'description',
-              'emoji',
-              'active',
-              'projects.created_at',
-              'projects.updated_at',
-            ])
-            ->get()
+          ->user()
+          ->projects()
+          ->with([
+            'users' => function ($query) {
+              $query->select(['user_id', 'name', 'email', 'provider_avatar', 'avatar_path']);
+            },
+          ])
+          ->select([
+            'title',
+            'projects.id',
+            'description',
+            'emoji',
+            'active',
+            'projects.created_at',
+            'projects.updated_at',
+          ])
+          ->get()
           : null,
       ],
       'flash' => [

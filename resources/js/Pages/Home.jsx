@@ -18,7 +18,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import TableComponent from '@/Components/TableComponent'
 import { cn } from '@/lib/utils'
- 
+
 const NAME_MAX = 50
 
 const Home = ({}) => {
@@ -36,11 +36,12 @@ const Home = ({}) => {
   //   emoji: '',
   // })
 
-  const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
-    title: '',
-    description: '',
-    emoji: '',
-  })
+  const { data, setData, post, processing, errors, reset, clearErrors } =
+    useForm({
+      title: '',
+      description: '',
+      emoji: '',
+    })
 
   const columns = [
     {
@@ -79,7 +80,7 @@ const Home = ({}) => {
             avatarUrls={row.getValue('users').map(
               (user) =>
                 ({
-                  imageUrl: user.provider_avatar,
+                  imageUrl: user?.avatar_url,
                   profileUrl: '',
                 }) || {},
             )}
@@ -165,11 +166,11 @@ const Home = ({}) => {
 
   const createProject = (e) => {
     e.preventDefault()
-    
+
     post(route('project.store'), {
-        onSuccess: () => {
-            reset() 
-        }
+      onSuccess: () => {
+        reset()
+      },
     })
   }
   const toggleActive = (projectId) => {
@@ -280,69 +281,83 @@ const Home = ({}) => {
                 <div className="grid gap-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="title-1">
-                        Nome <span className="text-destructive">*</span>
+                      Nome <span className="text-destructive">*</span>
                     </Label>
-                    <span className={cn(
-                        "text-[10px]", 
-                        data.title.length >= NAME_MAX ? "text-destructive font-bold" : "text-muted-foreground"
-                    )}>
+                    <span
+                      className={cn(
+                        'text-[10px]',
+                        data.title.length >= NAME_MAX
+                          ? 'text-destructive font-bold'
+                          : 'text-muted-foreground',
+                      )}
+                    >
                       {data.title.length}/{NAME_MAX}
                     </span>
                   </div>
 
-                <Input
-                  placeholder="Nome do Projeto"
-                  id="title-1"
-                  name="title"
-                  maxLength={NAME_MAX} // Bloqueio físico
-                  value={data.title}
-                  className={cn(errors.title ? 'border-destructive focus-visible:ring-destructive' : '')}
-                  onChange={(e) => {
+                  <Input
+                    placeholder="Nome do Projeto"
+                    id="title-1"
+                    name="title"
+                    maxLength={NAME_MAX} // Bloqueio físico
+                    value={data.title}
+                    className={cn(
+                      errors.title
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : '',
+                    )}
+                    onChange={(e) => {
                       setData('title', e.target.value)
                       if (errors.title) clearErrors('title')
-                  }}
-                />
-                {errors.title && (
-                  <span className="text-destructive text-sm font-medium">
+                    }}
+                  />
+                  {errors.title && (
+                    <span className="text-destructive text-sm font-medium">
                       {errors.title}
-                  </span>
-                )}
-              </div>
-
-              <div className="grid gap-2">
-                <div className="flex justify-between items-center">
-                    <Label htmlFor="description-1">
-                        Descrição <span className="text-destructive">*</span>
-                    </Label>
-                    <span className={cn(
-                        "text-[10px]", 
-                        data.description.length >= 1000 ? "text-destructive font-bold" : "text-muted-foreground"
-                    )}>
-                        {data.description.length}/1000
                     </span>
+                  )}
                 </div>
 
-                <Input
-                  placeholder="Descrição do Projeto"
-                  id="description-1"
-                  name="description"
-                  maxLength={1000} // Bloqueio físico
-                  className={cn(
-                      "bg-background",
-                      errors.description ? 'border-destructive focus-visible:ring-destructive' : ''
-                  )}
-                  value={data.description}
-                  onChange={(e) => {
+                <div className="grid gap-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="description-1">
+                      Descrição <span className="text-destructive">*</span>
+                    </Label>
+                    <span
+                      className={cn(
+                        'text-[10px]',
+                        data.description.length >= 1000
+                          ? 'text-destructive font-bold'
+                          : 'text-muted-foreground',
+                      )}
+                    >
+                      {data.description.length}/1000
+                    </span>
+                  </div>
+
+                  <Input
+                    placeholder="Descrição do Projeto"
+                    id="description-1"
+                    name="description"
+                    maxLength={1000} // Bloqueio físico
+                    className={cn(
+                      'bg-background',
+                      errors.description
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : '',
+                    )}
+                    value={data.description}
+                    onChange={(e) => {
                       setData('description', e.target.value)
                       if (errors.description) clearErrors('description')
-                  }}
-                />
-                {errors.description && (
-                  <span className="text-destructive text-sm font-medium">
+                    }}
+                  />
+                  {errors.description && (
+                    <span className="text-destructive text-sm font-medium">
                       {errors.description}
-                  </span>
-                )}
-              </div>
+                    </span>
+                  )}
+                </div>
 
                 <div className="flex items-center gap-3">
                   <Label htmlFor="description">Emoji</Label>
@@ -378,7 +393,7 @@ const Home = ({}) => {
                   </Button>
                 </div>
               </div>
-              
+
               <DialogFooter>
                 <DialogClose asChild>
                   <Button type="button" variant="outline">
@@ -393,33 +408,34 @@ const Home = ({}) => {
       </div>
 
       {/* Task Overview */}
-        {projects.length > 0 ? (
-          <div className="overflow-hidden rounded-md border">
-            <TableComponent table={table} />
+      {projects.length > 0 ? (
+        <div className="overflow-hidden rounded-md border">
+          <TableComponent table={table} />
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-[60vh] border border-dashed rounded-lg bg-card/50 text-center p-8">
+          <div className="bg-accent/50 p-4 rounded-full mb-4">
+            <MousePointerClick className="h-12 w-12 text-foreground/80" />
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-[60vh] border border-dashed rounded-lg bg-card/50 text-center p-8">
-            <div className="bg-accent/50 p-4 rounded-full mb-4">
-              <MousePointerClick className="h-12 w-12 text-foreground/80" />
-            </div>
-            <h3 className="text-2xl font-bold text-foreground mb-2">
-              Bem-vindo ao Reactify
-            </h3>
-            <p className="text-muted-foreground max-w-md mb-8">
-              Você ainda não tem nenhum projeto. Crie seu primeiro espaço de trabalho para começar a gerenciar suas tarefas com IA.
-            </p>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="lg" className="rounded-full font-semibold">
-                  Criar meu primeiro projeto
-                </Button>
-              </DialogTrigger>
-            </Dialog>
-          </div>
-        )} 
-            </div>
-          )
-        }
+          <h3 className="text-2xl font-bold text-foreground mb-2">
+            Bem-vindo ao Reactify
+          </h3>
+          <p className="text-muted-foreground max-w-md mb-8">
+            Você ainda não tem nenhum projeto. Crie seu primeiro espaço de
+            trabalho para começar a gerenciar suas tarefas com IA.
+          </p>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="lg" className="rounded-full font-semibold">
+                Criar meu primeiro projeto
+              </Button>
+            </DialogTrigger>
+          </Dialog>
+        </div>
+      )}
+    </div>
+  )
+}
 
 Home.layout = (page) => <MainLayout children={page} />
 

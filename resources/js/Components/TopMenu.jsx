@@ -139,9 +139,9 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
               aria-label="Perfil"
               title="Perfil"
             >
-              {user?.provider_avatar ? (
+              {user?.avatar_url ? (
                 <img
-                  src={user.provider_avatar}
+                  src={user.avatar_url}
                   alt="User Avatar"
                   className="size-7 rounded-full object-contain"
                 />

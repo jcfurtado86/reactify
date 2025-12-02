@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,6 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -28,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
     'provider_id',
     'provider_name',
     'provider_avatar',
+    'avatar_path',
     'email_verified_at',
   ];
 
@@ -36,6 +39,8 @@ class User extends Authenticatable implements MustVerifyEmail
    *
    * @var list<string>
    */
+
+  protected $appends = ['avatar_url'];
   protected $hidden = ['password', 'remember_token'];
 
   /**
@@ -66,5 +71,21 @@ class User extends Authenticatable implements MustVerifyEmail
   public function changeRequests()
   {
     return $this->hasMany(ChangeRequest::class, 'requested_by_id');
+  }
+
+  protected function avatarUrl(): Attribute
+  {
+    return Attribute::make(
+      get: function () {
+        if ($this->avatar_path) {
+          return Storage::url($this->avatar_path);
+        }
+
+        if ($this->provider_avatar) {
+          return $this->provider_avatar;
+        }
+        return  'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+      }
+    );
   }
 }
