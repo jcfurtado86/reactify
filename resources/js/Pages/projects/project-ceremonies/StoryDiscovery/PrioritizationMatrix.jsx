@@ -57,7 +57,7 @@ const SortablePriorityColumn = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="rounded-md flex flex-col items-center h-full"
+      className="sortable-column rounded-md flex flex-col items-center h-full"
     >
       {/* Cabeçalho da Coluna (agora é a área de arrastar) */}
       <div
@@ -131,7 +131,7 @@ const StoryCard = ({
       {...listeners}
       {...attributes}
       className={`
-         flex flex-col w-fit min-w-40 max-w-66 text-left p-2 items-center justify-start text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
+         flex flex-col w-fit min-w-40 max-w-56 text-left p-2 items-center justify-start text-xs font-normal text-foreground ${priority ? 'text-slate-50' : 'border border-border'}  rounded-md shadow-sm  transition-opacity duration-300 ${cursorClass} ${className}`}
     >
       {!story.isTemporary && (
         <div className="w-full flex items-center gap-2 justify-between">
@@ -638,7 +638,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
               )}
             </aside>
             <div
-              className={`${orderedPriorities.length > 0 ? 'grid grid-flow-col auto-cols-auto' : 'flex'} flex-1  gap-2 pr-2`}
+              className={`${orderedPriorities.length > 0 ? 'grid grid-flow-col auto-cols-max' : 'flex'} flex-1  gap-2 pr-2`}
             >
               {orderedPriorities.length > 0 ? (
                 <SortableContext
@@ -666,7 +666,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                               <DroppableCell
                                 key={cellId}
                                 id={cellId}
-                                className={`h-44 flex flex-row justify-center w-full `}
+                                className={`h-44 min-w-40 flex flex-row justify-center w-full `}
                               >
                                 {storiesInCell && storiesInCell.length > 0 ? (
                                   storiesInCell.map((story) => (
