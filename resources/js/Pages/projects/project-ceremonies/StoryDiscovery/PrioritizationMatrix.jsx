@@ -530,7 +530,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
           {/* <span className="h-11 py-1 m-2 t-4">Stories</span>*/}
           <DroppableCell
             id="story-list"
-            className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1 p-1 items-start border-0"
+            className="flex flex-wrap gap-1 p-1 border-0  "
           >
             {unassignedStories.length > 0 ? (
               unassignedStories.map((story) => {
@@ -547,7 +547,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   <StoryCard
                     key={story.id}
                     story={unassignedStory}
-                    className="h-full"
+                    className=""
                     systemColors={project?.system_colors}
                   />
                 )

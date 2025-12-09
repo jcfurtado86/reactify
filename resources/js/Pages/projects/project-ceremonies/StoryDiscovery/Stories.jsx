@@ -165,20 +165,19 @@ const StoryItem = ({
   onCancel,
   onDelete,
   onInspect,
-  isTemporary,
   textareaRef,
   typeSelectId,
   onToggleTypeSelect,
   onChangeStoryType,
   disabled = false,
-  errors
+  errors,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const status = inspectionStatus(story)
 
-  const TITLE_MAX = 255;
+  const TITLE_MAX = 255
   // Verifica erro (assumindo edição única por vez)
-  const titleError = isEditing ? errors?.title : null;
+  const titleError = isEditing ? errors?.title : null
 
   const handleColorSelect = (colorValue, variantTitle) => {
     const selectedColor = PREDEFINED_COLORS.find(
@@ -203,7 +202,6 @@ const StoryItem = ({
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.id}`
-
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
@@ -214,7 +212,7 @@ const StoryItem = ({
       <Card
         className={cn(
           'bg-card border transition-all duration-300 ease-in-out rounded',
-          titleError ? "border-destructive" : "" // Borda vermelha no Card se erro
+          titleError ? 'border-destructive' : '', // Borda vermelha no Card se erro
         )}
       >
         <CardContent
@@ -234,7 +232,7 @@ const StoryItem = ({
                       variant="outline"
                       className={`border-transparent text-black font-bold w-fit cursor-pointer`}
                     >
-                      {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
+                      {`${story.type === 'system' ? 'SS ' : 'US '}${isTemporary(story.id) ? '' : realStoryId}`}
                       <ChevronDown className="ml-1 size-3" />
                     </Badge>
                   </PopoverTrigger>
@@ -295,59 +293,71 @@ const StoryItem = ({
                   variant="outline"
                   className={`border-transparent text-black font-bold w-fit cursor-pointer `}
                 >
-                  {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
+                  {`${story.type === 'system' ? 'SS ' : 'US '}${isTemporary(story.id) ? '' : realStoryId}`}
                 </Badge>
               )}
               <StatusBadge status={status} />
+              <div className="flex items-center gap-1">
+                {isTemporary(story.id) && (
+                  <LoaderCircle className="text-primary animate-spin size-5" />
+                )}
+              </div>
             </div>
 
             {isEditing ? (
               <div className="flex flex-col w-full gap-1">
-                  <div className="flex w-full items-center gap-2">
-                    <TextareaAutosize
-                      ref={textareaRef}
-                      maxLength={TITLE_MAX}
-                      value={editValue}
-                      onChange={onValueChange}
-                      onKeyDown={handleKeyDown}
-                      className={cn(
-                          "w-full text-sm border-0 resize-none appearance-none overflow-hidden bg-transparent p-0 m-0 font-normal focus-visible:outline-none focus-visible:ring-0",
-                          (titleError || !editValue.trim()) ? "text-foreground placeholder:text-destructive border-b border-destructive" : "text-foreground"
-                      )}
-                      autoFocus
-                    />
-                    <div className="flex items-center gap-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-7 text-destructive/80 hover:bg-destructive/10"
-                          onClick={onCancel}
-                        >
-                          <X className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-7 text-green-500 hover:bg-green-500/10"
-                          onClick={onSave}
-                          disabled={!editValue.trim()}
-                        >
-                          <Check className="size-4" />
-                        </Button>
-                    </div>
+                <div className="flex w-full items-center gap-2">
+                  <TextareaAutosize
+                    ref={textareaRef}
+                    maxLength={TITLE_MAX}
+                    value={editValue}
+                    onChange={onValueChange}
+                    onKeyDown={handleKeyDown}
+                    className={cn(
+                      'w-full text-sm border-0 resize-none appearance-none overflow-hidden bg-transparent p-0 m-0 font-normal focus-visible:outline-none focus-visible:ring-0',
+                      titleError || !editValue.trim()
+                        ? 'text-foreground placeholder:text-destructive border-b border-destructive'
+                        : 'text-foreground',
+                    )}
+                    autoFocus
+                  />
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 text-destructive/80 hover:bg-destructive/10"
+                      onClick={onCancel}
+                    >
+                      <X className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 text-green-500 hover:bg-green-500/10"
+                      onClick={onSave}
+                      disabled={!editValue.trim()}
+                    >
+                      <Check className="size-4" />
+                    </Button>
                   </div>
-                  {/* Contador e Erro */}
-                  <div className="flex justify-between items-center px-1">
-                     <span className="text-xs text-destructive font-bold">
-                        {titleError || (!editValue.trim() ? "O título é obrigatório" : "")}
-                     </span>
-                     <span className={cn(
-                         "text-[10px]",
-                         (editValue?.length || 0) >= TITLE_MAX ? "text-destructive font-bold" : "text-muted-foreground"
-                     )}>
-                        {(editValue?.length || 0)}/{TITLE_MAX}
-                     </span>
-                  </div>
+                </div>
+                {/* Contador e Erro */}
+                <div className="flex justify-between items-center px-1">
+                  <span className="text-xs text-destructive font-bold">
+                    {titleError ||
+                      (!editValue.trim() ? 'O título é obrigatório' : '')}
+                  </span>
+                  <span
+                    className={cn(
+                      'text-[10px]',
+                      (editValue?.length || 0) >= TITLE_MAX
+                        ? 'text-destructive font-bold'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    {editValue?.length || 0}/{TITLE_MAX}
+                  </span>
+                </div>
               </div>
             ) : (
               <p className="m-0 text-sm text-foreground break-words whitespace-pre-wrap w-full min-w-0">
@@ -356,15 +366,10 @@ const StoryItem = ({
             )}
           </div>
 
-          <div className="flex items-center gap-1">
-            {isTemporary && (
-              <LoaderCircle className="text-primary animate-spin" />
-            )}
-          </div>
           <MotionDivOptions
             isHovered={isHovered}
             isEditing={isEditing}
-            isTemporary={isTemporary}
+            isTemporary={isTemporary(story.id)}
             disabled={disabled}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -683,7 +688,6 @@ const Stories = ({ project, setProject }) => {
                     onSave={() => editStory(story)}
                     onDelete={() => deleteStory(story.id)}
                     onCancel={() => setEditingId(null)}
-                    isTemporary={isTemporary(story)}
                     textareaRef={editingId === story.id ? textareaRef : null}
                     typeSelectId={typeSelectId}
                     onToggleTypeSelect={() => toggleTypeSelect(story.id)}
@@ -741,7 +745,6 @@ const Stories = ({ project, setProject }) => {
                     onSave={() => editStory(story)}
                     onDelete={() => deleteStory(story.id)}
                     onCancel={() => setEditingId(null)}
-                    isTemporary={isTemporary(story)}
                     textareaRef={editingId === story.id ? textareaRef : null}
                     typeSelectId={typeSelectId}
                     onToggleTypeSelect={() => toggleTypeSelect(story.id)}

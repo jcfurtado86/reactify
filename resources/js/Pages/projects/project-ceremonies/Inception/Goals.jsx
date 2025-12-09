@@ -13,7 +13,12 @@ import {
 import rainbowIcon from '/resources/images/rainbow.png'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
-import { PREDEFINED_COLORS, cn, inspectionStatus } from '@/lib/utils'
+import {
+  PREDEFINED_COLORS,
+  cn,
+  inspectionStatus,
+  isTemporary,
+} from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { tooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
@@ -22,7 +27,7 @@ import { ColorOptions } from '@/Components/ColorComponents'
 import { toast } from 'sonner'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
-import { usePage } from '@inertiajs/react' 
+import { usePage } from '@inertiajs/react'
 
 const GeneratedItemsModal = ({
   isModalMinimized,
@@ -162,7 +167,6 @@ const GeneratedItemsModal = ({
 
 const GoalItem = ({
   goal,
-  isTemporary,
   disabled = false,
   isEditing,
   editValue,
@@ -180,14 +184,14 @@ const GoalItem = ({
   onTogglePrioritySelect,
   onChangeGoalPriority,
   systemColors,
-  errors
+  errors,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const status = inspectionStatus(goal)
 
-  const TITLE_MAX = 255; 
-  const titleError = isEditing ? errors?.title : null;
-  
+  const TITLE_MAX = 255
+  const titleError = isEditing ? errors?.title : null
+
   const handleColorSelect = (colorValue, variantTitle) => {
     const selectedColor = PREDEFINED_COLORS.find(
       (color) => color.color === colorValue,
@@ -238,13 +242,15 @@ const GoalItem = ({
       className="relative group"
       data-card-id={goal.id}
     >
-      <Card className={cn(
-          "bg-card border transition-all duration-300 ease-in-out rounded",
-          titleError ? "border-destructive" : "" // Borda vermelha no Card se houver erro
-      )}>
+      <Card
+        className={cn(
+          'bg-card border transition-all duration-300 ease-in-out rounded',
+          titleError ? 'border-destructive' : '', // Borda vermelha no Card se houver erro
+        )}
+      >
         <CardContent className="p-2 flex flex-col gap-2">
           {/* Badge Row for Type and Priority */}
-          <div className="flex ">
+          <div className="flex gap-2">
             <div className="flex items-center gap-2">
               <Popover
                 open={!disabled && typeSelectId === goal.id}
@@ -377,10 +383,12 @@ const GoalItem = ({
                 </PopoverContent>
               </Popover>
               <StatusBadge status={status} />
+            </div>{' '}
+            <div className="flex items-center gap-1">
+              {isTemporary(goal.id) && (
+                <LoaderCircle className="text-primary animate-spin size-5" />
+              )}
             </div>
-            {isTemporary && (
-              <LoaderCircle className="text-primary animate-spin size-4" />
-            )}
           </div>
 
           {/* Title and Editing Area */}
@@ -414,16 +422,20 @@ const GoalItem = ({
                 </Button>
               </div>
               <div className="flex justify-between items-center px-1">
-                    <span className="text-xs text-destructive font-medium">
-                        {titleError}
-                    </span>
-                    <span className={cn(
-                        "text-[10px]",
-                        (editValue?.length || 0) >= TITLE_MAX ? "text-destructive font-bold" : "text-muted-foreground"
-                    )}>
-                        {(editValue?.length || 0)}/{TITLE_MAX}
-                    </span>
-                </div>
+                <span className="text-xs text-destructive font-medium">
+                  {titleError}
+                </span>
+                <span
+                  className={cn(
+                    'text-[10px]',
+                    (editValue?.length || 0) >= TITLE_MAX
+                      ? 'text-destructive font-bold'
+                      : 'text-muted-foreground',
+                  )}
+                >
+                  {editValue?.length || 0}/{TITLE_MAX}
+                </span>
+              </div>
             </div>
           ) : (
             <p className="m-0 font-normal text-sm text-foreground break-words whitespace-pre-wrap min-w-0 flex-1 min-h-[24px]">
@@ -436,7 +448,7 @@ const GoalItem = ({
       <MotionDivOptions
         isHovered={isHovered}
         isEditing={isEditing}
-        isTemporary={isTemporary}
+        isTemporary={isTemporary(goal.id)}
         disabled={disabled}
         onEdit={onEdit}
         onDelete={onDelete}
