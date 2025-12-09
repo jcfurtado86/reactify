@@ -144,7 +144,7 @@ const StoryCard = ({
           </Badge>
           {isDisabled && (
             <ButtonWithTooltip
-              size="icon"
+              className="size-6 p-2"
               variant="outline"
               tooltipContent={
                 'Estórias presentes em sprints não podem ser alteradas'
