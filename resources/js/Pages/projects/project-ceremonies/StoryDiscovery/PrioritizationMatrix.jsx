@@ -533,25 +533,27 @@ const PrioritizationMatrix = ({ project, setProject }) => {
             className="flex flex-wrap gap-1 p-1 border-0  "
           >
             {unassignedStories.length > 0 ? (
-              unassignedStories.map((story) => {
-                const unassignedStory = {
-                  story_id: story.id,
-                  story_title: story.title,
-                  story_type: story.type,
-                  status: story.status,
-                  epic_id: story.epic_id,
-                  epic_index: story.epic_index,
-                }
+              unassignedStories
+                .sort((a, b) => a.id - b.id)
+                .map((story) => {
+                  const unassignedStory = {
+                    story_id: story.id,
+                    story_title: story.title,
+                    story_type: story.type,
+                    status: story.status,
+                    epic_id: story.epic_id,
+                    epic_index: story.epic_index,
+                  }
 
-                return (
-                  <StoryCard
-                    key={story.id}
-                    story={unassignedStory}
-                    className=""
-                    systemColors={project?.system_colors}
-                  />
-                )
-              })
+                  return (
+                    <StoryCard
+                      key={story.id}
+                      story={unassignedStory}
+                      className=""
+                      systemColors={project?.system_colors}
+                    />
+                  )
+                })
             ) : (
               <div className="col-span-4 md:col-span-5 lg:col-span-6 flex flex-col items-center justify-center p-6 text-muted-foreground min-h-[100px]">
                 <BookText
@@ -669,14 +671,16 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                                 className={`h-44 min-w-40 flex flex-row justify-center w-full gap-1`}
                               >
                                 {storiesInCell && storiesInCell.length > 0 ? (
-                                  storiesInCell.map((story) => (
-                                    <StoryCard
-                                      key={story.id} // Use the prioritization ID for the key
-                                      story={story}
-                                      priority={priority}
-                                      systemColors={project?.system_colors}
-                                    />
-                                  ))
+                                  storiesInCell
+                                    .sort((a, b) => a.story_id - b.story_id)
+                                    .map((story) => (
+                                      <StoryCard
+                                        key={story.id} // Use the prioritization ID for the key
+                                        story={story}
+                                        priority={priority}
+                                        systemColors={project?.system_colors}
+                                      />
+                                    ))
                                 ) : (
                                   // Placeholder for empty cells
                                   <div className="h-full w-full flex items-center justify-center"></div>
