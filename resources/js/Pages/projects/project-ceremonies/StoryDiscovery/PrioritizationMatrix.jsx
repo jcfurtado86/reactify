@@ -202,7 +202,7 @@ const DroppableCell = ({ id, children, className = '' }) => {
     <div
       ref={setNodeRef}
       className={`
-        rounded-md transition-all duration-150 gap-2 border border-slate-100/20
+        rounded-md transition-all duration-150 border border-slate-100/20
         ${isOver ? ' bg-card/60' : ''}
         ${className}
       `}
@@ -666,7 +666,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                               <DroppableCell
                                 key={cellId}
                                 id={cellId}
-                                className={`h-44 min-w-40 flex flex-row justify-center w-full `}
+                                className={`h-44 min-w-40 flex flex-row justify-center w-full gap-1`}
                               >
                                 {storiesInCell && storiesInCell.length > 0 ? (
                                   storiesInCell.map((story) => (
