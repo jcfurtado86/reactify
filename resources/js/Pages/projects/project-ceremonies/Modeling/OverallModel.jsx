@@ -120,7 +120,7 @@ const GeneratedItemsModal = ({
                               </div>
 
                               {/* Coluna da Direita: Colaboradores */}
-                              <div className="w-1/2 px-1 border-l border-border flex flex-col gap-2">
+                              <div className="w-1/2 px-1 border-l border-border flex flex-col gap-1">
                                 <h5 className="font-semibold text-sm text-center text-primary my-2">
                                   Colaboradores
                                 </h5>
@@ -238,7 +238,7 @@ const EditableListItem = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const inputRef = useRef(null)
-  const LIST_ITEM_MAX = 50;
+  const LIST_ITEM_MAX = 50
   useEffect(() => {
     if (isEditing) {
       inputRef.current?.focus()
@@ -267,8 +267,10 @@ const EditableListItem = ({
               onChange={onValueChange}
               onKeyDown={handleKeyDown}
               className={cn(
-                  "h-8 flex-1 text-left px-2 bg-secondary",
-                  !editValue.trim() ? "border-destructive focus-visible:ring-destructive" : ""
+                'h-8 flex-1 text-left px-2 bg-secondary',
+                !editValue.trim()
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : '',
               )}
               autoFocus
             />
@@ -290,16 +292,20 @@ const EditableListItem = ({
             <X className="size-4" />
           </Button>*/}
           <div className="flex justify-between px-1 bg-background/50">
-               <span className="text-[10px] text-destructive font-bold h-3 block">
-                  {!editValue.trim() ? "Obrigatório" : ""}
-               </span>
-               <span className={cn(
-                   "text-[10px]",
-                   (editValue?.length || 0) >= LIST_ITEM_MAX ? "text-destructive font-bold" : "text-muted-foreground"
-               )}>
-                  {(editValue?.length || 0)}/{LIST_ITEM_MAX}
-               </span>
-            </div>
+            <span className="text-[10px] text-destructive font-bold h-3 block">
+              {!editValue.trim() ? 'Obrigatório' : ''}
+            </span>
+            <span
+              className={cn(
+                'text-[10px]',
+                (editValue?.length || 0) >= LIST_ITEM_MAX
+                  ? 'text-destructive font-bold'
+                  : 'text-muted-foreground',
+              )}
+            >
+              {editValue?.length || 0}/{LIST_ITEM_MAX}
+            </span>
+          </div>
         </div>
       ) : (
         <>
@@ -418,20 +424,22 @@ const CRCCard = ({
       >
         {editingTitleId === card.id ? (
           <div className="flex flex-col w-full">
-              <div className="flex items-center gap-2 w-full">
-                <Input
-                  ref={titleInputRef}
-                  type="text"
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  onKeyDown={handleTitleKeyDown}
-                  className={cn(
-                      "h-9 text-lg font-semibold flex-1",
-                      !editValue.trim() ? "border-destructive focus-visible:ring-destructive" : ""
-                  )}
-                  maxLength={CLASS_NAME_MAX} 
-                />
-              </div>
+            <div className="flex items-center gap-2 w-full">
+              <Input
+                ref={titleInputRef}
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleTitleKeyDown}
+                className={cn(
+                  'h-9 text-lg font-semibold flex-1',
+                  !editValue.trim()
+                    ? 'border-destructive focus-visible:ring-destructive'
+                    : '',
+                )}
+                maxLength={CLASS_NAME_MAX}
+              />
+            </div>
             {/* <Button
               variant="ghost"
               size="icon"
@@ -449,15 +457,19 @@ const CRCCard = ({
               <X className="size-5" />
             </Button>*/}
             <div className="flex justify-between px-1">
-                <span className="text-[10px] text-destructive font-bold h-3 block">
-                  {!editValue.trim() ? "Nome obrigatório" : ""}
-                </span>
-                <span className={cn(
-                    "text-[10px]",
-                    (editValue?.length || 0) >= CLASS_NAME_MAX ? "text-destructive font-bold" : "text-muted-foreground"
-                )}>
-                  {(editValue?.length || 0)}/{CLASS_NAME_MAX}
-                </span>
+              <span className="text-[10px] text-destructive font-bold h-3 block">
+                {!editValue.trim() ? 'Nome obrigatório' : ''}
+              </span>
+              <span
+                className={cn(
+                  'text-[10px]',
+                  (editValue?.length || 0) >= CLASS_NAME_MAX
+                    ? 'text-destructive font-bold'
+                    : 'text-muted-foreground',
+                )}
+              >
+                {editValue?.length || 0}/{CLASS_NAME_MAX}
+              </span>
             </div>
           </div>
         ) : (
@@ -508,7 +520,7 @@ const CRCCard = ({
             />
           ))}
         </div>
-        <div className="w-1/2 bg-muted/50 p-1 border-l border-border rounded-br-lg flex flex-col gap-2">
+        <div className="w-1/2 bg-muted/50 p-1 border-l border-border rounded-br-lg flex flex-col gap-1">
           <div className="flex justify-between items-center mb-1">
             <h4 className="font-semibold text-sm">Colaboradores</h4>
             <Button
@@ -969,32 +981,38 @@ const OverallModel = ({ project, setProject }) => {
             </AccordionTrigger>
             <AccordionContent className="p-4 pt-0">
               <div className="flex flex-col gap-1 my-2">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      placeholder="Adicionar nova classe ou colaborador..."
-                      value={newReusableName}
-                      maxLength={CLASS_NAME_MAX} 
-                      onChange={(e) => setNewReusableName(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === 'Enter' && newReusableName.trim() && handleAddReusableName()
-                      }
-                    />
-                    <Button 
-                        onClick={handleAddReusableName}
-                        disabled={!newReusableName.trim()} 
-                    >
-                        Salvar
-                    </Button>
-                  </div>
-                  
-                  <div className="flex justify-end px-1">
-                     <span className={cn(
-                         "text-[10px]",
-                         newReusableName.length >= CLASS_NAME_MAX ? "text-destructive font-bold" : "text-muted-foreground"
-                     )}>
-                        {newReusableName.length}/{CLASS_NAME_MAX}
-                     </span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Adicionar nova classe ou colaborador..."
+                    value={newReusableName}
+                    maxLength={CLASS_NAME_MAX}
+                    onChange={(e) => setNewReusableName(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === 'Enter' &&
+                      newReusableName.trim() &&
+                      handleAddReusableName()
+                    }
+                  />
+                  <Button
+                    onClick={handleAddReusableName}
+                    disabled={!newReusableName.trim()}
+                  >
+                    Salvar
+                  </Button>
+                </div>
+
+                <div className="flex justify-end px-1">
+                  <span
+                    className={cn(
+                      'text-[10px]',
+                      newReusableName.length >= CLASS_NAME_MAX
+                        ? 'text-destructive font-bold'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    {newReusableName.length}/{CLASS_NAME_MAX}
+                  </span>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(project.overall_model_classes || []).length > 0 ? (
