@@ -17,7 +17,7 @@ class TranscribeInterviewJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     // Aumenta o tempo máximo que o job pode rodar para 5 minutos (300 segundos)
-    public $timeout = 300;
+    public $timeout = 1800;
 
     protected $interview;
 
