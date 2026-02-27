@@ -5,11 +5,11 @@ from flask import Flask, request, Response, jsonify
 from dotenv import load_dotenv
 import langchain
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import OpenAIEmbeddings
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain.agents import create_agent
 from langchain.tools import tool 
 from langchain_core.tracers.langchain import wait_for_all_tracers
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_postgres import PGVector
 
 # Carrega variáveis de ambiente (ex: GOOGLE_API_KEY, PYTHON_SERVICE_API_KEY)
@@ -27,21 +27,22 @@ langchain.debug = True
 
 print("🔄 Inicializando sistema RAG e Embeddings...")
 
-# Caminho para o modelo local (mesmo do hf.py)
-HF_MODEL_PATH = ".hf_models" 
-# Se estiver rodando na mesma pasta, pode ser apenas "./.hf_models" ou o caminho absoluto
-if not os.path.exists(HF_MODEL_PATH):
-    # Fallback caso a pasta não seja encontrada imediatamente, ajusta para o diretório atual se necessário
-    print("🔄 Pasta do modelo de embedding nao encontrado...")
-    HF_MODEL_PATH = "./.hf_models" 
+# # Caminho para o modelo local (mesmo do hf.py)
+# HF_MODEL_PATH = ".hf_models" 
+# # Se estiver rodando na mesma pasta, pode ser apenas "./.hf_models" ou o caminho absoluto
+# if not os.path.exists(HF_MODEL_PATH):
+#     # Fallback caso a pasta não seja encontrada imediatamente, ajusta para o diretório atual se necessário
+#     print("🔄 Pasta do modelo de embedding nao encontrado...")
+#     HF_MODEL_PATH = "./.hf_models" 
 
-print("🔄 Inicializando Embeddings...")
-embeddings = HuggingFaceEmbeddings(
-    model_name=HF_MODEL_PATH, 
-    #model_name="BAAI/bge-m3",
-    model_kwargs={'device': 'cpu'},
-    encode_kwargs={'normalize_embeddings': True}
-)
+# print("🔄 Inicializando Embeddings...")
+# embeddings = HuggingFaceEmbeddings(
+#     model_name=HF_MODEL_PATH, 
+#     #model_name="BAAI/bge-m3",
+#     model_kwargs={'device': 'cpu'},
+#     encode_kwargs={'normalize_embeddings': True}
+# )
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 # Conexão com o Banco Vetorial
 connection_string = os.getenv("DATABASE_URL") # Certifique-se que isso está no .env
@@ -104,7 +105,7 @@ def search_knowledge_base(query: str) -> str:
     return "\n\n".join(results_text)
 
 @tool
-def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
+def get_data_from_artifact(artifact_name: str, project_id: int) -> str:
     """
     Busca os dados (em JSON) de um artefato específico
     (como 'Personas', 'Goals', 'Journeys', 'Stories')
@@ -133,7 +134,7 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
             - product_backlog
             - interviews
     """
-    print(f"🔎 --- Tool Call: get_data_for_artifact(artifact='{artifact_name}', project_id={project_id}) ---")
+    print(f"🔎 --- Tool Call: get_data_from_artifact(artifact='{artifact_name}', project_id={project_id}) ---")
     if not LARAVEL_API_KEY:
         return "Erro de configuração: PYTHON_SERVICE_API_KEY não definida no .env"
 
@@ -181,7 +182,7 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
 
         raw_data = response.json()
         clean_data = sanitize_data(raw_data)
-        print(f"✅ Dados limpos recebidos. Tamanho reduzido de {len(str(raw_data))} para {len(str(clean_data))} caracteres.")
+        print(f"✅ Dados limpos recebidos(ARTIFACTS). Tamanho reduzido de {len(str(raw_data))} para {len(str(clean_data))} caracteres.")
         print("-" * 80)
         print(json.dumps(clean_data, indent=4, ensure_ascii=False ))
         print("-" * 80)
@@ -197,7 +198,68 @@ def get_data_for_artifact(artifact_name: str, project_id: int) -> str:
         print(f"Erro inesperado na ferramenta: {str(e)}")
         return f"Erro ao chamar a ferramenta: {str(e)}"
 
-tools = [get_data_for_artifact, search_knowledge_base]
+@tool
+def get_data_from_interview(artifact_name: str, project_id: int) -> str:
+    """
+    Busca os dados (em JSON) de entrevistas de requisitos
+    de um projeto no backend principal do Laravel.
+    Use esta ferramenta sempre.
+    
+    Args:
+        project_id: ID do projeto
+        artifact_name: interviews
+    """
+    print(f"🔎 --- Tool Call: get_data_from_interview(artifact='{artifact_name}', project_id={project_id}) ---")
+    if not LARAVEL_API_KEY:
+        return "Erro de configuração: PYTHON_SERVICE_API_KEY não definida no .env"
+
+    valid_artifacts = [
+        "interviews"
+    ]
+    
+    if artifact_name not in valid_artifacts:
+        print(f"Artefato '{artifact_name}' inválido. Fora da lista da tool: {', '.join(valid_artifacts)}")
+        return {
+            "error": f"Artefato '{artifact_name}' inválido. Escolha entre: {', '.join(valid_artifacts)}"
+        }
+    
+    try:
+        response = requests.post(
+            LARAVEL_TOOL_API_URL,
+            headers={
+                "X-Internal-API-Key": LARAVEL_API_KEY,
+                "Accept": "application/json"
+            },
+            json={
+                "artifact_name": artifact_name,
+                "project_id": project_id
+            }
+        )
+        response.raise_for_status() # Lança erro se a resposta for 4xx ou 5xx
+        # print("--- Resposta da Ferramenta (JSON): ---")
+        # print(response.json())
+        wait_for_all_tracers()
+
+        raw_data = response.json()
+        clean_data = sanitize_data(raw_data)
+        print(f"✅ Dados limpos recebidos(INTERVIEW). Tamanho reduzido de {len(str(raw_data))} para {len(str(clean_data))} caracteres.")
+        print("-" * 80)
+        print(json.dumps(clean_data, indent=4, ensure_ascii=False ))
+        print("-" * 80)
+        # print(f"✅ Dados SUJOS.")
+        # print(json.dumps(raw_data, indent=4, ensure_ascii=False))
+        # print("-" * 80)
+        
+        return json.dumps(clean_data, ensure_ascii=False)
+    except requests.exceptions.HTTPError as e:
+        print(f"Erro HTTP: {e.response.text}")
+        return f"Erro ao buscar dados: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        print(f"Erro inesperado na ferramenta: {str(e)}")
+        return f"Erro ao chamar a ferramenta: {str(e)}"
+
+
+tools = [get_data_from_artifact, search_knowledge_base, get_data_from_interview]
 
 def sanitize_data(data):
     """
@@ -396,11 +458,12 @@ def build_system_prompt(data) -> str:
     system_prompt_content = f"""Você é um Assistente de IA atuando como **Facilitador** da metodologia ágil de requisitos REACT-M. Seu papel **NÃO** é apenas responder perguntas, mas **agir como um coach e guia,** para o usuário, conforme descrito na metodologia.
 
     **Ferramentas Disponíveis:**
-    1. Se precisar de dados do banco de dados do projeto relacionados aos artefatos e cerimônias inclusive as entrevistas de requisitos, use `get_data_for_artifact`.
-    2. Se precisar de embasamento teórico e metodológico e especialmente, se precisar saber qual seu papel durante as interações com o usuário se comportantodo como o Facilitator, use `search_knowledge_base`. Com ela você saberá tudo que precisa.
+    1. Para dados do banco de dados do projeto relacionados aos artefatos e cerimônias inclusive as entrevistas de requisitos, acesse `get_data_from_artifact`.
+    2. Para embasamento teórico e metodológico e especialmente, para entender exatamente qual seu papel durante as interações com o usuário se comportantodo como o Facilitator, use `search_knowledge_base`.
+    2. Para acessar as entrevistas de requisitos do sistema que o usuario quer desenvolver use `get_data_from_interview`.
     
-    **REGRAS CRÍTICAS DE APRESENTAÇÃO (Anti-Robô):**
-    1. **Zero "Technobabble":** JAMAIS mostre ao usuário chaves de JSON, nomes de colunas de banco ou termos em snake_case (ex: não escreva `goal_sketches`, `product_id`, `is_active`...).
+    **REGRAS CRÍTICAS DE APRESENTAÇÃO :**
+    1.JAMAIS mostre ao usuário chaves de JSON, nomes de colunas de banco ou termos em snake_case (ex: não escreva `goal_sketches`, `product_id`, `is_active`...).
     2. **Tradução Natural:** Ao ler o JSON da ferramenta, traduza os campos para linguagem natural antes de responder.
         - product_canvas -> Canvas do Produto
         - goal_sketches -> Objetivos do Produto
@@ -420,13 +483,15 @@ def build_system_prompt(data) -> str:
         - interviews -> Entrevistas do Produto
     3. **Formatação:** Nunca despeje o JSON cru na resposta.
 
-    **Seu Objetivo (O Papel do Facilitador):** Guiar todos os envolvidos a aplicar o REACT-M da melhor forma possível. Você deve ser proativo, colaborativo e ajudar a equipe a executar as cerimônias.
+    **Seu Objetivo (O Papel do Facilitador):** 
+    Guiar um usuário a aplicar o REACT-M da melhor forma possível. Você deve ser proativo, colaborativo e ajudar a executar as cerimônias e preencher os artefatos.
 
     **Instruções de Ferramentas:**
-    1. Use quantas tools achar necessário
-    2. Sempre prefira chamadas paralelas quando possível
+    1  SEMPRE USE A FERRAMENTA `search_knowledge_base`
+    2. SEMPRE USE A FERRAMENTA `get_data_from_interview`
     3. Sempre analise os dados retornados das tools antes de concluir
     4. Forneça um resumo com insights principais na resposta final
+
 
     **Instruções de Tom e Ação:**
     1. **Seja um Guia, Não um Dicionário:** ... (ex: 'Vejo que estamos em Inception, na tela de Personas...').
