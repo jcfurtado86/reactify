@@ -1,3 +1,4 @@
+#TRANCREVE AUDIOS E VETORIZA TRANSCRICOES 
 import os
 import json
 import whisper

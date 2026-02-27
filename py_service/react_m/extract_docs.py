@@ -1,4 +1,5 @@
-cfrom docling.document_converter import DocumentConverter
+#TESTA EXTRACAO DE TEXTO COM DOCLING
+from docling.document_converter import DocumentConverter
 
 source = "./Dissertacao_Bleno_VersaoFinal.pdf"  # file path or URL
 converter = DocumentConverter()

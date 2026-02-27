@@ -1,3 +1,4 @@
+# VETORIZA TRANSCRICOES
 import os
 import glob
 from dotenv import load_dotenv
@@ -5,6 +6,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_postgres import PGVector
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+from langchain_openai import OpenAIEmbeddings
 
 load_dotenv()
 
@@ -19,11 +21,12 @@ if not os.path.exists(TRANSCRIPTIONS_DIR):
 
 # 1. Configuração do Banco e Embeddings
 print("⚙️  Carregando modelos de Embedding...")
-embeddings = HuggingFaceEmbeddings(
-    model_name=HF_MODEL_PATH,
-    model_kwargs={'device': 'cpu'},
-    encode_kwargs={'normalize_embeddings': True}
-)
+# embeddings = HuggingFaceEmbeddings(
+#     model_name=HF_MODEL_PATH,
+#     model_kwargs={'device': 'cpu'},
+#     encode_kwargs={'normalize_embeddings': True}
+# )
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 vector_store = PGVector(
     embeddings=embeddings,

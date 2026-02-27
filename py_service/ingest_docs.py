@@ -1,3 +1,4 @@
+#VETORIZA ARQUIVO PDF COM DOCLING
 import os
 from dotenv import load_dotenv
 
