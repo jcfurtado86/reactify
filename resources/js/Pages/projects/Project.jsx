@@ -499,7 +499,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
                 </TabsTrigger>
               )}
               {can('sprint.view') && (
-                <TabsTrigger value="sprint">Sprint</TabsTrigger>
+                <TabsTrigger value="sprint">Sprint Kanban</TabsTrigger>
               )}
             </TabsList>
 
