@@ -11,7 +11,6 @@ const routerNames = {
   goal_sketches: 'goal',
   journeys: 'journey',
   personas: 'persona',
-  system_interfaces: 'system_interface',
   crc_cards: 'overall',
   business_rules: 'business-rule',
   usage_scenarios: 'usage-scenario',

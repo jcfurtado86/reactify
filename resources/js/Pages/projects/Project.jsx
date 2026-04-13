@@ -250,7 +250,6 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
       const data = await response.json()
       if (response.ok) {
         setProject(data.project)
-        console.log(data.project)
       }
     } catch (error) {
       toast.error(
@@ -259,8 +258,6 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
           ' atualizado: ' +
           error.message,
       )
-    } finally {
-      // console.log('Projeto atualizado com sucesso!')
     }
   }
 
@@ -308,10 +305,6 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     setModelingMenuItems(updatedMenuItems)
     localStorage.setItem('activeModelingMenu', activeArtifact)
   }, [activeArtifact])
-
-  useEffect(() => {
-    // console.log(project?.product_canvas)
-  }, [project])
 
   const renderInceptionContent = () => {
     switch (activeArtifact) {

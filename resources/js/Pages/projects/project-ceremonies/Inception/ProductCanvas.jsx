@@ -480,7 +480,6 @@ const MainView = ({ project = {}, setProject }) => {
         : productCanvasForBackend,
     }))
 
-    console.log(selectedProductCanvas, productCanvasForBackend)
     const productCanvasId = project.product_canvas.id
     router.patch(
       route('product-canvas.update', productCanvasId),

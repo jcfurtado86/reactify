@@ -37,6 +37,8 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
+import { useJourneysAIStore } from '@/stores/useJourneysAIStore'
+import JourneysAIModal from './components/JourneysAIModal'
 
 const SortableJourneyStepItem = (props) => {
   const {
@@ -218,10 +220,17 @@ const Journeys = ({ project, setProject }) => {
   const [editValue, setEditValue] = useState('')
   const [editingJourney, setEditingJourney] = useState(null)
   const [editJourneyName, setEditJourneyTitle] = useState('')
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false)
-  const [generatedJourneys, setGeneratedJourneys] = useState([])
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [isModalMinimized, setIsModalMinimized] = useState(false)
+
+  // Estado de UI do fluxo de geração via IA: movido para Zustand store
+  // (useJourneysAIStore) como piloto do padrão Q2+Q4 do plano de qualidade.
+  const isGeneratingAI = useJourneysAIStore((s) => s.isGenerating)
+  const generatedJourneys = useJourneysAIStore((s) => s.generated)
+  const startGenerating = useJourneysAIStore((s) => s.startGenerating)
+  const stopGenerating = useJourneysAIStore((s) => s.stopGenerating)
+  const setGeneratedAI = useJourneysAIStore((s) => s.setGenerated)
+  const markConfirmed = useJourneysAIStore((s) => s.markConfirmed)
+  const cancelGeneratedJourneys = useJourneysAIStore((s) => s.cancel)
+
   const { errors } = usePage().props
   const TITLE_MAX = 50;
 
@@ -285,75 +294,45 @@ const Journeys = ({ project, setProject }) => {
       handleReorderSteps(journeyId, reorderedSteps)
     }
   }
-  // Função para gerar journeys com IA
+  // Função para gerar journeys com IA.
+  // O estado de UI (loading / lista gerada / modal aberto) vive no
+  // useJourneysAIStore; aqui só orquestramos a chamada e os toasts.
   const generateJourneys = async () => {
-    setIsGeneratingAI(true)
-    setIsModalMinimized(false)
-
+    startGenerating()
     try {
       const response = await axios.post(route('journey.generate'), {
         project_id: project.id,
       })
-
       const data = response.data
 
       if (data.status === 'sucesso') {
-        const journeysWithSelection = data.journeys.map((journey) => ({
-          ...journey,
-          selected: true,
-        }))
-        setGeneratedJourneys(journeysWithSelection)
-        setShowConfirmModal(true)
+        setGeneratedAI(data.journeys)
         toast.success('Journeys geradas com sucesso.')
+      } else if (data.status === 'warning') {
+        toast.warning(data.message)
       } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
-        }
+        toast.error(
+          data.message || 'Ocorreu uma resposta inesperada do servidor.',
+        )
       }
     } catch (error) {
       toast.error('Erro ao comunicar com o servidor')
-      console.error('Erro ao gerar stories:', error)
+      console.error('Erro ao gerar journeys:', error)
     } finally {
-      setIsGeneratingAI(false)
+      stopGenerating()
     }
   }
 
-  // Função para alternar seleção de uma journey
-  const toggleJourneySelection = (index) => {
-    setGeneratedJourneys((prev) =>
-      prev.map((journey, i) =>
-        i === index ? { ...journey, selected: !journey.selected } : journey,
-      ),
-    )
-  }
-
-  // Função para selecionar/deselecionar todas as journeys
-  const toggleAllJourneys = () => {
-    const allSelected = generatedJourneys.every((journey) => journey.selected)
-    setGeneratedJourneys((prev) =>
-      prev.map((journey) => ({ ...journey, selected: !allSelected })),
-    )
-  }
-
-  // Função para confirmar e adicionar as journeys selecionadas
+  // Confirma as journeys selecionadas e persiste no backend.
   const confirmGeneratedJourneys = () => {
-    const selectedJourneys = generatedJourneys.filter(
-      (journey) => journey.selected,
-    )
-    const remainingJourneys = generatedJourneys.filter(
-      (journey) => !journey.selected,
-    )
+    const selectedJourneys = generatedJourneys.filter((j) => j.selected)
 
     if (selectedJourneys.length === 0) {
       toast.warning('Selecione pelo menos uma journey para adicionar.')
       return
     }
 
-    // Mapeia as jornadas selecionadas para o formato esperado pelo estado local
+    // Optimistic update do estado do projeto
     const journeysToAdd = selectedJourneys.map((journey) => {
       const { selected, ...rest } = journey
       return {
@@ -363,14 +342,12 @@ const Journeys = ({ project, setProject }) => {
         ...rest,
       }
     })
-
-    // Adiciona as novas jornadas ao estado do projeto
     const updatedProjectJourneys = project.journeys
       ? [...project.journeys, ...journeysToAdd]
       : [...journeysToAdd]
     setProject({ ...project, journeys: updatedProjectJourneys })
 
-    // Prepara os dados para o backend (sem os campos gerados localmente)
+    // Payload limpo pro backend
     const journeysForBackend = selectedJourneys.map(
       ({ id, created_at, project_id, selected, ...rest }) => ({
         ...rest,
@@ -381,7 +358,6 @@ const Journeys = ({ project, setProject }) => {
       }),
     )
 
-    // Persiste no backend
     router.post(
       route('journey.bulk-store'),
       {
@@ -395,27 +371,13 @@ const Journeys = ({ project, setProject }) => {
           toast.success(
             `${selectedJourneys.length} journey(s) adicionada(s) com sucesso!`,
           )
-          // Atualiza o estado do modal com as jornadas restantes
-          setGeneratedJourneys(remainingJourneys)
-
-          // Se não houver mais jornadas restantes, fecha o modal
-          if (remainingJourneys.length === 0) {
-            setShowConfirmModal(false)
-            setIsModalMinimized(false)
-          }
+          markConfirmed()
         },
         onError: () => {
           toast.error('Ocorreu um erro ao adicionar as jornadas.')
         },
       },
     )
-  }
-
-  // Função para cancelar e limpar as journeys geradas
-  const cancelGeneratedJourneys = () => {
-    setShowConfirmModal(false)
-    setGeneratedJourneys([])
-    setIsModalMinimized(false)
   }
 
   // Todas as funções existentes permanecem inalteradas
@@ -610,10 +572,6 @@ const Journeys = ({ project, setProject }) => {
     )
   }
 
-  // useEffect(() => {
-  //   console.log(expandedJourney)
-  // }, [expandedJourney])
-
   return (
     <div className="flex flex-col gap-4 p-4 w-full">
       {inspectionId && can('journey.manage') && (
@@ -626,129 +584,10 @@ const Journeys = ({ project, setProject }) => {
           setInspectionId={setInspectionId}
         />
       )}
-      {/* AI Generated Journeys Modal */}
-      {showConfirmModal && (
-        <div
-          className={cn(
-            'transition-all duration-300 z-50',
-            isModalMinimized
-              ? 'fixed bottom-4 right-4 w-[400px]'
-              : 'fixed inset-0 bg-background/80 flex items-center justify-center',
-          )}
-        >
-          <div className="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-border">
-            <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
-              <h3 className="text-xl font-bold text-foreground flex items-center">
-                {!isModalMinimized && 'Journeys geradas com IA'}
-                {isModalMinimized && 'Journeys geradas'}
-              </h3>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => setIsModalMinimized(!isModalMinimized)}
-                  size="icon"
-                  variant="ghost"
-                >
-                  {isModalMinimized ? (
-                    <ChevronsUp size={20} />
-                  ) : (
-                    <Minus size={20} />
-                  )}
-                </Button>
-                <Button
-                  onClick={cancelGeneratedJourneys}
-                  size="icon"
-                  variant="ghost"
-                >
-                  <X size={24} />
-                </Button>
-              </div>
-            </div>
+      {/* AI Generated Journeys Modal — extraído para componente +
+          Zustand store (Q2/Q4 do plano de qualidade). */}
+      <JourneysAIModal colors={colors} onConfirm={confirmGeneratedJourneys} />
 
-            {!isModalMinimized && (
-              <>
-                <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-accent rounded-lg flex-shrink-0">
-                  <span className="text-accent-foreground font-medium">
-                    {generatedJourneys.filter((j) => j.selected).length} of{' '}
-                    {generatedJourneys.length} selected
-                  </span>
-                  <Button onClick={toggleAllJourneys} size="sm">
-                    {generatedJourneys.every((j) => j.selected)
-                      ? 'Desmarcar Todas'
-                      : 'Selecionar Todas'}
-                  </Button>
-                </div>
-                <div className="flex-1 overflow-y-auto px-6 min-h-0">
-                  <div className="space-y-4 pb-4">
-                    {generatedJourneys.map((journey, index) => (
-                      <div
-                        key={index}
-                        className={cn(
-                          'rounded-lg p-4 border-2 transition-colors',
-                          journey.selected
-                            ? 'bg-muted border-primary'
-                            : 'bg-muted/50 border-border',
-                        )}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-foreground font-medium">
-                            {journey.title}
-                          </h4>
-                          <Switch
-                            id={`journey-select-${index}`}
-                            checked={journey.selected}
-                            onCheckedChange={() =>
-                              toggleJourneySelection(index)
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          {journey.steps.map((step, stepIndex) => (
-                            <div
-                              key={stepIndex}
-                              className="flex items-center text-sm text-foreground"
-                            >
-                              <span
-                                className={cn(
-                                  'text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs mr-2',
-                                  colors[index % colors.length].bg,
-                                )}
-                              >
-                                {stepIndex + 1}
-                              </span>
-                              <span className="flex-1">{step.description}</span>
-                              {step.is_touchpoint && (
-                                <Badge variant="success" className="ml-2">
-                                  Touchpoint
-                                </Badge>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-border flex-shrink-0">
-                  <Button variant="outline" onClick={cancelGeneratedJourneys}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="success"
-                    onClick={confirmGeneratedJourneys}
-                    disabled={
-                      generatedJourneys.filter((j) => j.selected).length === 0
-                    }
-                  >
-                    <Check className="mr-2" size={16} />
-                    Confirm and Add (
-                    {generatedJourneys.filter((j) => j.selected).length})
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Journeys List */}
       {project.journeys && project.journeys.length > 0 ? (

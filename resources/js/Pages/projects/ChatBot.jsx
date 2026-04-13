@@ -72,8 +72,6 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
 
     // Ouve o evento 'chat.message.received' (definido em App/Events/ChatMessageReceived.php)
     channel.listen('.chat.message.received', (event) => {
-      console.log('Evento WebSocket recebido:', event)
-
       const aiMessage = {
         id: `ai-${Date.now()}`,
         message: event.message, // A mensagem vem do broadcast
@@ -137,9 +135,6 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
       router.post(route('chat.store', project.id), data, {
         preserveState: true,
         preserveScroll: true,
-        onSuccess: () => {
-          console.log('Mensagem enviada para a fila com sucesso.')
-        },
         onError: (errors) => {
           const firstError = errors[Object.keys(errors)[0]]
           throw new Error(firstError || 'Erro ao processar a requisição.')

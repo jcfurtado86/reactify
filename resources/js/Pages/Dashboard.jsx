@@ -162,7 +162,7 @@ export const CeremonyCard = ({
                 <ButtonWithTooltip
                   variant="link"
                   title={`Ir até ${artifact.label}`}
-                  key={index}
+                  key={artifact.title}
                   className="flex items-center gap-2"
                   onClick={() =>
                     router.get(

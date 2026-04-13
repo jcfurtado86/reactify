@@ -197,7 +197,6 @@ const GoalItem = ({
       (color) => color.color === colorValue,
     )
     if (!selectedColor) return
-    console.log(selectedColor, variantTitle)
     router.post(
       route('system-color.store'),
       {
@@ -205,11 +204,8 @@ const GoalItem = ({
         project_id: goal.project_id,
       },
       {
-        onSuccess: () => {
-          console.log('Color saved successfully')
-        },
         onError: () => {
-          console.log('Error saving color')
+          toast.error('Erro ao salvar a cor do objetivo.')
         },
       },
     )

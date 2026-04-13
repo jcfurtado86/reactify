@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class OverallClassSystemInterfacePivot extends Pivot
 {
+  protected $fillable = [
+    'overall_model_class_id',
+    'system_interface_id',
+  ];
+
   protected static function booted()
   {
     static::created(function ($pivot) {

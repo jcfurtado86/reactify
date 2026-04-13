@@ -10,14 +10,13 @@ export const AvatarCircles = ({ numPeople, className, avatarUrls }) => {
         (url, index) =>
           index < 4 && (
             <a
-              key={index}
+              key={url.profileUrl ?? url.imageUrl ?? `avatar-${index}`}
               href={url.profileUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
               {url.imageUrl ? (
                 <img
-                  key={index}
                   className="size-9 rounded-full border-2 bg-card border-border"
                   src={url.imageUrl}
                   width={40}

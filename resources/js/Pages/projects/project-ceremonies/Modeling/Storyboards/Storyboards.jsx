@@ -91,7 +91,6 @@ const Storyboards = ({ project }) => {
         return
       }
 
-      console.log('⏳ Preparando cena inicial com a imagem:', imageUrl)
       try {
         const response = await fetch(imageUrl, { mode: 'cors' })
         if (!response.ok)
@@ -142,9 +141,6 @@ const Storyboards = ({ project }) => {
             },
           }
 
-          console.log(
-            '✅ Dados da cena prontos para serem injetados via initialData.',
-          )
           setSceneData({
             elements: [imageElement],
             files: files,
@@ -220,8 +216,6 @@ const Storyboards = ({ project }) => {
         // 4. Atualiza o estado da cena E incrementa a versão para forçar a remontagem
         setSceneData(newCompleteScene)
         setSceneVersion((prevVersion) => prevVersion + 1)
-
-        console.log('✅ Cena atualizada com anexo. Forçando remontagem.')
       }
       img.src = dataURL
     } catch (error) {
@@ -267,9 +261,6 @@ const Storyboards = ({ project }) => {
       router.post(route('storyboard.store'), formData, {
         onStart: () => {
           setIsProcessing(true)
-        },
-        onSuccess: () => {
-          console.log('Storyboard salvo com sucesso!')
         },
         onError: (errors) => {
           console.error('Erro ao salvar:', errors)

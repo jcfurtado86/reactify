@@ -16,14 +16,26 @@ class ToolController extends Controller
         Log::info('Serviço Python (Agente) chamou a ferramenta getArtifactData', [
             'data' => $request->all(),
             'ip' => $request->ip()
-        ]); 
-        
+        ]);
+
         $validated = $request->validate([
             'project_id' => 'required|integer|exists:projects,id',
             'artifact_name' => 'required|string',
+            'user_id' => 'required|integer|exists:users,id',
         ]);
 
-        $project = Project::find($validated['project_id']);
+        $project = Project::whereHas('users', fn($q) =>
+            $q->where('users.id', $validated['user_id'])
+        )->find($validated['project_id']);
+
+        if (!$project) {
+            Log::warning('ToolController: usuário não é membro do projeto solicitado', [
+                'user_id' => $validated['user_id'],
+                'project_id' => $validated['project_id'],
+            ]);
+            return response()->json(['error' => 'Projeto não acessível a este usuário.'], 403);
+        }
+
         $artifact = $validated['artifact_name'];
 
         $data = null;

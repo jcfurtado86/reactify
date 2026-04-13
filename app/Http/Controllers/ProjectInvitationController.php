@@ -32,7 +32,7 @@ class ProjectInvitationController extends Controller
       return back()->with(['message' => 'You are not participating in this project', 'status' => 'error']);
     };
 
-    if ($currentProject->pivot->role !== 'administrator') {
+    if ($currentProject->pivot->role !== UserRole::ADMINISTRATOR) {
       return back()->with(['message' => 'You are not authorized to invite users', 'status' => 'error']);
     }
     if ($project->users()->where('email', $validated['email'])->exists()) {

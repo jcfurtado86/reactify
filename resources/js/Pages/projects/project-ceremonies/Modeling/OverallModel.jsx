@@ -1,230 +1,19 @@
 import { router, usePage } from '@inertiajs/react'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import { Plus, Minus, Check, X, ChevronsUp, StickyNote } from 'lucide-react'
+import { Plus, StickyNote } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { tooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useOverallModelAIStore } from '@/stores/useOverallModelAIStore'
+import OverallModelAIModal from './components/OverallModelAIModal'
 
-const GeneratedItemsModal = ({
-  isModalMinimized,
-  changeModalState,
-  cancelGeneratedItems,
-  generatedItems,
-  generatedClasses,
-  toggleItemSelection,
-  confirmGeneratedItems,
-  toggleAllItems,
-  toggleAllClasses,
-  toggleClassSelection,
-}) => {
-  return (
-    <div
-      className={`
-              transition-all duration-300 z-50
-              ${
-                isModalMinimized
-                  ? 'fixed bottom-4 right-4 w-[400px]'
-                  : 'fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center'
-              }
-            `}
-    >
-      <div className="bg-card rounded-lg max-w-7xl w-full max-h-[95vh] flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between p-3 flex-shrink-0">
-          <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'CRC Cards gerados por IA'}
-            {isModalMinimized && 'CRC Cards gerados'}
-          </h3>
-          <div className="flex items-center gap-2">
-            {!isModalMinimized && (
-              <h3 className="text-xl font-bold text-foreground flex items-center">
-                Classes geradas por IA
-              </h3>
-            )}
-            <Button size="icon" variant="secondary" onClick={changeModalState}>
-              {isModalMinimized ? (
-                <ChevronsUp size={20} />
-              ) : (
-                <Minus size={20} />
-              )}
-            </Button>
-            <Button
-              onClick={cancelGeneratedItems}
-              size="icon"
-              variant="secondary"
-            >
-              <X size={24} />
-            </Button>
-          </div>
-        </div>
-        {!isModalMinimized && (
-          <main className="flex flex-1 min-h-0">
-            <section className="w-1/2 flex flex-col">
-              <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
-                <span className="text-foreground font-medium">
-                  {generatedItems.filter((j) => j.selected).length} de{' '}
-                  {generatedItems.length} selecionados
-                </span>
-                <Button
-                  onClick={toggleAllItems}
-                  className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
-                >
-                  {generatedItems.every((item) => item.selected)
-                    ? 'Desmarcar Todos'
-                    : 'Selecionar Todos'}
-                </Button>
-              </div>
+// Q2/Q4 do plano de qualidade: o GeneratedItemsModal que ficava inline
+// neste arquivo foi movido para ./components/OverallModelAIModal.jsx e
+// o estado de UI (cards/classes geradas, isOpen, isMinimized) migrou
+// para useOverallModelAIStore.
 
-              <div className="flex-1 overflow-y-auto px-6 min-h-0">
-                <div className="space-y-2 pb-4">
-                  {generatedItems.map((card, index) => {
-                    return (
-                      <div
-                        key={'temp-' + index}
-                        className={`rounded-lg p-1 border-2 transition-colors flex items-center gap-4 ${
-                          card.selected
-                            ? 'bg-muted border-primary'
-                            : 'bg-muted/50 border-border hover:border-muted-foreground'
-                        }`}
-                      >
-                        <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
-                          <Checkbox
-                            checked={card.selected}
-                            onCheckedChange={() => toggleItemSelection(index)}
-                          />
-                          <div className="w-full bg-card rounded-lg shadow-sm">
-                            {/* INÍCIO DA ALTERAÇÃO: Exibição do CRC Card */}
-
-                            {/* Título do Card */}
-                            <h3 className="text-lg font-semibold my-2">
-                              {card.class}
-                            </h3>
-                            <Separator />
-
-                            {/* Container Flex para as duas colunas */}
-                            <div className="flex">
-                              {/* Coluna da Esquerda: Responsabilidades */}
-                              <div className="w-1/2 px-1 flex flex-col gap-2">
-                                <h5 className="font-semibold text-sm text-center text-primary my-2">
-                                  Responsabilidades
-                                </h5>
-                                {card.responsabilities.map((res, index) => (
-                                  <div
-                                    key={index}
-                                    className="text-sm text-center p-2 border border-border rounded-md shadow-sm"
-                                  >
-                                    {res}
-                                  </div>
-                                ))}
-                              </div>
-
-                              {/* Coluna da Direita: Colaboradores */}
-                              <div className="w-1/2 px-1 border-l border-border flex flex-col gap-1">
-                                <h5 className="font-semibold text-sm text-center text-primary my-2">
-                                  Colaboradores
-                                </h5>
-                                {card.collaborators.map(
-                                  (collaborator, collaboratorIndex) => (
-                                    <div
-                                      key={collaboratorIndex}
-                                      className="text-sm text-center p-2 border border-border rounded-md shadow-sm"
-                                    >
-                                      {collaborator}
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            </div>
-
-                            {/* FIM DA ALTERAÇÃO */}
-                          </div>
-                        </label>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </section>
-            <section className="w-1/2 flex flex-col">
-              <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
-                <span className="text-foreground font-medium">
-                  {generatedClasses.filter((j) => j.selected).length} de{' '}
-                  {generatedClasses.length} selecionados
-                </span>
-                <Button
-                  onClick={toggleAllClasses}
-                  className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
-                >
-                  {generatedClasses.every((item) => item.selected)
-                    ? 'Desmarcar Todos'
-                    : 'Selecionar Todos'}
-                </Button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto px-6 min-h-0">
-                <div className="space-y-2 pb-4">
-                  {generatedClasses.map((card_class, index) => {
-                    return (
-                      <div
-                        key={'temp-' + index}
-                        className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
-                          card_class.selected
-                            ? 'bg-muted border-primary'
-                            : 'bg-muted/50 border-border hover:border-muted-foreground'
-                        }`}
-                      >
-                        <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
-                          <Checkbox
-                            checked={card_class.selected}
-                            onCheckedChange={() => toggleClassSelection(index)}
-                            disabled={
-                              card_class.requiredBy &&
-                              card_class.requiredBy.size > 0
-                            }
-                          />
-                          <div className="w-full bg-card rounded-lg p-3 shadow-sm">
-                            <h4 className="text-lg font-bold text-foreground mb-3">
-                              {card_class.name}
-                            </h4>
-                          </div>
-                        </label>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </section>
-          </main>
-        )}
-        {!isModalMinimized && (
-          <div className="flex justify-end gap-3 p-6 pt-4 border-t border-border flex-shrink-0">
-            <Button
-              onClick={cancelGeneratedItems}
-              className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={confirmGeneratedItems}
-              className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
-              disabled={
-                generatedItems.filter((j) => j.selected).length === 0 &&
-                generatedClasses.filter((j) => j.selected).length === 0
-              }
-            >
-              <Check className="mr-2" size={16} />
-              Confirmar e Adicionar (
-              {generatedItems.filter((j) => j.selected).length +
-                generatedClasses.filter((j) => j.selected).length}
-              )
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 // Componente para a lista de Responsabilidades (com Input)
 const EditableListItem = ({
   item,
@@ -337,9 +126,9 @@ const CollaboratorItem = ({ item, onChange, onDelete, options = [] }) => {
           <SelectValue>{item || 'Selecione...'}</SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {options.map((option, index) => (
+          {options.map((option) => (
             <SelectItem
-              key={index}
+              key={option.id ?? option.name}
               value={option.name}
               className="justify-evenly"
             >
@@ -551,12 +340,15 @@ const OverallModel = ({ project, setProject }) => {
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
-  //ia states
-  const [aiGeneratedCRCCards, setAiGeneratedCRCCards] = useState([])
-  const [aiGeneratedClasses, setAiGeneratedClasses] = useState([])
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [showAiModal, setShowAiModal] = useState(false)
-  const [isModalMinimized, setIsModalMinimized] = useState(false)
+
+  // IA states movidos para useOverallModelAIStore (Q2/Q4).
+  // Lemos só o que precisamos dentro deste componente; o modal
+  // externo (OverallModelAIModal) consome o store diretamente.
+  const isGenerating = useOverallModelAIStore((s) => s.isGenerating)
+  const startGeneratingAI = useOverallModelAIStore((s) => s.startGenerating)
+  const stopGeneratingAI = useOverallModelAIStore((s) => s.stopGenerating)
+  const setGeneratedAI = useOverallModelAIStore((s) => s.setGenerated)
+  const cancelAI = useOverallModelAIStore((s) => s.cancel)
   const [editingField, setEditingField] = useState({
     cardId: null,
     field: null,
@@ -571,7 +363,6 @@ const OverallModel = ({ project, setProject }) => {
 
   // inspection function
   const inspectOverallModel = (modelId) => {
-    console.log(modelId)
     if (inspectionId === modelId) {
       setInspectionId(null)
       setAnchorEl(null)
@@ -725,51 +516,29 @@ const OverallModel = ({ project, setProject }) => {
   }
 
   const generateCRCCards = async () => {
-    setIsGenerating(true)
-    setIsModalMinimized(false)
-
+    startGeneratingAI()
     try {
       const response = await axios.post(route('overall-model.generate'), {
         project_id: project.id,
       })
-
       const data = response.data
 
       if (data.status === 'sucesso') {
-        const classesWithSelection = data.overall_model_classes.map((c) => ({
-          ...c,
-          selected: true,
-          requiredBy: new Set(),
-        }))
-
-        const CRCCardsWithSelection = data.crc_cards.map((card, index) => ({
-          ...card,
-          tempId: `card-${index}`,
-          selected: true,
-        }))
-
-        const updatedClasses = syncClassSelections(
-          CRCCardsWithSelection,
-          classesWithSelection,
-        )
-
-        if (CRCCardsWithSelection.length === 0) {
+        if (!data.crc_cards || data.crc_cards.length === 0) {
           toast.info('Nenhum CRC Card foi gerado para as estórias existentes.')
           return
         }
-
-        setAiGeneratedClasses(updatedClasses)
-        setAiGeneratedCRCCards(CRCCardsWithSelection)
-        setShowAiModal(true)
-        toast.success(`${CRCCardsWithSelection.length} cards foram sugeridos.`)
+        setGeneratedAI({
+          cards: data.crc_cards,
+          classes: data.overall_model_classes,
+        })
+        toast.success(`${data.crc_cards.length} cards foram sugeridos.`)
+      } else if (data.status === 'warning') {
+        toast.warning(data.message)
       } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
-        }
+        toast.error(
+          data.message || 'Ocorreu uma resposta inesperada do servidor.',
+        )
       }
     } catch (error) {
       console.error('Erro ao gerar cards:', error)
@@ -778,20 +547,21 @@ const OverallModel = ({ project, setProject }) => {
           'Não foi possível conectar ao servidor.',
       )
     } finally {
-      setIsGenerating(false)
+      stopGeneratingAI()
     }
   }
 
   const confirmGeneratedCards = () => {
-    const selectedCards = aiGeneratedCRCCards.filter((card) => card.selected)
-    const selectedClasses = aiGeneratedClasses.filter((c) => c.selected)
+    // Lê do store via getState (não precisa subscribe fino aqui)
+    const state = useOverallModelAIStore.getState()
+    const selectedCards = state.cards.filter((card) => card.selected)
+    const selectedClasses = state.classes.filter((c) => c.selected)
 
     if (selectedCards.length === 0 && selectedClasses.length === 0) {
       toast.warning('Selecione pelo menos um item para adicionar.')
       return
     }
 
-    // Prepara os dados para o backend (ambas as listas)
     const cardsForBackend = selectedCards.map((card) => ({
       class: card.class,
       responsabilities: card.responsabilities,
@@ -800,11 +570,10 @@ const OverallModel = ({ project, setProject }) => {
     }))
 
     const classesForBackend = selectedClasses.map(({ name }) => ({
-      name: name,
+      name,
       project_id: project.id,
     }))
 
-    // Função auxiliar para salvar os cards (será chamada após salvar as classes)
     const saveCards = () => {
       if (cardsForBackend.length > 0) {
         router.post(
@@ -816,7 +585,7 @@ const OverallModel = ({ project, setProject }) => {
               toast.success(
                 `${cardsForBackend.length} CRC Card(s) salvo(s) com sucesso!`,
               )
-              setShowAiModal(false) // Fecha o modal no final de tudo
+              cancelAI()
             },
             onError: (errors) => {
               toast.error('Ocorreu um erro ao salvar os CRC Cards.')
@@ -825,7 +594,7 @@ const OverallModel = ({ project, setProject }) => {
           },
         )
       } else {
-        setShowAiModal(false) // Se não há cards, apenas fecha o modal
+        cancelAI()
       }
     }
 
@@ -852,113 +621,9 @@ const OverallModel = ({ project, setProject }) => {
     }
   }
 
-  // Função auxiliar para salvar os cards, chamada após salvar as classes
-  const saveCards = (cardsForBackend) => {
-    router.post(
-      route('overall.bulk-store'),
-      { crc_cards: cardsForBackend },
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          toast.success(
-            `${cardsForBackend.length} CRC Card(s) salvo(s) com sucesso!`,
-          )
-          setShowAiModal(false) // Fecha o modal após o sucesso
-        },
-        onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar os CRC Cards.')
-          console.error(errors)
-        },
-      },
-    )
-  }
-
-  const cancelGeneratedItems = () => {
-    setShowAiModal(false)
-    setAiGeneratedCRCCards([])
-    setAiGeneratedClasses([])
-    setIsModalMinimized(false)
-  }
-
-  const syncClassSelections = (cards, classes) => {
-    const newClasses = classes.map((c) => ({ ...c, requiredBy: new Set() }))
-    cards
-      .filter((card) => card.selected)
-      .forEach((card) => {
-        const requiredClassNames = [card.class, ...card.collaborators]
-        newClasses.forEach((classItem) => {
-          if (requiredClassNames.includes(classItem.name)) {
-            classItem.requiredBy.add(card.tempId)
-          }
-        })
-      })
-    newClasses.forEach((classItem) => {
-      if (classItem.requiredBy.size > 0) {
-        classItem.selected = true
-      }
-    })
-
-    return newClasses
-  }
-
-  const toggleCardSelection = (index) => {
-    const updatedCards = aiGeneratedCRCCards.map((card, i) =>
-      i === index ? { ...card, selected: !card.selected } : card,
-    )
-    const updatedClasses = syncClassSelections(updatedCards, aiGeneratedClasses)
-
-    setAiGeneratedCRCCards(updatedCards)
-    setAiGeneratedClasses(updatedClasses)
-  }
-
-  const toggleClassSelection = (index) => {
-    const targetClass = aiGeneratedClasses[index]
-    if (targetClass.requiredBy.size > 0) {
-      toast.info(
-        `A classe "${targetClass.name}" é requerida por um CRC Card selecionado e não pode ser desmarcada.`,
-      )
-      return
-    }
-
-    setAiGeneratedClasses((prev) =>
-      prev.map((classItem, i) =>
-        i === index
-          ? { ...classItem, selected: !classItem.selected }
-          : classItem,
-      ),
-    )
-  }
-
-  const toggleAllCards = () => {
-    const allSelected = aiGeneratedCRCCards.every((card) => card.selected)
-    setAiGeneratedCRCCards((prev) =>
-      prev.map((card) => ({ ...card, selected: !allSelected })),
-    )
-  }
-
-  const toggleAllClasses = () => {
-    const allSelected = aiGeneratedClasses.every((card) => card.selected)
-    setAiGeneratedClasses((prev) =>
-      prev.map((card) => ({ ...card, selected: !allSelected })),
-    )
-  }
-
   return (
     <div className="p-4 flex flex-col gap-3">
-      {showAiModal && (
-        <GeneratedItemsModal
-          isModalMinimized={isModalMinimized}
-          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
-          cancelGeneratedItems={cancelGeneratedItems}
-          generatedItems={aiGeneratedCRCCards}
-          generatedClasses={aiGeneratedClasses}
-          toggleItemSelection={toggleCardSelection}
-          toggleClassSelection={toggleClassSelection}
-          confirmGeneratedItems={confirmGeneratedCards}
-          toggleAllItems={toggleAllCards}
-          toggleAllClasses={toggleAllClasses}
-        />
-      )}
+      <OverallModelAIModal onConfirm={confirmGeneratedCards} />
       {inspectionId && (
         <InvestCard
           itemCategory={'crc_cards'}
@@ -1016,10 +681,9 @@ const OverallModel = ({ project, setProject }) => {
               </div>
               <div className="flex flex-wrap gap-2">
                 {(project.overall_model_classes || []).length > 0 ? (
-                  (project.overall_model_classes || []).map(
-                    (model_class, index) => (
+                  (project.overall_model_classes || []).map((model_class) => (
                       <Badge
-                        key={index}
+                        key={model_class.id}
                         variant="secondary"
                         className="flex items-center gap-2"
                       >
@@ -1033,8 +697,7 @@ const OverallModel = ({ project, setProject }) => {
                           <X className="size-3" />
                         </button>
                       </Badge>
-                    ),
-                  )
+                    ))
                 ) : (
                   <p className="text-xs text-muted-foreground italic">
                     Nenhum nome salvo ainda.

@@ -108,7 +108,7 @@ class ProjectController extends Controller
       'interviews',
       'system_colors',
       'users' => function ($query) {
-        $query->select(['user_id', 'name', 'email', 'provider_avatar']);
+        $query->select(['user_id', 'name', 'provider_avatar']);
       },
     ]);
 
@@ -146,7 +146,7 @@ class ProjectController extends Controller
       'interviews',
       'system_colors',
       'users' => function ($query) {
-        $query->select(['user_id', 'name', 'email', 'provider_avatar']);
+        $query->select(['user_id', 'name', 'provider_avatar']);
       },
     ]);
     $artifact = $request->query('artifact');

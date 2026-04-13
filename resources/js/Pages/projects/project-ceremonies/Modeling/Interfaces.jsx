@@ -117,9 +117,9 @@ const GeneratedItemsModal = ({
                             </p>
                           </div>
                           <div className="grid gap-1 w-full text-left text-muted-foreground text-sm">
-                            {relatedClasses.map((classData, index) => (
+                            {relatedClasses.map((classData) => (
                               <div
-                                key={index}
+                                key={classData.id}
                                 className="border p-3 rounded-lg bg-muted/50 flex items-center"
                               >
                                 <h4 className="font-semibold text-sm">
@@ -216,7 +216,6 @@ const Interfaces = ({ project, setProject }) => {
       )
       setAnchorEl(element)
       setInspectionId(interfaceId)
-      console.log(element, interfaceId)
     }
   }
 

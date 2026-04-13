@@ -36,8 +36,12 @@ const tooltipInfo = {
   },
   inspection: {
     title: 'Inspection',
+    link: 'inspection',
     description:
-      'Nessa cerimônia a equipe para e verifica se a tarefa (o requisito) está pronta. É aqui também que eles estimam o esforço: "Isso vai ser rápido ou vai dar muito trabalho?".',
+      'As inspeções são atividades de avaliação e melhoria do sistema, como a análise de usabilidade, a revisão de código e outras tarefas que garantem a qualidade e a eficiência do sistema. Nessa cerimônia a equipe para e verifica se a tarefa (o requisito) está pronta. É aqui também que eles estimam o esforço: "Isso vai ser rápido ou vai dar muito trabalho?".',
+    classNames: {
+      badge: 'bg-purple-600 ',
+    },
   },
   productBacklog: {
     title: 'Product Backlog',
@@ -142,15 +146,6 @@ const tooltipInfo = {
     link: 'storyboards',
     description:
       'Os storyboards são visões detalhadas das interfaces do aplicativo, que mostram como os usuários interagem com o sistema em diferentes cenários.',
-    classNames: {
-      badge: 'bg-purple-600 ',
-    },
-  },
-  //inspection
-  inspection: {
-    title: 'Inspection',
-    description:
-      'As inspeções são atividades de avaliação e melhoria do sistema, como a análise de usabilidade, a revisão de código e outras tarefas que garantem a qualidade e a eficiência do sistema.',
     classNames: {
       badge: 'bg-purple-600 ',
     },

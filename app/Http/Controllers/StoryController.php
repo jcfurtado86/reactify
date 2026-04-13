@@ -62,11 +62,17 @@ class StoryController extends Controller
     } catch (\Exception $e) {
       Log::error('Failed to update story and its children', [
         'story_id' => $story->id,
+        'payload' => $validated,
         'error' => $e->getMessage(),
+        'trace' => $e->getTraceAsString(),
       ]);
 
+      if (app()->environment('local')) {
+        throw $e;
+      }
+
       return back()->with([
-        'message' => 'An error occurred while updating. Please try again.',
+        'message' => 'An error occurred while updating: ' . $e->getMessage(),
         'status' => 'error',
       ]);
     }

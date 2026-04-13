@@ -24,7 +24,6 @@ export default function Register() {
       onFinish: () => reset('password', 'password_confirmation'),
     })
   }
-  console.log(route())
   return (
     <>
       <Head title="Register" />

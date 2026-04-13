@@ -54,10 +54,6 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
     },
   }
 
-  useEffect(() => {
-    console.log(props)
-  }, [props])
-
   const currentRouteName = route().current()
   const currentProjectId = route().params.project
 

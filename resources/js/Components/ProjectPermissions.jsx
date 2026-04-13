@@ -159,9 +159,6 @@ export function ProjectPermissions({ project }) {
                         {user.name}
                         {isOwner ? ' (You)' : ''}
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        {user.email}
-                      </p>
                     </div>
                     {!isOwner ? (
                       <div className="flex items-center gap-2">

@@ -145,17 +145,18 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
 
   const moveStory = (story, storyId, newStatus) => {
     const sprintId = story?.pivot?.sprint_id || null
+    const previousStories = localStories
     setLocalStories((prevStories) =>
-      prevStories.map((story) =>
-        story.id === storyId
+      prevStories.map((s) =>
+        s.id === storyId
           ? {
-              ...story,
+              ...s,
               pivot: {
-                ...story.pivot,
+                ...s.pivot,
                 kanban_status: newStatus,
               },
             }
-          : story,
+          : s,
       ),
     )
     if (!sprintId) return
@@ -181,9 +182,8 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
         },
         onError: (errors) => {
           console.error('Erro ao mover story:', errors)
-          if (sprintStories) {
-            setLocalStories(sprintStories)
-          }
+          // rollback otimista
+          setLocalStories(previousStories)
         },
       },
     )
