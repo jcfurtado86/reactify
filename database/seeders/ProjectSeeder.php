@@ -17,6 +17,18 @@ class ProjectSeeder extends Seeder
 {
   public function run(): void
   {
+    // Garantir user_roles base (necessário pra registro/login funcionarem)
+    foreach (['user', 'admin'] as $roleName) {
+      DB::table('user_roles')->updateOrInsert(
+        ['name' => $roleName],
+        [
+          'can_create' => true,
+          'can_read' => true,
+          'can_update' => true,
+        ],
+      );
+    }
+
     // Criar Usuário Admin (evitar duplicação de email)
     $user1 = DB::table('users')->where('email', 'admin@example.com')->first();
 
@@ -337,8 +349,11 @@ class ProjectSeeder extends Seeder
       ],
     ]);
 
-    // Criar Stories
-    $storiesData = [
+    // Criar Stories — as três primeiras são independentes; a quarta é uma
+    // sub-story da terceira e precisa referenciar o ID REAL gerado pelo
+    // banco (não a posição no array — isso quebra em re-runs ou quando
+    // existem stories de outros projetos).
+    $parentStories = [
       [
         'title' =>
         'Como usuário, quero criar uma conta para acessar o aplicativo',
@@ -354,23 +369,28 @@ class ProjectSeeder extends Seeder
         'Como administrador, quero gerenciar usuários para manter o controle de acesso ao sistema',
         'type' => 'system',
       ],
-      [
+    ];
+
+    $adminEpicId = null;
+
+    DB::transaction(function () use ($parentStories, $projectId, &$adminEpicId) {
+      foreach ($parentStories as $storyData) {
+        $story = Story::create(array_merge($storyData, [
+          'project_id' => $projectId,
+        ]));
+        if ($story->title === $parentStories[2]['title']) {
+          $adminEpicId = $story->id;
+        }
+      }
+
+      // Sub-story referenciando a "Como administrador..." como épico
+      Story::create([
         'title' =>
         'Otimização de Streaming. Descrição: Implementar tecnologias de compressão eficientes e entrega de conteúdo via CDN (Content Delivery Network) para garantir uma transmissão de vídeo sem interrupções e com carregamento rápido. Atributo de Qualidade: Desempenho e Eficiência',
         'type' => 'system',
-        'epic_id' => 3,
-      ],
-    ];
-
-    DB::transaction(function () use ($storiesData, $projectId) {
-      foreach ($storiesData as $storyData) {
-        // Adicione os dados que são comuns a todos, se necessário
-        $dataToCreate = array_merge($storyData, [
-          'project_id' => $projectId,
-
-        ]);
-        Story::create($dataToCreate);
-      }
+        'project_id' => $projectId,
+        'epic_id' => $adminEpicId,
+      ]);
     });
     //inserir cards
     $overall_classes = [
