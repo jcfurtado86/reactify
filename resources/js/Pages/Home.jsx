@@ -30,6 +30,9 @@ const Home = ({}) => {
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState([])
+  // Dialog "Criar Novo Projeto" compartilhado entre o botão do header
+  // e o CTA "Criar meu primeiro projeto" do estado vazio.
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
   // const [newProject, setNewProject] = useState({
   //   title: '',
   //   description: '',
@@ -248,7 +251,7 @@ const Home = ({}) => {
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <p className="font-semibold text-lg mb-4 text-foreground">Projects</p>
-        <Dialog>
+        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button
               variant="default"
@@ -424,13 +427,13 @@ const Home = ({}) => {
             Você ainda não tem nenhum projeto. Crie seu primeiro espaço de
             trabalho para começar a gerenciar suas tarefas com IA.
           </p>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="lg" className="rounded-full font-semibold">
-                Criar meu primeiro projeto
-              </Button>
-            </DialogTrigger>
-          </Dialog>
+          <Button
+            size="lg"
+            className="rounded-full font-semibold"
+            onClick={() => setCreateDialogOpen(true)}
+          >
+            Criar meu primeiro projeto
+          </Button>
         </div>
       )}
     </div>
