@@ -81,14 +81,10 @@ const Home = ({}) => {
       cell: ({ row }) => (
         <div className="w-32">
           <AvatarCircles
-            numPeople={row.getValue('users').length}
-            avatarUrls={row.getValue('users').map(
-              (user) =>
-                ({
-                  imageUrl: user?.avatar_url,
-                  profileUrl: '',
-                }) || {},
-            )}
+            avatarUrls={row.getValue('users').map((user) => ({
+              imageUrl: user?.avatar_url,
+              profileUrl: '',
+            }))}
           />
         </div>
       ),
