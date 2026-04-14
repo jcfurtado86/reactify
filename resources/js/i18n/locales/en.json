@@ -132,7 +132,18 @@
     "feature_realtime_title": "Guided REACT-M ceremonies",
     "feature_realtime_body": "Inception, goals, canvas, prioritization and sprints in a single flow. An AI facilitator walks you through every step of the method.",
     "feature_cloud_title": "Your team, working together",
-    "feature_cloud_body": "Invite customers, domain experts and the technical team, assign roles and follow all artifacts in real time."
+    "feature_cloud_body": "Invite customers, domain experts and the technical team, assign roles and follow all artifacts in real time.",
+    "howitworks_title": "How it works",
+    "howitworks_subtitle": "From audio to user story, in four steps.",
+    "step_label": "Step {{n}}",
+    "step1_title": "Upload the interview",
+    "step1_body": "Drop in audio, video or PDF from your conversation with the customer, expert or user.",
+    "step2_title": "AI transcribes and analyzes",
+    "step2_body": "Reactify transcribes the recording, surfaces the relevant excerpts and prepares the material for the artifacts.",
+    "step3_title": "Artifacts ready",
+    "step3_body": "Personas, journeys, goals, canvas, business rules and stories generated with AI, ready for you to review.",
+    "step4_title": "Team running the method",
+    "step4_body": "Run Inception, Story Discovery, Sprint and the other REACT-M ceremonies with the whole team aligned."
   },
   "top_menu": {
     "theme_selector": "Select a theme",

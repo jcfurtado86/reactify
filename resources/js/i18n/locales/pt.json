@@ -132,7 +132,18 @@
     "feature_realtime_title": "Cerimônias REACT-M guiadas",
     "feature_realtime_body": "Inception, objetivos, canvas, priorização e sprints em um fluxo único. Um facilitador com IA acompanha cada etapa do método.",
     "feature_cloud_title": "Equipe colaborando junto",
-    "feature_cloud_body": "Convide clientes, especialistas de domínio e time técnico, atribua papéis e acompanhe os artefatos em tempo real."
+    "feature_cloud_body": "Convide clientes, especialistas de domínio e time técnico, atribua papéis e acompanhe os artefatos em tempo real.",
+    "howitworks_title": "Como funciona",
+    "howitworks_subtitle": "Do áudio à user story, em quatro passos.",
+    "step_label": "Passo {{n}}",
+    "step1_title": "Envie a entrevista",
+    "step1_body": "Suba áudio, vídeo ou PDF da conversa com cliente, especialista ou usuário.",
+    "step2_title": "A IA transcreve e analisa",
+    "step2_body": "O Reactify transcreve, identifica os trechos relevantes e prepara o material para os artefatos.",
+    "step3_title": "Artefatos prontos",
+    "step3_body": "Personas, jornadas, objetivos, canvas, regras de negócio e estórias geradas com IA, prontas para revisar.",
+    "step4_title": "Equipe rodando o método",
+    "step4_body": "Conduza Inception, Story Discovery, Sprint e as demais cerimônias REACT-M com a equipe alinhada."
   },
   "top_menu": {
     "theme_selector": "Selecione um tema",
