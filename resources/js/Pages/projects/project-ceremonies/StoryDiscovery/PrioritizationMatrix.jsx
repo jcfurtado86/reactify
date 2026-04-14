@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import EditPriorities from './EditPriorities'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 
 const SortablePriorityColumn = ({
   priority,
@@ -366,6 +367,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
             {
               preserveState: true,
               preserveScroll: true,
+              onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
             },
           )
 
@@ -421,6 +423,8 @@ const PrioritizationMatrix = ({ project, setProject }) => {
               {
                 preserveState: true,
                 preserveScroll: true,
+                onSuccess: () => toastSuccess('prioritization_matrix.toast_removed'),
+                onError: (errors) => toastApiError(errors, 'common.toast.error_delete'),
               },
             )
           }
@@ -479,7 +483,11 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                 priority_id: priority_id,
                 position: Number(position),
               },
-              { preserveState: true, preserveScroll: true },
+              {
+                preserveState: true,
+                preserveScroll: true,
+                onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+              },
             )
           } else {
             // It's a new story from the unassigned list, so CREATE it
@@ -494,7 +502,12 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                 priority_id: priority_id,
                 position: Number(position),
               },
-              { preserveState: true, preserveScroll: true },
+              {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => toastSuccess('prioritization_matrix.toast_added'),
+                onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+              },
             )
           }
 

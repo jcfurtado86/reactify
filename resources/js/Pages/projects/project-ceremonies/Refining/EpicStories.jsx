@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import React from 'react'
 import { toast } from 'sonner'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { router } from '@inertiajs/react'
 import { isTemporary, useGroupedStories } from '@/lib/utils'
 import GenerateAIButton from '@/Components/GenerateAIButton'
@@ -361,12 +362,19 @@ const EpicStories = ({ project, setProject }) => {
   const hasStories = project?.stories && project.stories.length > 0
 
   const addEpicStory = (story) => {
-    router.post(route('story.store'), {
-      epic_id: story.id,
-      type: story.type,
-      project_id: project.id,
-      title: 'Nova Story Derivada',
-    })
+    router.post(
+      route('story.store'),
+      {
+        epic_id: story.id,
+        type: story.type,
+        project_id: project.id,
+        title: 'Nova Story Derivada',
+      },
+      {
+        onSuccess: () => toastSuccess('epic_stories.toast_added'),
+        onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+      },
+    )
     setProject((prevProject) => ({
       ...prevProject,
       stories: [

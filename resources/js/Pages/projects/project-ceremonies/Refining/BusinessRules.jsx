@@ -12,6 +12,7 @@ import {
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
 import { isTemporary, inspectionStatus } from '@/lib/utils'
 import InvestCard from '../Inspection/InvestCard'
@@ -256,7 +257,11 @@ const BusinessRuleCard = ({
       { title: editValue },
       {
         preserveScroll: true,
-        onSuccess: () => setIsEditing(false),
+        onSuccess: () => {
+          toastSuccess('business_rules.toast_updated')
+          setIsEditing(false)
+        },
+        onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },
     )
   }

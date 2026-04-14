@@ -145,7 +145,8 @@
     "description_helper": "Altere o nome e a descrição do seu projeto aqui. Clique em salvar quando terminar.",
     "project_title": "Título do Projeto",
     "describe_placeholder": "Descreva o projeto...",
-    "save_changes": "Salvar Alterações"
+    "save_changes": "Salvar Alterações",
+    "toast_saved": "Configurações do projeto salvas"
   },
   "edit_priorities": {
     "edit_button": "Editar Prioridades",
@@ -420,7 +421,8 @@
     "new_constraint": "Nova Constraint Goal",
     "new_business": "Nova Business Goal",
     "empty_constraint": "Nenhuma Constraint Goal",
-    "empty_business": "Nenhuma Business Goal"
+    "empty_business": "Nenhuma Business Goal",
+    "toast_updated": "Objetivo atualizado"
   },
   "personas": {
     "singular": "Persona",
@@ -441,7 +443,8 @@
     "confirm_delete_body": "Esta ação não pode ser desfeita. Isso excluirá permanentemente a persona e todos os seus dados.",
     "confirm_delete_action": "Sim, excluir",
     "confirm_delete_item_title": "Excluir este item?",
-    "confirm_delete_item_body": "Esta ação não pode ser desfeita."
+    "confirm_delete_item_body": "Esta ação não pode ser desfeita.",
+    "toast_added": "Persona adicionada"
   },
   "journeys": {
     "singular": "Jornada",
@@ -459,6 +462,7 @@
     "ai_modal_title_minimized": "Journeys geradas",
     "toast_generated": "Journeys geradas com sucesso.",
     "toast_added": "{{count}} jornada(s) adicionada(s) com sucesso!",
+    "toast_added_one": "Jornada adicionada",
     "toast_add_error": "Ocorreu um erro ao adicionar as jornadas.",
     "toast_comm_error": "Erro ao comunicar com o servidor",
     "save_title": "Salvar título",
@@ -502,7 +506,8 @@
     "new_user_story": "Nova User Story",
     "new_system_story": "Nova System Story",
     "empty_user": "Nenhuma User Story",
-    "empty_system": "Nenhuma System Story"
+    "empty_system": "Nenhuma System Story",
+    "toast_updated": "Story atualizada"
   },
   "epic_stories": {
     "title": "Estórias Épicas",
@@ -512,7 +517,8 @@
     "generate_cta": "Decompor épicos com IA",
     "toast_decomposed": "Épicos decompostos com sucesso.",
     "no_story_title": "Nenhuma Story",
-    "no_story_body": "Não é possível decompor épicos pois nenhuma story foi criada ainda."
+    "no_story_body": "Não é possível decompor épicos pois nenhuma story foi criada ainda.",
+    "toast_added": "Épico adicionado"
   },
   "business_rules": {
     "title": "Regras de Negócio",
@@ -523,7 +529,8 @@
     "generate_cta": "Gerar regras com IA",
     "toast_generated": "Regras de negócio geradas com sucesso.",
     "empty_title": "Nenhuma Regra de Negócio",
-    "empty_hint": "Crie uma User Story ou System Story primeiro para poder adicionar regras de negócio."
+    "empty_hint": "Crie uma User Story ou System Story primeiro para poder adicionar regras de negócio.",
+    "toast_updated": "Regra atualizada"
   },
   "usage_scenarios": {
     "title": "Cenários de Uso",
@@ -537,7 +544,8 @@
     "generate_cta": "Gerar cenários com IA",
     "toast_generated": "Cenários de uso gerados com sucesso.",
     "empty_title": "Nenhum Cenário de Uso",
-    "empty_hint": "Crie uma User Story ou System Story primeiro para poder adicionar cenários de uso."
+    "empty_hint": "Crie uma User Story ou System Story primeiro para poder adicionar cenários de uso.",
+    "toast_added": "Cenário adicionado"
   },
   "overall_model": {
     "title": "Overall Model",
@@ -565,7 +573,9 @@
     "empty_hint": "Crie um novo card para mapear as classes, responsabilidades e colaboradores.",
     "ai_cards_title": "CRC Cards gerados por IA",
     "ai_cards_title_minimized": "CRC Cards gerados",
-    "ai_classes_title": "Classes geradas por IA"
+    "ai_classes_title": "Classes geradas por IA",
+    "toast_class_added": "Classe adicionada",
+    "toast_card_added": "CRC Card adicionado"
   },
   "system_interfaces": {
     "title": "Interfaces de Sistema",
@@ -594,7 +604,8 @@
     "add_new_interface": "Adicionar Nova Interface",
     "edit_interface": "Editar Interface",
     "form_description_create": "Preencha os dados para criar a interface do sistema.",
-    "form_description_update": "Preencha os dados para atualizar a interface do sistema."
+    "form_description_update": "Preencha os dados para atualizar a interface do sistema.",
+    "toast_saved": "Interface salva"
   },
   "storyboards": {
     "title": "Storyboards",
@@ -620,7 +631,9 @@
     "all_prioritized": "Todas as stories foram priorizadas",
     "drag_to_unprioritize": "Arraste uma story da matriz aqui para \"despriorizá-la\".",
     "go_to_stories": "Ir para Stories",
-    "go_to_goals": "Ir para Goals"
+    "go_to_goals": "Ir para Goals",
+    "toast_removed": "Priorização removida",
+    "toast_added": "Story priorizada"
   },
   "change_log": {
     "title": "Registro de Mudanças",
@@ -699,7 +712,8 @@
     "small": "Pequeno",
     "testable": "Testável",
     "na": "N/A",
-    "check_card": "Check Card"
+    "check_card": "Check Card",
+    "toast_saved": "Avaliação INVEST salva"
   },
   "interviews": {
     "title": "Entrevistas",

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import TextareaAutosize from 'react-textarea-autosize'
 import GenerateAIButton from '@/Components/GenerateAIButton'
@@ -483,6 +484,7 @@ const Personas = ({ project, setProject }) => {
       preserveState: true,
       preserveScroll: true,
       onSuccess: (page) => {
+        toastSuccess('personas.toast_added')
         const createdPersona = page.props.project.personas.find(
           (p) => !project.personas.find((existingP) => existingP.id === p.id),
         )
@@ -496,6 +498,7 @@ const Personas = ({ project, setProject }) => {
         setIsSubmitting(false)
       },
       onError: (errors) => {
+        toastApiError(errors, 'common.toast.error_save')
         console.error('Erro ao criar persona:', errors)
         setIsSubmitting(false)
       },

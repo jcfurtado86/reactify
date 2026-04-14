@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { router, usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import TextareaAutosize from 'react-textarea-autosize'
 import { cn, inspectionStatus } from '@/lib/utils'
 import { useTooltipInfo } from '@/lib/projectData'
@@ -425,7 +426,12 @@ const Journeys = ({ project, setProject }) => {
         steps: [],
         project_id: project.id,
       },
-      { preserveState: true, preserveScroll: true },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => toastSuccess('journeys.toast_added_one'),
+        onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+      },
     )
 
     // Expandir a journey recém-criada (último índice)

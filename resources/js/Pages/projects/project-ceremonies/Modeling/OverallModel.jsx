@@ -6,7 +6,7 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { useTooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
-import { toastApiError } from '@/lib/toastHelpers'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { cn } from '@/lib/utils'
 import { useOverallModelAIStore } from '@/stores/useOverallModelAIStore'
 import OverallModelAIModal from './components/OverallModelAIModal'
@@ -384,17 +384,27 @@ const OverallModel = ({ project, setProject }) => {
     const updatedNames = [...currentNames, { name: newReusableName.trim() }]
     setProject({ ...project, overall_model_classes: updatedNames })
     setNewReusableName('')
-    router.post(route('overall-model-class.store'), {
-      name: newReusableName,
-      project_id: project.id,
-    })
+    router.post(
+      route('overall-model-class.store'),
+      {
+        name: newReusableName,
+        project_id: project.id,
+      },
+      {
+        onSuccess: () => toastSuccess('overall_model.toast_class_added'),
+        onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+      },
+    )
   }
 
   const handleDeleteReusableName = (idToDelete) => {
     const currentNames = project.overall_model_classes || []
     const updatedNames = currentNames.filter((item) => item.id !== idToDelete)
     setProject({ ...project, overall_model_classes: updatedNames })
-    router.delete(route('overall-model-class.destroy', { id: idToDelete }))
+    router.delete(route('overall-model-class.destroy', { id: idToDelete }), {
+      onSuccess: () => toastSuccess('common.toast.deleted'),
+      onError: (errors) => toastApiError(errors, 'common.toast.error_delete'),
+    })
   }
 
   const startEditTitle = (card) => {
@@ -509,6 +519,7 @@ const OverallModel = ({ project, setProject }) => {
       },
       {
         onSuccess: () => {
+          toastSuccess('overall_model.toast_card_added')
           // Atualiza ambos (cards e classes) no sucesso
           setProject((prev) => ({
             ...prev,
@@ -516,6 +527,7 @@ const OverallModel = ({ project, setProject }) => {
             overall_model_classes: updatedClasses,
           }))
         },
+        onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },
     )
   }
@@ -583,15 +595,13 @@ const OverallModel = ({ project, setProject }) => {
           {
             preserveScroll: true,
             onSuccess: () => {
-              toast.success(
-                `${cardsForBackend.length} CRC Card(s) salvo(s) com sucesso!`,
-              )
+              toastSuccess('overall_model.toast_cards_saved', {
+                count: cardsForBackend.length,
+              })
               cancelAI()
             },
-            onError: (errors) => {
-              toast.error(t('overall_model.toast_save_error'))
-              console.error(errors)
-            },
+            onError: (errors) =>
+              toastApiError(errors, 'common.toast.error_save'),
           },
         )
       } else {
@@ -606,15 +616,13 @@ const OverallModel = ({ project, setProject }) => {
         {
           preserveScroll: true,
           onSuccess: () => {
-            toast.success(
-              `${classesForBackend.length} classe(s) salva(s) com sucesso!`,
-            )
+            toastSuccess('overall_model.toast_classes_saved', {
+              count: classesForBackend.length,
+            })
             saveCards()
           },
-          onError: (errors) => {
-            toast.error(t('overall_model.toast_classes_save_error'))
-            console.error(errors)
-          },
+          onError: (errors) =>
+            toastApiError(errors, 'overall_model.toast_classes_save_error'),
         },
       )
     } else {

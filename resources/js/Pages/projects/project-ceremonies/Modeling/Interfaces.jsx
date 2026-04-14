@@ -4,6 +4,7 @@ import { Minus, Check, X, ChevronsUp, Network } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { cn } from '@/lib/utils'
@@ -262,12 +263,17 @@ const Interfaces = ({ project, setProject }) => {
   // Submete o formulário, decidindo entre POST (criar) ou PUT (atualizar).
   const handleSubmit = (e) => {
     e.preventDefault()
-    const onSuccess = () => setIsDialogOpen(false)
+    const onSuccess = () => {
+      toastSuccess('system_interfaces.toast_saved')
+      setIsDialogOpen(false)
+    }
+    const onError = (errors) => toastApiError(errors, 'common.toast.error_save')
 
     if (data.id) {
       patch(route('system-interface.update', { interface: data.id }), {
         preserveScroll: true, // Mantém a posição do scroll na página após a resposta.
         onSuccess,
+        onError,
       })
       setProject((prevProject) => ({
         ...prevProject,
@@ -280,6 +286,7 @@ const Interfaces = ({ project, setProject }) => {
       post(route('system-interface.store'), {
         preserveScroll: true,
         onSuccess,
+        onError,
       })
       setProject((prevProject) => ({
         ...prevProject,

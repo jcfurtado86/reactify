@@ -15,6 +15,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
 import StatusBadge from '@/Components/StatusBadge'
 import { usePage } from '@inertiajs/react'
@@ -657,6 +658,8 @@ const UsageScenarios = ({ project, setProject }) => {
     // Backend request
     router.post(route('usage-scenario.store'), newScenarioData, {
       preserveScroll: true,
+      onSuccess: () => toastSuccess('usage_scenarios.toast_added'),
+      onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
     })
   }
 
@@ -754,7 +757,7 @@ const UsageScenarios = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error(t('common.error'))
+          toastApiError(errors, 'common.toast.error_save')
           console.error('Erro do backend:', errors)
         },
       },

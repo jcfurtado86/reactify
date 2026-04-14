@@ -17,6 +17,7 @@ import { router, usePage } from '@inertiajs/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import axios from 'axios'
 import { toast } from 'sonner'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import {
   PREDEFINED_COLORS,
   isTemporary,
@@ -195,10 +196,16 @@ const StoryItem = ({
       (color) => color.color === colorValue,
     )
     if (!selectedColor) return
-    router.post(route('system-color.store'), {
-      stories: { ...systemColors?.stories, [variantTitle]: colorValue },
-      project_id: story.project_id,
-    })
+    router.post(
+      route('system-color.store'),
+      {
+        stories: { ...systemColors?.stories, [variantTitle]: colorValue },
+        project_id: story.project_id,
+      },
+      {
+        onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+      },
+    )
   }
 
   const handleKeyDown = (e) => {
@@ -473,9 +480,16 @@ const Stories = ({ project, setProject }) => {
 
         setProject({ ...project, stories: updatedStories })
 
-        router.patch(route('story.update', story.id), {
-          title: editValue,
-        })
+        router.patch(
+          route('story.update', story.id),
+          {
+            title: editValue,
+          },
+          {
+            onSuccess: () => toastSuccess('stories.toast_updated'),
+            onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+          },
+        )
       }
       setEditingId(null)
     } else {

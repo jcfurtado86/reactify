@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { isTemporary, cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import StatusBadge from '@/Components/StatusBadge'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 
 const routerNames = {
   // local state name -> route name
@@ -109,9 +110,10 @@ const InvestCard = ({
       },
       {
         onSuccess: () => {
+          toastSuccess('invest_card.toast_saved')
           setInspectionId(null)
         },
-
+        onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
         onStart: () => {
           setIsLoading(true)
         },

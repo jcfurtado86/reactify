@@ -3,6 +3,7 @@ import { useForm } from '@inertiajs/react'
 import { Settings, LoaderCircle, MousePointerClick, Trash2 } from 'lucide-react'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import { useTranslation } from 'react-i18next'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 
 export function ProjectSettings({ project }) {
   const { t } = useTranslation()
@@ -31,10 +32,14 @@ export function ProjectSettings({ project }) {
 
   // Função para lidar com o envio do formulário
   const handleSaveChanges = (e) => {
-    e.preventDefault() // Previne o comportamento padrão de recarregar a página
+    e.preventDefault()
     patch(route('project.update', project.id), {
-      onSuccess: () => setIsOpen(false), // Fecha o sheet em caso de sucesso
       preserveScroll: true,
+      onSuccess: () => {
+        toastSuccess('project_settings.toast_saved')
+        setIsOpen(false)
+      },
+      onError: (err) => toastApiError(err, 'common.toast.error_save'),
     })
   }
 

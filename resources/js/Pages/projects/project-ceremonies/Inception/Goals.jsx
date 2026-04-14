@@ -26,7 +26,7 @@ import InfoButton from '@/Components/InfoButton'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { ColorOptions } from '@/Components/ColorComponents'
 import { toast } from 'sonner'
-import { toastApiError } from '@/lib/toastHelpers'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
 import { usePage } from '@inertiajs/react'
@@ -583,9 +583,16 @@ const Goals = ({ project, setProject }) => {
         )
         setProject({ ...project, goal_sketches: updatedGoals })
 
-        router.patch(route('goal.update', goal.id), {
-          title: editValue,
-        })
+        router.patch(
+          route('goal.update', goal.id),
+          {
+            title: editValue,
+          },
+          {
+            onSuccess: () => toastSuccess('goals.toast_updated'),
+            onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+          },
+        )
       }
       setEditingId(null) // Sai do modo de edição
     } else {
@@ -612,9 +619,16 @@ const Goals = ({ project, setProject }) => {
 
       setProject({ ...project, goal_sketches: updatedGoals })
 
-      router.patch(route('goal.update', goalId), {
-        type: newType,
-      })
+      router.patch(
+        route('goal.update', goalId),
+        {
+          type: newType,
+        },
+        {
+          onSuccess: () => toastSuccess('goals.toast_updated'),
+          onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+        },
+      )
     }
 
     setTypeSelectId(null) // Fecha o seletor de tipo
@@ -636,9 +650,16 @@ const Goals = ({ project, setProject }) => {
 
       setProject({ ...project, goal_sketches: updatedGoals })
 
-      router.patch(route('goal.update', goalId), {
-        priority: newPriority,
-      })
+      router.patch(
+        route('goal.update', goalId),
+        {
+          priority: newPriority,
+        },
+        {
+          onSuccess: () => toastSuccess('goals.toast_updated'),
+          onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
+        },
+      )
     }
     setPrioritySelectId(null) // Fecha o seletor de prioridade
   }
