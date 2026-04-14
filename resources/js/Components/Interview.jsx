@@ -245,6 +245,7 @@ const InterviewUploadCard = ({
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [error, setError] = useState(null)
+  const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedInterview, setSelectedInterview] = useState(null)
@@ -265,15 +266,12 @@ const InterviewUploadCard = ({
     return null
   }
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]
+  const uploadFile = (file) => {
     if (!file) return
 
     const validationError = validateFile(file)
     if (validationError) {
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
+      toast.error(validationError)
       return
     }
 
@@ -300,6 +298,7 @@ const InterviewUploadCard = ({
           const errorMessage =
             errors.interview || t('interview.upload_error')
           setError(errorMessage)
+          toast.error(errorMessage)
           setIsUploading(false)
           if (fileInputRef.current) {
             fileInputRef.current.value = ''
@@ -310,6 +309,36 @@ const InterviewUploadCard = ({
         },
       },
     )
+  }
+
+  const handleFileChange = (e) => {
+    uploadFile(e.target.files[0])
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+    if (!isUploading && !isDragging) setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    // Só desliga o estado quando o cursor sai do card de verdade,
+    // não quando passa por cima de um filho.
+    if (
+      e.currentTarget.contains(e.relatedTarget) ||
+      e.currentTarget === e.relatedTarget
+    ) {
+      return
+    }
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    if (isUploading) return
+    const file = e.dataTransfer.files?.[0]
+    if (file) uploadFile(file)
   }
 
   const handleOpenEditModal = (interview) => {
@@ -326,7 +355,14 @@ const InterviewUploadCard = ({
 
   return (
     <div
-      className={`${className}  rounded-lg border-t-4 border-t-chart-2 bg-card p-4 shadow-lg transition-all duration-300 hover:shadow-xl`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={cn(
+        className,
+        'rounded-lg border-t-4 border-t-chart-2 bg-card p-4 shadow-lg transition-all duration-300 hover:shadow-xl',
+        isDragging && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
+      )}
     >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h3 className="flex items-center text-lg font-bold text-card-foreground">
@@ -370,8 +406,17 @@ const InterviewUploadCard = ({
             />
           ))
         ) : (
-          <div className="py-8 text-center text-sm text-muted-foreground">
-            {t('interview.empty')}
+          <div
+            className={cn(
+              'flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed py-10 text-center text-sm text-muted-foreground transition-colors',
+              isDragging
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-border',
+            )}
+          >
+            <UploadCloud className="h-8 w-8 opacity-60" />
+            <p>{t('interview.drag_and_drop')}</p>
+            <p className="text-xs opacity-70">{t('interview.empty')}</p>
           </div>
         )}
       </div>
