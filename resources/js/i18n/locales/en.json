@@ -269,7 +269,59 @@
     "go_to": "Go to {{name}}",
     "pending_fill": "Pending",
     "missing_prioritization": "Some stories have not been prioritized",
-    "describe_project_placeholder": "Describe your project..."
+    "describe_project_placeholder": "Describe your project...",
+    "value_total": "value {{value}}",
+    "active_sprint_delivery": "{{name}}: {{done}}/{{total}} delivered",
+    "no_active_sprint": "No active sprint",
+    "domain_expert_kanban": "Domain Expert Kanban",
+    "open_backlog": "Open Product Backlog",
+    "kanban_product_backlog": "Product Backlog",
+    "kanban_sprint_backlog": "Sprint Backlog",
+    "kanban_delivered": "Delivered",
+    "requirements_health": "Requirements health",
+    "health_unprioritized": "Unprioritized",
+    "health_invest_pending": "INVEST pending",
+    "health_open_changes": "Open RQMs",
+    "hero_active_sprint_eyebrow": "Current sprint",
+    "hero_go_to_kanban": "Go to Team Kanban",
+    "hero_next_action_eyebrow": "Next suggested action",
+    "sprint_day_of": "Day {{day}} of {{total}}",
+    "next_action": {
+      "inception": {
+        "title": "Complete the Inception",
+        "hint": "Personas, journeys and the Product Canvas are still empty. Start here to ground the project.",
+        "cta": "Open Inception"
+      },
+      "write_stories": {
+        "title": "Capture the User Stories",
+        "hint": "No stories in the backlog yet. Capture customer requirements as User/System Stories.",
+        "cta": "Open Stories"
+      },
+      "prioritize": {
+        "title": "Prioritize the backlog",
+        "hint": "{{count}} stories are not yet placed on the Prioritization Matrix.",
+        "cta": "Open Prioritization Matrix"
+      },
+      "invest": {
+        "title": "Validate Definition of Ready",
+        "hint": "{{count}} stories still need to pass INVEST criteria.",
+        "cta": "Validate INVEST"
+      },
+      "create_sprint": {
+        "title": "Create a new sprint",
+        "hint": "You have {{count}} ready stories in the Product Backlog. Time to plan the next sprint.",
+        "cta": "Open Product Backlog"
+      },
+      "all_clear": {
+        "title": "All clear",
+        "hint": "Backlog prioritized, requirements validated and no pending sprints. Well done!",
+        "cta": "View sprints"
+      }
+    },
+    "sprint_timeline": "Sprint timeline",
+    "timeline_empty": "No sprints created yet",
+    "cycle_aria": "REACT-M cycle",
+    "cycle_center_hint": "iterative"
   },
   "project": {
     "overview": "Overview",
@@ -302,7 +354,13 @@
     "project_updated": "Project updated successfully!",
     "project_update_error": "Error updating project",
     "not_found": "Project not found",
-    "permission_denied": "You don't have permission to access this project"
+    "permission_denied": "You don't have permission to access this project",
+    "phases": {
+      "inception": "Inception",
+      "story_discovery": "Discovery",
+      "refining": "Refining",
+      "modeling": "Modeling"
+    }
   },
   "chat": {
     "title": "AI Assistant",
@@ -624,7 +682,8 @@
     "create_description": "Create a new sprint.",
     "stories_count": "{{count}} Story(ies)",
     "no_stories_in_sprints": "No stories in sprints.",
-    "no_stories_hint": "Create a sprint, add stories from the Product Backlog and start it."
+    "no_stories_hint": "Create a sprint, add stories from the Product Backlog and start it.",
+    "active": "Active"
   },
   "invest_card": {
     "title": "Invest Card",

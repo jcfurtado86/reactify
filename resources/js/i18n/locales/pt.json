@@ -269,7 +269,59 @@
     "go_to": "Ir até {{name}}",
     "pending_fill": "Preenchimento pendente",
     "missing_prioritization": "Algumas estórias não foram priorizadas",
-    "describe_project_placeholder": "Descreva seu projeto..."
+    "describe_project_placeholder": "Descreva seu projeto...",
+    "value_total": "valor {{value}}",
+    "active_sprint_delivery": "{{name}}: {{done}}/{{total}} entregues",
+    "no_active_sprint": "Nenhuma sprint ativa",
+    "domain_expert_kanban": "Kanban do Domain Expert",
+    "open_backlog": "Abrir Product Backlog",
+    "kanban_product_backlog": "Product Backlog",
+    "kanban_sprint_backlog": "Sprint Backlog",
+    "kanban_delivered": "Delivered",
+    "requirements_health": "Saúde dos requisitos",
+    "health_unprioritized": "Sem priorização",
+    "health_invest_pending": "INVEST pendente",
+    "health_open_changes": "RQMs abertos",
+    "hero_active_sprint_eyebrow": "Sprint em andamento",
+    "hero_go_to_kanban": "Ir para o Team Kanban",
+    "hero_next_action_eyebrow": "Próxima ação sugerida",
+    "sprint_day_of": "Dia {{day}} de {{total}}",
+    "next_action": {
+      "inception": {
+        "title": "Complete a Inception",
+        "hint": "Personas, jornadas e o Product Canvas ainda estão vazios. Comece por aqui para ancorar o projeto.",
+        "cta": "Abrir Inception"
+      },
+      "write_stories": {
+        "title": "Levante as User Stories",
+        "hint": "Ainda não há stories no backlog. Capture os requisitos do cliente em User/System Stories.",
+        "cta": "Abrir Stories"
+      },
+      "prioritize": {
+        "title": "Priorize o backlog",
+        "hint": "{{count}} stories ainda não foram posicionadas na Matriz de Priorização.",
+        "cta": "Abrir Prioritization Matrix"
+      },
+      "invest": {
+        "title": "Valide o Definition of Ready",
+        "hint": "{{count}} stories ainda não passaram pelos critérios INVEST.",
+        "cta": "Validar INVEST"
+      },
+      "create_sprint": {
+        "title": "Crie uma nova sprint",
+        "hint": "Você tem {{count}} stories prontas no Product Backlog. Hora de planejar a próxima sprint.",
+        "cta": "Abrir Product Backlog"
+      },
+      "all_clear": {
+        "title": "Tudo em dia",
+        "hint": "Backlog priorizado, requisitos validados e sem sprint pendente. Parabéns!",
+        "cta": "Ver sprints"
+      }
+    },
+    "sprint_timeline": "Linha do tempo das sprints",
+    "timeline_empty": "Nenhuma sprint criada ainda",
+    "cycle_aria": "Ciclo REACT-M",
+    "cycle_center_hint": "iterativo"
   },
   "project": {
     "overview": "Visão geral",
@@ -302,7 +354,13 @@
     "project_updated": "Projeto atualizado com sucesso!",
     "project_update_error": "Erro ao atualizar o projeto",
     "not_found": "Projeto não encontrado",
-    "permission_denied": "Você não tem permissão para acessar este projeto"
+    "permission_denied": "Você não tem permissão para acessar este projeto",
+    "phases": {
+      "inception": "Inception",
+      "story_discovery": "Discovery",
+      "refining": "Refining",
+      "modeling": "Modeling"
+    }
   },
   "chat": {
     "title": "Assistente de IA",
@@ -624,7 +682,8 @@
     "create_description": "Crie uma nova sprint.",
     "stories_count": "{{count}} Estória(s)",
     "no_stories_in_sprints": "Sem stories em sprints.",
-    "no_stories_hint": "Crie uma sprint, adicione stories do Product Backlog e inicie-a."
+    "no_stories_hint": "Crie uma sprint, adicione stories do Product Backlog e inicie-a.",
+    "active": "Ativa"
   },
   "invest_card": {
     "title": "Invest Card",

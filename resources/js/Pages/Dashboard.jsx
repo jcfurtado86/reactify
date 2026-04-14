@@ -1,39 +1,337 @@
 import React from 'react'
-import { Head, router } from '@inertiajs/react'
+import { Head, router, usePage } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
-import ProgressIcon from '@/Components/ProgressIcon'
 import { ExpandableCard } from './projects/project-ceremonies/Inception/ProductCanvas'
 import Interview from '@/Components/Interview'
 import { useTooltipInfo } from '@/lib/projectData'
 import { ProjectPermissions } from '@/Components/ProjectPermissions'
 import { ProjectSettings } from '@/Components/ProjectSettings'
 import {
-  Users,
-  List,
   Clock,
   ArrowRight,
   CircleCheckBig,
   CircleAlert,
-  Calendar as CalendarIcon,
+  List,
+  ChevronDown,
+  AlertTriangle,
+  FileWarning,
+  ClipboardCheck,
+  GitPullRequest,
+  Rocket,
 } from 'lucide-react'
 import SpanButton from '@/Components/SpanButton'
 import MainLayout from '@/Layouts/MainLayout'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { cn, completedStoriesCount } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
-const getDateObject = (dateInput) => {
-  if (!dateInput) {
-    return undefined
-  }
-  const dateOnlyString = dateInput.substring(0, 10)
-  const date = new Date(`${dateOnlyString}T00:00:00`)
+const roleBadgeVariant = {
+  administrator: 'destructive',
+  domain_expert: 'secondary',
+  team: 'default',
+  customer: 'outline',
+}
 
-  if (isNaN(date.getTime())) {
-    return undefined
+const sumStoryValue = (stories) =>
+  stories.reduce((acc, s) => acc + (s.value ?? 0), 0)
+
+const investStatus = (invest) => {
+  if (!invest) return 'missing'
+  const values = Object.values(invest)
+  if (values.length === 0) return 'missing'
+  if (values.some((v) => v === 'no')) return 'rejected'
+  if (values.every((v) => v === 'yes' || v === 'na')) return 'validated'
+  return 'pending'
+}
+
+const KanbanColumn = ({ titleKey, stories, color, onClick }) => {
+  const { t } = useTranslation()
+  const count = stories.length
+  const value = sumStoryValue(stories)
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'flex flex-col justify-between rounded-md border border-border bg-background p-3 text-left transition-colors hover:bg-muted',
+        'min-h-[5.5rem] flex-1',
+      )}
+    >
+      <span className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground">
+        <span className={cn('h-2 w-2 rounded-full', color)} />
+        {t(titleKey)}
+      </span>
+      <span className="flex items-end justify-between gap-2 mt-2">
+        <span className="text-2xl font-bold text-foreground leading-none">
+          {count}
+        </span>
+        <span className="text-[11px] text-muted-foreground">
+          {t('dashboard.value_total', { value })}
+        </span>
+      </span>
+    </button>
+  )
+}
+
+const SprintTimeline = ({ sprints, onSelect }) => {
+  const { t, i18n } = useTranslation()
+  const sorted = useMemo(
+    () =>
+      [...(sprints || [])].sort(
+        (a, b) => new Date(a.start_date) - new Date(b.start_date),
+      ),
+    [sprints],
+  )
+
+  if (sorted.length === 0) {
+    return (
+      <div className="text-xs text-muted-foreground py-4 text-center">
+        {t('dashboard.timeline_empty')}
+      </div>
+    )
   }
-  return date
+
+  const fmt = (iso) => {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return d.toLocaleDateString(i18n.language === 'pt' ? 'pt-BR' : 'en-US', {
+      day: '2-digit',
+      month: '2-digit',
+    })
+  }
+
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+      {sorted.map((sprint) => {
+        const total = sprint.stories?.length || 0
+        const done =
+          sprint.stories?.filter((s) => s.pivot?.kanban_status === 'done')
+            .length || 0
+        const pct = total > 0 ? (done / total) * 100 : 0
+        const isActive = sprint.status === 'active'
+        const isCompleted = sprint.status === 'completed'
+        const borderTone = isActive
+          ? 'border-primary'
+          : isCompleted
+            ? 'border-emerald-500'
+            : 'border-border'
+        return (
+          <button
+            key={sprint.id}
+            type="button"
+            onClick={() => onSelect(sprint)}
+            className={cn(
+              'shrink-0 min-w-[11rem] flex flex-col gap-1 rounded-md border-t-4 bg-background p-3 text-left transition-colors hover:bg-muted',
+              borderTone,
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-semibold text-foreground truncate">
+                {sprint.name}
+              </span>
+              {isActive && (
+                <Badge variant="default" className="text-[10px]">
+                  {t('sprint.active')}
+                </Badge>
+              )}
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              {fmt(sprint.start_date)} — {fmt(sprint.end_date)}
+            </span>
+            <div className="flex items-center gap-2 mt-1">
+              <Progress value={pct} className="flex-1 h-1.5" />
+              <span className="text-[11px] tabular-nums text-muted-foreground">
+                {done}/{total}
+              </span>
+            </div>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+const ReactMCycle = ({ project, currentPhase, onPhaseClick }) => {
+  const { t } = useTranslation()
+  const counts = {
+    inception:
+      (project?.personas?.length || 0) +
+      (project?.journeys?.length || 0) +
+      (project?.goal_sketches?.length || 0),
+    storyDiscovery: project?.stories?.length || 0,
+    refining:
+      (project?.stories?.filter((s) => s.epic_id)?.length || 0) +
+      (project?.business_rules?.length || 0) +
+      (project?.usage_scenarios?.length || 0),
+    modeling:
+      (project?.crc_cards?.length || 0) +
+      (project?.system_interfaces?.length || 0) +
+      (project?.storyboards?.length || 0),
+  }
+
+  // SVG layout: 4 nodes at top/right/bottom/left, radius 70 around center (100,100)
+  const size = 220
+  const cx = size / 2
+  const cy = size / 2
+  const r = 72
+  const nodeR = 32
+
+  const phases = [
+    { key: 'inception', angle: -90, labelKey: 'project.phases.inception' },
+    {
+      key: 'storyDiscovery',
+      angle: 0,
+      labelKey: 'project.phases.story_discovery',
+    },
+    { key: 'refining', angle: 90, labelKey: 'project.phases.refining' },
+    { key: 'modeling', angle: 180, labelKey: 'project.phases.modeling' },
+  ]
+
+  const pos = (angleDeg) => {
+    const rad = (angleDeg * Math.PI) / 180
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-2 py-2">
+      <svg
+        viewBox={`0 0 ${size} ${size}`}
+        className="w-full max-w-[240px]"
+        role="img"
+        aria-label={t('dashboard.cycle_aria')}
+      >
+        {/* Dashed ring */}
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r}
+          fill="none"
+          stroke="currentColor"
+          strokeOpacity="0.15"
+          strokeWidth="2"
+          strokeDasharray="4 4"
+          className="text-muted-foreground"
+        />
+        {/* Arrows between nodes */}
+        {phases.map((p, i) => {
+          const next = phases[(i + 1) % phases.length]
+          const a = pos(p.angle)
+          const b = pos(next.angle)
+          return (
+            <line
+              key={`arrow-${p.key}`}
+              x1={a.x}
+              y1={a.y}
+              x2={b.x}
+              y2={b.y}
+              stroke="currentColor"
+              strokeOpacity="0.25"
+              strokeWidth="1.5"
+              className="text-muted-foreground"
+            />
+          )
+        })}
+        {/* Center label */}
+        <text
+          x={cx}
+          y={cy - 4}
+          textAnchor="middle"
+          className="fill-muted-foreground"
+          fontSize="10"
+          fontWeight="600"
+          style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
+        >
+          REACT-M
+        </text>
+        <text
+          x={cx}
+          y={cy + 10}
+          textAnchor="middle"
+          className="fill-muted-foreground"
+          fontSize="8"
+        >
+          {t('dashboard.cycle_center_hint')}
+        </text>
+        {/* Nodes */}
+        {phases.map((p) => {
+          const { x, y } = pos(p.angle)
+          const isCurrent = currentPhase === p.key
+          return (
+            <g
+              key={p.key}
+              className="cursor-pointer"
+              onClick={() => onPhaseClick(p.key)}
+            >
+              <circle
+                cx={x}
+                cy={y}
+                r={nodeR}
+                className={cn(
+                  isCurrent
+                    ? 'fill-primary stroke-primary'
+                    : 'fill-card stroke-border',
+                )}
+                strokeWidth="2"
+              />
+              <text
+                x={x}
+                y={y - 4}
+                textAnchor="middle"
+                fontSize="8"
+                fontWeight="600"
+                className={cn(
+                  isCurrent
+                    ? 'fill-primary-foreground'
+                    : 'fill-muted-foreground',
+                )}
+                style={{ textTransform: 'uppercase' }}
+              >
+                {t(p.labelKey)}
+              </text>
+              <text
+                x={x}
+                y={y + 10}
+                textAnchor="middle"
+                fontSize="14"
+                fontWeight="700"
+                className={cn(
+                  isCurrent ? 'fill-primary-foreground' : 'fill-foreground',
+                )}
+              >
+                {counts[p.key]}
+              </text>
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
+const HealthCard = ({ icon: Icon, labelKey, count, tone, onClick }) => {
+  const { t } = useTranslation()
+  const bad = count > 0
+  const toneClasses = bad
+    ? {
+        danger: 'border-destructive/40 text-destructive',
+        warning: 'border-amber-500/40 text-amber-500',
+      }[tone]
+    : 'border-border text-muted-foreground'
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'flex items-center justify-between gap-3 rounded-md border bg-background p-3 transition-colors hover:bg-muted flex-1 min-w-[10rem]',
+        toneClasses,
+      )}
+    >
+      <span className="flex items-center gap-2 text-xs font-medium">
+        <Icon className="size-4 shrink-0" />
+        {t(labelKey)}
+      </span>
+      <span className="text-xl font-bold tabular-nums">{count}</span>
+    </button>
+  )
 }
 
 export const CeremonyCard = ({
@@ -196,10 +494,69 @@ export const CeremonyCard = ({
 
 const Dashboard = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const { auth } = usePage().props
   const tooltipInfo = useTooltipInfo()
-  const [date, setDate] = useState(getDateObject(project.due_date))
-  const isInitialMount = useRef(true)
-  const [progress, setProgress] = useState(0)
+  const [interviewsOpen, setInterviewsOpen] = useState(false)
+
+  const currentUserRole = useMemo(
+    () =>
+      project?.users?.find((u) => u.id === auth?.user?.id)?.pivot?.role ||
+      null,
+    [project, auth],
+  )
+
+  const health = useMemo(() => {
+    const stories = project?.stories || []
+    const changes = project?.change_requests || []
+    const sprints = project?.sprints || []
+    const activeSprint = sprints.find((s) => s.status === 'active')
+
+    const unprioritized = stories.filter(
+      (s) => s.value == null || s.complexity == null,
+    ).length
+
+    const investNotOk = stories.filter((s) => {
+      const st = investStatus(s.invest_card)
+      return st === 'missing' || st === 'pending' || st === 'rejected'
+    }).length
+
+    const openChanges = changes.filter(
+      (c) => c.status !== 'IMPLEMENTADA' && c.status !== 'REJEITADA',
+    ).length
+
+    const activeSprintStories = activeSprint?.stories || []
+    const activeSprintDone = activeSprintStories.filter(
+      (s) => s.pivot?.kanban_status === 'done',
+    ).length
+
+    return {
+      unprioritized,
+      investNotOk,
+      openChanges,
+      activeSprint,
+      activeSprintTotal: activeSprintStories.length,
+      activeSprintDone,
+    }
+  }, [project])
+
+  const sprintProgress = useMemo(() => {
+    if (!health.activeSprint) return null
+    const { start_date, end_date } = health.activeSprint
+    if (!start_date || !end_date) return { day: null, total: null }
+    const start = new Date(start_date)
+    const end = new Date(end_date)
+    const today = new Date()
+    const msDay = 1000 * 60 * 60 * 24
+    const total = Math.max(
+      1,
+      Math.round((end.getTime() - start.getTime()) / msDay) + 1,
+    )
+    const day = Math.min(
+      total,
+      Math.max(1, Math.round((today.getTime() - start.getTime()) / msDay) + 1),
+    )
+    return { day, total }
+  }, [health.activeSprint])
 
   const { productBacklogStories, sprintBacklogStories, deliveredStories } =
     useMemo(() => {
@@ -292,138 +649,399 @@ const Dashboard = ({ project, setProject }) => {
     { title: 'productBacklog', amount: 3 },
     { title: 'sprint', amount: project?.sprints?.length },
   ]
-  useEffect(() => {
-    const completedStories = completedStoriesCount(project.stories || [])
-    const totalStories = project.stories?.length || 0
-    if (totalStories < 1) {
-      setProgress(0)
-      return
-    }
-    const progressPercentage =
-      (Math.max(0, completedStories) / totalStories) * 100
-    setProgress(progressPercentage)
-  }, [project.stories])
+  const currentPhase = useMemo(() => {
+    const canvas = project?.product_canvas
+    const canvasFilled =
+      canvas &&
+      (canvas.product_is || canvas.personas || canvas.issues || canvas.solutions)
+    const personas = project?.personas?.length || 0
+    const journeys = project?.journeys?.length || 0
+    const stories = project?.stories?.length || 0
+    const refiningStuff =
+      (project?.business_rules?.length || 0) +
+      (project?.usage_scenarios?.length || 0) +
+      (project?.stories?.filter((s) => s.epic_id)?.length || 0)
+    const modelingStuff =
+      (project?.crc_cards?.length || 0) +
+      (project?.system_interfaces?.length || 0) +
+      (project?.storyboards?.length || 0)
 
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false
-      return
+    if (!canvasFilled && personas === 0 && journeys === 0) return 'inception'
+    if (stories === 0) return 'storyDiscovery'
+    if (refiningStuff === 0) return 'refining'
+    if (modelingStuff === 0) return 'modeling'
+    return 'modeling'
+  }, [project])
+
+  const nextAction = useMemo(() => {
+    if (health.activeSprint) return null
+    const stories = project?.stories || []
+    const personas = project?.personas || []
+    const journeys = project?.journeys || []
+    const canvas = project?.product_canvas
+    const canvasFilled =
+      canvas &&
+      (canvas.product_is ||
+        canvas.personas ||
+        canvas.issues ||
+        canvas.solutions)
+
+    if (personas.length === 0 && journeys.length === 0 && !canvasFilled) {
+      return {
+        key: 'inception',
+        ceremony: 'inception',
+        artifact: 'productCanvas',
+      }
     }
-    router.patch(
-      route('project.update', project.id),
-      {
-        due_date: date ? date.toISOString().split('T')[0] : null, // Envia a data no formato YYYY-MM-DD
-      },
-      {
-        preserveScroll: true,
-        onError: (errors) => {
-          console.error('Failed to update deadline:', errors)
-        },
-      },
+    if (stories.length === 0) {
+      return {
+        key: 'write_stories',
+        ceremony: 'storyDiscovery',
+        artifact: 'stories',
+      }
+    }
+    if (health.unprioritized > 0) {
+      return {
+        key: 'prioritize',
+        ceremony: 'storyDiscovery',
+        artifact: 'prioritizationMatrix',
+        count: health.unprioritized,
+      }
+    }
+    if (health.investNotOk > 0) {
+      return {
+        key: 'invest',
+        ceremony: 'storyDiscovery',
+        artifact: 'stories',
+        count: health.investNotOk,
+      }
+    }
+    if (productBacklogStories.length > 0) {
+      return {
+        key: 'create_sprint',
+        ceremony: 'productBacklog',
+        count: productBacklogStories.length,
+      }
+    }
+    return { key: 'all_clear', ceremony: 'sprint' }
+  }, [project, health, productBacklogStories])
+
+  const goToPhase = (phase) =>
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: phase,
+      }),
     )
-  }, [date])
+
+  const goToSprintPage = (sprint) =>
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: 'sprint',
+      }),
+      { sprint: sprint.id },
+    )
+
+  const goToNextAction = () => {
+    if (!nextAction) return
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: nextAction.ceremony,
+      }),
+      nextAction.artifact ? { artifact: nextAction.artifact } : {},
+    )
+  }
+
+  const goToBacklog = () =>
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: 'productBacklog',
+      }),
+    )
+  const goToSprint = () =>
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: 'sprint',
+      }),
+    )
+  const goToPrioritization = () =>
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: 'storyDiscovery',
+      }),
+      { artifact: 'prioritizationMatrix' },
+    )
+  const goToChangeLog = () =>
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: 'storyDiscovery',
+      }),
+      { artifact: 'changeLog' },
+    )
+  const goToStories = () =>
+    router.get(
+      route('project.ceremony.show', {
+        project: project.id,
+        ceremony: 'storyDiscovery',
+      }),
+      { artifact: 'stories' },
+    )
+
+  const interviewsCount = project?.interviews?.length || 0
 
   return (
-    <main className="grid md:grid-cols-[1fr,16rem] lg:grid-cols-[35%,16rem,1fr] grid-rows-[22rem,auto,auto] gap-2 p-2 w-full ">
+    <main className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr),minmax(20rem,1fr)] gap-3 p-3 w-full">
       <Head title={project?.title || 'Project Title'} />
-      {/* progresso de conclusao*/}
-      <section className="bg-card rounded-lg flex flex-col justify-between text-muted-foreground p-2 gap-2 w-full h-full ">
-        <div className=" flex flex-col gap-2 w-full">
-          <span className=" flex-1 break-words text-lg text-foreground p-0 border-0 m-0 cursor-default z-10">
-            {project.title} {project.emoji}
-            <Badge
-              className="ml-2"
-              variant={`${project.active ? 'secondary' : 'destructive'}`}
-            >
-              {project.active ? t('dashboard.active') : t('dashboard.inactive')}
-            </Badge>
+
+      <div className="flex flex-col gap-3 min-w-0">
+        {/* Project header */}
+        <section className="bg-card rounded-lg flex flex-col gap-3 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
+              <h1 className="text-lg font-semibold text-foreground break-words">
+                {project.title} {project.emoji}
+              </h1>
+              <Badge
+                variant={project.active ? 'secondary' : 'destructive'}
+              >
+                {project.active
+                  ? t('dashboard.active')
+                  : t('dashboard.inactive')}
+              </Badge>
+              {currentUserRole && (
+                <Badge
+                  variant={roleBadgeVariant[currentUserRole] || 'outline'}
+                  title={t('project_permissions.role')}
+                >
+                  {t(`project_permissions.roles.${currentUserRole}`)}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <ProjectPermissions project={project} />
+              <ProjectSettings project={project} />
+            </div>
+          </div>
+
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock size={14} />
+            {project.updated_at
+              ? new Date(project.updated_at).toLocaleString()
+              : t('dashboard.updated_never')}
           </span>
-          {t('dashboard.progress_title')}
-          <div className="flex items-center">
-            <Progress value={progress} className="w-32 h-2 mr-2" />
-            <span className="text-sm font-medium">
-              {t('dashboard.stories_completed_pct', {
-                pct: Math.round(progress),
-              })}
-            </span>
-          </div>
-          <div className="flex items-center">
-            <Clock size={16} className="mr-3.5" />
-            {project.updated_at ? (
-              <span>
-                {t('dashboard.updated_at', {
-                  date: format(
-                    new Date(project.updated_at),
-                    'dd/MM/yyyy HH:mm',
-                    { locale: ptBR },
-                  ),
-                })}
+        </section>
+
+        {/* HERO: where am I in the cycle */}
+        {health.activeSprint ? (
+          <button
+            type="button"
+            onClick={goToSprint}
+            className="bg-card rounded-lg border-l-4 border-primary p-5 flex flex-col gap-3 text-left hover:bg-muted/40 transition-colors"
+          >
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-3">
+                <Rocket className="size-6 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                    {t('dashboard.hero_active_sprint_eyebrow')}
+                  </p>
+                  <h2 className="text-xl font-bold text-foreground">
+                    {health.activeSprint.name}
+                  </h2>
+                </div>
+              </div>
+              {sprintProgress?.day && sprintProgress?.total && (
+                <Badge variant="outline" className="text-xs">
+                  {t('dashboard.sprint_day_of', {
+                    day: sprintProgress.day,
+                    total: sprintProgress.total,
+                  })}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <Progress
+                value={
+                  health.activeSprintTotal > 0
+                    ? (health.activeSprintDone / health.activeSprintTotal) *
+                      100
+                    : 0
+                }
+                className="flex-1 h-2"
+              />
+              <span className="text-sm font-medium text-foreground tabular-nums">
+                {health.activeSprintDone}/{health.activeSprintTotal}
               </span>
-            ) : (
-              <span>{t('dashboard.updated_never')}</span>
-            )}
+            </div>
+            <div className="flex items-center gap-2 text-sm text-primary font-medium">
+              {t('dashboard.hero_go_to_kanban')}
+              <ArrowRight className="size-4" />
+            </div>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={goToNextAction}
+            className="bg-card rounded-lg border-l-4 border-amber-500 p-5 flex flex-col gap-3 text-left hover:bg-muted/40 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="size-6 text-amber-500 shrink-0" />
+              <div>
+                <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                  {t('dashboard.hero_next_action_eyebrow')}
+                </p>
+                <h2 className="text-xl font-bold text-foreground">
+                  {t(`dashboard.next_action.${nextAction?.key}.title`)}
+                </h2>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {t(`dashboard.next_action.${nextAction?.key}.hint`, {
+                count: nextAction?.count ?? 0,
+              })}
+            </p>
+            <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 font-medium">
+              {t(`dashboard.next_action.${nextAction?.key}.cta`)}
+              <ArrowRight className="size-4" />
+            </div>
+          </button>
+        )}
+
+        {/* Mini Domain Expert Kanban */}
+        <section className="bg-card rounded-lg p-4 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase text-muted-foreground">
+              {t('dashboard.domain_expert_kanban')}
+            </h2>
+            <SpanButton variant="link" onClick={goToBacklog}>
+              {t('dashboard.open_backlog')}
+              <ArrowRight className="size-3 ml-1" />
+            </SpanButton>
           </div>
-        </div>
+          <div className="flex gap-2 flex-wrap">
+            <KanbanColumn
+              titleKey="dashboard.kanban_product_backlog"
+              stories={productBacklogStories}
+              color="bg-amber-500"
+              onClick={goToBacklog}
+            />
+            <KanbanColumn
+              titleKey="dashboard.kanban_sprint_backlog"
+              stories={sprintBacklogStories}
+              color="bg-blue-500"
+              onClick={goToSprint}
+            />
+            <KanbanColumn
+              titleKey="dashboard.kanban_delivered"
+              stories={deliveredStories}
+              color="bg-emerald-500"
+              onClick={goToSprint}
+            />
+          </div>
+        </section>
 
-        <div className="flex items-center gap-2">
-          <ProgressIcon
-            value={project?.stories?.length || 0}
-            max={20}
-            colorClass="text-primary"
-            label={t('dashboard.stories_label')}
-            icon={List}
-          />
-          <ProgressIcon
-            value={project?.sprints?.length || 0}
-            max={10}
-            colorClass="text-destructive"
-            label={t('dashboard.sprints_label')}
-            icon={Users}
-          />
-        </div>
-        {/* opcoes*/}
-        <div className="flex items-center justify-center gap-2">
-          <ProjectPermissions project={project} />
-          <ProjectSettings project={project} />
-        </div>
-      </section>
+        {/* Health panel */}
+        <section className="bg-card rounded-lg p-4 flex flex-col gap-3">
+          <h2 className="text-sm font-semibold uppercase text-muted-foreground">
+            {t('dashboard.requirements_health')}
+          </h2>
+          <div className="flex gap-2 flex-wrap">
+            <HealthCard
+              icon={FileWarning}
+              labelKey="dashboard.health_unprioritized"
+              count={health.unprioritized}
+              tone="warning"
+              onClick={goToPrioritization}
+            />
+            <HealthCard
+              icon={ClipboardCheck}
+              labelKey="dashboard.health_invest_pending"
+              count={health.investNotOk}
+              tone="warning"
+              onClick={goToStories}
+            />
+            <HealthCard
+              icon={GitPullRequest}
+              labelKey="dashboard.health_open_changes"
+              count={health.openChanges}
+              tone="danger"
+              onClick={goToChangeLog}
+            />
+          </div>
+        </section>
 
-      <div className="flex bg-card mx-auto py-2 w-full rounded">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={setDate}
-          disabled={{ before: new Date() }}
-          initialFocus
-          locale={ptBR}
-          className="bg-card p-4 mx-auto"
+        {/* Sprint timeline */}
+        <section className="bg-card rounded-lg p-4 flex flex-col gap-3">
+          <h2 className="text-sm font-semibold uppercase text-muted-foreground">
+            {t('dashboard.sprint_timeline')}
+          </h2>
+          <SprintTimeline
+            sprints={project?.sprints || []}
+            onSelect={goToSprintPage}
+          />
+        </section>
+
+        <ExpandableCard
+          title={project?.title || t('nav.projects')}
+          content={project?.description}
+          col={1}
+          variant="chart_1"
+          icon={List}
+          editable={false}
+          defaultExpanded={true}
+          placeholder={t('dashboard.describe_project_placeholder')}
+          className="min-w-full"
         />
+
+        {/* Collapsible interviews */}
+        <section className="bg-card rounded-lg">
+          <button
+            type="button"
+            onClick={() => setInterviewsOpen((v) => !v)}
+            className="w-full flex items-center justify-between p-3 hover:bg-muted/40 rounded-lg transition-colors"
+          >
+            <span className="text-sm font-semibold text-foreground">
+              {t('interview.title')}{' '}
+              <span className="text-muted-foreground">
+                ({interviewsCount})
+              </span>
+            </span>
+            <ChevronDown
+              className={cn(
+                'size-4 transition-transform',
+                interviewsOpen && 'rotate-180',
+              )}
+            />
+          </button>
+          {interviewsOpen && (
+            <Interview
+              className="border-0 !shadow-none !bg-transparent"
+              projectId={project.id}
+              interviews={project.interviews || []}
+            />
+          )}
+        </section>
       </div>
-      <ExpandableCard
-        title={project?.title || t('nav.projects')}
-        content={project?.description}
-        col={1}
-        variant="chart_1"
-        icon={List}
-        editable={false}
-        defaultExpanded={true}
-        placeholder={t('dashboard.describe_project_placeholder')}
-        className="md:row-start-2 md:col-span-2 min-w-full "
-      />
-      <Interview
-        className="md:col-span-2"
-        projectId={project.id}
-        interviews={project.interviews || []} // Passe a lista de entrevistas do seu projeto
-      />
-      {/* ceremonies*/}
-      <section className="ceremonies lg:col-span-2 lg:col-start-3 lg:row-start-1 row-span-3 row-start-4 md:col-span-2 flex flex-col  items-center bg-card gap-2 p-2">
+
+      {/* ceremonies sidebar */}
+      <section className="ceremonies flex flex-col items-stretch bg-card gap-2 p-2 rounded-lg lg:sticky lg:top-2 lg:self-start lg:max-h-[calc(100vh-1rem)] lg:overflow-y-auto">
+        <ReactMCycle
+          project={project}
+          currentPhase={currentPhase}
+          onPhaseClick={goToPhase}
+        />
         {ceremonies.map((ceremony, index) => (
           <React.Fragment key={ceremony.title}>
             {ceremony.title === 'inception' && (
-              <p>{t('dashboard.ceremonies_section')}</p>
-            )}
-            {ceremony.title === 'productBacklog' && (
-              <p>{t('dashboard.backlog_section')}</p>
+              <p className="text-xs font-semibold uppercase text-muted-foreground px-2 pt-1">
+                {t('dashboard.ceremonies_section')}
+              </p>
             )}
             <CeremonyCard
               project={project}
