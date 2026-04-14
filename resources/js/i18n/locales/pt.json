@@ -81,6 +81,7 @@
     "save": "Salvar",
     "saving": "Salvando...",
     "empty": "Nenhuma entrevista ainda.",
+    "accepted_formats": "Formatos aceitos: PDF, MP3 e MP4",
     "drag_and_drop": "Arraste e solte um arquivo aqui, ou clique para selecionar",
     "select_file": "Selecionar arquivo",
     "file_not_allowed": "Tipo de arquivo não permitido",

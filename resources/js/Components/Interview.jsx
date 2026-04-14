@@ -356,6 +356,10 @@ const InterviewUploadCard = ({
         />
       </div>
 
+      <p className="mb-2 text-xs text-muted-foreground">
+        {t('interview.accepted_formats')}
+      </p>
+
       <div className="mt-2 space-y-2">
         {interviews.length > 0 ? (
           interviews.map((interview) => (

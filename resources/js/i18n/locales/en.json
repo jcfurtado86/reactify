@@ -81,6 +81,7 @@
     "save": "Save",
     "saving": "Saving...",
     "empty": "No interviews yet.",
+    "accepted_formats": "Accepted formats: PDF, MP3 and MP4",
     "drag_and_drop": "Drag and drop a file here, or click to select",
     "select_file": "Select file",
     "file_not_allowed": "File type not allowed",
