@@ -3,8 +3,9 @@ import { route } from 'ziggy-js'
 import { Particles } from '@/components/magicui/particles'
 import { useTranslation } from 'react-i18next'
 import { Trans } from 'react-i18next'
+import LanguageSwitcher from '@/Components/LanguageSwitcher'
 
-export default function Welcome({ auth, laravelVersion, phpVersion }) {
+export default function Welcome({ auth, currentYear }) {
   const { t } = useTranslation()
   return (
     <>
@@ -12,6 +13,9 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
       <div className="min-h-screen bg-background text-foreground">
         <Particles className="absolute inset-0 w-full h-full" />
+        <div className="absolute top-4 right-4 z-10">
+          <LanguageSwitcher />
+        </div>
         <div className="relative flex min-h-screen flex-col items-center justify-center selection:bg-primary/20">
           {/* Header */}
           {/* <header className="absolute top-0 w-full px-6 py-6 flex justify-between items-center">
@@ -102,7 +106,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
           {/* Footer */}
           <footer className="absolute bottom-0 py-6 text-center text-muted-foreground text-sm">
-            {t('welcome.footer')}
+            {t('welcome.footer', { year: currentYear })}
           </footer>
         </div>
       </div>

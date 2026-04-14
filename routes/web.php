@@ -458,7 +458,9 @@ Route::get('/config', function () {
   ->name('config');
 
 Route::get('/', function () {
-  return Inertia::render('Welcome');
+  return Inertia::render('Welcome', [
+    'currentYear' => (int) date('Y'),
+  ]);
 })
   ->middleware('guest')
   ->name('welcome');

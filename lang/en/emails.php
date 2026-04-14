@@ -6,10 +6,10 @@ return [
     'welcome' => [
         'subject' => 'Welcome to Reactify, :name!',
         'greeting' => 'Hi, :name! 👋',
-        'intro' => 'Welcome to **Reactify** — the platform that helps agile teams capture, validate and manage software requirements with AI support, based on the REACT-M method. Your account has been created successfully.',
+        'intro' => 'Welcome to **Reactify**, the platform that helps agile teams capture, validate and manage software requirements with AI support, based on the REACT-M method. Your account has been created successfully.',
         'next_steps_header' => 'In the next few minutes you can:',
         'step_project' => 'Create your **first project**',
-        'step_interview' => 'Upload a **requirements interview** (audio, video or PDF) — Reactify transcribes it and uses the content to generate personas, journeys and user stories',
+        'step_interview' => 'Upload a **requirements interview** (audio, video or PDF). Reactify transcribes it and uses the content to generate personas, journeys and user stories',
         'step_team' => 'Invite your team and assign roles (Customer, Domain Expert, Team)',
         'cta' => 'Get started',
     ],
@@ -29,7 +29,7 @@ return [
         'role_domain_expert' => 'Domain Expert',
         'role_team' => 'Team',
         'role_administrator' => 'Administrator',
-        'role_unknown' => '—',
+        'role_unknown' => '-',
     ],
 
     'permissions_updated' => [
@@ -47,7 +47,7 @@ return [
         'intro' => 'We received a request to reset the password for your Reactify account. Click the button below to choose a new password.',
         'cta' => 'Reset password',
         'expiry' => 'This link expires in :minutes minutes.',
-        'ignore_notice' => 'If you didn\'t request a reset, ignore this email — your password stays safe.',
+        'ignore_notice' => 'If you didn\'t request a reset, ignore this email. Your password stays safe.',
     ],
 
     'verify_email' => [

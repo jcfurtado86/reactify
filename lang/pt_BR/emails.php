@@ -6,10 +6,10 @@ return [
     'welcome' => [
         'subject' => 'Bem-vindo(a) ao Reactify, :name!',
         'greeting' => 'Olá, :name! 👋',
-        'intro' => 'Seja bem-vindo(a) ao **Reactify** — a plataforma que ajuda equipes ágeis a levantar, validar e gerenciar requisitos de software com apoio de IA, baseada no método REACT-M. Sua conta foi criada com sucesso.',
+        'intro' => 'Seja bem-vindo(a) ao **Reactify**, a plataforma que ajuda equipes ágeis a levantar, validar e gerenciar requisitos de software com apoio de IA, baseada no método REACT-M. Sua conta foi criada com sucesso.',
         'next_steps_header' => 'Nos próximos minutos você pode:',
         'step_project' => 'Criar seu **primeiro projeto**',
-        'step_interview' => 'Fazer upload de uma **entrevista de requisitos** (áudio, vídeo ou PDF) — o Reactify transcreve e usa o conteúdo para gerar personas, jornadas e user stories',
+        'step_interview' => 'Fazer upload de uma **entrevista de requisitos** (áudio, vídeo ou PDF). O Reactify transcreve e usa o conteúdo para gerar personas, jornadas e user stories',
         'step_team' => 'Convidar sua equipe e definir papéis (Customer, Domain Expert, Team)',
         'cta' => 'Começar agora',
     ],
@@ -29,7 +29,7 @@ return [
         'role_domain_expert' => 'Especialista de domínio',
         'role_team' => 'Equipe',
         'role_administrator' => 'Administrador',
-        'role_unknown' => '—',
+        'role_unknown' => '-',
     ],
 
     'permissions_updated' => [
@@ -47,7 +47,7 @@ return [
         'intro' => 'Recebemos uma solicitação para redefinir a senha da sua conta no Reactify. Clique no botão abaixo para escolher uma nova senha.',
         'cta' => 'Redefinir senha',
         'expiry' => 'Este link expira em :minutes minutos.',
-        'ignore_notice' => 'Se você não solicitou a redefinição, ignore este email — sua senha continua segura.',
+        'ignore_notice' => 'Se você não solicitou a redefinição, ignore este email. Sua senha continua segura.',
     ],
 
     'verify_email' => [
