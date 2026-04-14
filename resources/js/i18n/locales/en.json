@@ -50,7 +50,19 @@
     "na": "N/A",
     "backlog": "Backlog",
     "items_count": "{{count}} items",
-    "no_results": "No results"
+    "no_results": "No results",
+    "toast": {
+      "saved": "Changes saved",
+      "deleted": "Item deleted",
+      "created": "Item created",
+      "updated": "Item updated",
+      "error_generic": "Something went wrong",
+      "error_save": "Failed to save",
+      "error_delete": "Failed to delete",
+      "error_network": "Server connection error",
+      "select_at_least_one": "Select at least one item",
+      "no_changes": "No changes detected"
+    }
   },
   "motion_div": {
     "add": "Add",
@@ -148,7 +160,6 @@
     "set_default": "Set as default",
     "confirm_delete_title": "Are you sure you want to delete?",
     "confirm_delete_body": "This action cannot be undone. It will permanently delete the priority.",
-    "toast_no_changes": "No changes detected.",
     "toast_updated": "Priority updated successfully.",
     "toast_update_error": "An error occurred while updating the priority.",
     "toast_deleted": "Priority deleted successfully.",
@@ -219,7 +230,10 @@
     "email_verification_sent": "A new verification link has been sent to your email address.",
     "current_password": "Current password",
     "new_password": "New password",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "toast_password_updated": "Password updated successfully",
+    "toast_profile_updated": "Profile updated",
+    "toast_account_deleted": "Account deleted"
   },
   "home": {
     "page_title": "Home",
@@ -401,8 +415,6 @@
     "toast_saved": "Goal saved successfully",
     "toast_deleted": "Goal deleted",
     "toast_generated": "Goals generated successfully.",
-    "toast_generate_empty": "AI did not generate new goals based on the interviews.",
-    "toast_select_one": "Select at least one goal to add.",
     "toast_color_save_error": "Error saving goal color.",
     "remove_confirm": "Remove this goal?",
     "new_constraint": "New Constraint Goal",
@@ -425,7 +437,6 @@
     "toast_saved": "Persona saved successfully",
     "toast_deleted": "Persona deleted",
     "toast_generated": "Personas generated successfully.",
-    "toast_generate_empty": "AI did not generate new personas based on the interviews.",
     "confirm_delete_title": "Are you sure?",
     "confirm_delete_body": "This action cannot be undone. It will permanently delete the persona and all of its data.",
     "confirm_delete_action": "Yes, delete",
@@ -449,7 +460,6 @@
     "toast_generated": "Journeys generated successfully.",
     "toast_added": "{{count}} journey(s) added successfully!",
     "toast_add_error": "An error occurred while adding journeys.",
-    "toast_select_one": "Select at least one journey to add.",
     "toast_comm_error": "Server communication error",
     "save_title": "Save title",
     "edit_title": "Edit title",
@@ -487,7 +497,6 @@
     "empty": "No stories added yet.",
     "generate_cta": "Generate stories with AI",
     "toast_generated": "Stories generated successfully.",
-    "toast_generate_empty": "AI did not generate new stories based on the current context.",
     "toast_unexpected": "Unexpected server response.",
     "remove_confirm": "Remove this story?",
     "new_user_story": "New User Story",
@@ -503,8 +512,7 @@
     "generate_cta": "Decompose epics with AI",
     "toast_decomposed": "Epics decomposed successfully.",
     "no_story_title": "No Story",
-    "no_story_body": "Cannot decompose epics because no story has been created yet.",
-    "no_epics_toast": "No story was identified as an epic for decomposition."
+    "no_story_body": "Cannot decompose epics because no story has been created yet."
   },
   "business_rules": {
     "title": "Business Rules",
@@ -528,7 +536,6 @@
     "empty": "No scenarios added yet.",
     "generate_cta": "Generate scenarios with AI",
     "toast_generated": "Usage scenarios generated successfully.",
-    "none_generated_toast": "No usage scenario was generated for the existing stories.",
     "empty_title": "No Usage Scenario",
     "empty_hint": "Create a User Story or System Story first to add usage scenarios."
   },
@@ -546,12 +553,10 @@
     "empty": "No CRC Cards yet.",
     "generate_cta": "Generate Overall Model with AI",
     "toast_generated": "{{count}} cards were suggested.",
-    "toast_empty_generation": "No CRC Cards were generated for the existing stories.",
     "toast_cards_saved": "{{count}} CRC Card(s) saved successfully!",
     "toast_classes_saved": "{{count}} class(es) saved successfully!",
     "toast_save_error": "An error occurred while saving the CRC Cards.",
     "toast_classes_save_error": "An error occurred while saving the classes.",
-    "toast_select_one": "Select at least one item to add.",
     "confirm_delete_title": "Are you sure?",
     "confirm_delete_body": "This action cannot be undone. It will permanently delete the card and all of its data.",
     "confirm_delete_action": "Yes, delete card",
@@ -719,7 +724,12 @@
     "remove_user": "Remove user",
     "cannot_manage_permissions": "You don't have permission to manage",
     "owner": "Owner",
-    "invalid_role": "Invalid role! Please check and try again."
+    "invalid_role": "Invalid role! Please check and try again.",
+    "toast_saved": "Permissions saved",
+    "toast_invited": "Invitation sent to {{email}}",
+    "toast_removed": "Member removed from project",
+    "toast_invite_error": "Failed to send invitation",
+    "toast_remove_error": "Failed to remove member"
   },
   "ai_errors": {
     "missing_prereqs": "To generate {{label}}, you must register at least one of each of the following: {{items}}.",
@@ -874,6 +884,14 @@
     "ai_generated_storyboard": {
       "title": "Generate Storyboard with AI",
       "description": "Uses AI to create a narrative sequence that illustrates the user's navigation between the suggested interfaces, validating the visual flow."
+    }
+  },
+  "ai": {
+    "toast": {
+      "empty": "AI found no suggestions based on current context",
+      "success": "{{count}} suggestions generated. Review and confirm.",
+      "error": "AI generation failed. Please try again.",
+      "unexpected": "Unexpected server response"
     }
   }
 }

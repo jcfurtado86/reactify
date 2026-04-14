@@ -329,7 +329,7 @@ const Journeys = ({ project, setProject }) => {
     const selectedJourneys = generatedJourneys.filter((j) => j.selected)
 
     if (selectedJourneys.length === 0) {
-      toast.warning(t('journeys.toast_select_one'))
+      toast.warning(t('common.toast.select_at_least_one'))
       return
     }
 

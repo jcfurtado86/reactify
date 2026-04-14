@@ -533,7 +533,7 @@ const Stories = ({ project, setProject }) => {
         }))
 
         if (storiesWithSelection.length === 0) {
-          toast.info(t('stories.toast_generate_empty'))
+          toast.info(t('ai.toast.empty'))
           setIsGenerating(false)
           return
         }

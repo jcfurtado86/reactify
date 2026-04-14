@@ -404,7 +404,7 @@ const EpicStories = ({ project, setProject }) => {
         )
 
         if (epicStoriesWithSelection.length === 0) {
-          toast.info(t('epic_stories.no_epics_toast'))
+          toast.info(t('ai.toast.empty'))
           return
         }
 

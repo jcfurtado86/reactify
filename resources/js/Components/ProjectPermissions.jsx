@@ -1,8 +1,8 @@
 import { Plus, LoaderCircle, X, UserCog } from 'lucide-react'
 import { usePage, router } from '@inertiajs/react'
 import axios from 'axios'
-import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 export function ProjectPermissions({ project }) {
   const { t } = useTranslation()
   const { auth, errors } = usePage().props
@@ -59,15 +59,19 @@ export function ProjectPermissions({ project }) {
       { users },
       {
         onSuccess: () => {
+          toastSuccess('project_permissions.toast_saved')
           setIsOpen(false)
         },
         onError: (currentError) => {
-          const errorKeys = Object.keys(currentError)
-          const hasRoleError = errorKeys.some((key) => key.includes('.role'))
-          if (hasRoleError) {
-            toast.error(t('project_permissions.invalid_role'))
-            console.error('Função inválida! Verifique e tente novamente.')
-          }
+          const hasRoleError = Object.keys(currentError).some((key) =>
+            key.includes('.role'),
+          )
+          toastApiError(
+            currentError,
+            hasRoleError
+              ? 'project_permissions.invalid_role'
+              : 'common.toast.error_save',
+          )
         },
       },
     )
@@ -77,6 +81,7 @@ export function ProjectPermissions({ project }) {
   const handleAddUser = async () => {
     if (!newUserEmail) return
     setIsAddingUser(true)
+    const emailSent = newUserEmail
 
     router.post(
       route('projects.invitations.store', project.id),
@@ -86,11 +91,13 @@ export function ProjectPermissions({ project }) {
       },
       {
         onSuccess: () => {
+          toastSuccess('project_permissions.toast_invited', {
+            email: emailSent,
+          })
           normalizeProjectUsers(project?.users)
         },
-        onError: (error) => {
-          // toast.error('Failed to add user')
-        },
+        onError: (error) =>
+          toastApiError(error, 'project_permissions.toast_invite_error'),
       },
     )
     setIsAddingUser(false)
@@ -105,10 +112,9 @@ export function ProjectPermissions({ project }) {
         id: memberId,
       },
       {
-        onSuccess: () => {},
-        onError: (error) => {
-          // toast.error('Failed to remove user')
-        },
+        onSuccess: () => toastSuccess('project_permissions.toast_removed'),
+        onError: (error) =>
+          toastApiError(error, 'project_permissions.toast_remove_error'),
       },
     )
     setIsLoading(false)

@@ -7,6 +7,7 @@ import InputLabel from '@/Components/InputLabel'
 import Modal from '@/Components/Modal'
 import SecondaryButton from '@/Components/SecondaryButton'
 import { useTranslation } from 'react-i18next'
+import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 
 // --- COMPONENTES FILHOS ---
 
@@ -31,6 +32,8 @@ const FormularioEditarPerfil = ({
     e.preventDefault()
     post(route('profile.update'), {
       preserveScroll: true,
+      onSuccess: () => toastSuccess('profile.toast_profile_updated'),
+      onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
     })
   }
 
@@ -167,8 +170,12 @@ const FormularioAlterarSenha = ({ className = '' }) => {
     e.preventDefault()
     put(route('password.update'), {
       preserveScroll: true,
-      onSuccess: () => reset(),
+      onSuccess: () => {
+        toastSuccess('profile.toast_password_updated')
+        reset()
+      },
       onError: (errors) => {
+        toastApiError(errors, 'common.toast.error_save')
         if (errors.password) {
           reset('password', 'password_confirmation')
           passwordInput.current.focus()
@@ -283,8 +290,14 @@ const FormularioDeletarConta = ({ className = '' }) => {
     e.preventDefault()
     destroy(route('profile.destroy'), {
       preserveScroll: true,
-      onSuccess: () => closeModal(),
-      onError: () => passwordInput.current.focus(),
+      onSuccess: () => {
+        toastSuccess('profile.toast_account_deleted')
+        closeModal()
+      },
+      onError: (errors) => {
+        toastApiError(errors, 'common.toast.error_delete')
+        passwordInput.current.focus()
+      },
       onFinish: () => reset(),
     })
   }

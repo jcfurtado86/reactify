@@ -50,7 +50,19 @@
     "na": "N/A",
     "backlog": "Backlog",
     "items_count": "{{count}} itens",
-    "no_results": "Sem resultados"
+    "no_results": "Sem resultados",
+    "toast": {
+      "saved": "Alterações salvas",
+      "deleted": "Item excluído",
+      "created": "Item criado",
+      "updated": "Item atualizado",
+      "error_generic": "Algo deu errado",
+      "error_save": "Falha ao salvar",
+      "error_delete": "Falha ao excluir",
+      "error_network": "Erro de conexão com o servidor",
+      "select_at_least_one": "Selecione ao menos um item",
+      "no_changes": "Nenhuma alteração detectada"
+    }
   },
   "motion_div": {
     "add": "Adicionar",
@@ -148,7 +160,6 @@
     "set_default": "Definir como padrão",
     "confirm_delete_title": "Tem certeza que deseja excluir?",
     "confirm_delete_body": "Essa ação não pode ser desfeita. Isso excluirá permanentemente a prioridade.",
-    "toast_no_changes": "Nenhuma alteração detectada.",
     "toast_updated": "Prioridade atualizada com sucesso.",
     "toast_update_error": "Ocorreu um erro ao atualizar a prioridade.",
     "toast_deleted": "Prioridade excluída com sucesso.",
@@ -219,7 +230,10 @@
     "email_verification_sent": "Um novo link de verificação foi enviado para seu endereço de e-mail.",
     "current_password": "Senha atual",
     "new_password": "Nova senha",
-    "saved": "Salvo."
+    "saved": "Salvo.",
+    "toast_password_updated": "Senha atualizada com sucesso",
+    "toast_profile_updated": "Perfil atualizado",
+    "toast_account_deleted": "Conta excluída"
   },
   "home": {
     "page_title": "Início",
@@ -401,8 +415,6 @@
     "toast_saved": "Objetivo salvo com sucesso",
     "toast_deleted": "Objetivo excluído",
     "toast_generated": "Objetivos gerados com sucesso.",
-    "toast_generate_empty": "A IA não gerou novas goals com base nas entrevistas.",
-    "toast_select_one": "Selecione pelo menos uma goal para adicionar.",
     "toast_color_save_error": "Erro ao salvar a cor do objetivo.",
     "remove_confirm": "Deseja remover este objetivo?",
     "new_constraint": "Nova Constraint Goal",
@@ -425,7 +437,6 @@
     "toast_saved": "Persona salva com sucesso",
     "toast_deleted": "Persona excluída",
     "toast_generated": "Personas geradas com sucesso.",
-    "toast_generate_empty": "A IA não gerou novas personas com base nas entrevistas.",
     "confirm_delete_title": "Você tem certeza?",
     "confirm_delete_body": "Esta ação não pode ser desfeita. Isso excluirá permanentemente a persona e todos os seus dados.",
     "confirm_delete_action": "Sim, excluir",
@@ -449,7 +460,6 @@
     "toast_generated": "Journeys geradas com sucesso.",
     "toast_added": "{{count}} jornada(s) adicionada(s) com sucesso!",
     "toast_add_error": "Ocorreu um erro ao adicionar as jornadas.",
-    "toast_select_one": "Selecione pelo menos uma journey para adicionar.",
     "toast_comm_error": "Erro ao comunicar com o servidor",
     "save_title": "Salvar título",
     "edit_title": "Editar título",
@@ -487,7 +497,6 @@
     "empty": "Nenhuma estória cadastrada ainda.",
     "generate_cta": "Gerar estórias com IA",
     "toast_generated": "Histórias geradas com sucesso.",
-    "toast_generate_empty": "A IA não gerou novas estórias com base no contexto atual.",
     "toast_unexpected": "Ocorreu uma resposta inesperada do servidor.",
     "remove_confirm": "Deseja remover esta estória?",
     "new_user_story": "Nova User Story",
@@ -503,8 +512,7 @@
     "generate_cta": "Decompor épicos com IA",
     "toast_decomposed": "Épicos decompostos com sucesso.",
     "no_story_title": "Nenhuma Story",
-    "no_story_body": "Não é possível decompor épicos pois nenhuma story foi criada ainda.",
-    "no_epics_toast": "Nenhuma estória foi identificada como um épico para decomposição."
+    "no_story_body": "Não é possível decompor épicos pois nenhuma story foi criada ainda."
   },
   "business_rules": {
     "title": "Regras de Negócio",
@@ -528,7 +536,6 @@
     "empty": "Nenhum cenário cadastrado ainda.",
     "generate_cta": "Gerar cenários com IA",
     "toast_generated": "Cenários de uso gerados com sucesso.",
-    "none_generated_toast": "Nenhum cenário de uso foi gerado para as estórias existentes.",
     "empty_title": "Nenhum Cenário de Uso",
     "empty_hint": "Crie uma User Story ou System Story primeiro para poder adicionar cenários de uso."
   },
@@ -546,12 +553,10 @@
     "empty": "Nenhum CRC Card ainda.",
     "generate_cta": "Gerar Overall Model com IA",
     "toast_generated": "{{count}} cards foram sugeridos.",
-    "toast_empty_generation": "Nenhum CRC Card foi gerado para as estórias existentes.",
     "toast_cards_saved": "{{count}} CRC Card(s) salvo(s) com sucesso!",
     "toast_classes_saved": "{{count}} classe(s) salva(s) com sucesso!",
     "toast_save_error": "Ocorreu um erro ao salvar os CRC Cards.",
     "toast_classes_save_error": "Ocorreu um erro ao salvar as classes.",
-    "toast_select_one": "Selecione pelo menos um item para adicionar.",
     "confirm_delete_title": "Você tem certeza?",
     "confirm_delete_body": "Esta ação não pode ser desfeita. Isso excluirá permanentemente o card e todos os seus dados.",
     "confirm_delete_action": "Sim, excluir card",
@@ -719,7 +724,12 @@
     "remove_user": "Remover usuário",
     "cannot_manage_permissions": "Você não tem permissão para gerenciar",
     "owner": "Dono",
-    "invalid_role": "Função inválida! Verifique e tente novamente."
+    "invalid_role": "Função inválida! Verifique e tente novamente.",
+    "toast_saved": "Permissões salvas",
+    "toast_invited": "Convite enviado para {{email}}",
+    "toast_removed": "Membro removido do projeto",
+    "toast_invite_error": "Falha ao enviar convite",
+    "toast_remove_error": "Falha ao remover membro"
   },
   "ai_errors": {
     "missing_prereqs": "Para gerar {{label}}, é necessário cadastrar ao menos um de cada item a seguir: {{items}}.",
@@ -874,6 +884,14 @@
     "ai_generated_storyboard": {
       "title": "Gerar Storyboard com IA",
       "description": "Usa IA para criar uma sequência narrativa que ilustra a navegação do usuário entre as interfaces sugeridas, validando o fluxo visual."
+    }
+  },
+  "ai": {
+    "toast": {
+      "empty": "A IA não encontrou sugestões com base no contexto atual",
+      "success": "{{count}} sugestões geradas. Revise e confirme.",
+      "error": "Falha ao gerar com IA. Tente novamente.",
+      "unexpected": "Resposta inesperada do servidor"
     }
   }
 }

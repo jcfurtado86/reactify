@@ -677,7 +677,7 @@ const UsageScenarios = ({ project, setProject }) => {
         )
 
         if (usageScenariosWithSelection.length === 0) {
-          toast.info(t('usage_scenarios.none_generated_toast'))
+          toast.info(t('ai.toast.empty'))
           return
         }
 

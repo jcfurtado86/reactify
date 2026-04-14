@@ -654,7 +654,7 @@ const Personas = ({ project, setProject }) => {
         }))
 
         if (personasWithSelection.length === 0) {
-          toast.info(t('personas.toast_generate_empty'))
+          toast.info(t('ai.toast.empty'))
           return
         }
 

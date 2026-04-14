@@ -20,7 +20,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
   function handleSubmit(e) {
     e.preventDefault()
     if (name === priority.name && color === priority.color) {
-      toast.info(t('edit_priorities.toast_no_changes'))
+      toast.info(t('common.toast.no_changes'))
       return
     }
 

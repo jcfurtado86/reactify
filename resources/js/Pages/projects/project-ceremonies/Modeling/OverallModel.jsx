@@ -6,6 +6,7 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { useTooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
+import { toastApiError } from '@/lib/toastHelpers'
 import { cn } from '@/lib/utils'
 import { useOverallModelAIStore } from '@/stores/useOverallModelAIStore'
 import OverallModelAIModal from './components/OverallModelAIModal'
@@ -529,27 +530,23 @@ const OverallModel = ({ project, setProject }) => {
 
       if (data.status === 'sucesso') {
         if (!data.crc_cards || data.crc_cards.length === 0) {
-          toast.info(t('overall_model.toast_empty_generation'))
+          toast.info(t('ai.toast.empty'))
           return
         }
         setGeneratedAI({
           cards: data.crc_cards,
           classes: data.overall_model_classes,
         })
-        toast.success(`${data.crc_cards.length} cards foram sugeridos.`)
+        toast.success(
+          t('overall_model.toast_generated', { count: data.crc_cards.length }),
+        )
       } else if (data.status === 'warning') {
         toast.warning(data.message)
       } else {
-        toast.error(
-          data.message || 'Ocorreu uma resposta inesperada do servidor.',
-        )
+        toast.error(data.message || t('ai.toast.unexpected'))
       }
     } catch (error) {
-      console.error('Erro ao gerar cards:', error)
-      toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
-      )
+      toastApiError(error, 'ai.toast.error')
     } finally {
       stopGeneratingAI()
     }
@@ -562,7 +559,7 @@ const OverallModel = ({ project, setProject }) => {
     const selectedClasses = state.classes.filter((c) => c.selected)
 
     if (selectedCards.length === 0 && selectedClasses.length === 0) {
-      toast.warning(t('overall_model.toast_select_one'))
+      toast.warning(t('common.toast.select_at_least_one'))
       return
     }
 

@@ -26,6 +26,7 @@ import InfoButton from '@/Components/InfoButton'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { ColorOptions } from '@/Components/ColorComponents'
 import { toast } from 'sonner'
+import { toastApiError } from '@/lib/toastHelpers'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
 import { usePage } from '@inertiajs/react'
@@ -216,9 +217,8 @@ const GoalItem = ({
         project_id: goal.project_id,
       },
       {
-        onError: () => {
-          toast.error(t('goals.toast_color_save_error'))
-        },
+        onError: (error) =>
+          toastApiError(error, 'goals.toast_color_save_error'),
       },
     )
   }
@@ -671,7 +671,7 @@ const Goals = ({ project, setProject }) => {
         }))
 
         if (goalsWithSelection.length === 0) {
-          toast.info(t('goals.toast_generate_empty'))
+          toast.info(t('ai.toast.empty'))
           return
         }
 
@@ -700,7 +700,7 @@ const Goals = ({ project, setProject }) => {
     const remainingGoals = aiGeneratedGoals.filter((goal) => !goal.selected)
 
     if (selectedGoals.length === 0) {
-      toast.warning(t('goals.toast_select_one'))
+      toast.warning(t('common.toast.select_at_least_one'))
       return
     }
 
