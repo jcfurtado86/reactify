@@ -2,7 +2,9 @@ import { Plus, LoaderCircle, X, UserCog } from 'lucide-react'
 import { usePage, router } from '@inertiajs/react'
 import axios from 'axios'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 export function ProjectPermissions({ project }) {
+  const { t } = useTranslation()
   const { auth, errors } = usePage().props
   const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
@@ -126,23 +128,23 @@ export function ProjectPermissions({ project }) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="secondary" title="Gerenciar permissões" size="icon">
+        <Button variant="secondary" title={t('project_permissions.title')} size="icon">
           <UserCog className="size-4" />
         </Button>
       </SheetTrigger>
       <SheetContent className="max-w-[370px] sm:max-w-[450px] md:max-w-[470px]">
         <SheetHeader>
           <SheetTitle className="text-foreground">
-            Gerenciar Permissões
+            {t('project_permissions.title')}
           </SheetTitle>
           <SheetDescription className="text-muted-foreground">
             {canManagePermissions
-              ? 'Adicione, remova ou edite o acesso dos membros a este projeto.'
-              : 'Você pode visualizar os membros do projeto.'}
+              ? t('project_permissions.invite_user')
+              : t('project_permissions.cannot_manage_permissions')}
           </SheetDescription>
         </SheetHeader>
         <div className="py-4 space-y-4">
-          {isLoading && <p className="text-muted-foreground">Carregando...</p>}
+          {isLoading && <p className="text-muted-foreground">{t('common.loading')}</p>}
           {!isLoading &&
             users
               // .filter((user) => user.id !== auth.user.id)
@@ -157,7 +159,7 @@ export function ProjectPermissions({ project }) {
                     <div className="flex flex-col">
                       <p className="font-medium text-foreground">
                         {user.name}
-                        {isOwner ? ' (You)' : ''}
+                        {isOwner ? ' ' + t('project_permissions.you') : ''}
                       </p>
                     </div>
                     {!isOwner ? (
@@ -170,16 +172,20 @@ export function ProjectPermissions({ project }) {
                           disabled={!canManagePermissions || isOwner}
                         >
                           <SelectTrigger className="w-24">
-                            <SelectValue placeholder="Role" />
+                            <SelectValue placeholder={t('project_permissions.role')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="customer">Customer</SelectItem>
-                            <SelectItem value="domain_expert">
-                              Domain Expert
+                            <SelectItem value="customer">
+                              {t('project_permissions.roles.customer')}
                             </SelectItem>
-                            <SelectItem value="team">Team</SelectItem>
+                            <SelectItem value="domain_expert">
+                              {t('project_permissions.roles.domain_expert')}
+                            </SelectItem>
+                            <SelectItem value="team">
+                              {t('project_permissions.roles.team')}
+                            </SelectItem>
                             <SelectItem value="administrator">
-                              Administrator
+                              {t('project_permissions.roles.administrator')}
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -207,7 +213,7 @@ export function ProjectPermissions({ project }) {
               onClick={handleSaveChanges}
               disabled={isLoading || isAddingUser}
             >
-              {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+              {isLoading ? t('common.processing') : t('common.save')}
             </Button>
           </div>
         </div>
@@ -218,7 +224,7 @@ export function ProjectPermissions({ project }) {
               {/* Seção para adicionar novo usuário */}
               <div className="flex flex-col gap-2 text-left ">
                 <div className="text-foreground flex justify-between w-full">
-                  Adicionar novo membro
+                  {t('project_permissions.invite_user')}
                   <Button
                     variant="default"
                     className="p-0 z-20 size-8"
@@ -238,7 +244,7 @@ export function ProjectPermissions({ project }) {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Insira o email"
+                    placeholder={t('project_permissions.email_placeholder')}
                     className="text-foreground"
                     value={newUserEmail}
                     onChange={(e) => setNewUserEmail(e.target.value)}

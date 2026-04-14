@@ -7,6 +7,7 @@ import {
   ChevronsUp,
   Layers,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import React from 'react'
 import { toast } from 'sonner'
@@ -345,6 +346,7 @@ const EpicStoryCard = ({
  * @param {{ project: object, setProject: (project: object) => void }} props
  */
 const EpicStories = ({ project, setProject }) => {
+  const { t } = useTranslation()
   //ia states
   const [aiGeneratedEpicStories, setAiGeneratedEpicStories] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -438,7 +440,7 @@ const EpicStories = ({ project, setProject }) => {
     )
 
     if (selectedEpicStories.length === 0) {
-      toast.warning('Selecione pelo menos uma estória para adicionar.')
+      toast.warning(t('common.select_at_least_one'))
       return
     }
 
@@ -469,7 +471,7 @@ const EpicStories = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as stories.')
+          toast.error(t('common.error'))
           console.error('Erro do backend:', errors)
         },
       },

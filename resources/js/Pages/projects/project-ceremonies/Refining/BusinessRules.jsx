@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowRight,
   CornerDownRight,
@@ -355,6 +356,7 @@ const BusinessRuleCard = ({
  * @param {{ project: object, setProject: (project: object) => void }} props
  */
 const BusinessRules = ({ project, setProject }) => {
+  const { t } = useTranslation()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
@@ -442,7 +444,7 @@ const BusinessRules = ({ project, setProject }) => {
 
         setAiGeneratedBusinessRules(businessRulesWithSelection)
         setShowAiModal(true)
-        toast.success('Regras de Negócio geradas com sucesso.')
+        toast.success(t('business_rules.toast_generated'))
       } else {
         if (data.status === 'warning') {
           toast.warning(data.message)
@@ -472,7 +474,7 @@ const BusinessRules = ({ project, setProject }) => {
     )
 
     if (selectedBusinessRules.length === 0) {
-      toast.warning('Selecione pelo menos uma business rule para adicionar.')
+      toast.warning(t('common.select_at_least_one'))
       return
     }
 
@@ -516,7 +518,7 @@ const BusinessRules = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as Business Rules.')
+          toast.error(t('common.error'))
           console.error('Erro do backend:', errors)
           setProject((prevProject) => {
             const businessRulesToAddIds = businessRulesToAdd.map((g) => g.id)

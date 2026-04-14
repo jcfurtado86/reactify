@@ -1,4 +1,5 @@
 import { usePermissions } from '@/Context/PermissionContext'
+import { useTranslation } from 'react-i18next'
 import {
   DndContext,
   closestCenter,
@@ -209,6 +210,7 @@ const JourneyStepItem = ({
 }
 
 const Journeys = ({ project, setProject }) => {
+  const { t } = useTranslation()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
@@ -307,16 +309,14 @@ const Journeys = ({ project, setProject }) => {
 
       if (data.status === 'sucesso') {
         setGeneratedAI(data.journeys)
-        toast.success('Journeys geradas com sucesso.')
+        toast.success(t('journeys.toast_generated'))
       } else if (data.status === 'warning') {
         toast.warning(data.message)
       } else {
-        toast.error(
-          data.message || 'Ocorreu uma resposta inesperada do servidor.',
-        )
+        toast.error(data.message || t('ai_errors.unexpected'))
       }
     } catch (error) {
-      toast.error('Erro ao comunicar com o servidor')
+      toast.error(t('journeys.toast_comm_error'))
       console.error('Erro ao gerar journeys:', error)
     } finally {
       stopGenerating()
@@ -328,7 +328,7 @@ const Journeys = ({ project, setProject }) => {
     const selectedJourneys = generatedJourneys.filter((j) => j.selected)
 
     if (selectedJourneys.length === 0) {
-      toast.warning('Selecione pelo menos uma journey para adicionar.')
+      toast.warning(t('journeys.toast_select_one'))
       return
     }
 
@@ -369,12 +369,12 @@ const Journeys = ({ project, setProject }) => {
         preserveScroll: true,
         onSuccess: () => {
           toast.success(
-            `${selectedJourneys.length} journey(s) adicionada(s) com sucesso!`,
+            t('journeys.toast_added', { count: selectedJourneys.length }),
           )
           markConfirmed()
         },
         onError: () => {
-          toast.error('Ocorreu um erro ao adicionar as jornadas.')
+          toast.error(t('journeys.toast_add_error'))
         },
       },
     )

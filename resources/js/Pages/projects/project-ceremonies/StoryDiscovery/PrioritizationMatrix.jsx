@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   darkenColor,
   isTemporary as getIsTemporary,
@@ -256,6 +257,7 @@ const transformArrayToMatrixObject = (
   }, {})
 }
 const PrioritizationMatrix = ({ project, setProject }) => {
+  const { t } = useTranslation()
   const childrenByEpicId = useGroupedStories(project?.stories)
   const GRID_ROWS = project.goal_sketches.length || 4
   const priorityOrder = {
@@ -591,7 +593,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
         <section className="flex-1">
           <section className="flex gap-2 justify-between">
             <aside className="flex flex-col w-48 items-center bg-card p-2 gap-2 rounded">
-              <span className="h-11 py-1 ">Goals</span>
+              <span className="h-11 py-1 ">{t('goals.plural')}</span>
               {hasGoals ? (
                 project.goal_sketches
                   .sort((a, b) => {

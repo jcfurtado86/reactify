@@ -1,4 +1,5 @@
 import { usePermissions } from '@/Context/PermissionContext'
+import { useTranslation } from 'react-i18next'
 import {
   AlertCircle,
   Users,
@@ -42,6 +43,7 @@ const GeneratedItemsModal = ({
   confirmGeneratedItems,
   toggleAllItems,
 }) => {
+  const { t } = useTranslation()
   return (
     <div
       className={`
@@ -56,8 +58,14 @@ const GeneratedItemsModal = ({
       <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between p-3 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'Definições Geradas por IA'}
-            {isModalMinimized && 'Definições Geradas'}
+            {!isModalMinimized &&
+              t('ai_modal.ai_generated_title', {
+                artifact: t('product_canvas.title'),
+              })}
+            {isModalMinimized &&
+              t('ai_modal.ai_generated_title_minimized', {
+                artifact: t('product_canvas.title'),
+              })}
           </h3>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="secondary" onClick={changeModalState}>
@@ -375,6 +383,7 @@ const ExpandableCard = ({
 }
 
 const MainView = ({ project = {}, setProject }) => {
+  const { t } = useTranslation()
   //ia states
   const [aiGeneratedProductCanvas, setAiGeneratedProductCanvas] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -424,29 +433,24 @@ const MainView = ({ project = {}, setProject }) => {
         )
 
         if (productCanvasWithSelection.length === 0) {
-          toast.info('A IA não gerou sugestões para o Product Canvas.')
+          toast.info(t('product_canvas.empty'))
           return
         }
 
         setAiGeneratedProductCanvas(productCanvasWithSelection)
         setShowAiModal(true)
-        toast.success(
-          'Sugestões para o Product Canvas foram geradas com sucesso.',
-        )
+        toast.success(t('product_canvas.toast_generated'))
       } else {
         if (data.status === 'warning') {
           toast.warning(data.message)
         } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
+          toast.error(data.message || t('ai_errors.unexpected'))
         }
       }
     } catch (error) {
       console.error('Erro ao gerar Product Canvas:', error)
       toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
+        error.response?.data?.message || t('ai_errors.server_error'),
       )
     } finally {
       setIsGenerating(false)
@@ -462,7 +466,7 @@ const MainView = ({ project = {}, setProject }) => {
     )
 
     if (selectedProductCanvas.length === 0) {
-      toast.warning('Selecione pelo menos um item para adicionar.')
+      toast.warning(t('common.select_at_least_one'))
       return
     }
 
@@ -488,9 +492,7 @@ const MainView = ({ project = {}, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(
-            `${selectedProductCanvas.length} item(s) adicionado(s) com sucesso!`,
-          )
+          toast.success(t('product_canvas.toast_save_success'))
           setAiGeneratedProductCanvas(remainingProductCanvas)
           if (remainingProductCanvas.length === 0) {
             setShowAiModal(false)
@@ -498,7 +500,7 @@ const MainView = ({ project = {}, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as goals.')
+          toast.error(t('product_canvas.toast_save_error'))
           console.error('Erro do backend:', errors)
         },
       },
@@ -543,22 +545,22 @@ const MainView = ({ project = {}, setProject }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-2">
         <ExpandableCard
           editable={can('productCanvas.manage')}
-          title="Problems"
+          title={t('product_canvas.issues')}
           content={project?.product_canvas?.issues}
           variant="destructive"
           icon={AlertCircle}
-          placeholder="What problems does this project solve?"
+          placeholder={t('product_canvas.issues')}
           onContentUpdate={(content) => updateProductCanvas('issues', content)}
           maxLength={TEXT_LIMIT}
           error={errors.issues}
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
-          title="Solutions"
+          title={t('product_canvas.solutions')}
           content={project?.product_canvas?.solutions}
           variant="chart_1"
           icon={CheckCircle}
-          placeholder="How does the project solve the problems?"
+          placeholder={t('product_canvas.solutions')}
           onContentUpdate={(content) =>
             updateProductCanvas('solutions', content)
           }
@@ -567,11 +569,11 @@ const MainView = ({ project = {}, setProject }) => {
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
-          title="Involved Personas"
+          title={t('product_canvas.personas')}
           content={project?.product_canvas?.personas}
           variant="chart_2"
           icon={Users}
-          placeholder="Who are the main users?"
+          placeholder={t('product_canvas.personas')}
           onContentUpdate={(content) =>
             updateProductCanvas('personas', content)
           }
@@ -580,11 +582,11 @@ const MainView = ({ project = {}, setProject }) => {
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
-          title="Restrictions"
+          title={t('product_canvas.restrictions')}
           content={project?.product_canvas?.restrictions}
           variant="chart_3"
           icon={X}
-          placeholder="What are the project's limitations?"
+          placeholder={t('product_canvas.restrictions')}
           onContentUpdate={(content) =>
             updateProductCanvas('restrictions', content)
           }
@@ -593,11 +595,11 @@ const MainView = ({ project = {}, setProject }) => {
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
-          title="Is"
+          title={t('product_canvas.product_is')}
           content={project?.product_canvas?.product_is}
           variant="chart_4"
           icon={Check}
-          placeholder="What this product IS..."
+          placeholder={t('product_canvas.product_is')}
           onContentUpdate={(content) =>
             updateProductCanvas('product_is', content)
           }
@@ -606,11 +608,11 @@ const MainView = ({ project = {}, setProject }) => {
         />
         <ExpandableCard
           editable={can('productCanvas.manage')}
-          title="Is Not"
+          title={t('product_canvas.product_is_not')}
           content={project?.product_canvas?.product_is_not}
           variant="chart_5"
           icon={X}
-          placeholder="What this product IS NOT..."
+          placeholder={t('product_canvas.product_is_not')}
           onContentUpdate={(content) =>
             updateProductCanvas('product_is_not', content)
           }

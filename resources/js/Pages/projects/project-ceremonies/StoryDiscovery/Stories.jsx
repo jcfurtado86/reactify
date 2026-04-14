@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { usePermissions } from '@/Context/PermissionContext'
+import { useTranslation } from 'react-i18next'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import {
   Plus,
@@ -38,6 +39,7 @@ const GeneratedItemsModal = ({
   toggleAllItems,
   systemColors,
 }) => {
+  const { t } = useTranslation()
   const storyVariants = systemColors?.stories || {}
   return (
     <div
@@ -53,8 +55,14 @@ const GeneratedItemsModal = ({
       <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'Stories Geradas por IA'}
-            {isModalMinimized && 'Stories Geradas'}
+            {!isModalMinimized &&
+              t('ai_modal.ai_generated_title', {
+                artifact: t('stories.plural'),
+              })}
+            {isModalMinimized &&
+              t('ai_modal.ai_generated_title_minimized', {
+                artifact: t('stories.plural'),
+              })}
           </h3>
           <div className="flex items-center gap-2">
             <Button onClick={changeModalState} size="icon" variant="secondary">
@@ -382,6 +390,7 @@ const StoryItem = ({
 }
 
 const Stories = ({ project, setProject }) => {
+  const { t } = useTranslation()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
@@ -520,30 +529,25 @@ const Stories = ({ project, setProject }) => {
         }))
 
         if (storiesWithSelection.length === 0) {
-          toast.info(
-            'A IA não gerou novas estórias com base no contexto atual.',
-          )
+          toast.info(t('stories.toast_generate_empty'))
           setIsGenerating(false)
           return
         }
 
         setAiGeneratedStories(storiesWithSelection)
         setShowAiModal(true)
-        toast.success('Histórias geradas com sucesso.')
+        toast.success(t('stories.toast_generated'))
       } else {
         if (data.status === 'warning') {
           toast.warning(data.message)
         } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
+          toast.error(data.message || t('ai_errors.unexpected'))
         }
       }
     } catch (error) {
       console.error('Erro ao gerar stories:', error)
       toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
+        error.response?.data?.message || t('ai_errors.server_error'),
       )
     } finally {
       setIsGenerating(false)
@@ -572,7 +576,7 @@ const Stories = ({ project, setProject }) => {
     )
 
     if (selectedStories.length === 0) {
-      toast.warning('Selecione pelo menos uma story para adicionar.')
+      toast.warning(t('common.select_at_least_one'))
       return
     }
 
@@ -601,9 +605,7 @@ const Stories = ({ project, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(
-            `${selectedStories.length} storie(s) adicionada(s) com sucesso!`,
-          )
+          toast.success(t('stories.toast_generated'))
           setAiGeneratedStories(remainingStories)
           if (remainingStories.length === 0) {
             setShowAiModal(false)
@@ -611,7 +613,7 @@ const Stories = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as stories.')
+          toast.error(t('common.error'))
           console.error('Erro do backend:', errors)
           setProject((prevProject) => {
             const storiesToAddIds = storiesToAdd.map((s) => s.id)

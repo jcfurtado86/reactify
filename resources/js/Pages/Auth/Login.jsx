@@ -6,10 +6,11 @@ import TextInput from '@/Components/TextInput'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import MainLayout from '@/Layouts/MainLayout'
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react'
-import { Computer } from 'lucide-react'
+import { Head, Link, useForm } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 
 const Login = ({ status, canResetPassword }) => {
+  const { t } = useTranslation()
   const { data, setData, post, processing, errors, reset } = useForm({
     email: '',
     password: '',
@@ -24,7 +25,7 @@ const Login = ({ status, canResetPassword }) => {
   }
   return (
     <>
-      <Head title="Log in" />
+      <Head title={t('auth.login_title')} />
       <div className="bg-card border border-border p-8 rounded-xl w-full max-w-md shadow-lg">
         {status && (
           <div className="mb-4 text-sm font-medium text-success-foreground bg-success p-3 rounded-lg border border-success-border">
@@ -34,13 +35,12 @@ const Login = ({ status, canResetPassword }) => {
         <div className="mb-6 text-center flex flex-col gap-4">
           <Button className="w-full">
             <img
-              alt="Google Logo"
+              alt="GitHub Logo"
               src="https://img.icons8.com/?size=100&id=Mhl1TfJLdkh5&format=png&color=000000"
               className="size-8"
             />
-
             <a disabled={processing} href={'/auth/github/redirect'}>
-              Continue with GitHub
+              {t('auth.sign_in_with', { provider: 'GitHub' })}
             </a>
           </Button>
           <Button className="w-full">
@@ -50,13 +50,13 @@ const Login = ({ status, canResetPassword }) => {
               className="size-8"
             />
             <a disabled={processing} href={'/auth/google/redirect'}>
-              Continue with Google
+              {t('auth.sign_in_with', { provider: 'Google' })}
             </a>
           </Button>
 
           <div className="flex items-center justify-between w-full">
             <Separator className="w-[45%]" />
-            <p className="flex items-center justify-center">or</p>
+            <p className="flex items-center justify-center">{t('auth.or')}</p>
             <Separator className="w-[45%]" />
           </div>
         </div>
@@ -65,7 +65,7 @@ const Login = ({ status, canResetPassword }) => {
           <div>
             <InputLabel
               htmlFor="email"
-              value="Email"
+              value={t('auth.email')}
               className="text-foreground font-medium"
             />
             <TextInput
@@ -73,11 +73,11 @@ const Login = ({ status, canResetPassword }) => {
               type="email"
               name="email"
               value={data.email}
-              className="mt-2 block w-full bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary rounded-lg px-3 py-2 text-sm transition-colors"
+              className="mt-2 block w-full"
               autoComplete="username"
               isFocused={true}
               onChange={(e) => setData('email', e.target.value)}
-              placeholder="Enter your email"
+              placeholder={t('auth.email_placeholder')}
             />
             <InputError
               message={errors.email}
@@ -88,7 +88,7 @@ const Login = ({ status, canResetPassword }) => {
           <div>
             <InputLabel
               htmlFor="password"
-              value="Password"
+              value={t('auth.password')}
               className="text-foreground font-medium"
             />
             <TextInput
@@ -96,10 +96,10 @@ const Login = ({ status, canResetPassword }) => {
               type="password"
               name="password"
               value={data.password}
-              className="mt-2 block w-full bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary rounded-lg px-3 py-2 text-sm transition-colors"
+              className="mt-2 block w-full"
               autoComplete="current-password"
               onChange={(e) => setData('password', e.target.value)}
-              placeholder="Enter your password"
+              placeholder={t('auth.password_placeholder')}
             />
             <InputError
               message={errors.password}
@@ -116,7 +116,7 @@ const Login = ({ status, canResetPassword }) => {
                 className="border-input text-primary focus:ring-primary focus:ring-offset-0 rounded"
               />
               <span className="ml-2 text-sm text-foreground select-none">
-                Remember me
+                {t('auth.remember_me')}
               </span>
             </label>
           </div>
@@ -127,7 +127,7 @@ const Login = ({ status, canResetPassword }) => {
                 href={route('password.request')}
                 className="text-sm !text-foreground hover:text-primary transition-colors duration-200 underline-offset-4 hover:underline"
               >
-                Forgot your password?
+                {t('auth.forgot_password')}
               </Link>
             )}
             <PrimaryButton
@@ -135,19 +135,19 @@ const Login = ({ status, canResetPassword }) => {
               disabled={processing}
               id="login-button"
             >
-              {processing ? 'Signing in...' : 'Log in'}
+              {processing ? t('common.processing') : t('auth.sign_in')}
             </PrimaryButton>
           </div>
         </form>
 
         <div className="mt-6 text-center flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
+            {t('auth.not_registered')}{' '}
             <Link
               href={route('register')}
               className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline transition-colors"
             >
-              Sign up
+              {t('auth.sign_up')}
             </Link>
           </p>
         </div>

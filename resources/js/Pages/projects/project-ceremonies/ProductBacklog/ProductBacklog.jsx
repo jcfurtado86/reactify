@@ -1,4 +1,5 @@
 import { router, useForm, usePage } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 import { cn, formatDate, isSprintActive, parseDateAsLocal } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -22,6 +23,7 @@ import {
 import SprintTable from './components/SprintTable'
 
 const ProductBacklog = ({ project, setProject }) => {
+  const { t } = useTranslation()
   const [localProject, setLocalProject] = useState(project)
   const [startDate, setStartDate] = useState(new Date())
   const [endDate, setEndDate] = useState(
@@ -68,7 +70,7 @@ const ProductBacklog = ({ project, setProject }) => {
           }
         },
         onError: () => {
-          toast.error('Erro ao mover story para o Backlog')
+          toast.error(t('common.error'))
         },
       },
     )
@@ -307,7 +309,7 @@ const ProductBacklog = ({ project, setProject }) => {
   const deleteSprint = (e) => {
     e.preventDefault()
     if (!selectedSprint) {
-      toast.error('Please select a sprint to delete')
+      toast.error(t('sprint.delete_sprint'))
       return
     }
     router.delete(route('sprint.destroy', selectedSprint.id))
@@ -317,7 +319,7 @@ const ProductBacklog = ({ project, setProject }) => {
   const finishSprint = (e) => {
     e.preventDefault()
     if (!selectedSprint) {
-      toast.error('Please select s sprint')
+      toast.error(t('sprint.title'))
       return
     }
 

@@ -1,16 +1,18 @@
 import { router } from '@inertiajs/react'
 import ChangeRequestForm from '../../../../Components/ChangeRequestForm'
 import ChangeRequestDetails from '../../../../Components/ChangeRequestDetails'
-import { useState } from 'react' 
-import { Eye } from 'lucide-react' 
+import { useState } from 'react'
+import { Eye } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useTranslation } from 'react-i18next'
 
 const ChangeLog = ({ project }) => {
+  const { t } = useTranslation()
   const changeRequests = project.change_requests || []
   const [showForm, setShowForm] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState(null)
@@ -24,10 +26,11 @@ const ChangeLog = ({ project }) => {
     }
 
     const statusLabels = {
-      SOLICITADA: 'Solicitada',
-      APROVADA: 'Aprovada',
-      REJEITADA: 'Rejeitada',
-      EM_ANALISE: 'Em análise',
+      SOLICITADA: t('change_log.status.requested'),
+      APROVADA: t('change_log.status.approved'),
+      REJEITADA: t('change_log.status.rejected'),
+      EM_ANALISE: t('change_log.status.in_review'),
+      IMPLEMENTADA: t('change_log.status.implemented'),
     }
 
     return (
@@ -37,24 +40,17 @@ const ChangeLog = ({ project }) => {
     )
   }
 
-  const formatStories = (stories, impactType) => {
-    return stories
-      .filter((story) => story.pivot.impact_type === impactType)
-      .map((story) => story.code || `US-${story.id}`)
-      .join(', ')
-  }
-
   return (
     <div className="p-2">
       <div className="w-full flex justify-between items-center p-4">
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogTrigger asChild>
-            <Button variant="secondary">Nova Solicitação</Button>
+            <Button variant="secondary">{t('change_log.new_request')}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl h-content p-0 border-0">
-          <DialogTitle className="sr-only">
-            Nova Solicitação de Mudança
-          </DialogTitle>
+            <DialogTitle className="sr-only">
+              {t('change_log.new_request_title')}
+            </DialogTitle>
             <ChangeRequestForm
               project={project}
               stories={project.stories || []}
@@ -64,12 +60,14 @@ const ChangeLog = ({ project }) => {
         </Dialog>
       </div>
 
-      {/* Modal de Detalhes / Edição de Status */}
-      <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && setSelectedRequest(null)}>
+      <Dialog
+        open={!!selectedRequest}
+        onOpenChange={(open) => !open && setSelectedRequest(null)}
+      >
         <DialogContent className="max-w-2xl">
           {selectedRequest && (
-            <ChangeRequestDetails 
-              request={selectedRequest} 
+            <ChangeRequestDetails
+              request={selectedRequest}
               onClose={() => setSelectedRequest(null)}
             />
           )}
@@ -79,14 +77,24 @@ const ChangeLog = ({ project }) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-center">Número</TableHead>
-            <TableHead className="text-center">Data da Solicitação</TableHead>
-            <TableHead className="text-center">Responsável</TableHead>
-            <TableHead className="text-center">Descrição</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-center">Ações</TableHead>
-            {/* <TableHead className="text-center">Impacto</TableHead>
-            <TableHead className="text-center">Novas</TableHead> */}
+            <TableHead className="text-center">
+              {t('change_log.columns.number')}
+            </TableHead>
+            <TableHead className="text-center">
+              {t('change_log.columns.date')}
+            </TableHead>
+            <TableHead className="text-center">
+              {t('change_log.columns.requester')}
+            </TableHead>
+            <TableHead className="text-center">
+              {t('change_log.columns.description')}
+            </TableHead>
+            <TableHead className="text-center">
+              {t('change_log.columns.status')}
+            </TableHead>
+            <TableHead className="text-center">
+              {t('change_log.columns.actions')}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -109,21 +117,12 @@ const ChangeLog = ({ project }) => {
                 <TableCell className="text-center">
                   {getStatusBadge(request.status)}
                 </TableCell>
-                {/* <TableCell className="text-center">
-                  {formatStories(request.stories || [], 'IMPACTADA') || '-'}
-                </TableCell>
                 <TableCell className="text-center">
-                  {formatStories(request.stories || [], 'NOVA') || '-'}
-                </TableCell> */}
-                {/* <TableCell className="text-center">
-                  {request.effort || '-'}
-                </TableCell> */}
-                <TableCell className="text-center">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setSelectedRequest(request)}
-                    title="Ver Detalhes e Gerenciar"
+                    title={t('change_log.view_details')}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
@@ -133,7 +132,7 @@ const ChangeLog = ({ project }) => {
           ) : (
             <TableRow>
               <TableCell colSpan={8} className="text-center text-gray-500 py-8">
-                Nenhuma solicitação de mudança encontrada
+                {t('change_log.empty')}
               </TableCell>
             </TableRow>
           )}

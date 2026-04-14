@@ -4,8 +4,10 @@ import PrimaryButton from '@/Components/PrimaryButton'
 import TextInput from '@/Components/TextInput'
 import MainLayout from '@/Layouts/MainLayout'
 import { Head, Link, useForm } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 
 export default function Register() {
+  const { t } = useTranslation()
   const currentRoute = route()
 
   const invitationToken = currentRoute.params.invitation_token || ''
@@ -26,14 +28,14 @@ export default function Register() {
   }
   return (
     <>
-      <Head title="Register" />
+      <Head title={t('auth.register_title')} />
 
       <div className="bg-card border border-border p-8 rounded-xl shadow-xl w-full max-w-md">
         <form onSubmit={submit} className="space-y-6">
           <div>
             <InputLabel
               htmlFor="name"
-              value="Name"
+              value={t('common.name')}
               className="text-foreground font-medium"
             />
             <TextInput
@@ -44,16 +46,19 @@ export default function Register() {
               autoComplete="name"
               isFocused={true}
               onChange={(e) => setData('name', e.target.value)}
-              placeholder="Seu nome"
+              placeholder={t('auth.name_placeholder')}
               required
             />
-            <InputError message={errors.name} className="mt-2 text-destructive" />
+            <InputError
+              message={errors.name}
+              className="mt-2 text-destructive"
+            />
           </div>
 
           <div>
             <InputLabel
               htmlFor="email"
-              value="Email"
+              value={t('auth.email')}
               className="text-foreground font-medium"
             />
             <TextInput
@@ -64,16 +69,19 @@ export default function Register() {
               className="mt-2 block w-full"
               autoComplete="username"
               onChange={(e) => setData('email', e.target.value)}
-              placeholder="seu@email.com"
+              placeholder={t('auth.email_placeholder')}
               required
             />
-            <InputError message={errors.email} className="mt-2 text-destructive" />
+            <InputError
+              message={errors.email}
+              className="mt-2 text-destructive"
+            />
           </div>
 
           <div>
             <InputLabel
               htmlFor="password"
-              value="Password"
+              value={t('auth.password')}
               className="text-foreground font-medium"
             />
             <TextInput
@@ -84,16 +92,19 @@ export default function Register() {
               className="mt-2 block w-full"
               autoComplete="new-password"
               onChange={(e) => setData('password', e.target.value)}
-              placeholder="Senha"
+              placeholder={t('auth.password_placeholder')}
               required
             />
-            <InputError message={errors.password} className="mt-2 text-destructive" />
+            <InputError
+              message={errors.password}
+              className="mt-2 text-destructive"
+            />
           </div>
 
           <div>
             <InputLabel
               htmlFor="password_confirmation"
-              value="Confirm Password"
+              value={t('auth.confirm_password')}
               className="text-foreground font-medium"
             />
             <TextInput
@@ -104,7 +115,7 @@ export default function Register() {
               className="mt-2 block w-full"
               autoComplete="new-password"
               onChange={(e) => setData('password_confirmation', e.target.value)}
-              placeholder="Confirme a senha"
+              placeholder={t('auth.confirm_password_placeholder')}
               required
             />
             <InputError
@@ -118,9 +129,11 @@ export default function Register() {
               href={route('login')}
               className="text-sm text-foreground hover:text-primary transition-colors duration-200"
             >
-              Already registered?
+              {t('auth.already_registered')}
             </Link>
-            <PrimaryButton disabled={processing}>Register</PrimaryButton>
+            <PrimaryButton disabled={processing}>
+              {t('auth.sign_up')}
+            </PrimaryButton>
           </div>
         </form>
       </div>

@@ -1,4 +1,5 @@
 import { usePermissions } from '@/Context/PermissionContext'
+import { useTranslation } from 'react-i18next'
 import {
   Plus,
   Edit,
@@ -32,6 +33,7 @@ const GeneratedItemsModal = ({
   confirmGeneratedItems,
   toggleAllItems,
 }) => {
+  const { t } = useTranslation()
   return (
     <div
       className={`
@@ -46,8 +48,14 @@ const GeneratedItemsModal = ({
       <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between p-3 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'Personas Geradas por IA'}
-            {isModalMinimized && 'Personas Geradas'}
+            {!isModalMinimized &&
+              t('ai_modal.ai_generated_title', {
+                artifact: t('personas.plural'),
+              })}
+            {isModalMinimized &&
+              t('ai_modal.ai_generated_title_minimized', {
+                artifact: t('personas.plural'),
+              })}
           </h3>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="secondary" onClick={changeModalState}>
@@ -79,8 +87,8 @@ const GeneratedItemsModal = ({
                 className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
               >
                 {generatedItems.every((story) => story.selected)
-                  ? 'Desmarcar Todas'
-                  : 'Selecionar Todas'}
+                  ? t('common.deselect_all')
+                  : t('common.select_all')}
               </Button>
             </div>
 
@@ -114,7 +122,7 @@ const GeneratedItemsModal = ({
                         {/* Seção de Perfil */}
                         <div className="flex flex-col gap-2">
                           <h4 className="font-semibold text-foreground mb-1">
-                            Perfil
+                            {t('personas.profile')}
                           </h4>
                           <ul className="list-disc list-inside text-muted-foreground">
                             {persona.profile.map((item, i) => (
@@ -126,7 +134,7 @@ const GeneratedItemsModal = ({
                         {/* Seção de Expectativas */}
                         <div className="flex flex-col gap-2">
                           <h4 className="font-semibold text-foreground mb-1">
-                            Expectativas
+                            {t('personas.expectations')}
                           </h4>
                           <ul className="list-disc list-inside text-muted-foreground">
                             {persona.expectations.map((item, i) => (
@@ -140,7 +148,7 @@ const GeneratedItemsModal = ({
                         {/* Seção de Objetivos */}
                         <div className="flex flex-col gap-2">
                           <h4 className="font-semibold text-foreground mb-1">
-                            Objetivos
+                            {t('personas.goals')}
                           </h4>
                           <ul className="list-disc list-inside text-muted-foreground">
                             {persona.goals.map((item, i) => (
@@ -160,7 +168,7 @@ const GeneratedItemsModal = ({
                 onClick={cancelGeneratedItems}
                 className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={confirmGeneratedItems}
@@ -168,8 +176,9 @@ const GeneratedItemsModal = ({
                 disabled={generatedItems.filter((j) => j.selected).length === 0}
               >
                 <Check className="mr-2" size={16} />
-                Confirmar e Adicionar (
-                {generatedItems.filter((j) => j.selected).length})
+                {t('ai_modal.confirm_add_count', {
+                  count: generatedItems.filter((j) => j.selected).length,
+                })}
               </Button>
             </div>
           </>
@@ -401,6 +410,7 @@ const PersonaItem = ({
 }
 
 const Personas = ({ project, setProject }) => {
+  const { t } = useTranslation()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
@@ -641,27 +651,24 @@ const Personas = ({ project, setProject }) => {
         }))
 
         if (personasWithSelection.length === 0) {
-          toast.info('A IA não gerou novas personas com base nas entrevistas.')
+          toast.info(t('personas.toast_generate_empty'))
           return
         }
 
         setAiGeneratedPersonas(personasWithSelection)
         setShowAiModal(true)
-        toast.success('Personas geradas com sucesso.')
+        toast.success(t('personas.toast_generated'))
       } else {
         if (data.status === 'warning') {
           toast.warning(data.message)
         } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
+          toast.error(data.message || t('ai_errors.unexpected'))
         }
       }
     } catch (error) {
       console.error('Erro ao gerar personas:', error)
       toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
+        error.response?.data?.message || t('ai_errors.server_error'),
       )
     } finally {
       setIsGenerating(false)
@@ -677,7 +684,7 @@ const Personas = ({ project, setProject }) => {
     )
 
     if (selectedPersonas.length === 0) {
-      toast.warning('Selecione pelo menos uma persona para adicionar.')
+      toast.warning(t('common.select_at_least_one'))
       return
     }
 
@@ -708,7 +715,7 @@ const Personas = ({ project, setProject }) => {
         preserveScroll: true,
         onSuccess: () => {
           toast.success(
-            `${selectedPersonas.length} persona(s) adicionada(s) com sucesso!`,
+            t('personas.toast_saved'),
           )
           setAiGeneratedPersonas(remainingPersonas)
           if (remainingPersonas.length === 0) {
@@ -717,7 +724,7 @@ const Personas = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as personas.')
+          toast.error(t('common.error'))
           console.error('Erro do backend:', errors)
           setProject((prevProject) => {
             const personasToAddIds = personasToAdd.map((p) => p.id)
@@ -830,7 +837,7 @@ const Personas = ({ project, setProject }) => {
             className="xl:col-span-2 flex "
           >
             <Plus size={18} className="mr-2" />
-            {isSubmitting ? 'Criando...' : 'Nova Persona'}
+            {isSubmitting ? t('common.processing') : t('personas.new')}
           </Button>
           <GenerateAIButton
             isGenerating={isGenerating}

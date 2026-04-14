@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 import {
   DndContext,
   PointerSensor,
@@ -108,6 +109,7 @@ const KanbanColumn = ({ id, variant, title, stories, systemColors }) => {
 // Componente Principal do Kanban Board
 // ============================================================================
 const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
+  const { t } = useTranslation()
   const [localStories, setLocalStories] = useState([])
 
   // ✅ Estado para armazenar a story que está sendo arrastada
@@ -222,13 +224,12 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
   )
 
   const columns = [
-    { key: 'todo', title: 'To Do' },
-    { key: 'in_progress', title: 'In Progress' },
-    { key: 'testing', title: 'Testing' },
-    { key: 'done', title: 'Done' },
+    { key: 'todo', title: t('sprint.kanban.todo') },
+    { key: 'in_progress', title: t('sprint.kanban.in_progress') },
+    { key: 'testing', title: t('sprint.kanban.testing') },
+    { key: 'done', title: t('sprint.kanban.done') },
   ]
 
-  // A lógica de renderização para o estado de 'nenhuma sprint' permanece a mesma
   if (!sprints) {
     return (
       <Card>
@@ -236,7 +237,9 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
           <div className="flex items-center gap-4"></div>
         </CardHeader>
         <CardContent className="text-left py-8">
-          <p className="text-muted-foreground">Nenhuma sprint selecionada</p>
+          <p className="text-muted-foreground">
+            {t('sprint.no_sprint_selected')}
+          </p>
         </CardContent>
       </Card>
     )

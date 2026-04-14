@@ -1,5 +1,6 @@
 import React from 'react'
 import { router } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowRight,
   CornerDownRight,
@@ -590,6 +591,7 @@ const ScenarioCard = ({
  * @param {{ project: object, setProject: (project: object) => void }} props
  */
 const UsageScenarios = ({ project, setProject }) => {
+  const { t } = useTranslation()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
@@ -711,7 +713,7 @@ const UsageScenarios = ({ project, setProject }) => {
     )
 
     if (selectedUsageScenarios.length === 0) {
-      toast.warning('Selecione pelo menos um cenário de uso para adicionar.')
+      toast.warning(t('common.select_at_least_one'))
       return
     }
 
@@ -750,7 +752,7 @@ const UsageScenarios = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar os cenários de uso.')
+          toast.error(t('common.error'))
           console.error('Erro do backend:', errors)
         },
       },

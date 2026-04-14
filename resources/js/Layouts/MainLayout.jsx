@@ -1,6 +1,7 @@
 import React from 'react'
 import TopMenu from '@/Components/TopMenu'
 import LeftMenu from '@/Components/LeftMenu'
+import LanguageSwitcher from '@/Components/LanguageSwitcher'
 import { usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
 import { Link } from '@inertiajs/react'
@@ -11,6 +12,9 @@ const GuestLayout = ({ children }) => {
   return (
     <div className="guestlayout flex min-h-screen w-full flex-col items-center bg-background pt-6 sm:justify-center sm:pt-0">
       <Particles className="absolute inset-0 w-full h-full" />
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSwitcher />
+      </div>
       <div className="mb-12">
         <Link
           as={'button'}

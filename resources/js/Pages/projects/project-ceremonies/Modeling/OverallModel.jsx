@@ -1,4 +1,5 @@
 import { router, usePage } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { Plus, StickyNote } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
@@ -337,6 +338,7 @@ const CRCCard = ({
 }
 
 const OverallModel = ({ project, setProject }) => {
+  const { t } = useTranslation()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
@@ -525,7 +527,7 @@ const OverallModel = ({ project, setProject }) => {
 
       if (data.status === 'sucesso') {
         if (!data.crc_cards || data.crc_cards.length === 0) {
-          toast.info('Nenhum CRC Card foi gerado para as estórias existentes.')
+          toast.info(t('overall_model.toast_empty_generation'))
           return
         }
         setGeneratedAI({
@@ -558,7 +560,7 @@ const OverallModel = ({ project, setProject }) => {
     const selectedClasses = state.classes.filter((c) => c.selected)
 
     if (selectedCards.length === 0 && selectedClasses.length === 0) {
-      toast.warning('Selecione pelo menos um item para adicionar.')
+      toast.warning(t('overall_model.toast_select_one'))
       return
     }
 
@@ -588,7 +590,7 @@ const OverallModel = ({ project, setProject }) => {
               cancelAI()
             },
             onError: (errors) => {
-              toast.error('Ocorreu um erro ao salvar os CRC Cards.')
+              toast.error(t('overall_model.toast_save_error'))
               console.error(errors)
             },
           },
@@ -611,7 +613,7 @@ const OverallModel = ({ project, setProject }) => {
             saveCards()
           },
           onError: (errors) => {
-            toast.error('Ocorreu um erro ao salvar as classes.')
+            toast.error(t('overall_model.toast_classes_save_error'))
             console.error(errors)
           },
         },

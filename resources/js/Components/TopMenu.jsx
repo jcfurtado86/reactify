@@ -12,10 +12,13 @@ import {
 } from 'lucide-react'
 import RaccoonIcon from '/resources/images/raccoonIconHeadTransparent.png'
 import { useTheme } from '@/Context/ThemeContext'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '@/Components/LanguageSwitcher'
 
 const TopMenu = ({ isOpen, setIsOpen }) => {
   const { props } = usePage()
   const { user, notifications } = props.auth
+  const { t } = useTranslation()
   const themes = [
     { name: 'zinc', label: 'Default (Zinc)', color: 'oklch(0.922 0 0)' },
     { name: 'doom64', label: 'Doom 64', color: '#e53935' },
@@ -101,6 +104,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
             </SelectContent>
           </Select>
         </div>
+        <LanguageSwitcher />
         <Button
           variant="ghost"
           size="icon"
@@ -119,8 +123,8 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           variant="ghost"
           size="icon"
           onClick={() => router.get(route('notifications.index'))}
-          aria-label="Notificações"
-          title="Notificações"
+          aria-label={t('nav.notifications')}
+          title={t('nav.notifications')}
         >
           <Bell className="!size-5" />
           <Badge
@@ -136,8 +140,8 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
               variant="ghost"
               size="icon"
               className="rounded-full"
-              aria-label="Perfil"
-              title="Perfil"
+              aria-label={t('nav.profile')}
+              title={t('nav.profile')}
             >
               {user?.avatar_url ? (
                 <img
@@ -151,20 +155,20 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="start">
-            <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {t('nav.profile')}
+            </DropdownMenuLabel>
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onSelect={() => router.get(route('profile.edit'))}
               >
-                Perfil
+                {t('profile.title')}
               </DropdownMenuItem>
-
-              <DropdownMenuItem>Configurações</DropdownMenuItem>
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => router.post(route('logout'))}>
-              Log out
+              {t('nav.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

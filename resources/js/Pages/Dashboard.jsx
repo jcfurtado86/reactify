@@ -1,5 +1,6 @@
 import React from 'react'
 import { Head, router } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 import ProgressIcon from '@/Components/ProgressIcon'
 import { ExpandableCard } from './projects/project-ceremonies/Inception/ProductCanvas'
 import Interview from '@/Components/Interview'
@@ -41,10 +42,11 @@ export const CeremonyCard = ({
   artifacts = [],
   amount = 0,
   className,
-  onClick, // IMPORTANTE: Esta prop agora é usada no botão "Ver mais"
+  onClick,
   delay = 0,
   project,
 }) => {
+  const { t } = useTranslation()
   const getArtifactKey = (artifactTitle) => {
     switch (artifactTitle) {
       case 'overallModel':
@@ -70,10 +72,10 @@ export const CeremonyCard = ({
 
     switch (artifactTitle) {
       case 'prioritizationMatrix':
-        return 'Algumas estórias não foram priorizadas'
+        return t('dashboard.missing_prioritization')
 
       default:
-        return 'Preenchimento pendente'
+        return t('dashboard.pending_fill')
     }
   }
   const getProductCanvasAmount = (canvas) => {
@@ -111,9 +113,8 @@ export const CeremonyCard = ({
           className="p-4 hover:no-underline"
         >
           <div className="flex w-full items-center gap-2">
-            {/* {amount > 0 && <Badge variant="secondary">{amount}</Badge>}*/}
             <SpanButton
-              title={`Ir até ${item.title}`}
+              title={t('dashboard.go_to', { name: item.title })}
               onClick={onClick}
               variant="link"
             >
@@ -161,7 +162,7 @@ export const CeremonyCard = ({
               return (
                 <ButtonWithTooltip
                   variant="link"
-                  title={`Ir até ${artifact.label}`}
+                  title={t('dashboard.go_to', { name: artifact.label })}
                   key={artifact.title}
                   className="flex items-center gap-2"
                   onClick={() =>
@@ -194,6 +195,7 @@ export const CeremonyCard = ({
 }
 
 const Dashboard = ({ project, setProject }) => {
+  const { t } = useTranslation()
   const [date, setDate] = useState(getDateObject(project.due_date))
   const isInitialMount = useRef(true)
   const [progress, setProgress] = useState(0)
@@ -332,25 +334,32 @@ const Dashboard = ({ project, setProject }) => {
               className="ml-2"
               variant={`${project.active ? 'secondary' : 'destructive'}`}
             >
-              {project.active ? 'Active' : 'Inactive'}
+              {project.active ? t('dashboard.active') : t('dashboard.inactive')}
             </Badge>
           </span>
-          Progresso da Conclusão
+          {t('dashboard.progress_title')}
           <div className="flex items-center">
             <Progress value={progress} className="w-32 h-2 mr-2" />
-            <span className="text-sm font-medium">{`${Math.round(progress)}% de estórias concluídas`}</span>
+            <span className="text-sm font-medium">
+              {t('dashboard.stories_completed_pct', {
+                pct: Math.round(progress),
+              })}
+            </span>
           </div>
           <div className="flex items-center">
             <Clock size={16} className="mr-3.5" />
             {project.updated_at ? (
               <span>
-                Atualizado:{' '}
-                {format(new Date(project.updated_at), 'dd/MM/yyyy HH:mm', {
-                  locale: ptBR,
+                {t('dashboard.updated_at', {
+                  date: format(
+                    new Date(project.updated_at),
+                    'dd/MM/yyyy HH:mm',
+                    { locale: ptBR },
+                  ),
                 })}
               </span>
             ) : (
-              <span>Atualizado: -</span>
+              <span>{t('dashboard.updated_never')}</span>
             )}
           </div>
         </div>
@@ -360,14 +369,14 @@ const Dashboard = ({ project, setProject }) => {
             value={project?.stories?.length || 0}
             max={20}
             colorClass="text-primary"
-            label="Stories"
+            label={t('dashboard.stories_label')}
             icon={List}
           />
           <ProgressIcon
             value={project?.sprints?.length || 0}
             max={10}
             colorClass="text-destructive"
-            label="Sprints"
+            label={t('dashboard.sprints_label')}
             icon={Users}
           />
         </div>
@@ -390,14 +399,14 @@ const Dashboard = ({ project, setProject }) => {
         />
       </div>
       <ExpandableCard
-        title={project?.title || 'Project'}
+        title={project?.title || t('nav.projects')}
         content={project?.description}
         col={1}
         variant="chart_1"
         icon={List}
         editable={false}
         defaultExpanded={true}
-        placeholder="Describe your project..."
+        placeholder={t('dashboard.describe_project_placeholder')}
         className="md:row-start-2 md:col-span-2 min-w-full "
       />
       <Interview
@@ -409,8 +418,12 @@ const Dashboard = ({ project, setProject }) => {
       <section className="ceremonies lg:col-span-2 lg:col-start-3 lg:row-start-1 row-span-3 row-start-4 md:col-span-2 flex flex-col  items-center bg-card gap-2 p-2">
         {ceremonies.map((ceremony, index) => (
           <React.Fragment key={ceremony.title}>
-            {ceremony.title === 'inception' && <p>Cerimônias</p>}
-            {ceremony.title === 'productBacklog' && <p>Backlog</p>}
+            {ceremony.title === 'inception' && (
+              <p>{t('dashboard.ceremonies_section')}</p>
+            )}
+            {ceremony.title === 'productBacklog' && (
+              <p>{t('dashboard.backlog_section')}</p>
+            )}
             <CeremonyCard
               project={project}
               item={tooltipInfo[ceremony.title]}

@@ -1,5 +1,6 @@
 import { useEcho } from '@laravel/echo-react'
 import { Head, router, usePage } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 import NavMenu from '@/Components/NavMenu'
 import { ProjectPermissions } from '@/Components/ProjectPermissions'
 // inception
@@ -37,15 +38,19 @@ import ChatBot from './ChatBot.jsx'
 import { ProjectSettings } from '@/Components/ProjectSettings.jsx'
 
 const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
+  const { t } = useTranslation()
   const [project, setProject] = useState({ ...projectDB })
   const { can } = usePermissions()
   // Inception States
 
+  // Menu items têm labelKey (i18n key) em vez de label estática. A
+  // string exibida é resolvida via t() no momento de passar para o
+  // NavMenu, lá embaixo, para responder a mudanças de idioma.
   const [menuItems, setMenuItems] = useState([
     ...(can('productCanvas.view')
       ? [
           {
-            label: 'Product Canvas',
+            labelKey: 'project.artifacts.product_canvas',
             link: 'productCanvas',
             value: true,
             tooltip: tooltipInfo.productCanvas,
@@ -55,7 +60,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('persona.view')
       ? [
           {
-            label: 'Personas',
+            labelKey: 'project.artifacts.personas',
             link: 'personas',
             value: false,
             tooltip: tooltipInfo.personas,
@@ -65,7 +70,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('goal.view')
       ? [
           {
-            label: 'Goals',
+            labelKey: 'project.artifacts.goals',
             link: 'goals',
             value: false,
             tooltip: tooltipInfo.goals,
@@ -75,7 +80,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('journey.view')
       ? [
           {
-            label: 'Journeys',
+            labelKey: 'project.artifacts.journeys',
             link: 'journeys',
             value: false,
             tooltip: tooltipInfo.journeys,
@@ -84,13 +89,11 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
       : []),
   ])
 
-  // Story Discovery States
-
   const [storyDiscoveryMenuItems, setStoryDiscoveryMenuItems] = useState([
     ...(can('userStory.view')
       ? [
           {
-            label: 'Stories',
+            labelKey: 'project.artifacts.stories',
             link: 'stories',
             value: true,
             tooltip: tooltipInfo.stories,
@@ -100,7 +103,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('overallModel.view')
       ? [
           {
-            label: 'Overall Model',
+            labelKey: 'project.artifacts.overall_model',
             link: 'overallModel',
             value: false,
             tooltip: tooltipInfo.overallModel,
@@ -110,7 +113,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('prioritizationMatrix.view')
       ? [
           {
-            label: 'Matriz de Priorização',
+            labelKey: 'project.artifacts.prioritization_matrix',
             link: 'prioritizationMatrix',
             value: false,
             tooltip: tooltipInfo.prioritizationMatrix,
@@ -120,7 +123,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('changeLog.view')
       ? [
           {
-            label: 'Change Log',
+            labelKey: 'project.artifacts.change_log',
             link: 'changeLog',
             value: false,
             tooltip: tooltipInfo.changeLog,
@@ -129,13 +132,11 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
       : []),
   ])
 
-  // Refining States
-
   const [refiningMenuItems, setRefiningMenuItems] = useState([
     ...(can('userStory.view')
       ? [
           {
-            label: 'Epic Stories',
+            labelKey: 'project.artifacts.epic_stories',
             link: 'epicStories',
             value: true,
             tooltip: tooltipInfo.epicStories,
@@ -145,7 +146,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('businessRule.view')
       ? [
           {
-            label: 'Business Rules',
+            labelKey: 'project.artifacts.business_rules',
             link: 'businessRules',
             value: false,
             tooltip: tooltipInfo.businessRules,
@@ -155,7 +156,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('usageScenario.view')
       ? [
           {
-            label: 'Usage Scenarios',
+            labelKey: 'project.artifacts.usage_scenarios',
             link: 'usageScenarios',
             value: false,
             tooltip: tooltipInfo.usageScenarios,
@@ -164,13 +165,11 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
       : []),
   ])
 
-  // Modeling States
-
   const [modelingMenuItems, setModelingMenuItems] = useState([
     ...(can('overallModel.view')
       ? [
           {
-            label: 'Overall Model',
+            labelKey: 'project.artifacts.overall_model',
             link: 'overallModel',
             value: true,
             tooltip: tooltipInfo.overallModel,
@@ -180,7 +179,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('interface.view')
       ? [
           {
-            label: 'Interfaces Internas e Externas',
+            labelKey: 'project.artifacts.system_interfaces',
             link: 'interfaces',
             value: false,
             tooltip: tooltipInfo.interfaces,
@@ -190,7 +189,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
     ...(can('storyboard.view')
       ? [
           {
-            label: 'Storyboards',
+            labelKey: 'project.artifacts.storyboards',
             link: 'storyboards',
             value: false,
             tooltip: tooltipInfo.storyboards,
@@ -198,6 +197,11 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
         ]
       : []),
   ])
+
+  // Wrapper para traduzir labels antes de passar para NavMenu.
+  // Usa `link` como key estável pra comparação de artefato ativo.
+  const localized = (items) =>
+    items.map((item) => ({ ...item, label: t(item.labelKey) }))
 
   const defaultArtifacts = useMemo(
     () => ({
@@ -252,12 +256,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
         setProject(data.project)
       }
     } catch (error) {
-      toast.error(
-        'Erro ao obter o projeto ' +
-          projectID +
-          ' atualizado: ' +
-          error.message,
-      )
+      toast.error(t('project.project_update_error') + ': ' + error.message)
     }
   }
 
@@ -270,7 +269,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
   useEffect(() => {
     const updatedMenuItems = menuItems.map((item) => ({
       ...item,
-      value: item.label === activeArtifact,
+      value: item.link === activeArtifact,
     }))
     setMenuItems(updatedMenuItems)
     localStorage.setItem('activeMenu', activeArtifact)
@@ -280,7 +279,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
   useEffect(() => {
     const updatedMenuItems = storyDiscoveryMenuItems.map((item) => ({
       ...item,
-      value: item.label === activeArtifact,
+      value: item.link === activeArtifact,
     }))
     setStoryDiscoveryMenuItems(updatedMenuItems)
     localStorage.setItem('activeStoryDiscoveryMenu', activeArtifact)
@@ -290,7 +289,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
   useEffect(() => {
     const updatedMenuItems = refiningMenuItems.map((item) => ({
       ...item,
-      value: item.label === activeArtifact,
+      value: item.link === activeArtifact,
     }))
     setRefiningMenuItems(updatedMenuItems)
     localStorage.setItem('activeRefiningMenu', activeArtifact)
@@ -300,7 +299,7 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
   useEffect(() => {
     const updatedMenuItems = modelingMenuItems.map((item) => ({
       ...item,
-      value: item.label === activeArtifact,
+      value: item.link === activeArtifact,
     }))
     setModelingMenuItems(updatedMenuItems)
     localStorage.setItem('activeModelingMenu', activeArtifact)
@@ -482,17 +481,21 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
             </Button>
             {/* Left: Tabs */}
             <TabsList>
-              <TabsTrigger value="inception">Inception</TabsTrigger>
-              <TabsTrigger value="storyDiscovery">Story Discovery</TabsTrigger>
-              <TabsTrigger value="refining">Refining</TabsTrigger>
-              <TabsTrigger value="modeling">Modeling</TabsTrigger>
+              <TabsTrigger value="inception">
+                {t('project.inception')}
+              </TabsTrigger>
+              <TabsTrigger value="storyDiscovery">
+                {t('project.story_discovery')}
+              </TabsTrigger>
+              <TabsTrigger value="refining">{t('project.refining')}</TabsTrigger>
+              <TabsTrigger value="modeling">{t('project.modeling')}</TabsTrigger>
               {can('productBacklog.view') && (
                 <TabsTrigger value="productBacklog">
-                  Product Backlog
+                  {t('project.product_backlog')}
                 </TabsTrigger>
               )}
               {can('sprint.view') && (
-                <TabsTrigger value="sprint">Sprint Kanban</TabsTrigger>
+                <TabsTrigger value="sprint">{t('project.sprint')}</TabsTrigger>
               )}
             </TabsList>
 
@@ -515,28 +518,28 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
 
           <TabsContent value="inception">
             <NavMenu
-              menuItems={menuItems}
+              menuItems={localized(menuItems)}
               setActiveMenu={handleArtifactChange}
             />
             {renderInceptionContent()}
           </TabsContent>
           <TabsContent value="storyDiscovery">
             <NavMenu
-              menuItems={storyDiscoveryMenuItems}
+              menuItems={localized(storyDiscoveryMenuItems)}
               setActiveMenu={handleArtifactChange}
             />
             {renderStoryDiscoveryContent()}
           </TabsContent>
           <TabsContent value="refining">
             <NavMenu
-              menuItems={refiningMenuItems}
+              menuItems={localized(refiningMenuItems)}
               setActiveMenu={handleArtifactChange}
             />
             {renderRefiningContent()}
           </TabsContent>
           <TabsContent value="modeling">
             <NavMenu
-              menuItems={modelingMenuItems}
+              menuItems={localized(modelingMenuItems)}
               setActiveMenu={handleArtifactChange}
             />
             {renderModelingContent()}

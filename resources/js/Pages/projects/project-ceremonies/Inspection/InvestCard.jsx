@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { X, Check, LoaderCircle, ChevronRight, Info } from 'lucide-react'
 import { router } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 import { isTemporary, cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import StatusBadge from '@/Components/StatusBadge'
@@ -24,6 +25,7 @@ const InvestCard = ({
   project,
   setInspectionId,
 }) => {
+  const { t } = useTranslation()
   const item = project[itemCategory]?.find((element) => element.id === itemId)
   const [investState, setInvestState] = useState({
     independent: item?.invest_card?.independent || 'na',
@@ -205,13 +207,13 @@ const InvestCard = ({
               variant="success"
               size="icon"
               onClick={handleSubmit}
-              title="Salvar"
+              title={t('common.save')}
             >
               <Check />
             </Button>
             <Button
               onClick={() => setIsExpanded(!isExpanded)}
-              title={isExpanded ? 'Reduzir' : 'Expandir'}
+              title={isExpanded ? t('common.close') : t('ai_modal.maximize')}
               variant="secondary"
               size="icon"
             >

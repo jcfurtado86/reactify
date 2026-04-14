@@ -1,4 +1,5 @@
 import { useForm, router } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 import { Minus, Check, X, ChevronsUp, Network } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
@@ -166,6 +167,7 @@ const GeneratedItemsModal = ({
 }
 
 const Interfaces = ({ project, setProject }) => {
+  const { t } = useTranslation()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
@@ -402,7 +404,7 @@ const Interfaces = ({ project, setProject }) => {
         }))
 
         if (interfacesWithSelection.length === 0) {
-          toast.info('Nenhuma interface foi gerada com base no contexto atual.')
+          toast.info(t('system_interfaces.empty'))
           return
         }
 
@@ -436,7 +438,7 @@ const Interfaces = ({ project, setProject }) => {
     )
 
     if (selectedInterfaces.length === 0) {
-      toast.warning('Selecione pelo menos uma interface para adicionar.')
+      toast.warning(t('common.select_at_least_one'))
       return
     }
 
@@ -469,7 +471,7 @@ const Interfaces = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as interfaces.')
+          toast.error(t('common.error'))
           console.error('Erro do backend:', errors)
         },
       },

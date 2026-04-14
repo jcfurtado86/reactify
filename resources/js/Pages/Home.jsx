@@ -18,10 +18,12 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import TableComponent from '@/Components/TableComponent'
 import { cn } from '@/lib/utils'
+import { useTranslation } from 'react-i18next'
 
 const NAME_MAX = 50
 
 const Home = ({}) => {
+  const { t } = useTranslation()
   const props = usePage().props
   //const { errors } = props
   const projects = props.auth.projects || []
@@ -54,7 +56,7 @@ const Home = ({}) => {
     },
     {
       accessorKey: 'title',
-      header: 'Title',
+      header: t('home.columns.title'),
       cell: ({ row }) => (
         <Button
           variant="empty"
@@ -66,7 +68,7 @@ const Home = ({}) => {
     },
     {
       accessorKey: 'description',
-      header: 'Description',
+      header: t('home.columns.description'),
       cell: ({ row }) => (
         <div className="flex items-center !line-clamp-3">
           {row.getValue('description')}
@@ -75,7 +77,7 @@ const Home = ({}) => {
     },
     {
       accessorKey: 'users',
-      header: 'Members',
+      header: t('home.columns.members'),
       cell: ({ row }) => (
         <div className="w-32">
           <AvatarCircles
@@ -93,14 +95,14 @@ const Home = ({}) => {
     },
     {
       accessorKey: 'active',
-      header: 'Status',
+      header: t('home.columns.status'),
       cell: ({ row }) => (
         <div className="flex items-center !line-clamp-3">
           <Button
             size="icon"
             variant="empty"
             className={`rounded-full ${row.getValue('active') ? 'text-green-400' : 'text-red-500'}`}
-            title={row.getValue('active') ? 'Active' : 'Inactive'}
+            title={row.getValue('active') ? t('home.toasts.project_activated') : t('home.toasts.project_deactivated')}
           >
             {row.getValue('active') ? <CircleCheck /> : <CircleOff />}
           </Button>
@@ -109,7 +111,7 @@ const Home = ({}) => {
     },
     {
       accessorKey: 'created_at',
-      header: 'Created',
+      header: t('home.columns.created'),
       cell: ({ row }) => (
         <div className="flex items-center whitespace-nowrap">
           {new Date(row.getValue('created_at')).toLocaleString('pt-BR', {
@@ -133,18 +135,18 @@ const Home = ({}) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={() => toggleActive(row.getValue('id'))}
               >
-                Toggle active
+                {t('home.toggle_active')}
                 <PowerCircle />
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 onClick={() => deleteProject(row.getValue('id'))}
               >
-                Delete
+                {t('common.delete')}
                 <Trash2 />
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -212,9 +214,9 @@ const Home = ({}) => {
           )
         })
       }
-      toast.success('Projetos atualizados com sucesso!')
+      toast.success(t('home.toasts.projects_updated'))
     } catch (error) {
-      toast.error('Erro ao obter projetos atualizados: ' + error.message)
+      toast.error(t('common.error') + ': ' + error.message)
       console.error(error)
     }
   }
@@ -247,10 +249,12 @@ const Home = ({}) => {
 
   return (
     <div className="bg-background text-white p-6 flex-1 mx-auto w-full">
-      <Head title="Home" />
+      <Head title={t('home.page_title')} />
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-lg mb-4 text-foreground">Projects</p>
+        <p className="font-semibold text-lg mb-4 text-foreground">
+          {t('home.projects_heading')}
+        </p>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button
@@ -264,18 +268,18 @@ const Home = ({}) => {
                   'oklch(0.6861 0.2061 14.9941)',
                 ]}
               />
-              Novo Projeto
+              {t('home.new_project')}
             </Button>
           </DialogTrigger>
 
           <DialogContent className="">
             <form className="space-y-4" onSubmit={createProject}>
               <DialogHeader>
-                <DialogTitle>Criar Novo Projeto</DialogTitle>
+                <DialogTitle>{t('home.create_new_project')}</DialogTitle>
                 <DialogDescription>
-                  Preencha os campos abaixo para criar um novo projeto.
+                  {t('home.create_project_helper')}
                   <br />
-                  Os campos obrigatórios estão marcados com um asterisco{' '}
+                  {t('home.required_fields_marker')}{' '}
                   <span className="text-destructive">*</span>
                 </DialogDescription>
               </DialogHeader>
@@ -284,7 +288,8 @@ const Home = ({}) => {
                 <div className="grid gap-3">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="title-1">
-                      Nome <span className="text-destructive">*</span>
+                      {t('home.project_name')}{' '}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <span
                       className={cn(
@@ -299,7 +304,7 @@ const Home = ({}) => {
                   </div>
 
                   <Input
-                    placeholder="Nome do Projeto"
+                    placeholder={t('home.project_name_placeholder')}
                     id="title-1"
                     name="title"
                     maxLength={NAME_MAX} // Bloqueio físico
@@ -324,7 +329,8 @@ const Home = ({}) => {
                 <div className="grid gap-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="description-1">
-                      Descrição <span className="text-destructive">*</span>
+                      {t('home.project_description')}{' '}
+                      <span className="text-destructive">*</span>
                     </Label>
                     <span
                       className={cn(
@@ -339,7 +345,7 @@ const Home = ({}) => {
                   </div>
 
                   <Input
-                    placeholder="Descrição do Projeto"
+                    placeholder={t('home.project_description_placeholder')}
                     id="description-1"
                     name="description"
                     maxLength={1000} // Bloqueio físico
@@ -363,7 +369,7 @@ const Home = ({}) => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Label htmlFor="description">Emoji</Label>
+                  <Label htmlFor="description">{t('home.project_emoji')}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" size="icon">
@@ -386,7 +392,7 @@ const Home = ({}) => {
                   <Button
                     variant="outline"
                     size="icon"
-                    title="Remover emoji"
+                    title={t('home.remove_emoji')}
                     onClick={(e) => {
                       e.preventDefault()
                       setData('emoji', null)
@@ -400,10 +406,10 @@ const Home = ({}) => {
               <DialogFooter>
                 <DialogClose asChild>
                   <Button type="button" variant="outline">
-                    Cancelar
+                    {t('common.cancel')}
                   </Button>
                 </DialogClose>
-                <Button type="submit">Criar Projeto</Button>
+                <Button type="submit">{t('home.create_project_button')}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -421,18 +427,17 @@ const Home = ({}) => {
             <MousePointerClick className="h-12 w-12 text-foreground/80" />
           </div>
           <h3 className="text-2xl font-bold text-foreground mb-2">
-            Bem-vindo ao Reactify
+            {t('home.welcome_title')}
           </h3>
           <p className="text-muted-foreground max-w-md mb-8">
-            Você ainda não tem nenhum projeto. Crie seu primeiro espaço de
-            trabalho para começar a gerenciar suas tarefas com IA.
+            {t('home.welcome_body')}
           </p>
           <Button
             size="lg"
             className="rounded-full font-semibold"
             onClick={() => setCreateDialogOpen(true)}
           >
-            Criar meu primeiro projeto
+            {t('home.create_first_project')}
           </Button>
         </div>
       )}

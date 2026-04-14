@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageSquare, X, SendHorizontal, LoaderCircle } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import { useTranslation } from 'react-i18next'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const AIMessage = ({ fullContent, animate }) => {
@@ -39,11 +40,11 @@ const AIMessage = ({ fullContent, animate }) => {
  * Componente principal do ChatBot, agora com WebSockets (Laravel Echo).
  */
 const ChatBot = ({ project, currentPage, currentContextData }) => {
+  const { t } = useTranslation()
   const [messages, setMessages] = useState([
     {
       id: 1,
-      message:
-        'Olá! 👋 Eu sou seu assistente REACT-M e atuarei como seu Facilitador. Como posso **guiar** você ou sua equipe na cerimônia de hoje?',
+      message: t('chat.welcome'),
       sender: 'bot',
       timestamp: new Date().toISOString(),
       animate: false,
@@ -137,14 +138,14 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
         preserveScroll: true,
         onError: (errors) => {
           const firstError = errors[Object.keys(errors)[0]]
-          throw new Error(firstError || 'Erro ao processar a requisição.')
+          throw new Error(firstError || t('chat.error_request'))
         },
       })
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error)
       const errorMessage = {
         id: `temp-error-${Date.now()}`,
-        message: `Ocorreu um erro ao enviar sua mensagem: ${error.message}`,
+        message: t('chat.error_response', { message: error.message }),
         sender: 'ai',
         timestamp: new Date().toISOString(),
         animate: false,
@@ -175,7 +176,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
           >
             <header className="flex justify-between items-center p-4 bg-primary text-primary-foreground rounded-t-lg">
               <h3 id="chat-heading" className="text-base font-semibold">
-                Facilitador
+                {t('chat.title')}
               </h3>
               <Button
                 variant="ghost"
@@ -244,7 +245,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
                 <Input
                   disabled={isLoading}
                   type="text"
-                  placeholder="Digite sua pergunta..."
+                  placeholder={t('chat.placeholder')}
                   className="flex-1 font-normal"
                   value={inputMessage}
                   onKeyDown={(e) => {
@@ -257,7 +258,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
                 <Button
                   disabled={isLoading}
                   size="icon"
-                  aria-label="Enviar mensagem"
+                  aria-label={t('chat.send')}
                   onClick={handleSendMessage}
                 >
                   <SendHorizontal className="size-5" />
@@ -272,9 +273,9 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
         onClick={toggleChat}
         size="icon"
         className="fixed bottom-2 right-2 size-12 rounded-full shadow-lg transition-transform transform hover:scale-110 z-50"
-        aria-label={isOpen ? 'Fechar chat' : 'Abrir chat'}
+        aria-label={isOpen ? t('chat.close_chat') : t('chat.open_chat')}
         aria-expanded={isOpen}
-        tooltipContent={isOpen ? null : <div>Pergunte qualquer coisa</div>}
+        tooltipContent={isOpen ? null : <div>{t('chat.title')}</div>}
         side="left"
       >
         <AnimatePresence initial={false} mode="wait">

@@ -1,4 +1,5 @@
 import { usePermissions } from '@/Context/PermissionContext'
+import { useTranslation } from 'react-i18next'
 import {
   Plus,
   Check,
@@ -39,6 +40,7 @@ const GeneratedItemsModal = ({
   toggleAllItems,
   systemColors,
 }) => {
+  const { t } = useTranslation()
   const goalVariants = systemColors?.goals || {}
 
   return (
@@ -55,8 +57,14 @@ const GeneratedItemsModal = ({
       <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between p-3 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'Goals Geradas por IA'}
-            {isModalMinimized && 'Goals Geradas'}
+            {!isModalMinimized &&
+              t('ai_modal.ai_generated_title', {
+                artifact: t('goals.plural'),
+              })}
+            {isModalMinimized &&
+              t('ai_modal.ai_generated_title_minimized', {
+                artifact: t('goals.plural'),
+              })}
           </h3>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="secondary" onClick={changeModalState}>
@@ -80,16 +88,18 @@ const GeneratedItemsModal = ({
           <>
             <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
               <span className="text-foreground font-medium">
-                {generatedItems.filter((j) => j.selected).length} de{' '}
-                {generatedItems.length} selecionadas
+                {t('common.selected_count', {
+                  selected: generatedItems.filter((j) => j.selected).length,
+                  total: generatedItems.length,
+                })}
               </span>
               <Button
                 onClick={toggleAllItems}
                 className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
               >
                 {generatedItems.every((story) => story.selected)
-                  ? 'Desmarcar Todas'
-                  : 'Selecionar Todas'}
+                  ? t('common.deselect_all')
+                  : t('common.select_all')}
               </Button>
             </div>
 
@@ -146,7 +156,7 @@ const GeneratedItemsModal = ({
                 onClick={cancelGeneratedItems}
                 className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={confirmGeneratedItems}
@@ -154,8 +164,9 @@ const GeneratedItemsModal = ({
                 disabled={generatedItems.filter((j) => j.selected).length === 0}
               >
                 <Check className="mr-2" size={16} />
-                Confirmar e Adicionar (
-                {generatedItems.filter((j) => j.selected).length})
+                {t('ai_modal.confirm_add_count', {
+                  count: generatedItems.filter((j) => j.selected).length,
+                })}
               </Button>
             </div>
           </>
@@ -186,6 +197,7 @@ const GoalItem = ({
   systemColors,
   errors,
 }) => {
+  const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const status = inspectionStatus(goal)
 
@@ -205,7 +217,7 @@ const GoalItem = ({
       },
       {
         onError: () => {
-          toast.error('Erro ao salvar a cor do objetivo.')
+          toast.error(t('goals.toast_color_save_error'))
         },
       },
     )
@@ -454,6 +466,7 @@ const GoalItem = ({
   )
 }
 const Goals = ({ project, setProject }) => {
+  const { t } = useTranslation()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)
@@ -657,27 +670,24 @@ const Goals = ({ project, setProject }) => {
         }))
 
         if (goalsWithSelection.length === 0) {
-          toast.info('A IA não gerou novas goals com base nas entrevistas.')
+          toast.info(t('goals.toast_generate_empty'))
           return
         }
 
         setAiGeneratedGoals(goalsWithSelection)
         setShowAiModal(true)
-        toast.success('Goals geradas com sucesso.')
+        toast.success(t('goals.toast_generated'))
       } else {
         if (data.status === 'warning') {
           toast.warning(data.message)
         } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
+          toast.error(data.message || t('ai_errors.unexpected'))
         }
       }
     } catch (error) {
       console.error('Erro ao gerar goals:', error)
       toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
+        error.response?.data?.message || t('ai_errors.server_error'),
       )
     } finally {
       setIsGenerating(false)
@@ -689,7 +699,7 @@ const Goals = ({ project, setProject }) => {
     const remainingGoals = aiGeneratedGoals.filter((goal) => !goal.selected)
 
     if (selectedGoals.length === 0) {
-      toast.warning('Selecione pelo menos uma goal para adicionar.')
+      toast.warning(t('goals.toast_select_one'))
       return
     }
 
@@ -719,9 +729,7 @@ const Goals = ({ project, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(
-            `${selectedGoals.length} goal(s) adicionada(s) com sucesso!`,
-          )
+          toast.success(t('goals.toast_saved'))
           setAiGeneratedGoals(remainingGoals)
           if (remainingGoals.length === 0) {
             setShowAiModal(false)
@@ -729,7 +737,7 @@ const Goals = ({ project, setProject }) => {
           }
         },
         onError: (errors) => {
-          toast.error('Ocorreu um erro ao salvar as goals.')
+          toast.error(t('common.error'))
           console.error('Erro do backend:', errors)
           setProject((prevProject) => {
             const goalsToAddIds = goalsToAdd.map((g) => g.id)

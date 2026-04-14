@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react'
 import React from 'react'
 import { Excalidraw, WelcomeScreen, exportToBlob } from '@excalidraw/excalidraw'
 import { Paperclip, Save } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useGroupedStories } from '@/lib/utils'
 const blobToDataURL = (blob) => {
   return new Promise((resolve, reject) => {
@@ -47,6 +48,7 @@ const StoryCard = ({
 }
 
 const Storyboards = ({ project }) => {
+  const { t } = useTranslation()
   const [excalidrawAPI, setExcalidrawAPI] = useState(null)
   const [sceneData, setSceneData] = useState(null)
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -220,7 +222,7 @@ const Storyboards = ({ project }) => {
       img.src = dataURL
     } catch (error) {
       console.error('Erro ao processar anexo para remontagem:', error)
-      alert('Não foi possível carregar o anexo.')
+      alert(t('common.error'))
     } finally {
       if (event.target) event.target.value = ''
     }
@@ -232,7 +234,7 @@ const Storyboards = ({ project }) => {
   }
   const handleSaveCanvas = async () => {
     if (!excalidrawAPI || !selectedStory) {
-      alert('Por favor, selecione uma story antes de salvar.')
+      alert(t('storyboards.select_story'))
       return
     }
 
@@ -264,7 +266,7 @@ const Storyboards = ({ project }) => {
         },
         onError: (errors) => {
           console.error('Erro ao salvar:', errors)
-          alert('Ocorreu um erro ao salvar o storyboard.')
+          alert(t('storyboards.toast_save_error'))
         },
         onFinish: () => {
           setIsProcessing(false)
@@ -272,7 +274,7 @@ const Storyboards = ({ project }) => {
       })
     } catch (error) {
       console.error('Erro ao exportar o canvas:', error)
-      alert('Não foi possível gerar a imagem do canvas.')
+      alert(t('storyboards.toast_export_error'))
     }
   }
 
