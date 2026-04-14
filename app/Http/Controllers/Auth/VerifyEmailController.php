@@ -26,7 +26,7 @@ class VerifyEmailController extends Controller
 
     $user = $request->user();
 
-    Mail::to($user->email)->send(new WelcomeEmail($user->name));
+    Mail::to($user)->send(new WelcomeEmail($user->name));
 
     return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');
   }

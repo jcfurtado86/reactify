@@ -64,7 +64,10 @@ class ProjectInvitationController extends Controller
     if ($invitedUser) {
       Notification::send($invitedUser, new UserInvitedToProject($invitation));
     } else {
-      Notification::route('mail', $validated['email'])->notify(new UserInvitedToProject($invitation));
+      // Sem usuário cadastrado → HasLocalePreference não se aplica. Usa o idioma
+      // do inviter como melhor palpite pra não cair no default inglês.
+      Notification::route('mail', $validated['email'])
+        ->notify((new UserInvitedToProject($invitation))->locale($user->preferredLocale()));
     }
 
     return back()->with(['message' => 'Invitation sent successfully', 'status' => 'success']);

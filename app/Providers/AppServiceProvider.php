@@ -42,6 +42,9 @@ use App\Models\SystemInterface;
 use App\Models\Interview;
 use App\Models\Project;
 
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -80,5 +83,31 @@ class AppServiceProvider extends ServiceProvider
     Project::observe(ProjectObserver::class);
     SystemColor::observe(SystemColorObserver::class);
     Sprint::observe(SprintObserver::class);
+
+    ResetPassword::toMailUsing(function ($notifiable, $token) {
+      $url = url(route('password.reset', [
+        'token' => $token,
+        'email' => $notifiable->getEmailForPasswordReset(),
+      ], false));
+
+      return (new MailMessage())
+        ->subject(__('emails.password_reset.subject'))
+        ->greeting(__('emails.password_reset.greeting', ['name' => $notifiable->name ?? '']))
+        ->line(__('emails.password_reset.intro'))
+        ->action(__('emails.password_reset.cta'), $url)
+        ->line(__('emails.password_reset.expiry', [
+          'minutes' => config('auth.passwords.' . config('auth.defaults.passwords') . '.expire'),
+        ]))
+        ->line(__('emails.password_reset.ignore_notice'));
+    });
+
+    VerifyEmail::toMailUsing(function ($notifiable, $url) {
+      return (new MailMessage())
+        ->subject(__('emails.verify_email.subject'))
+        ->greeting(__('emails.verify_email.greeting', ['name' => $notifiable->name ?? '']))
+        ->line(__('emails.verify_email.intro'))
+        ->action(__('emails.verify_email.cta'), $url)
+        ->line(__('emails.verify_email.ignore_notice'));
+    });
   }
 }

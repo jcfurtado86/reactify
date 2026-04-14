@@ -56,6 +56,26 @@ class ProfileController extends Controller
   }
 
   /**
+   * Persist the user's preferred locale so that emails and notifications
+   * can be delivered in the same language the user sees in the UI.
+   */
+  public function updateLocale(Request $request): RedirectResponse
+  {
+    $validated = $request->validate([
+      'locale' => ['required', 'string', 'in:pt,en,pt_BR'],
+    ]);
+
+    // Normaliza: frontend usa 'pt', Laravel espera 'pt_BR'.
+    $locale = $validated['locale'] === 'pt' ? 'pt_BR' : $validated['locale'];
+
+    $user = $request->user();
+    $user->locale = $locale;
+    $user->save();
+
+    return Redirect::back();
+  }
+
+  /**
    * Delete the user's account.
    */
   public function destroy(Request $request): RedirectResponse

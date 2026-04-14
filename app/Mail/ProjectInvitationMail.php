@@ -28,7 +28,10 @@ class ProjectInvitationMail extends Mailable
   public function envelope(): Envelope
   {
     return new Envelope(
-      subject: 'Project Invitation Mail',
+      subject: __('emails.invitation.subject', [
+        'inviter' => $this->invitation->inviter->name,
+        'project' => $this->invitation->project->title,
+      ]),
     );
   }
 
@@ -37,10 +40,20 @@ class ProjectInvitationMail extends Mailable
    */
   public function content(): Content
   {
+    $invitedUser = \App\Models\User::where('email', $this->invitation->email)->first();
+    $roleKey = $this->invitation->role ?: 'unknown';
+
     return new Content(
       markdown: 'emails.project-invitation',
       with: [
         'invitation' => $this->invitation,
+        'recipientName' => $invitedUser?->name,
+        'roleLabel' => __('emails.invitation.role_' . $roleKey),
+        'acceptUrl' => route('invitations.accept', ['invitation' => $this->invitation->token]),
+        'declineUrl' => route('invitations.decline', ['invitation' => $this->invitation->token]),
+        'expiresAt' => optional($this->invitation->expires_at)
+          ? \Illuminate\Support\Carbon::parse($this->invitation->expires_at)->format('d/m/Y H:i')
+          : '—',
       ]
     );
   }

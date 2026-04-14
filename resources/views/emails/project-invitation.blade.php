@@ -1,18 +1,21 @@
 @component('mail::message')
-Você recebeu um convite de {{ $invitation->inviter->name }} para participar do projeto {{ $invitation->project->title }}.
+# {{ $recipientName ? __('emails.invitation.greeting_named', ['name' => $recipientName]) : __('emails.invitation.greeting') }}
 
-Você pode aceitar ou recusar o convite clicando nos botões abaixo:
+{!! __('emails.invitation.intro', ['inviter' => $invitation->inviter->name, 'project' => $invitation->project->title]) !!}
 
-@component('mail::button', ['url' => route('invitations.accept', ['invitation' => $invitation->token])])
-Aceitar Convite
+@if ($invitation->project->description)
+> {{ \Illuminate\Support\Str::limit($invitation->project->description, 200) }}
+@endif
+
+**{{ __('emails.invitation.role_label') }}** {{ $roleLabel }}
+
+@component('mail::button', ['url' => $acceptUrl, 'color' => 'success'])
+{{ __('emails.invitation.cta_accept') }}
 @endcomponent
 
-@component('mail::button', ['url' => route('invitations.decline', ['invitation' => $invitation->token])])
-Recusar Convite
-@endcomponent
+{{ __('emails.invitation.pitch') }}
 
-@component('mail::panel')
-<p>Se você tiver alguma dúvida ou precisar de ajuda, não hesite em nos contatar.</p>
-@endcomponent
+{!! __('emails.invitation.expires_at', ['date' => $expiresAt]) !!}
 
+{!! __('emails.invitation.decline_link', ['url' => $declineUrl]) !!}
 @endcomponent

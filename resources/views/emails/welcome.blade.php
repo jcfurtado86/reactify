@@ -1,16 +1,17 @@
 @component('mail::message')
-# Seja Bem-vindo(a), {{ $name }}!
+# {{ __('emails.welcome.greeting', ['name' => $name]) }}
 
-Obrigado por se registrar em nossa plataforma. Estamos muito felizes em tê-lo(a) conosco.
+{!! __('emails.welcome.intro') !!}
 
-@component('mail::button', ['url' => $url])
-Acessar seu Painel
+{{ __('emails.welcome.next_steps_header') }}
+
+- {!! __('emails.welcome.step_project') !!}
+- {!! __('emails.welcome.step_interview') !!}
+- {!! __('emails.welcome.step_team') !!}
+
+@component('mail::button', ['url' => $url, 'color' => 'success'])
+{{ __('emails.welcome.cta') }}
 @endcomponent
 
-@component('mail::panel')
-Lembre-se de completar seu perfil para ter a melhor experiência possível.
-@endcomponent
-
-Atenciosamente,<br>
-{{ config('app.name') }}
+{{ __('emails.signature') }} {{ config('app.name') }}
 @endcomponent

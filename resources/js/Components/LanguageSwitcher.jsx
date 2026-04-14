@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { router, usePage } from '@inertiajs/react'
 
 /**
  * Botão que alterna entre os dois idiomas suportados (pt ↔ en).
@@ -54,6 +55,7 @@ const LANG_META = {
 
 const LanguageSwitcher = ({ className = '' }) => {
   const { i18n, t } = useTranslation()
+  const { auth } = usePage().props
   const current = (i18n.resolvedLanguage || i18n.language || 'pt').startsWith(
     'pt',
   )
@@ -64,7 +66,19 @@ const LanguageSwitcher = ({ className = '' }) => {
   const nextMeta = LANG_META[next]
   const Flag = meta.Flag
 
-  const toggle = () => i18n.changeLanguage(next)
+  const toggle = () => {
+    i18n.changeLanguage(next)
+    // Persistir no backend pra emails respeitarem o idioma escolhido.
+    // Fire-and-forget: sem loading state, sem toast, sem preservação de
+    // scroll — só manda e segue a vida.
+    if (auth?.user?.id) {
+      router.patch(
+        route('profile.locale'),
+        { locale: next },
+        { preserveScroll: true, preserveState: true, only: [] },
+      )
+    }
+  }
 
   return (
     <button

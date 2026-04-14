@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, HasLocalePreference
 {
   /** @use HasFactory<\Database\Factories\UserFactory> */
   use HasFactory, Notifiable, SoftDeletes;
@@ -32,7 +33,13 @@ class User extends Authenticatable implements MustVerifyEmail
     'provider_avatar',
     'avatar_path',
     'email_verified_at',
+    'locale',
   ];
+
+  public function preferredLocale(): string
+  {
+    return $this->locale ?: config('app.locale');
+  }
 
   /**
    * The attributes that should be hidden for serialization.

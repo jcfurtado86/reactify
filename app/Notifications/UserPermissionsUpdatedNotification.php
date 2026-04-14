@@ -37,23 +37,29 @@ class UserPermissionsUpdatedNotification extends Notification
    */
   public function toMail(object $notifiable): MailMessage
   {
-    $currentRole = $this->getRoleForNotifiable($notifiable);
+    $roleLabel = $this->getRoleLabel($notifiable);
+
     return (new MailMessage())
-      ->greeting('Hello ' . $notifiable->name . ',')
-      ->subject(
-        $this->editorUser->name .
-          ' updated your permissions in ' .
-          $this->project->title
-      )
-      ->line(
-        '[' .
-          $this->editorUser->name .
-          '](mailto:' .
-          $this->editorUser->email .
-          ') updated your permissions in ' .
-          $this->project->title
-      )
-      ->line('Now your current role is ' . $currentRole . '.');
+      ->subject(__('emails.permissions_updated.subject', [
+        'project' => $this->project->title,
+      ]))
+      ->greeting(__('emails.permissions_updated.greeting', [
+        'name' => $notifiable->name,
+      ]))
+      ->line(__('emails.permissions_updated.body', [
+        'editor' => $this->editorUser->name,
+        'project' => $this->project->title,
+      ]))
+      ->line(__('emails.permissions_updated.new_role', [
+        'role' => $roleLabel,
+      ]))
+      ->action(
+        __('emails.permissions_updated.cta'),
+        route('project.ceremony.show', [
+          'project' => $this->project->id,
+          'ceremony' => 'inception',
+        ])
+      );
   }
 
   /**
@@ -63,16 +69,19 @@ class UserPermissionsUpdatedNotification extends Notification
    */
   public function toArray(object $notifiable): array
   {
-    $currentRole = $this->getRoleForNotifiable($notifiable);
     return [
-      'message' =>
-        $this->editorUser->name .
-        ' updated your permissions in ' .
-        $this->project->title .
-        '. Current role: ' .
-        $currentRole .
-        '.',
+      'message' => __('emails.permissions_updated.inapp_message', [
+        'editor' => $this->editorUser->name,
+        'project' => $this->project->title,
+        'role' => $this->getRoleLabel($notifiable),
+      ]),
     ];
+  }
+
+  private function getRoleLabel(object $notifiable): string
+  {
+    $roleKey = $this->getRoleForNotifiable($notifiable) ?: 'unknown';
+    return __('emails.invitation.role_' . $roleKey);
   }
 
   private function getRoleForNotifiable(object $notifiable): string
