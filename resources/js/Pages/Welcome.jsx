@@ -11,6 +11,7 @@ import {
   Upload,
   LayoutDashboard,
   Rocket,
+  ListChecks,
 } from 'lucide-react'
 
 export default function Welcome({ auth, currentYear }) {
@@ -19,12 +20,17 @@ export default function Welcome({ auth, currentYear }) {
     <>
       <Head title={t('welcome.head_title')} />
 
-      <div className="min-h-screen bg-background text-foreground">
-        <Particles className="absolute inset-0 w-full h-full" />
-        <div className="absolute top-4 right-4 z-10">
+      <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
+        <Particles
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          quantity={150}
+          ease={80}
+          refresh
+        />
+        <div className="absolute top-4 right-4 z-20">
           <LanguageSwitcher />
         </div>
-        <div className="relative flex min-h-screen flex-col items-center justify-center selection:bg-primary/20">
+        <div className="relative z-10 flex min-h-screen flex-col items-center selection:bg-primary/20">
           {/* Header */}
           {/* <header className="absolute top-0 w-full px-6 py-6 flex justify-between items-center">
             <div className="text-2xl font-bold text-primary">Reactify</div>
@@ -62,7 +68,7 @@ export default function Welcome({ auth, currentYear }) {
                 i18nKey="welcome.hero_title"
                 components={{
                   brand: (
-                    <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 bg-clip-text text-transparent" />
+                    <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 via-rose-500 to-amber-500 bg-clip-text text-transparent" />
                   ),
                 }}
               />
@@ -87,7 +93,7 @@ export default function Welcome({ auth, currentYear }) {
             </div>
 
             {/* Feature Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full mt-16 max-w-7xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full mt-16 max-w-7xl">
               {[
                 {
                   Icon: Mic,
@@ -110,6 +116,13 @@ export default function Welcome({ auth, currentYear }) {
                   iconBg: 'bg-rose-500/10 text-rose-500',
                   hoverBorder: 'hover:border-rose-500/50',
                 },
+                {
+                  Icon: ListChecks,
+                  title: t('welcome.feature_management_title'),
+                  description: t('welcome.feature_management_body'),
+                  iconBg: 'bg-amber-500/10 text-amber-500',
+                  hoverBorder: 'hover:border-amber-500/50',
+                },
               ].map(({ Icon, title, description, iconBg, hoverBorder }) => (
                 <div
                   key={title}
@@ -124,6 +137,24 @@ export default function Welcome({ auth, currentYear }) {
                   <p className="text-muted-foreground">{description}</p>
                 </div>
               ))}
+            </div>
+
+            {/* What is REACT-M */}
+            <div className="w-full max-w-3xl mt-32 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                <Trans
+                  i18nKey="welcome.about_title"
+                  components={{
+                    brand: <span className="text-foreground" />,
+                  }}
+                />
+              </h2>
+              <p className="text-base md:text-lg text-muted-foreground mb-4">
+                {t('welcome.about_p1')}
+              </p>
+              <p className="text-base md:text-lg text-muted-foreground">
+                {t('welcome.about_p2')}
+              </p>
             </div>
 
             {/* How it works */}
@@ -168,8 +199,8 @@ export default function Welcome({ auth, currentYear }) {
                     title: t('welcome.step4_title'),
                     body: t('welcome.step4_body'),
                     img: '/img/landing/step-4-team.png',
-                    iconBg: 'bg-emerald-500/10 text-emerald-500',
-                    stepLabel: 'text-emerald-500',
+                    iconBg: 'bg-amber-500/10 text-amber-500',
+                    stepLabel: 'text-amber-500',
                   },
                 ].map(
                   (
