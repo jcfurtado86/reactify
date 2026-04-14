@@ -89,8 +89,10 @@ const GeneratedItemsModal = ({
           <>
             <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
               <span className="text-foreground font-medium text-lg">
-                {generatedItems.filter((j) => j.selected).length} de{' '}
-                {generatedItems.length} selecionadas
+                {t('ai_modal.selected_of', {
+                  count: generatedItems.filter((j) => j.selected).length,
+                  total: generatedItems.length,
+                })}
               </span>
               <Button
                 onClick={toggleAllItems}
@@ -138,7 +140,7 @@ const GeneratedItemsModal = ({
                 onClick={cancelGeneratedItems}
                 className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={confirmGeneratedItems}
@@ -149,9 +151,9 @@ const GeneratedItemsModal = ({
                 }
               >
                 <Check className="mr-2" size={16} />
-                Confirmar e Adicionar (
-                {Object.values(generatedItems).filter((j) => j.selected).length}
-                )
+                {t('ai_modal.confirm_add_count', {
+                  count: Object.values(generatedItems).filter((j) => j.selected).length,
+                })}
               </Button>
             </div>
           </>
@@ -290,7 +292,7 @@ const ExpandableCard = ({
                     ' transition-colors',
                     isHovered || !hasContent ? 'opacity-100' : 'opacity-0',
                   )}
-                  title="Editar conteúdo"
+                  title={t('product_canvas.edit_content')}
                 >
                   <EditIcon size={16} />
                 </Button>
@@ -332,7 +334,7 @@ const ExpandableCard = ({
                       </span>
                     ) : (
                       <span className="text-muted-foreground/80">
-                        Ctrl+Enter to save
+                        {t('product_canvas.ctrl_enter_save')}
                       </span>
                     )}
                   </div>

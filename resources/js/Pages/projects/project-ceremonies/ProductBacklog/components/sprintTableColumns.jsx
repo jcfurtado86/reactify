@@ -1,5 +1,8 @@
 import { EllipsisVertical, Undo2 } from 'lucide-react'
 import { getStatusColor } from '@/lib/utils'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.t(...args)
 
 /**
  * Definição das colunas compartilhadas pelas tabelas de
@@ -27,14 +30,14 @@ export const getSharedColumns = ({
           (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('common.select_all')}
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t('sprint.select_row')}
       />
     ),
   },
@@ -56,7 +59,7 @@ export const getSharedColumns = ({
   },
   {
     accessorKey: 'title',
-    header: 'Título',
+    header: t('common.title'),
     meta: { className: 'w-[80%]' },
     cell: ({ row }) => (
       <div className="flex items-center w-full !line-clamp-3">
@@ -66,7 +69,7 @@ export const getSharedColumns = ({
   },
   {
     accessorKey: 'pivot.kanban_status',
-    header: 'Status',
+    header: t('common.status'),
     cell: ({ row }) => {
       const story = row.original
       const status = story?.pivot?.kanban_status || 'Backlog'
@@ -92,19 +95,17 @@ export const getSharedColumns = ({
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" title={'Options'}>
+            <Button variant="ghost" size="icon" title={t('common.actions')}>
               <EllipsisVertical />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="start">
             <DropdownMenuItem>
-              {selectedStories.length > 1
-                ? `${selectedStories.length} selected`
-                : `1 selected`}
+              {t('sprint.n_selected', { count: selectedStories.length })}
             </DropdownMenuItem>
             {status !== 'completed' && (
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Move to sprint</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger>{t('sprint.move_to_sprint')}</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
                     {project.sprints
@@ -135,7 +136,7 @@ export const getSharedColumns = ({
                   onClick={() => onRemoveRequest(sprintId, story.id)}
                   className="text-red-600 focus:text-red-600 flex justify-start"
                 >
-                  <Undo2 className="mr-2 size-4" /> Mover para o Backlog
+                  <Undo2 className="mr-2 size-4" /> {t('sprint.move_to_backlog')}
                 </DropdownMenuItem>
               </>
             )}

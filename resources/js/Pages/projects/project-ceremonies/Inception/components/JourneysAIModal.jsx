@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import { Check, ChevronsUp, Minus, X } from 'lucide-react'
 import { useJourneysAIStore } from '@/stores/useJourneysAIStore'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Modal de revisão das Journeys geradas por IA.
@@ -11,6 +12,7 @@ import { useJourneysAIStore } from '@/stores/useJourneysAIStore'
  * a função que faz o POST e atualiza o estado do projeto.
  */
 export const JourneysAIModal = ({ colors, onConfirm }) => {
+  const { t } = useTranslation()
   const isOpen = useJourneysAIStore((s) => s.isOpen)
   const isMinimized = useJourneysAIStore((s) => s.isMinimized)
   const generated = useJourneysAIStore((s) => s.generated)
@@ -36,8 +38,8 @@ export const JourneysAIModal = ({ colors, onConfirm }) => {
       <div className="bg-card rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-border">
         <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isMinimized && 'Journeys geradas com IA'}
-            {isMinimized && 'Journeys geradas'}
+            {!isMinimized && t('journeys.ai_modal_title')}
+            {isMinimized && t('journeys.ai_modal_title_minimized')}
           </h3>
           <div className="flex items-center gap-2">
             <Button onClick={toggleMinimized} size="icon" variant="ghost">
@@ -53,10 +55,13 @@ export const JourneysAIModal = ({ colors, onConfirm }) => {
           <>
             <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-accent rounded-lg flex-shrink-0">
               <span className="text-accent-foreground font-medium">
-                {selectedCount} of {generated.length} selected
+                {t('ai_modal.selected_of', {
+                  count: selectedCount,
+                  total: generated.length,
+                })}
               </span>
               <Button onClick={toggleAll} size="sm">
-                {allSelected ? 'Desmarcar Todas' : 'Selecionar Todas'}
+                {allSelected ? t('common.deselect_all') : t('common.select_all')}
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 min-h-0">
@@ -98,7 +103,7 @@ export const JourneysAIModal = ({ colors, onConfirm }) => {
                           <span className="flex-1">{step.description}</span>
                           {step.is_touchpoint && (
                             <Badge variant="success" className="ml-2">
-                              Touchpoint
+                              {t('journeys.touchpoint')}
                             </Badge>
                           )}
                         </div>
@@ -110,7 +115,7 @@ export const JourneysAIModal = ({ colors, onConfirm }) => {
             </div>
             <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-border flex-shrink-0">
               <Button variant="outline" onClick={cancel}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="success"
@@ -118,7 +123,7 @@ export const JourneysAIModal = ({ colors, onConfirm }) => {
                 disabled={selectedCount === 0}
               >
                 <Check className="mr-2" size={16} />
-                Confirm and Add ({selectedCount})
+                {t('ai_modal.confirm_add_count', { count: selectedCount })}
               </Button>
             </div>
           </>

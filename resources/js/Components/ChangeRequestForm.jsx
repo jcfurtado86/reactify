@@ -3,7 +3,9 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useTranslation } from 'react-i18next'
 const ChangeRequestForm = ({ project, stories = [], onClose }) => {
+  const { t } = useTranslation()
   const [selectedStories, setSelectedStories] = useState({})
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const { auth } = usePage().props
@@ -75,19 +77,18 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
   return (
     <Card className="w-full max-w-4xl ">
       <CardHeader>
-        <CardTitle>Nova Solicitação de Mudança</CardTitle>
+        <CardTitle>{t('change_log.new_request_title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Descrição com Limite e Contador */}
           <div className="space-y-2">
             <Label htmlFor="description" className="flex justify-between">
-              <span>Descrição da Mudança</span>
+              <span>{t('change_request.description')}</span>
             </Label>
-            
+
             <Textarea
               id="description"
-              placeholder="Descreva detalhadamente a mudança solicitada..."
+              placeholder={t('change_request.description')}
               value={data.description}
               onChange={(e) => setData('description', e.target.value)}
               required
@@ -114,10 +115,10 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
           <div className="space-y-2">
           
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, 'PPP') : <span>Set deadline</span>}
-          
+            {date ? format(date, 'PPP') : <span>{t('change_request.set_deadline')}</span>}
+
             <div className="space-y-2">
-              <Label htmlFor="requester_name">Solicitante (Pessoa ou Entidade)</Label>
+              <Label htmlFor="requester_name">{t('change_request.requester')}</Label>
                 <Input
                     id="requester_name"
                     value={data.requester_name}
@@ -194,7 +195,7 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
           {/* Botões de Ação */}
           <div className="flex gap-3 pt-4">
             <Button type="submit" disabled={processing} className="flex-1">
-              {processing ? 'Enviando...' : 'Criar Solicitação'}
+              {processing ? t('common.processing') : t('change_log.new_request')}
             </Button>
 
             {onClose && (
@@ -204,7 +205,7 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
                 onClick={onClose}
                 disabled={processing}
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
             )}
           </div>

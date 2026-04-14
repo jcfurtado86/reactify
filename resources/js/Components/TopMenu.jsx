@@ -51,8 +51,8 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           variant="ghost"
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
-          aria-label={isOpen ? 'Close Side Menu' : 'Open Side Menu'}
-          title={isOpen ? 'Close Side Menu' : 'Open Side Menu'}
+          aria-label={isOpen ? t('top_menu.close_side_menu') : t('top_menu.open_side_menu')}
+          title={isOpen ? t('top_menu.close_side_menu') : t('top_menu.open_side_menu')}
         >
           {isOpen ? (
             <PanelLeftClose className="!size-5" />
@@ -82,8 +82,8 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
             defaultValue="zinc"
             onValueChange={(value) => setThemeColor(value)}
           >
-            <SelectTrigger title="Selecione um tema">
-              <SelectValue placeholder="Selecione um tema" />
+            <SelectTrigger title={t('top_menu.theme_selector')}>
+              <SelectValue placeholder={t('top_menu.theme_selector')} />
             </SelectTrigger>
             <SelectContent>
               {themes.map((theme) => (
@@ -109,8 +109,8 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           variant="ghost"
           size="icon"
           onClick={handleThemeToggle}
-          aria-label="Toggle theme"
-          title="Toggle theme"
+          aria-label={t('top_menu.toggle_theme')}
+          title={t('top_menu.toggle_theme')}
         >
           {theme === 'dark' ? (
             <Moon className="!size-5" />

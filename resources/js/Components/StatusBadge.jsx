@@ -1,20 +1,22 @@
 import { X, Check, LoaderCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import SpanButton from './SpanButton'
 const StatusBadge = ({ status }) => {
+  const { t } = useTranslation()
   let message = ''
   let element = null
 
   switch (status) {
     case 'validated':
-      message = 'Critérios aceitos'
+      message = t('status_badge.criteria_accepted')
       element = <Check className="text-green-500" />
       break
     case 'pending':
-      message = 'Avaliação pendente'
+      message = t('status_badge.criteria_pending')
       element = <LoaderCircle className="text-blue-500" />
       break
     case 'rejected':
-      message = 'Critérios recusados'
+      message = t('status_badge.criteria_rejected')
       element = <X className="text-red-500" />
       break
     default:

@@ -1,9 +1,11 @@
 {
   "common": {
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
+    "inspect": "Inspect",
     "confirm": "Confirm",
     "confirm_and_add": "Confirm and Add",
     "create": "Create",
@@ -15,11 +17,14 @@
     "loading": "Loading...",
     "processing": "Processing...",
     "generating": "Generating...",
+    "uploading": "Uploading...",
     "none": "None",
     "name": "Name",
     "description": "Description",
     "title": "Title",
     "status": "Status",
+    "type": "Type",
+    "date": "Date",
     "actions": "Actions",
     "optional": "optional",
     "required": "required",
@@ -28,10 +33,131 @@
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
+    "retry": "Retry",
+    "select": "Select",
+    "select_type": "Select type",
+    "select_priority": "Select priority",
+    "select_story_type": "Select story type",
+    "set_deadline": "Set deadline",
+    "search": "Search",
     "select_all": "Select All",
     "deselect_all": "Deselect All",
     "select_at_least_one": "Select at least one item",
-    "selected_count": "{{selected}} of {{total}} selected"
+    "selected_count": "{{selected}} of {{total}} selected",
+    "operation": "Operation",
+    "yes_upper": "YES",
+    "no_upper": "NO",
+    "na": "N/A",
+    "backlog": "Backlog",
+    "items_count": "{{count}} items",
+    "no_results": "No results"
+  },
+  "motion_div": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "inspect_invest": "Inspect (INVEST Card)"
+  },
+  "status_badge": {
+    "criteria_accepted": "Criteria accepted",
+    "criteria_pending": "Pending evaluation",
+    "criteria_rejected": "Criteria rejected"
+  },
+  "interview": {
+    "title": "Interviews",
+    "upload": "Upload interview",
+    "save": "Save",
+    "saving": "Saving...",
+    "empty": "No interviews yet.",
+    "drag_and_drop": "Drag and drop a file here, or click to select",
+    "select_file": "Select file",
+    "file_not_allowed": "File type not allowed",
+    "extraction_pending": "Pending extraction",
+    "extraction_processing": "Extracting...",
+    "extraction_completed": "Extraction completed",
+    "extraction_failed": "Extraction failed",
+    "uploaded_success": "Interview uploaded successfully",
+    "upload_error": "Error uploading interview",
+    "remove": "Remove",
+    "remove_confirm": "Are you sure you want to remove this interview?",
+    "transcript": "Transcript",
+    "view_transcript": "View transcript"
+  },
+  "change_request": {
+    "requester": "Requester",
+    "request_date": "Request Date",
+    "description": "Description",
+    "status_label": "Status",
+    "impacted_stories": "Impacted Stories",
+    "new_stories": "New Stories",
+    "impact": "Impact",
+    "impact_type_impacted": "Impacted",
+    "impact_type_new": "New",
+    "effort": "Effort",
+    "set_deadline": "Set deadline",
+    "save_status": "Save status",
+    "change_status": "Change status"
+  },
+  "notifications_page": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all as read",
+    "empty": "No notifications yet.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "welcome": {
+    "brand": "Reactify",
+    "tagline": "Collaborative AI platform for the REACT-M methodology",
+    "login": "Log in",
+    "register": "Sign up",
+    "get_started": "Get started",
+    "head_title": "Welcome to Reactify",
+    "hero_title": "Manage your Projects with <brand>Reactify</brand>",
+    "hero_subtitle": "Accelerate your development with our powerful toolkit. Create, manage, and deploy projects faster than ever before.",
+    "footer": "© 2025 Reactify. All rights reserved.",
+    "feature_components_title": "React Components",
+    "feature_components_body": "Build with modern React components and hooks for better performance and maintainability.",
+    "feature_realtime_title": "Real-Time Updates",
+    "feature_realtime_body": "Get instant updates and live reloading during development for faster iteration.",
+    "feature_cloud_title": "Cloud Deployment",
+    "feature_cloud_body": "Deploy your applications to the cloud with one click and scale effortlessly."
+  },
+  "top_menu": {
+    "theme_selector": "Select a theme",
+    "toggle_theme": "Toggle theme",
+    "open_side_menu": "Open side menu",
+    "close_side_menu": "Close side menu"
+  },
+  "project_settings": {
+    "title": "Project Settings",
+    "description_helper": "Change the name and description of your project here. Click save when done.",
+    "project_title": "Project Title",
+    "describe_placeholder": "Describe the project...",
+    "save_changes": "Save Changes"
+  },
+  "edit_priorities": {
+    "edit_button": "Edit Priorities",
+    "manage_title": "Manage Matrix Priorities",
+    "manage_description": "Add, edit or remove the priorities used across projects.",
+    "existing": "Existing Priorities",
+    "add_title": "Add Priority",
+    "name_placeholder": "Type the priority name",
+    "color_label": "Color",
+    "adding": "Adding...",
+    "deleting": "Deleting...",
+    "set_default": "Set as default",
+    "confirm_delete_title": "Are you sure you want to delete?",
+    "confirm_delete_body": "This action cannot be undone. It will permanently delete the priority.",
+    "toast_no_changes": "No changes detected.",
+    "toast_updated": "Priority updated successfully.",
+    "toast_update_error": "An error occurred while updating the priority.",
+    "toast_deleted": "Priority deleted successfully.",
+    "toast_delete_error": "An error occurred while deleting the priority.",
+    "toast_created": "Priority created successfully.",
+    "toast_create_error": "An error occurred while creating the priority."
+  },
+  "color_components": {
+    "title": "Colors"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -41,7 +167,8 @@
     "login": "Log in",
     "register": "Sign up",
     "language": "Language",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "open_menu": "Open menu"
   },
   "auth": {
     "login_title": "Sign in",
@@ -197,7 +324,8 @@
     "minimize": "Minimize",
     "maximize": "Maximize",
     "confirm_add_count": "Confirm and Add ({{count}})",
-    "class_required_toast": "The class \"{{name}}\" is required by a selected CRC Card and cannot be deselected."
+    "class_required_toast": "The class \"{{name}}\" is required by a selected CRC Card and cannot be deselected.",
+    "selected_of": "{{count}} of {{total}} selected"
   },
   "goals": {
     "singular": "Goal",
@@ -217,7 +345,12 @@
     "toast_generated": "Goals generated successfully.",
     "toast_generate_empty": "AI did not generate new goals based on the interviews.",
     "toast_select_one": "Select at least one goal to add.",
-    "toast_color_save_error": "Error saving goal color."
+    "toast_color_save_error": "Error saving goal color.",
+    "remove_confirm": "Remove this goal?",
+    "new_constraint": "New Constraint Goal",
+    "new_business": "New Business Goal",
+    "empty_constraint": "No Constraint Goal",
+    "empty_business": "No Business Goal"
   },
   "personas": {
     "singular": "Persona",
@@ -228,11 +361,18 @@
     "goals": "Goals",
     "add_persona": "Add persona",
     "empty": "No personas added yet.",
+    "empty_title": "No persona defined",
+    "empty_hint": "Create a new persona to map the user profiles of your project.",
     "generate_cta": "Generate personas with AI",
     "toast_saved": "Persona saved successfully",
     "toast_deleted": "Persona deleted",
     "toast_generated": "Personas generated successfully.",
-    "toast_generate_empty": "AI did not generate new personas based on the interviews."
+    "toast_generate_empty": "AI did not generate new personas based on the interviews.",
+    "confirm_delete_title": "Are you sure?",
+    "confirm_delete_body": "This action cannot be undone. It will permanently delete the persona and all of its data.",
+    "confirm_delete_action": "Yes, delete",
+    "confirm_delete_item_title": "Delete this item?",
+    "confirm_delete_item_body": "This action cannot be undone."
   },
   "journeys": {
     "singular": "Journey",
@@ -243,6 +383,8 @@
     "add_step": "Add step",
     "add_journey": "Add journey",
     "empty": "No journeys added yet.",
+    "empty_title": "No Journey defined.",
+    "empty_hint": "Create a new journey to map the user flow.",
     "generate_cta": "Generate journeys with AI",
     "ai_modal_title": "Journeys generated with AI",
     "ai_modal_title_minimized": "Journeys generated",
@@ -250,7 +392,13 @@
     "toast_added": "{{count}} journey(s) added successfully!",
     "toast_add_error": "An error occurred while adding journeys.",
     "toast_select_one": "Select at least one journey to add.",
-    "toast_comm_error": "Server communication error"
+    "toast_comm_error": "Server communication error",
+    "save_title": "Save title",
+    "edit_title": "Edit title",
+    "delete_journey": "Delete Journey",
+    "delete_confirm": "Are you sure? All steps will be lost.",
+    "new_journey": "New Journey",
+    "empty_steps": "This Journey has no steps."
   },
   "product_canvas": {
     "title": "Product Canvas",
@@ -264,7 +412,9 @@
     "empty": "Canvas not filled yet.",
     "toast_generated": "Product Canvas generated successfully.",
     "toast_save_success": "Canvas saved successfully!",
-    "toast_save_error": "Error saving Canvas"
+    "toast_save_error": "Error saving Canvas",
+    "edit_content": "Edit content",
+    "ctrl_enter_save": "Ctrl+Enter to save"
   },
   "stories": {
     "singular": "Story",
@@ -280,7 +430,12 @@
     "generate_cta": "Generate stories with AI",
     "toast_generated": "Stories generated successfully.",
     "toast_generate_empty": "AI did not generate new stories based on the current context.",
-    "toast_unexpected": "Unexpected server response."
+    "toast_unexpected": "Unexpected server response.",
+    "remove_confirm": "Remove this story?",
+    "new_user_story": "New User Story",
+    "new_system_story": "New System Story",
+    "empty_user": "No User Story",
+    "empty_system": "No System Story"
   },
   "epic_stories": {
     "title": "Epic Stories",
@@ -288,7 +443,10 @@
     "decomposed_epics": "Decomposed epics",
     "empty": "No stories to decompose.",
     "generate_cta": "Decompose epics with AI",
-    "toast_decomposed": "Epics decomposed successfully."
+    "toast_decomposed": "Epics decomposed successfully.",
+    "no_story_title": "No Story",
+    "no_story_body": "Cannot decompose epics because no story has been created yet.",
+    "no_epics_toast": "No story was identified as an epic for decomposition."
   },
   "business_rules": {
     "title": "Business Rules",
@@ -297,7 +455,9 @@
     "add_rule": "Add rule",
     "empty": "No rules added yet.",
     "generate_cta": "Generate rules with AI",
-    "toast_generated": "Business rules generated successfully."
+    "toast_generated": "Business rules generated successfully.",
+    "empty_title": "No Business Rule",
+    "empty_hint": "Create a User Story or System Story first to add business rules."
   },
   "usage_scenarios": {
     "title": "Usage Scenarios",
@@ -309,7 +469,10 @@
     "add_scenario": "Add scenario",
     "empty": "No scenarios added yet.",
     "generate_cta": "Generate scenarios with AI",
-    "toast_generated": "Usage scenarios generated successfully."
+    "toast_generated": "Usage scenarios generated successfully.",
+    "none_generated_toast": "No usage scenario was generated for the existing stories.",
+    "empty_title": "No Usage Scenario",
+    "empty_hint": "Create a User Story or System Story first to add usage scenarios."
   },
   "overall_model": {
     "title": "Overall Model",
@@ -319,6 +482,9 @@
     "collaborators": "Collaborators",
     "add_card": "Add card",
     "add_class": "Add class",
+    "add_class_placeholder": "Add new class or collaborator...",
+    "no_names_saved": "No name saved yet.",
+    "no_crc_cards": "No Class-Responsibility-Collaboration card defined",
     "empty": "No CRC Cards yet.",
     "generate_cta": "Generate Overall Model with AI",
     "toast_generated": "{{count}} cards were suggested.",
@@ -327,7 +493,16 @@
     "toast_classes_saved": "{{count}} class(es) saved successfully!",
     "toast_save_error": "An error occurred while saving the CRC Cards.",
     "toast_classes_save_error": "An error occurred while saving the classes.",
-    "toast_select_one": "Select at least one item to add."
+    "toast_select_one": "Select at least one item to add.",
+    "confirm_delete_title": "Are you sure?",
+    "confirm_delete_body": "This action cannot be undone. It will permanently delete the card and all of its data.",
+    "confirm_delete_action": "Yes, delete card",
+    "class_bank": "Class Bank",
+    "add_crc_card": "Add CRC Card",
+    "empty_hint": "Create a new card to map the classes, responsibilities, and collaborators.",
+    "ai_cards_title": "CRC Cards generated by AI",
+    "ai_cards_title_minimized": "CRC Cards generated",
+    "ai_classes_title": "Classes generated by AI"
   },
   "system_interfaces": {
     "title": "System Interfaces",
@@ -342,13 +517,28 @@
     "add_interface": "Add interface",
     "empty": "No interfaces added yet.",
     "generate_cta": "Generate interfaces with AI",
-    "toast_generated": "Interfaces generated successfully."
+    "toast_generated": "Interfaces generated successfully.",
+    "internal_title": "Internal Interfaces",
+    "external_title": "External Interfaces",
+    "empty_internal": "No Internal Interface",
+    "empty_internal_hint": "Create an internal interface for this project.",
+    "empty_external": "No External Interface",
+    "empty_external_hint": "Create an external interface for this project.",
+    "input_required": "Input is required",
+    "output_required": "Output is required",
+    "title_required": "Title is required",
+    "new_interface": "New Interface",
+    "add_new_interface": "Add New Interface",
+    "edit_interface": "Edit Interface",
+    "form_description_create": "Fill in the fields to create the system interface.",
+    "form_description_update": "Fill in the fields to update the system interface."
   },
   "storyboards": {
     "title": "Storyboards",
     "select_story": "Select a story",
     "save_canvas": "Save canvas",
     "insert_attachment": "Insert attachment",
+    "loading": "Loading storyboard...",
     "toast_saved": "Storyboard saved successfully!",
     "toast_save_error": "An error occurred while saving the storyboard.",
     "toast_export_error": "Error exporting the canvas"
@@ -359,7 +549,15 @@
     "complexity": "Complexity",
     "unprioritized": "Unprioritized",
     "empty": "No stories to prioritize.",
-    "generate_cta": "Prioritize with AI"
+    "generate_cta": "Prioritize with AI",
+    "no_columns_title": "No priority column defined",
+    "no_columns_body": "Click \"Edit Priorities\" to create the columns (low, medium, high) of your matrix.",
+    "no_goals_title": "No Goal",
+    "no_goals_hint": "Create Goals first.",
+    "all_prioritized": "All stories have been prioritized",
+    "drag_to_unprioritize": "Drag a story from the matrix here to \"unprioritize\" it.",
+    "go_to_stories": "Go to Stories",
+    "go_to_goals": "Go to Goals"
   },
   "change_log": {
     "title": "Change Log",
@@ -386,7 +584,13 @@
   },
   "product_backlog": {
     "title": "Product Backlog",
-    "empty": "Backlog is empty."
+    "empty": "Backlog is empty.",
+    "no_prioritized_stories": "No story has been prioritized. Go to the Prioritization Matrix to rank your stories.",
+    "title_with_count": "Product Backlog ({{count}} items)",
+    "create_sprint": "Create sprint",
+    "go_to_matrix": "Go to matrix",
+    "empty_title": "Empty Product Backlog",
+    "go_to_prioritization_matrix": "Go to Prioritization Matrix"
   },
   "sprint": {
     "title": "Sprint",
@@ -407,8 +611,20 @@
     "move_to_sprint": "Move to sprint",
     "move_to_backlog": "Move to backlog",
     "items_count": "{{count}} items",
-    "start_date": "Start",
-    "end_date": "End"
+    "start_date": "Start date",
+    "end_date": "End date",
+    "select_row": "Select row",
+    "n_selected": "{{count}} selected",
+    "end_sprint_confirm": "Are you sure you want to end this sprint? Unfinished stories in it can move to the next sprint or back to the Backlog.",
+    "delete_sprint_confirm": "Are you sure you want to delete this sprint? The stories in it will go back to the Backlog.",
+    "sprints_label": "Sprints",
+    "finish": "Finish",
+    "pick_date": "Pick a date",
+    "create_title": "Create Sprint",
+    "create_description": "Create a new sprint.",
+    "stories_count": "{{count}} Story(ies)",
+    "no_stories_in_sprints": "No stories in sprints.",
+    "no_stories_hint": "Create a sprint, add stories from the Product Backlog and start it."
   },
   "invest_card": {
     "title": "Invest Card",
@@ -418,7 +634,8 @@
     "estimable": "Estimable",
     "small": "Small",
     "testable": "Testable",
-    "na": "N/A"
+    "na": "N/A",
+    "check_card": "Check Card"
   },
   "interviews": {
     "title": "Interviews",
@@ -442,7 +659,8 @@
     "send_invite": "Send invite",
     "remove_user": "Remove user",
     "cannot_manage_permissions": "You don't have permission to manage",
-    "owner": "Owner"
+    "owner": "Owner",
+    "invalid_role": "Invalid role! Please check and try again."
   },
   "ai_errors": {
     "missing_prereqs": "To generate {{label}}, you must register at least one of each of the following: {{items}}.",

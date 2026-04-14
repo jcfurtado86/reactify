@@ -165,6 +165,7 @@ const CRCCard = ({
   handleCollaboratorChange,
   onInspect,
 }) => {
+  const { t } = useTranslation()
   const { errors } = usePage().props
   const CLASS_NAME_MAX = 40
   const [isHeaderHovered, setIsHeaderHovered] = useState(false)
@@ -278,7 +279,7 @@ const CRCCard = ({
       <div className="flex flex-grow">
         <div className="w-1/2 p-1 flex flex-col gap-1">
           <div className="flex justify-between items-center mb-1">
-            <h4 className="font-semibold text-sm">Responsabilidades</h4>
+            <h4 className="font-semibold text-sm">{t('overall_model.responsibilities')}</h4>
             <Button
               variant="ghost"
               size="icon"
@@ -312,7 +313,7 @@ const CRCCard = ({
         </div>
         <div className="w-1/2 bg-muted/50 p-1 border-l border-border rounded-br-lg flex flex-col gap-1">
           <div className="flex justify-between items-center mb-1">
-            <h4 className="font-semibold text-sm">Colaboradores</h4>
+            <h4 className="font-semibold text-sm">{t('overall_model.collaborators')}</h4>
             <Button
               variant="ghost"
               size="icon"
@@ -644,13 +645,13 @@ const OverallModel = ({ project, setProject }) => {
         >
           <AccordionItem value="item-1" className="border-b-0">
             <AccordionTrigger className="px-4 py-3 text-sm font-semibold hover:no-underline">
-              Banco de Classes
+              {t('overall_model.class_bank')}
             </AccordionTrigger>
             <AccordionContent className="p-4 pt-0">
               <div className="flex flex-col gap-1 my-2">
                 <div className="flex items-center gap-2">
                   <Input
-                    placeholder="Adicionar nova classe ou colaborador..."
+                    placeholder={t('overall_model.add_class_placeholder')}
                     value={newReusableName}
                     maxLength={CLASS_NAME_MAX}
                     onChange={(e) => setNewReusableName(e.target.value)}
@@ -664,7 +665,7 @@ const OverallModel = ({ project, setProject }) => {
                     onClick={handleAddReusableName}
                     disabled={!newReusableName.trim()}
                   >
-                    Salvar
+                    {t('common.save')}
                   </Button>
                 </div>
 
@@ -702,7 +703,7 @@ const OverallModel = ({ project, setProject }) => {
                     ))
                 ) : (
                   <p className="text-xs text-muted-foreground italic">
-                    Nenhum nome salvo ainda.
+                    {t('overall_model.no_names_saved')}
                   </p>
                 )}
               </div>
@@ -711,7 +712,7 @@ const OverallModel = ({ project, setProject }) => {
         </Accordion>
         <Button variant="secondary" className="h-12 " onClick={handleAddCard}>
           <Plus size={18} className="mr-2" />
-          Adicionar CRC Card
+          {t('overall_model.add_crc_card')}
         </Button>
       </section>
       {Object.keys(errors).length > 0 && (
@@ -754,11 +755,10 @@ const OverallModel = ({ project, setProject }) => {
           <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
             <StickyNote size={32} className="mb-3 text-primary" />
             <p className="mb-2 font-medium text-foreground">
-              Nenhum cartão de Colaboradoração Responsabilidade-Classe definido
+              {t('overall_model.no_crc_cards')}
             </p>
             <p className="mb-4 text-sm text-center max-w-xs">
-              Crie um novo card para mapear as classes, responsabilidades e
-              colaboradores.
+              {t('overall_model.empty_hint')}
             </p>
           </div>
         )}
@@ -770,16 +770,15 @@ const OverallModel = ({ project, setProject }) => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogTitle>{t('overall_model.confirm_delete_title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso excluirá permanentemente o
-              card e todos os seus dados.
+              {t('overall_model.confirm_delete_body')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteCard}>
-              Sim, excluir card
+              {t('overall_model.confirm_delete_action')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

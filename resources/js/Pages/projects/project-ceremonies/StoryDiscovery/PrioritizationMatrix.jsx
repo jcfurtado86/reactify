@@ -564,10 +564,10 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   strokeWidth={1.5}
                 />
                 <p className="mb-2 text-sm text-center font-medium text-foreground">
-                  Todas as stories foram priorizadas
+                  {t('prioritization_matrix.all_prioritized')}
                 </p>
                 <p className="text-sm text-center mb-2">
-                  Arraste uma story da matriz aqui para "despriorizá-la".
+                  {t('prioritization_matrix.drag_to_unprioritize')}
                 </p>
                 <Button
                   variant="outline"
@@ -582,7 +582,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                     )
                   }
                 >
-                  Ir para Stories
+                  {t('prioritization_matrix.go_to_stories')}
                   <ExternalLink className="size-4 ml-2" />
                 </Button>
               </div>
@@ -619,9 +619,9 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                     strokeWidth={1.5}
                   />
                   <p className="text-sm text-center font-medium text-foreground">
-                    Nenhum Goal
+                    {t('prioritization_matrix.no_goals_title')}
                   </p>
-                  <p className="text-xs text-center">Crie Goals primeiro.</p>
+                  <p className="text-xs text-center">{t('prioritization_matrix.no_goals_hint')}</p>
                   <Button
                     variant="outline"
                     size="sm"
@@ -635,7 +635,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                       )
                     }
                   >
-                    Ir para Goals
+                    {t('prioritization_matrix.go_to_goals')}
                     <ExternalLink className="size-4" />
                   </Button>
                 </div>
@@ -703,11 +703,10 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                     strokeWidth={1.5}
                   />
                   <p className="mb-2 font-medium text-foreground">
-                    Nenhuma coluna de Prioridade definida
+                    {t('prioritization_matrix.no_columns_title')}
                   </p>
                   <p className="text-sm text-center max-w-xs">
-                    Clique em "Editar Prioridades" para criar as colunas(baixa,
-                    média, alta) da sua matriz.
+                    {t('prioritization_matrix.no_columns_body')}
                   </p>
                 </div>
               )}

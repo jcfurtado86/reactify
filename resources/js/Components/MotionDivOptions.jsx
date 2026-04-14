@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Pencil, Trash, ChartArea } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const MotionDivOptions = ({
   isHovered,
@@ -11,8 +12,8 @@ const MotionDivOptions = ({
   onInspect,
   onDelete,
 }) => {
+  const { t } = useTranslation()
   return (
-    // 1. O Provider envolve tudo para que os tooltips funcionem
     <TooltipProvider delayDuration={100}>
       <AnimatePresence>
         {isHovered && !isEditing && !isTemporary && !disabled && (
@@ -23,7 +24,6 @@ const MotionDivOptions = ({
             transition={{ duration: 0.2 }}
             className="z-50 absolute right-0 top-0 flex items-center rounded-md bg-card border border-border shadow-lg"
           >
-            {/* Botão Inspecionar com Tooltip */}
             {onInspect && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -37,11 +37,10 @@ const MotionDivOptions = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Inspecionar (INVEST Card)</p>
+                  <p>{t('motion_div.inspect_invest')}</p>
                 </TooltipContent>
               </Tooltip>
             )}
-            {/* Botão Adicionar com Tooltip */}
             {onAdd && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -55,12 +54,11 @@ const MotionDivOptions = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Adicionar</p>
+                  <p>{t('motion_div.add')}</p>
                 </TooltipContent>
               </Tooltip>
             )}
 
-            {/* Botão Editar com Tooltip */}
             {onEdit && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -74,12 +72,11 @@ const MotionDivOptions = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Editar</p>
+                  <p>{t('motion_div.edit')}</p>
                 </TooltipContent>
               </Tooltip>
             )}
 
-            {/* Botão Deletar com Tooltip */}
             {onDelete && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -93,7 +90,7 @@ const MotionDivOptions = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Deletar</p>
+                  <p>{t('motion_div.delete')}</p>
                 </TooltipContent>
               </Tooltip>
             )}

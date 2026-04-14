@@ -1,5 +1,6 @@
 import { isTemporary, darkenColor, PREDEFINED_COLORS } from '@/lib/utils'
 import { Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 const ColorOptions = ({ selectedValue, handleColorSelect }) => {
   const handleSelect = (e, color) => {
     e.preventDefault()
@@ -29,6 +30,7 @@ const ColorOptions = ({ selectedValue, handleColorSelect }) => {
 }
 // Componente ColorPickerPopover (sem alterações)
 const ColorPickerPopover = ({ value, onChange, disabled = false }) => {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const handleColorSelect = (colorValue) => {
     onChange(colorValue)
@@ -50,7 +52,7 @@ const ColorPickerPopover = ({ value, onChange, disabled = false }) => {
       </PopoverTrigger>
       <PopoverContent className="w-52 p-2" align="start">
         <div className="space-y-1">
-          <h4 className="font-medium text-sm px-2 py-1.5">Cores</h4>
+          <h4 className="font-medium text-sm px-2 py-1.5">{t('color_components.title')}</h4>
           <ColorOptions
             handleColorSelect={handleColorSelect}
             selectedValue={value}

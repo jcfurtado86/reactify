@@ -263,7 +263,7 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
                 <Badge variant="outline">{sprint.name}</Badge>
               ))} */}
 
-            <Badge variant="outline">{totalStories} Estória(s)</Badge>
+            <Badge variant="outline">{t('sprint.stories_count', { count: totalStories })}</Badge>
           </div>
         </CardHeader>
       </Card>
@@ -272,11 +272,11 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
         <Card className="border-dashed border-2 border-muted-foreground/25">
           <CardContent className="flex flex-col items-center justify-center py-8 text-center">
             <p className="text-muted-foreground mb-4">
-              Sem stories em sprints.
+              {t('sprint.no_stories_in_sprints')}
             </p>
 
             <p className="text-sm text-muted-foreground mt-2">
-              Crie uma sprint, adicione stories do Product Backlog e inicie-a.
+              {t('sprint.no_stories_hint')}
             </p>
           </CardContent>
         </Card>

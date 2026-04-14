@@ -302,7 +302,7 @@ const Storyboards = ({ project }) => {
               <></>
             ) : (
               <>
-                <p className="text-2xl"> Stories</p>
+                <p className="text-2xl"> {t('stories.plural')}</p>
               </>
             )}
 
@@ -334,7 +334,7 @@ const Storyboards = ({ project }) => {
         {/* RENDERIZAÇÃO CONDICIONAL */}
         {!sceneData ? (
           <div className="w-full h-full flex items-center justify-center bg-card text-foreground">
-            Carregando storyboard...
+            {t('storyboards.loading')}
           </div>
         ) : (
           <Excalidraw
@@ -353,7 +353,7 @@ const Storyboards = ({ project }) => {
                       <Paperclip />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Inserir anexo</TooltipContent>
+                  <TooltipContent>{t('storyboards.insert_attachment')}</TooltipContent>
                 </Tooltip>
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
@@ -368,7 +368,7 @@ const Storyboards = ({ project }) => {
                       </Button>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent>Salvar Storyboard</TooltipContent>
+                  <TooltipContent>{t('storyboards.save_canvas')}</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}

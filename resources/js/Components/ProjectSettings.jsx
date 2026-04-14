@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from '@inertiajs/react'
 import { Settings, LoaderCircle, MousePointerClick, Trash2 } from 'lucide-react'
 import ReactTextareaAutosize from 'react-textarea-autosize'
+import { useTranslation } from 'react-i18next'
 
 export function ProjectSettings({ project }) {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
 
   // Usando o hook useForm do Inertia para gerenciar o formulário
@@ -42,21 +44,20 @@ export function ProjectSettings({ project }) {
         <Button
           variant="secondary"
           size="icon"
-          title="Configurações do Projeto"
+          title={t('project_settings.title')}
         >
           <Settings className="size-4" />
-          <span className="sr-only">Configurações do Projeto</span>
+          <span className="sr-only">{t('project_settings.title')}</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[370px] sm:w-[450px] md:w-[470px]">
         <form onSubmit={handleSaveChanges}>
           <SheetHeader>
             <SheetTitle className="text-foreground">
-              Configurações do Projeto
+              {t('project_settings.title')}
             </SheetTitle>
             <SheetDescription className="text-muted-foreground">
-              Altere o nome e a descrição do seu projeto aqui. Clique em salvar
-              quando terminar.
+              {t('project_settings.description_helper')}
             </SheetDescription>
           </SheetHeader>
 
@@ -64,7 +65,7 @@ export function ProjectSettings({ project }) {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="title" className="text-left">
-                  Título do Projeto
+                  {t('project_settings.project_title')}
                 </Label>
                 {/* Contador de caracteres (limite 50) */}
                 <span className="text-xs text-muted-foreground">
@@ -92,7 +93,7 @@ export function ProjectSettings({ project }) {
             </div>
 
             <div className="flex items-center gap-3">
-              <Label htmlFor="description">Emoji</Label>
+              <Label htmlFor="description">{t('home.project_emoji')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="icon" className={errors.emoji ? 'border-destructive' : ''}>
@@ -116,7 +117,7 @@ export function ProjectSettings({ project }) {
               <Button
                 variant="outline"
                 size="icon"
-                title="Remover emoji"
+                title={t('home.remove_emoji')}
                 onClick={(e) => {
                   e.preventDefault()
                   setData('emoji', null)
@@ -132,7 +133,7 @@ export function ProjectSettings({ project }) {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="description" className="text-left">
-                  Descrição
+                  {t('common.description')}
                 </Label>
                 {/* Contador de caracteres (limite 1000) */}
                 <span className="text-xs text-muted-foreground">
@@ -153,7 +154,7 @@ export function ProjectSettings({ project }) {
                     ? 'border border-destructive focus:outline-none p-2' 
                     : 'border-0 focus:ring-0 px-0' 
                   }`}
-                placeholder="Descreva o projeto..."
+                placeholder={t('project_settings.describe_placeholder')}
                 disabled={processing}
                 minRows={3}
               />
@@ -169,17 +170,17 @@ export function ProjectSettings({ project }) {
           <SheetFooter>
             <SheetClose asChild>
               <Button type="button" variant="outline">
-                Cancelar
+                {t('common.cancel')}
               </Button>
             </SheetClose>
             <Button type="submit" disabled={processing}>
               {processing ? (
                 <>
                   <LoaderCircle className="mr-2 size-4 animate-spin" />
-                  Salvando...
+                  {t('common.saving')}
                 </>
               ) : (
-                'Salvar Alterações'
+                t('project_settings.save_changes')
               )}
             </Button>
           </SheetFooter>

@@ -79,8 +79,10 @@ const GeneratedItemsModal = ({
           <>
             <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
               <span className="text-foreground font-medium">
-                {generatedItems.filter((j) => j.selected).length} de{' '}
-                {generatedItems.length} selecionadas
+                {t('ai_modal.selected_of', {
+                  count: generatedItems.filter((j) => j.selected).length,
+                  total: generatedItems.length,
+                })}
               </span>
               <Button
                 onClick={toggleAllItems}
@@ -819,11 +821,10 @@ const Personas = ({ project, setProject }) => {
         <div className="col-span-1 xl:col-span-2 flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border">
           <UserCircle2 size={40} className="mb-4 text-primary" />
           <p className="mb-2 font-medium text-foreground">
-            Nenhuma persona definida
+            {t('personas.empty_title')}
           </p>
           <p className="mb-4 text-sm text-center max-w-xs">
-            Crie uma nova persona para mapear os perfis de usuário do seu
-            projeto.
+            {t('personas.empty_hint')}
           </p>
         </div>
       )}
@@ -854,16 +855,15 @@ const Personas = ({ project, setProject }) => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogTitle>{t('personas.confirm_delete_title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. Isso excluirá permanentemente a
-              persona e todos os seus dados.
+              {t('personas.confirm_delete_body')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeletePersona}>
-              Sim, excluir
+              {t('personas.confirm_delete_action')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -881,15 +881,15 @@ const Personas = ({ project, setProject }) => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir este item?</AlertDialogTitle>
+            <AlertDialogTitle>{t('personas.confirm_delete_item_title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita.
+              {t('personas.confirm_delete_item_body')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={deleteItem}>
-              Sim, excluir
+              {t('personas.confirm_delete_action')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

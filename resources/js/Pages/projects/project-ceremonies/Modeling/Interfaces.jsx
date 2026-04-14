@@ -23,6 +23,7 @@ const GeneratedItemsModal = ({
   confirmGeneratedItems,
   toggleAllItems,
 }) => {
+  const { t } = useTranslation()
   const formatType = (type) => {
     if (!type) return 'Não definido'
     return type.charAt(0).toUpperCase() + type.slice(1)
@@ -67,16 +68,18 @@ const GeneratedItemsModal = ({
           <>
             <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
               <span className="text-foreground font-medium">
-                {generatedItems.filter((item) => item.selected).length} de{' '}
-                {generatedItems.length} selecionadas
+                {t('ai_modal.selected_of', {
+                  count: generatedItems.filter((item) => item.selected).length,
+                  total: generatedItems.length,
+                })}
               </span>
               <Button
                 onClick={toggleAllItems}
                 className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
               >
                 {generatedItems.every((item) => item.selected)
-                  ? 'Desmarcar Todas'
-                  : 'Selecionar Todas'}
+                  ? t('common.deselect_all')
+                  : t('common.select_all')}
               </Button>
             </div>
 
@@ -110,11 +113,11 @@ const GeneratedItemsModal = ({
                             {item.title}
                           </div>
                           <div className="grid gap-1 text-left text-muted-foreground text-sm">
-                            <p className="">Tipo: {formatType(item.type)}</p>
-                            <p className="">Input: {item.input}</p>
-                            <p className="">Output: {item.output}</p>
+                            <p className="">{t('common.type')}: {formatType(item.type)}</p>
+                            <p className="">{t('system_interfaces.input')}: {item.input}</p>
+                            <p className="">{t('system_interfaces.output')}: {item.output}</p>
                             <p className="text-muted-foreground">
-                              Related Classes:
+                              {t('system_interfaces.related_classes')}:
                             </p>
                           </div>
                           <div className="grid gap-1 w-full text-left text-muted-foreground text-sm">
@@ -147,7 +150,7 @@ const GeneratedItemsModal = ({
                 onClick={cancelGeneratedItems}
                 className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={confirmGeneratedItems}
@@ -155,8 +158,9 @@ const GeneratedItemsModal = ({
                 disabled={generatedItems.filter((j) => j.selected).length === 0}
               >
                 <Check className="mr-2" size={16} />
-                Confirmar e Adicionar (
-                {generatedItems.filter((j) => j.selected).length})
+                {t('ai_modal.confirm_add_count', {
+                  count: generatedItems.filter((j) => j.selected).length,
+                })}
               </Button>
             </div>
           </>
@@ -333,11 +337,11 @@ const Interfaces = ({ project, setProject }) => {
         >
           <h4 className="font-bold text-sm mb-2">{data.title}</h4>
           <p>
-            <span className="font-bold text-sm">Input: </span>
+            <span className="font-bold text-sm">{t('system_interfaces.input')}: </span>
             <span className="text-sm text-muted-foreground">{data.input}</span>
           </p>
           <p>
-            <span className="font-bold text-sm">Output: </span>
+            <span className="font-bold text-sm">{t('system_interfaces.output')}: </span>
             <span className="text-sm text-muted-foreground">{data.output}</span>
           </p>
         </div>
@@ -363,7 +367,7 @@ const Interfaces = ({ project, setProject }) => {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Classes Relacionadas</DialogTitle>
+                  <DialogTitle>{t('system_interfaces.related_classes')}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-3 py-4">
                   {relatedClasses.map((classData) => (
@@ -531,16 +535,17 @@ const Interfaces = ({ project, setProject }) => {
         {/* dialog for adding interface*/}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <Button variant="secondary" onClick={handleOpenForCreate}>
-            Adicionar Interface
+            {t('system_interfaces.add_interface')}
           </Button>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {data.id ? 'Editar Interface' : 'Adicionar Nova Interface'}
+                {data.id ? t('system_interfaces.edit_interface') : t('system_interfaces.add_new_interface')}
               </DialogTitle>
               <DialogDescription>
-                Preencha os dados para {data.id ? 'atualizar' : 'criar'} a
-                interface do sistema.
+                {data.id
+                  ? t('system_interfaces.form_description_update')
+                  : t('system_interfaces.form_description_create')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
@@ -549,7 +554,7 @@ const Interfaces = ({ project, setProject }) => {
                 {/* --- TÍTULO --- */}
                 <div className="grid grid-cols-5 items-start gap-4">
                   <Label htmlFor="title" className="text-right pt-2">
-                    Título <span className="text-destructive">*</span>
+                    {t('common.title')} <span className="text-destructive">*</span>
                   </Label>
                   <div className="col-span-4 flex flex-col gap-1">
                       <Input
@@ -565,7 +570,7 @@ const Interfaces = ({ project, setProject }) => {
                       />
                       <div className="flex justify-between px-1">
                          <span className="text-[10px] text-destructive font-bold min-h-[15px] block">
-                            {errors.title || (!data.title.trim() ? "O título é obrigatório" : "")}
+                            {errors.title || (!data.title.trim() ? t('system_interfaces.title_required') : "")}
                          </span>
                          <span className={cn(
                              "text-[10px]",
@@ -580,18 +585,18 @@ const Interfaces = ({ project, setProject }) => {
                 {/* --- TIPO --- */}
                 <div className="grid grid-cols-5 items-center gap-4">
                   <Label htmlFor="type" className="text-right">
-                    Tipo
+                    {t('common.type')}
                   </Label>
                   <Select
                     value={data.type}
                     onValueChange={(value) => setData('type', value)}
                   >
                     <SelectTrigger className="col-span-4">
-                      <SelectValue placeholder="Selecione o tipo" />
+                      <SelectValue placeholder={t('common.select_type')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="internal">Interna</SelectItem>
-                      <SelectItem value="external">Externa</SelectItem>
+                      <SelectItem value="internal">{t('system_interfaces.internal')}</SelectItem>
+                      <SelectItem value="external">{t('system_interfaces.external')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -599,7 +604,7 @@ const Interfaces = ({ project, setProject }) => {
                 {/* --- INPUT --- */}
                 <div className="grid grid-cols-5 items-start gap-4">
                   <Label htmlFor="input" className="text-right pt-2">
-                    Input <span className="text-destructive">*</span>
+                    {t('system_interfaces.input')} <span className="text-destructive">*</span>
                   </Label>
                   <div className="col-span-4 flex flex-col gap-1">
                       <Input
@@ -615,7 +620,7 @@ const Interfaces = ({ project, setProject }) => {
                       />
                       <div className="flex justify-between px-1">
                          <span className="text-[10px] text-destructive font-bold min-h-[15px] block">
-                            {errors.input || (!data.input.trim() ? "O input é obrigatório" : "")}
+                            {errors.input || (!data.input.trim() ? t('system_interfaces.input_required') : "")}
                          </span>
                          <span className={cn(
                              "text-[10px]",
@@ -630,7 +635,7 @@ const Interfaces = ({ project, setProject }) => {
                 {/* --- OUTPUT --- */}
                 <div className="grid grid-cols-5 items-start gap-4">
                   <Label htmlFor="output" className="text-right pt-2">
-                    Output <span className="text-destructive">*</span>
+                    {t('system_interfaces.output')} <span className="text-destructive">*</span>
                   </Label>
                   <div className="col-span-4 flex flex-col gap-1">
                       <Input
@@ -646,7 +651,7 @@ const Interfaces = ({ project, setProject }) => {
                       />
                       <div className="flex justify-between px-1">
                          <span className="text-[10px] text-destructive font-bold min-h-[15px] block">
-                            {errors.output || (!data.output.trim() ? "O output é obrigatório" : "")}
+                            {errors.output || (!data.output.trim() ? t('system_interfaces.output_required') : "")}
                          </span>
                          <span className={cn(
                              "text-[10px]",
@@ -661,7 +666,7 @@ const Interfaces = ({ project, setProject }) => {
                 {/* --- CLASSES RELACIONADAS --- */}
                 {data.type === 'internal' && (
                   <div className="grid grid-cols-5 items-start gap-4">
-                    <Label className="text-right pt-2">Classes</Label>
+                    <Label className="text-right pt-2">{t('overall_model.classes')}</Label>
                     <div className={cn(
                         "col-span-4 border rounded-md p-2",
                         data.overall_model_class_ids.length === 0 ? "border-destructive" : ""
@@ -708,7 +713,7 @@ const Interfaces = ({ project, setProject }) => {
                         (data.type === 'internal' && data.overall_model_class_ids.length === 0)
                     }
                 >
-                  {processing ? 'Salvando...' : 'Salvar'}
+                  {processing ? t('common.saving') : t('common.save')}
                 </Button>
               </DialogFooter>
             </form>
@@ -717,7 +722,7 @@ const Interfaces = ({ project, setProject }) => {
       </div>
       <div className="flex w-full gap-2">
         <section className="flex flex-col items-center gap-2 w-1/2">
-          <h3 className="text-2xl font-bold mb-4">Interfaces Internas</h3>
+          <h3 className="text-2xl font-bold mb-4">{t('system_interfaces.internal_title')}</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* ADICIONADO: Verificação de Empty State para Internas */}
             {internalInterfaces.length > 0 ? (
@@ -738,10 +743,10 @@ const Interfaces = ({ project, setProject }) => {
                   strokeWidth={1.5}
                 />
                 <p className="mb-2 font-medium text-foreground">
-                  Nenhuma Interface Interna
+                  {t('system_interfaces.empty_internal')}
                 </p>
                 <p className="text-sm text-center max-w-xs">
-                  Crie uma interface interna para este projeto.
+                  {t('system_interfaces.empty_internal_hint')}
                 </p>
               </div>
             )}
@@ -749,7 +754,7 @@ const Interfaces = ({ project, setProject }) => {
         </section>
 
         <section className="flex flex-col items-center gap-2 border-l border-border pl-2 w-1/2">
-          <h3 className="text-2xl font-bold mb-4">Interfaces Externas</h3>
+          <h3 className="text-2xl font-bold mb-4">{t('system_interfaces.external_title')}</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {externalInterfaces.length > 0 ? (
               externalInterfaces.map((item) => (
@@ -769,10 +774,10 @@ const Interfaces = ({ project, setProject }) => {
                   strokeWidth={1.5}
                 />
                 <p className="mb-2 font-medium text-foreground">
-                  Nenhuma Interface Externa
+                  {t('system_interfaces.empty_external')}
                 </p>
                 <p className="text-sm text-center max-w-xs">
-                  Crie uma interface externa para este projeto.
+                  {t('system_interfaces.empty_external_hint')}
                 </p>
               </div>
             )}

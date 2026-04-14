@@ -36,6 +36,7 @@ const GeneratedItemsModal = ({
   toggleAllItems,
   systemColors,
 }) => {
+  const { t } = useTranslation()
   const storyVariants = systemColors?.stories || {}
   return (
     <div
@@ -76,16 +77,18 @@ const GeneratedItemsModal = ({
           <>
             <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
               <span className="text-foreground font-medium">
-                {generatedItems.filter((j) => j.selected).length} de{' '}
-                {generatedItems.length} selecionadas
+                {t('ai_modal.selected_of', {
+                  count: generatedItems.filter((j) => j.selected).length,
+                  total: generatedItems.length,
+                })}
               </span>
               <Button
                 onClick={toggleAllItems}
                 className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
               >
                 {generatedItems.every((story) => story.selected)
-                  ? 'Desmarcar Todas'
-                  : 'Selecionar Todas'}
+                  ? t('common.deselect_all')
+                  : t('common.select_all')}
               </Button>
             </div>
 
@@ -178,7 +181,7 @@ const GeneratedItemsModal = ({
                 onClick={cancelGeneratedItems}
                 className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={confirmGeneratedItems}
@@ -186,7 +189,7 @@ const GeneratedItemsModal = ({
                 disabled={generatedItems.filter((j) => j.selected).length === 0}
               >
                 <Check className="mr-2" size={16} />
-                Confirmar e Adicionar (
+                {t('common.confirm_and_add')} (
                 {generatedItems.filter((j) => j.selected).length})
               </Button>
             </div>
@@ -673,9 +676,7 @@ const UsageScenarios = ({ project, setProject }) => {
         )
 
         if (usageScenariosWithSelection.length === 0) {
-          toast.info(
-            'Nenhum cenário de uso foi gerado para as estórias existentes.',
-          )
+          toast.info(t('usage_scenarios.none_generated_toast'))
           return
         }
 
@@ -810,11 +811,10 @@ const UsageScenarios = ({ project, setProject }) => {
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
           <FileText size={40} className="mb-4 text-primary" />
           <p className="mb-2 font-medium text-foreground">
-            Nenhum Cenário de Uso
+            {t('usage_scenarios.empty_title')}
           </p>
           <p className="mb-4 text-sm text-center max-w-xs">
-            Crie uma User Story ou System Story primeiro para poder adicionar
-            cenários de uso.
+            {t('usage_scenarios.empty_hint')}
           </p>
         </div>
       )}

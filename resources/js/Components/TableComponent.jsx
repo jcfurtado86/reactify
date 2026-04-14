@@ -1,7 +1,9 @@
 import { flexRender } from '@tanstack/react-table'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 const TableComponent = ({ table }) => {
+  const { t } = useTranslation()
   const columns = table.getVisibleLeafColumns().length
 
   return (
@@ -47,7 +49,7 @@ const TableComponent = ({ table }) => {
         ) : (
           <TableRow>
             <TableCell colSpan={columns} className="h-24 text-center">
-              Sem resultados
+              {t('common.no_results')}
             </TableCell>
           </TableRow>
         )}

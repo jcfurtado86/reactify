@@ -86,16 +86,18 @@ const GeneratedItemsModal = ({
           <>
             <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
               <span className="text-foreground font-medium">
-                {generatedItems.filter((j) => j.selected).length} de{' '}
-                {generatedItems.length} selecionadas
+                {t('ai_modal.selected_of', {
+                  count: generatedItems.filter((j) => j.selected).length,
+                  total: generatedItems.length,
+                })}
               </span>
               <Button
                 onClick={toggleAllItems}
                 className="px-3 py-1 bg-primary hover:bg-primary/90 text-foreground text-sm rounded transition-colors"
               >
                 {generatedItems.every((story) => story.selected)
-                  ? 'Desmarcar Todas'
-                  : 'Selecionar Todas'}
+                  ? t('common.deselect_all')
+                  : t('common.select_all')}
               </Button>
             </div>
 
@@ -143,7 +145,7 @@ const GeneratedItemsModal = ({
                 onClick={cancelGeneratedItems}
                 className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={confirmGeneratedItems}
@@ -151,7 +153,7 @@ const GeneratedItemsModal = ({
                 disabled={generatedItems.filter((j) => j.selected).length === 0}
               >
                 <Check className="mr-2" size={16} />
-                Confirmar e Adicionar (
+                {t('common.confirm_and_add')} (
                 {generatedItems.filter((j) => j.selected).length})
               </Button>
             </div>
@@ -180,6 +182,7 @@ const StoryItem = ({
   disabled = false,
   errors,
 }) => {
+  const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const status = inspectionStatus(story)
 
@@ -279,7 +282,7 @@ const StoryItem = ({
                             <PopoverContent className="w-52 p-2" align="start">
                               <div className="space-y-1">
                                 <h4 className="font-medium text-sm px-2 py-1.5">
-                                  Cores
+                                  {t('color_components.title')}
                                 </h4>
                                 <ColorOptions
                                   handleColorSelect={(e) =>
@@ -705,7 +708,7 @@ const Stories = ({ project, setProject }) => {
           <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
             <BookText size={32} className="mb-3 text-primary" />
             <p className="mb-2 text-sm text-center font-medium text-foreground">
-              Nenhuma User Story
+              {t('stories.empty_user')}
             </p>
           </div>
         )}
@@ -717,7 +720,7 @@ const Stories = ({ project, setProject }) => {
             disabled={!can('userStory.manage')}
           >
             <Plus size={18} className="mr-2" />
-            <span>Nova User Story</span>
+            <span>{t('stories.new_user_story')}</span>
           </Button>
         )}
       </div>
@@ -762,7 +765,7 @@ const Stories = ({ project, setProject }) => {
           <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
             <BookText size={32} className="mb-3 text-primary" />
             <p className="mb-2 text-sm text-center font-medium text-foreground">
-              Nenhuma System Story
+              {t('stories.empty_system')}
             </p>
           </div>
         )}
@@ -774,7 +777,7 @@ const Stories = ({ project, setProject }) => {
               onClick={() => addNewStory('system')}
             >
               <Plus size={18} className="mr-2" />
-              <span>Nova System Story</span>
+              <span>{t('stories.new_system_story')}</span>
             </Button>
             <GenerateAIButton
               isGenerating={isGenerating}

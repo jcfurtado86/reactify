@@ -654,7 +654,7 @@ const Journeys = ({ project, setProject }) => {
                         </ButtonWithTooltip>
                         {editingJourney === journey.id ? (
                           <ButtonWithTooltip
-                            tooltipContent={'Salvar titulo'}
+                            tooltipContent={t('journeys.save_title')}
                             variant="success"
                             size="icon"
                             disabled={!editJourneyName.trim()}
@@ -668,7 +668,7 @@ const Journeys = ({ project, setProject }) => {
                           </ButtonWithTooltip>
                         ) : (
                           <ButtonWithTooltip
-                            tooltipContent={'Editar titulo'}
+                            tooltipContent={t('journeys.edit_title')}
                             variant="ghost"
                             size="icon"
                             className="text-muted-foreground hover:text-foreground"
@@ -683,7 +683,7 @@ const Journeys = ({ project, setProject }) => {
                         <Popover>
                           <PopoverTrigger asChild>
                             <ButtonWithTooltip
-                              tooltipContent={'Deletar journey'}
+                              tooltipContent={t('journeys.delete_journey')}
                               variant="ghost"
                               size="icon"
                               className="text-destructive/80 hover:text-destructive"
@@ -697,9 +697,9 @@ const Journeys = ({ project, setProject }) => {
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div className="space-y-3">
-                              <h4 className="font-medium">Delete Journey</h4>
+                              <h4 className="font-medium">{t('journeys.delete_journey')}</h4>
                               <p className="text-sm text-muted-foreground">
-                                Are you sure? All steps will be lost.
+                                {t('journeys.delete_confirm')}
                               </p>
                               <div className="flex justify-end gap-2">
                                 <Button
@@ -707,7 +707,7 @@ const Journeys = ({ project, setProject }) => {
                                   size="sm"
                                   onClick={() => deleteJourney(journey.id)}
                                 >
-                                  Delete
+                                  {t('common.delete')}
                                 </Button>
                               </div>
                             </div>
@@ -796,7 +796,7 @@ const Journeys = ({ project, setProject }) => {
                   ) : (
                     <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
                       <p className="mb-2">
-                        Essa Jornada não possui nenhum passo.
+                        {t('journeys.empty_steps')}
                       </p>
                       {can('journey.manage') && (
                         <Button
@@ -805,7 +805,7 @@ const Journeys = ({ project, setProject }) => {
                           className="text-primary"
                           onClick={() => addNewStep(journey.id)}
                         >
-                          <Plus size={16} className="mr-1" /> Adicionar passo
+                          <Plus size={16} className="mr-1" /> {t('journeys.add_step')}
                         </Button>
                       )}
                     </div>
@@ -817,9 +817,9 @@ const Journeys = ({ project, setProject }) => {
       ) : (
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border">
           <Map size={40} className="mb-4 text-primary" />
-          <p className="mb-2">Nenhuma Jornada definida.</p>
+          <p className="mb-2">{t('journeys.empty_title')}</p>
           <p className="mb-4 text-sm">
-            Crie uma nova jornada para mapear o fluxo do usuário.
+            {t('journeys.empty_hint')}
           </p>
         </div>
       )}
@@ -834,7 +834,7 @@ const Journeys = ({ project, setProject }) => {
               className="w-full"
               onClick={addNewJourney}
             >
-              <Plus size={18} className="mr-2" /> Nova Jornada
+              <Plus size={18} className="mr-2" /> {t('journeys.new_journey')}
             </Button>
             <GenerateAIButton
               isGenerating={isGeneratingAI}

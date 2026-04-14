@@ -266,7 +266,7 @@ const Dashboard = ({ project, setProject }) => {
       artifacts: [
         { label: 'Stories', title: 'stories' },
         { label: 'Overall Model', title: 'overallModel' },
-        { label: 'Matriz de Priorização', title: 'prioritizationMatrix' },
+        { label: t('project.artifacts.prioritization_matrix'), title: 'prioritizationMatrix' },
         { label: 'Change Log', title: 'changeLog' },
       ],
     },

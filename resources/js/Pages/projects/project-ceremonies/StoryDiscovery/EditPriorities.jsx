@@ -4,10 +4,12 @@ import { darkenColor, PREDEFINED_COLORS, cn } from '@/lib/utils'
 import { ColorOptions, ColorPickerPopover } from '@/Components/ColorComponents'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 const NAME_MAX = 30;
 
 const PriorityEditPopover = ({ priority, children, setProject, project }) => {
+  const { t } = useTranslation()
   const [name, setName] = useState(priority.name)
   const [color, setColor] = useState(priority.color)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -18,7 +20,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
   function handleSubmit(e) {
     e.preventDefault()
     if (name === priority.name && color === priority.color) {
-      toast.info('Nenhuma alteração detectada.')
+      toast.info(t('edit_priorities.toast_no_changes'))
       return
     }
 
@@ -37,7 +39,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
       {
         preserveScroll: true,
         onSuccess: () => {
-          toast.success('Prioridade atualizada com sucesso.')
+          toast.success(t('edit_priorities.toast_updated'))
         },
         onError: (errors) => {
           setProject((prev) => ({ ...prev, matrix_priorities: oldPriorities }))
@@ -49,7 +51,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
           } else if (errors.error) {
             toast.error(errors.error)
           } else {
-            toast.error('Ocorreu um erro ao atualizar a prioridade.')
+            toast.error(t('edit_priorities.toast_update_error'))
           }
         },
         onFinish: () => {
@@ -70,11 +72,11 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
     router.delete(route('matrix-priority.destroy', { priority: priority.id }), {
       preserveScroll: true,
       onSuccess: () => {
-        toast.success('Prioridade excluída com sucesso.')
+        toast.success(t('edit_priorities.toast_deleted'))
       },
       onError: (errors) => {
         setProject((prev) => ({ ...prev, matrix_priorities: oldPriorities }))
-        toast.error(errors.error || 'Ocorreu um erro ao excluir a prioridade.')
+        toast.error(errors.error || t('edit_priorities.toast_delete_error'))
       },
       onFinish: () => {
         setIsProcessing(false)
@@ -129,43 +131,42 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
                 className="w-full justify-start text-red-500 hover:text-red-500"
                 disabled={isProcessing}
               >
-                <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                <Trash2 className="mr-2 h-4 w-4" /> {t('common.delete')}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  Tem certeza que deseja excluir?
+                  {t('edit_priorities.confirm_delete_title')}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  Essa ação não pode ser desfeita. Isso excluirá permanentemente
-                  a prioridade.
+                  {t('edit_priorities.confirm_delete_body')}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
                   disabled={isProcessing}
                 >
-                  {isProcessing ? 'Excluindo...' : 'Excluir'}
+                  {isProcessing ? t('edit_priorities.deleting') : t('common.delete')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
           <Button variant="ghost" className="w-full justify-start" disabled>
-            <Bookmark className="mr-2 h-4 w-4" /> Definir como padrão
+            <Bookmark className="mr-2 h-4 w-4" /> {t('edit_priorities.set_default')}
           </Button>
           <Separator />
 
           {/* Seletor de Cor */}
           <div className="p-2 space-y-1">
-            <h4 className="font-medium text-sm">Cores</h4>
+            <h4 className="font-medium text-sm">{t('color_components.title')}</h4>
             <ColorOptions handleColorSelect={setColor} selectedValue={color} />
           </div>
 
           <Button type="submit" className="w-full" disabled={isProcessing}>
-            {isProcessing ? 'Salvando...' : 'Salvar Alterações'}
+            {isProcessing ? t('common.saving') : t('project_settings.save_changes')}
           </Button>
         </form>
       </PopoverContent>
@@ -174,6 +175,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
 }
 
 const EditPriorities = ({ project, setProject, priorities, projectId }) => {
+  const { t } = useTranslation()
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState('#ffffff')
   const [isStoring, setIsStoring] = useState(false)
@@ -236,7 +238,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
       {
         preserveScroll: true,
         onSuccess: () => {
-          toast.success('Prioridade criada com sucesso.')
+          toast.success(t('edit_priorities.toast_created'))
         },
         onError: (errors) => {
           setProject((prev) => ({
@@ -249,7 +251,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
           } else if (errors.error) {
             toast.error(errors.error)
           } else {
-            toast.error('Ocorreu um erro ao criar a prioridade.')
+            toast.error(t('edit_priorities.toast_create_error'))
           }
         },
         onFinish: () => {
@@ -262,7 +264,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="secondary">Editar Prioridades</Button>
+        <Button variant="secondary">{t('edit_priorities.edit_button')}</Button>
       </SheetTrigger>
       <SheetContent
         style={{
@@ -271,16 +273,15 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
         className="top-auto bottom-0 overflow-y-auto" // A classe h-[85%] foi removida pois o style a substitui
       >
         <SheetHeader>
-          <SheetTitle>Gerenciar Prioridades da Matriz</SheetTitle>
+          <SheetTitle>{t('edit_priorities.manage_title')}</SheetTitle>
           <SheetDescription>
-            Adicione, edite ou remova as prioridades que são usadas em todos os
-            projetos.
+            {t('edit_priorities.manage_description')}
           </SheetDescription>
         </SheetHeader>
         <div className="py-4 space-y-6">
           <div className="space-y-2">
             <h4 className="font-medium text-foreground px-1">
-              Prioridades Existentes
+              {t('edit_priorities.existing')}
             </h4>
             {/* Mapeia as prioridades para botões que abrem o popover */}
             {priorities.map((p) => (
@@ -313,14 +314,14 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
           {/* Formulário para adicionar nova prioridade (sem alterações) */}
           <form onSubmit={handleStore} className="gap-4">
             <h4 className="font-medium text-foreground">
-              Adicionar Prioridade
+              {t('edit_priorities.add_title')}
             </h4>
             <div className="flex items-end gap-2 mb-4">
               <div className="grid gap-1.5 flex-1">
                 <div className="flex flex-col gap-1">
                 <Input
                   id="new-name"
-                  placeholder="Digite o nome da prioridade"
+                  placeholder={t('edit_priorities.name_placeholder')}
                   maxLength={NAME_MAX} // Bloqueio físico
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
@@ -344,7 +345,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
                 </div>
               </div>
               <div className="flex flex-col items-center justify-center gap-1">
-                <Label>Cor</Label>
+                <Label>{t('edit_priorities.color_label')}</Label>
                 <ColorPickerPopover
                   value={newColor}
                   onChange={setNewColor}
@@ -354,7 +355,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
             </div>
             <SheetFooter>
               <Button type="submit" disabled={isStoring}>
-                {isStoring ? 'Adicionando...' : 'Adicionar'}
+                {isStoring ? t('edit_priorities.adding') : t('common.add')}
               </Button>
             </SheetFooter>
           </form>

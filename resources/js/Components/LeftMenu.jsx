@@ -1,5 +1,6 @@
 import { usePage, router } from '@inertiajs/react'
 import { Grid, Milestone, BadgeCheckIcon, ChevronRightIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -35,6 +36,7 @@ const useOnClickOutside = (ref, handler) => {
 }
 
 const LeftMenu = ({ isOpen, setIsOpen }) => {
+  const { t } = useTranslation()
   const { props } = usePage()
   const projects = props.auth.projects || []
 
@@ -80,7 +82,7 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
         >
           {isOpen && (
             <span className="font-medium text-center hidden md:inline truncate">
-              Projects
+              {t('nav.projects')}
             </span>
           )}
 

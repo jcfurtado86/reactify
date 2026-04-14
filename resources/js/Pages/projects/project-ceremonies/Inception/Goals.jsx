@@ -309,7 +309,7 @@ const GoalItem = ({
                           <PopoverContent className="w-52 p-2" align="start">
                             <div className="space-y-1">
                               <h4 className="font-medium text-sm px-2 py-1.5">
-                                Cores
+                                {t('color_components.title')}
                               </h4>
                               <ColorOptions
                                 handleColorSelect={(e) =>
@@ -374,7 +374,7 @@ const GoalItem = ({
                           <PopoverContent className="w-52 p-2" align="start">
                             <div className="space-y-1">
                               <h4 className="font-medium text-sm px-2 py-1.5">
-                                Cores
+                                {t('color_components.title')}
                               </h4>
                               <ColorOptions
                                 handleColorSelect={(e) =>
@@ -846,14 +846,14 @@ const Goals = ({ project, setProject }) => {
           <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
             <Goal size={32} className="mb-3 text-primary" />
             <p className="mb-2 text-sm text-center font-medium text-foreground">
-              Nenhuma Constraint Goal
+              {t('goals.empty_constraint')}
             </p>
           </div>
         )}
         {can('goal.manage') && (
           <Button variant="secondary" onClick={() => addNewGoal('cg')}>
             <Plus size={18} className="mr-2" />
-            <span>Nova Constraint Goal</span>
+            <span>{t('goals.new_constraint')}</span>
           </Button>
         )}
       </div>
@@ -904,7 +904,7 @@ const Goals = ({ project, setProject }) => {
           <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
             <Goal size={32} className="mb-3 text-primary" />
             <p className="mb-2 text-sm text-center font-medium text-foreground">
-              Nenhuma Business Goal
+              {t('goals.empty_business')}
             </p>
           </div>
         )}
@@ -912,7 +912,7 @@ const Goals = ({ project, setProject }) => {
           <>
             <Button variant="secondary" onClick={() => addNewGoal('bg')}>
               <Plus size={18} className="mr-2" />
-              <span>Nova Business Goal</span>
+              <span>{t('goals.new_business')}</span>
             </Button>
             <GenerateAIButton
               isGenerating={isGenerating}

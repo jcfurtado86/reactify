@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {  CircleX, Pencil, Check, ChevronDown, LoaderCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ModalConfirmation, ModalSelect } from '@/Components/Modals';
 import TextArea from '@/Components/TextArea';
 
@@ -18,6 +19,7 @@ const StoryCard = ({
   deleteStory,
   setDeleteConfirmId,
 }) => {
+  const { t } = useTranslation();
   const [storyTypes] = useState([
     { color: 'bg-violet-600', title: 'user' },
     { color: 'bg-teal-600', title: 'system' },
@@ -40,7 +42,7 @@ const StoryCard = ({
             types={storyTypes}
             onClick={(type) => changeStoryType(story.id, type.title)}
             onCancel={() => setTypeSelectId(null)}
-            message={'Select story type'}
+            message={t('common.select_story_type')}
           />
         )}
       </div>
@@ -87,7 +89,7 @@ const StoryCard = ({
             <ModalConfirmation
               onConfirm={() => deleteStory(story.id)}
               onCancel={() => setDeleteConfirmId(null)}
-              message="Deseja remover esta story?"
+              message={t('stories.remove_confirm')}
             />
           )}
         </div>
@@ -116,6 +118,7 @@ const GoalCard = ({
   setDeleteConfirmId,
 
 }) => {
+  const { t } = useTranslation();
   const [goalTypes] = useState([
     { color: 'bg-orange-600', title: 'bg' },
     { color: 'bg-purple-600', title: 'cg' },
@@ -152,7 +155,7 @@ const GoalCard = ({
             types={goalTypes}
             onClick={(type) => changeGoalType(goal.id, type.title)}
             onCancel={() => setTypeSelectId(null)}
-            message={'Select type'}
+            message={t('common.select_type')}
           />
         )}
 
@@ -171,7 +174,7 @@ const GoalCard = ({
             types={goalPriorities}
             onClick={(priority) => changeGoalPriority(goal.id, priority.title)}
             onCancel={() => setPrioritySelectId(null)}
-            message={'Select priority'}
+            message={t('common.select_priority')}
           />
         )}
       </div>
@@ -215,7 +218,7 @@ const GoalCard = ({
             <ModalConfirmation
               onConfirm={() => deleteGoal(goal.id)}
               onCancel={() => setDeleteConfirmId(null)}
-              message="Deseja remover esta goal?"
+              message={t('goals.remove_confirm')}
             />
           )}
         </div>

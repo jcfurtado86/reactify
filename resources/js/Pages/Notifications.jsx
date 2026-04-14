@@ -1,8 +1,10 @@
 import MainLayout from '@/Layouts/MainLayout'
 import { usePage, router, Head } from '@inertiajs/react'
 import { BellRing, Trash } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const Notifications = () => {
+  const { t } = useTranslation()
   const { auth } = usePage().props
   const { notifications } = auth
 
@@ -28,20 +30,20 @@ const Notifications = () => {
 
   return (
     <div className="container mx-auto py-10">
-      <Head title="Notifications" />
+      <Head title={t('notifications_page.title')} />
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-2 text-2xl font-bold">
             <div className="flex items-center gap-2">
               <BellRing className="h-6 w-6" />
-              <span>Notifications</span>
+              <span>{t('notifications_page.title')}</span>
             </div>
             <Button
               variant="secondary"
               className="h-12 "
               onClick={() => router.patch(route('notifications.read'))}
             >
-              Mark all as read
+              {t('notifications_page.mark_all_read')}
               <Trash className="!size-6" />
             </Button>
           </CardTitle>
@@ -78,7 +80,7 @@ const Notifications = () => {
                             )
                           }}
                         >
-                          Accept
+                          {t('notifications_page.accept')}
                         </Button>
                         <Button
                           variant="destructive"
@@ -90,7 +92,7 @@ const Notifications = () => {
                             )
                           }}
                         >
-                          Decline
+                          {t('notifications_page.decline')}
                         </Button>
                       </div>
                     )}
@@ -101,7 +103,7 @@ const Notifications = () => {
           ) : (
             <div className="py-12 text-center">
               <p className="text-lg text-muted-foreground">
-                You have no notifications.
+                {t('notifications_page.empty')}
               </p>
             </div>
           )}

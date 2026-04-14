@@ -65,7 +65,7 @@ export function ProjectPermissions({ project }) {
           const errorKeys = Object.keys(currentError)
           const hasRoleError = errorKeys.some((key) => key.includes('.role'))
           if (hasRoleError) {
-            toast.error('Função inválida! Verifique e tente novamente.')
+            toast.error(t('project_permissions.invalid_role'))
             console.error('Função inválida! Verifique e tente novamente.')
           }
         },
@@ -255,16 +255,16 @@ export function ProjectPermissions({ project }) {
                     onValueChange={(e) => setNewUserRole(e)}
                   >
                     <SelectTrigger className="max-w-[30%]">
-                      <SelectValue placeholder="Role" />
+                      <SelectValue placeholder={t('project_permissions.role')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="customer">Customer</SelectItem>
+                      <SelectItem value="customer">{t('project_permissions.roles.customer')}</SelectItem>
                       <SelectItem value="domain_expert">
-                        Domain Expert
+                        {t('project_permissions.roles.domain_expert')}
                       </SelectItem>
-                      <SelectItem value="team">Team</SelectItem>
+                      <SelectItem value="team">{t('project_permissions.roles.team')}</SelectItem>
                       <SelectItem value="administrator">
-                        Administrator
+                        {t('project_permissions.roles.administrator')}
                       </SelectItem>
                     </SelectContent>
                   </Select>

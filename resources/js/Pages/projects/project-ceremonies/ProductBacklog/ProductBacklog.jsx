@@ -372,9 +372,9 @@ const ProductBacklog = ({ project, setProject }) => {
           description: 'Edite os detalhes da sprint.',
         }
       case 'create':
-        return { title: 'Criar Sprint', description: 'Crie uma nova sprint.' }
+        return { title: t('sprint.create_title'), description: t('sprint.create_description') }
       default:
-        return { title: 'Operacao' }
+        return { title: t('common.operation') }
     }
   }
 
@@ -397,11 +397,9 @@ const ProductBacklog = ({ project, setProject }) => {
         <AlertDialogContent>
           <form onSubmit={finishSprint}>
             <AlertDialogHeader>
-              <AlertDialogTitle>Finalizar Sprint</AlertDialogTitle>
+              <AlertDialogTitle>{t('sprint.end_sprint')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja finalizar essa sprint? <br />
-                As estórias nao finalizadas presentes nela podem ir para a
-                próxima sprint ou ao Backlog.
+                {t('sprint.end_sprint_confirm')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <section className="my-4">
@@ -415,9 +413,9 @@ const ProductBacklog = ({ project, setProject }) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Sprints</SelectLabel>
+                    <SelectLabel>{t('sprint.sprints_label')}</SelectLabel>
                     <SelectItem key="Backlog" value={'Backlog'}>
-                      Backlog
+                      {t('common.backlog')}
                     </SelectItem>
                     {project?.sprints
                       ?.filter(
@@ -445,8 +443,8 @@ const ProductBacklog = ({ project, setProject }) => {
               </Select>
             </section>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction type="submit">Finalizar</AlertDialogAction>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+              <AlertDialogAction type="submit">{t('sprint.finish')}</AlertDialogAction>
             </AlertDialogFooter>
           </form>
         </AlertDialogContent>
@@ -455,16 +453,15 @@ const ProductBacklog = ({ project, setProject }) => {
       <AlertDialog open={openDeleteForm} onOpenChange={setOpenDeleteForm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Deletar Sprint</AlertDialogTitle>
+            <AlertDialogTitle>{t('sprint.delete_sprint')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja deletar essa sprint? As estórias contidas
-              nela voltarão ao Backlog.
+              {t('sprint.delete_sprint_confirm')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={deleteSprint}>
-              Deletar
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -476,7 +473,7 @@ const ProductBacklog = ({ project, setProject }) => {
             <DialogTitle>{getAlertContents().title}</DialogTitle>
             <DialogDescription>
               {getAlertContents().description} <br />
-              Os campos obrigatórios estão marcados com um asterisco{' '}
+              {t('home.required_fields_marker')}{' '}
               <span className="text-destructive">*</span>
             </DialogDescription>
           </DialogHeader>
@@ -484,7 +481,7 @@ const ProductBacklog = ({ project, setProject }) => {
             <div className="grid gap-4 pb-2">
               <div className="grid gap-3">
                 <Label htmlFor="name-1">
-                  Nome <span className="text-destructive">*</span>
+                  {t('common.name')} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="name-1"
@@ -498,7 +495,7 @@ const ProductBacklog = ({ project, setProject }) => {
               </div>
               <div className="grid gap-3">
                 <label className="text-sm font-medium">
-                  Data de início <span className="text-destructive">*</span>
+                  {t('sprint.start_date')} <span className="text-destructive">*</span>
                 </label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -513,7 +510,7 @@ const ProductBacklog = ({ project, setProject }) => {
                       {startDate ? (
                         formatDate(startDate)
                       ) : (
-                        <span>Escolha uma data</span>
+                        <span>{t('sprint.pick_date')}</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -534,7 +531,7 @@ const ProductBacklog = ({ project, setProject }) => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">
-                  Data de término <span className="text-destructive">*</span>
+                  {t('sprint.end_date')} <span className="text-destructive">*</span>
                 </label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -549,7 +546,7 @@ const ProductBacklog = ({ project, setProject }) => {
                       {endDate ? (
                         formatDate(endDate)
                       ) : (
-                        <span>Escolha uma data</span>
+                        <span>{t('sprint.pick_date')}</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -571,9 +568,9 @@ const ProductBacklog = ({ project, setProject }) => {
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline">Cancelar</Button>
+                <Button variant="outline">{t('common.cancel')}</Button>
               </DialogClose>
-              <Button type="submit">Salvar Alterações</Button>
+              <Button type="submit">{t('project_settings.save_changes')}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -594,11 +591,11 @@ const ProductBacklog = ({ project, setProject }) => {
           <AccordionTrigger className="hover:no-underline">
             <div className="flex gap-4">
               <span className="hover:underline my-auto">
-                Product Backlog ({productBacklogTable.getRowCount()} items)
+                {t('product_backlog.title_with_count', { count: productBacklogTable.getRowCount() })}
               </span>
 
               <SpanButton variant="secondary" onClick={(e) => createSprint(e)}>
-                Criar sprint
+                {t('product_backlog.create_sprint')}
               </SpanButton>
               <SpanButton
                 variant="secondary"
@@ -613,7 +610,7 @@ const ProductBacklog = ({ project, setProject }) => {
                   )
                 }}
               >
-                Ir para matriz
+                {t('product_backlog.go_to_matrix')}
               </SpanButton>
             </div>
           </AccordionTrigger>
@@ -630,11 +627,10 @@ const ProductBacklog = ({ project, setProject }) => {
                   strokeWidth={1.5}
                 />
                 <p className="mb-2 font-medium text-foreground">
-                  Product Backlog Vazio
+                  {t('product_backlog.empty_title')}
                 </p>
                 <p className="text-sm text-center max-w-xs">
-                  Nenhuma story foi priorizada. Vá para a Matriz de Priorização
-                  para classificar suas stories.
+                  {t('product_backlog.no_prioritized_stories')}
                 </p>
                 <Button
                   variant="outline"
@@ -649,7 +645,7 @@ const ProductBacklog = ({ project, setProject }) => {
                     )
                   }
                 >
-                  Ir para Matriz de Priorização
+                  {t('product_backlog.go_to_prioritization_matrix')}
                 </Button>
               </div>
             )}

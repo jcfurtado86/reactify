@@ -1,11 +1,14 @@
 import { Head, Link } from '@inertiajs/react'
 import { route } from 'ziggy-js'
 import { Particles } from '@/components/magicui/particles'
+import { useTranslation } from 'react-i18next'
+import { Trans } from 'react-i18next'
 
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
+  const { t } = useTranslation()
   return (
     <>
-      <Head title="Welcome to Reactify" />
+      <Head title={t('welcome.head_title')} />
 
       <div className="min-h-screen bg-background text-foreground">
         <Particles className="absolute inset-0 w-full h-full" />
@@ -43,13 +46,13 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
           {/* Hero Section */}
           <div className="flex flex-col items-center text-center py-32 px-6">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              Gerencie seus Projetos com{' '}
-              <span className="text-primary">Reactify</span>
+              <Trans
+                i18nKey="welcome.hero_title"
+                components={{ brand: <span className="text-primary" /> }}
+              />
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl">
-              Accelerate your React development with our powerful toolkit.
-              Create, manage, and deploy React applications faster than ever
-              before.
+              {t('welcome.hero_subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mb-16">
               <Link
@@ -57,13 +60,13 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                 href={route('register')}
                 className="px-8 py-4 bg-primary text-background hover:bg-primary/90 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
               >
-                Registre
+                {t('welcome.register')}
               </Link>
               <Link
                 href={route('login')}
                 className="px-8 py-4 border-2 border-border bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-xl font-bold text-lg transition-all duration-300"
               >
-                Login
+                {t('welcome.login')}
               </Link>
             </div>
 
@@ -71,19 +74,16 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full mt-16 max-w-7xl">
               {[
                 {
-                  title: 'React Components',
-                  description:
-                    'Build with modern React components and hooks for better performance and maintainability.',
+                  title: t('welcome.feature_components_title'),
+                  description: t('welcome.feature_components_body'),
                 },
                 {
-                  title: 'Real-Time Updates',
-                  description:
-                    'Get instant updates and live reloading during development for faster iteration.',
+                  title: t('welcome.feature_realtime_title'),
+                  description: t('welcome.feature_realtime_body'),
                 },
                 {
-                  title: 'Cloud Deployment',
-                  description:
-                    'Deploy your applications to the cloud with one click and scale effortlessly.',
+                  title: t('welcome.feature_cloud_title'),
+                  description: t('welcome.feature_cloud_body'),
                 },
               ].map((feature) => (
                 <div
@@ -102,7 +102,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
           {/* Footer */}
           <footer className="absolute bottom-0 py-6 text-center text-muted-foreground text-sm">
-            © 2025 Reactify. All rights reserved.
+            {t('welcome.footer')}
           </footer>
         </div>
       </div>

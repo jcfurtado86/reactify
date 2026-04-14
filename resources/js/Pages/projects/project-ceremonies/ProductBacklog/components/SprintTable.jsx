@@ -1,5 +1,6 @@
 import { formatDate, isSprintActive } from '@/lib/utils'
 import { Trash2Icon as TrashIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -25,6 +26,7 @@ export const SprintTable = ({
   openEditSprintForm,
   openEndSprintForm,
 }) => {
+  const { t } = useTranslation()
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState([])
@@ -107,19 +109,19 @@ export const SprintTable = ({
             </span>
             <span className="text-muted-foreground my-auto">
               {' '}
-              {formatDate(sprint.start_date)} - {formatDate(sprint.end_date)} (
-              {table.getRowCount()} items)
+              {formatDate(sprint.start_date)} - {formatDate(sprint.end_date)} ({' '}
+              {t('common.items_count', { count: table.getRowCount() })})
             </span>
 
             {sprint.status === 'completed' && (
               <Badge variant="badge" className={'bg-rose-300'}>
-                Finalizada
+                {t('sprint.sprint_completed')}
               </Badge>
             )}
 
             {isSprintActive(sprint) && sprint.status === 'active' && (
               <Badge variant="badge" className={'bg-green-300'}>
-                Ativa
+                {t('sprint.sprint_active')}
               </Badge>
             )}
             {sprint.status === 'active' && (
@@ -140,12 +142,12 @@ export const SprintTable = ({
                   variant="secondary"
                   onClick={() => openEditSprintForm(sprint)}
                 >
-                  Editar sprint
+                  {t('sprint.edit_sprint')}
                 </SpanButton>
               </>
             )}
             <SpanButton
-              title="Deletar Sprint"
+              title={t('sprint.delete_sprint')}
               variant="destructive"
               onClick={() => openDeleteSprintForm(sprint)}
             >

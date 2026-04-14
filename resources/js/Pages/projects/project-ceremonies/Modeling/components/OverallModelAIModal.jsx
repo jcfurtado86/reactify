@@ -1,5 +1,6 @@
 import { Check, ChevronsUp, Minus, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { useOverallModelAIStore } from '@/stores/useOverallModelAIStore'
 
 /**
@@ -10,6 +11,7 @@ import { useOverallModelAIStore } from '@/stores/useOverallModelAIStore'
  * que persiste as seleções no backend.
  */
 export const OverallModelAIModal = ({ onConfirm }) => {
+  const { t } = useTranslation()
   const isOpen = useOverallModelAIStore((s) => s.isOpen)
   const isMinimized = useOverallModelAIStore((s) => s.isMinimized)
   const cards = useOverallModelAIStore((s) => s.cards)
@@ -29,7 +31,7 @@ export const OverallModelAIModal = ({ onConfirm }) => {
     const result = toggleClassSelectionRaw(index)
     if (result?.blocked) {
       toast.info(
-        `A classe "${result.className}" é requerida por um CRC Card selecionado e não pode ser desmarcada.`,
+        t('ai_modal.class_required_toast', { name: result.className }),
       )
     }
   }
@@ -51,13 +53,13 @@ export const OverallModelAIModal = ({ onConfirm }) => {
       <div className="bg-card rounded-lg max-w-7xl w-full max-h-[95vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between p-3 flex-shrink-0">
           <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isMinimized && 'CRC Cards gerados por IA'}
-            {isMinimized && 'CRC Cards gerados'}
+            {!isMinimized && t('overall_model.ai_cards_title')}
+            {isMinimized && t('overall_model.ai_cards_title_minimized')}
           </h3>
           <div className="flex items-center gap-2">
             {!isMinimized && (
               <h3 className="text-xl font-bold text-foreground flex items-center">
-                Classes geradas por IA
+                {t('overall_model.ai_classes_title')}
               </h3>
             )}
             <Button size="icon" variant="secondary" onClick={toggleMinimized}>
@@ -73,15 +75,18 @@ export const OverallModelAIModal = ({ onConfirm }) => {
             <section className="w-1/2 flex flex-col">
               <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
                 <span className="text-foreground font-medium">
-                  {selectedCardsCount} de {cards.length} selecionados
+                  {t('ai_modal.selected_of', {
+                    count: selectedCardsCount,
+                    total: cards.length,
+                  })}
                 </span>
                 <Button
                   onClick={toggleAllCards}
                   className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
                 >
                   {cards.every((item) => item.selected)
-                    ? 'Desmarcar Todos'
-                    : 'Selecionar Todos'}
+                    ? t('common.deselect_all')
+                    : t('common.select_all')}
                 </Button>
               </div>
 
@@ -109,7 +114,7 @@ export const OverallModelAIModal = ({ onConfirm }) => {
                           <div className="flex">
                             <div className="w-1/2 px-1 flex flex-col gap-2">
                               <h5 className="font-semibold text-sm text-center text-primary my-2">
-                                Responsabilidades
+                                {t('overall_model.responsibilities')}
                               </h5>
                               {card.responsabilities.map((res) => (
                                 <div
@@ -122,7 +127,7 @@ export const OverallModelAIModal = ({ onConfirm }) => {
                             </div>
                             <div className="w-1/2 px-1 border-l border-border flex flex-col gap-1">
                               <h5 className="font-semibold text-sm text-center text-primary my-2">
-                                Colaboradores
+                                {t('overall_model.collaborators')}
                               </h5>
                               {card.collaborators.map((collaborator) => (
                                 <div
@@ -144,15 +149,18 @@ export const OverallModelAIModal = ({ onConfirm }) => {
             <section className="w-1/2 flex flex-col">
               <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
                 <span className="text-foreground font-medium">
-                  {selectedClassesCount} de {classes.length} selecionados
+                  {t('ai_modal.selected_of', {
+                    count: selectedClassesCount,
+                    total: classes.length,
+                  })}
                 </span>
                 <Button
                   onClick={toggleAllClasses}
                   className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
                 >
                   {classes.every((item) => item.selected)
-                    ? 'Desmarcar Todos'
-                    : 'Selecionar Todos'}
+                    ? t('common.deselect_all')
+                    : t('common.select_all')}
                 </Button>
               </div>
 
@@ -195,7 +203,7 @@ export const OverallModelAIModal = ({ onConfirm }) => {
               onClick={cancel}
               className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={onConfirm}
@@ -203,8 +211,9 @@ export const OverallModelAIModal = ({ onConfirm }) => {
               disabled={selectedCardsCount === 0 && selectedClassesCount === 0}
             >
               <Check className="mr-2" size={16} />
-              Confirmar e Adicionar (
-              {selectedCardsCount + selectedClassesCount})
+              {t('ai_modal.confirm_add_count', {
+                count: selectedCardsCount + selectedClassesCount,
+              })}
             </Button>
           </div>
         )}

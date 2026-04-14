@@ -161,12 +161,12 @@ const InvestCard = ({
               )}
             >
               <h3 className="font-bold uppercase text-foreground">
-                Check Card
+                {t('invest_card.check_card')}
               </h3>
 
-              <span className=" ">SIM</span>
-              <span className="">NÃO</span>
-              <span className="">N/A</span>
+              <span className=" ">{t('common.yes_upper')}</span>
+              <span className="">{t('common.no_upper')}</span>
+              <span className="">{t('common.na')}</span>
               {isExpanded && <Info />}
             </div>
 
