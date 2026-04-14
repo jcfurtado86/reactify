@@ -666,5 +666,155 @@
     "missing_prereqs": "To generate {{label}}, you must register at least one of each of the following: {{items}}.",
     "server_error": "Could not connect to the server.",
     "unexpected": "Unexpected server response."
+  },
+  "tooltips": {
+    "inception": {
+      "title": "Inception",
+      "description": "The first big conversation to understand the overall project idea. The goal is for everyone (clients and team) to agree on what the product is and which problem it solves."
+    },
+    "story_discovery": {
+      "title": "Story Discovery",
+      "description": "After understanding the overall idea, it's time to list everything the system will do. The result is an initial list of \"features\" or \"tasks\", known as the Backlog."
+    },
+    "refining": {
+      "title": "Refining",
+      "description": "Here, the team selects the most important items from that task list and performs a deep analysis. The goal is to add details."
+    },
+    "modeling": {
+      "title": "Modeling",
+      "description": "Here the technical team details how the screens will look or how the internal parts of the system will work for each task."
+    },
+    "inspection": {
+      "title": "Inspection",
+      "description": "Inspections are activities for evaluating and improving the system, such as usability analysis, code review and other tasks that ensure the quality and efficiency of the system. In this ceremony the team stops and checks whether the task (the requirement) is ready. It's also where they estimate effort: \"Will this be quick or will it be a lot of work?\"."
+    },
+    "product_backlog": {
+      "title": "Product Backlog",
+      "description": "Prioritized list of user and system stories, managed to ensure incremental delivery of value. Prioritization is used to define the delivery order."
+    },
+    "sprint": {
+      "title": "Sprint",
+      "description": "Set of stories from the Product Backlog selected for implementation in the current cycle."
+    },
+    "product_canvas": {
+      "title": "Product Canvas",
+      "description": "Visualize all project items, including personas, goals and journeys."
+    },
+    "goals": {
+      "title": "Goals",
+      "description": "Main project goals, indicating targets and expected outcomes."
+    },
+    "personas": {
+      "title": "Personas",
+      "description": "Representative profiles of the system users, with expectations, constraints and goals."
+    },
+    "journeys": {
+      "title": "Journeys",
+      "description": "Sequences of steps (journeys) that describe the path of the user or administrator to reach a goal in the system."
+    },
+    "stories": {
+      "title": "Stories",
+      "description": "User stories and system requirements that detail features and needs of the project."
+    },
+    "prioritization_matrix": {
+      "title": "Prioritization Matrix",
+      "description": "Matrix for prioritizing user stories."
+    },
+    "change_log": {
+      "title": "Change Log",
+      "description": "Change record."
+    },
+    "epic_stories": {
+      "title": "Epic Stories",
+      "description": "Epic stories are stories complex enough that they need to be split into several user stories in order to be implemented."
+    },
+    "business_rules": {
+      "title": "Business Rules",
+      "description": "Business rules are instructions that define the rules and constraints that must be followed to ensure the integrity and consistency of the system."
+    },
+    "usage_scenarios": {
+      "title": "Usage Scenarios",
+      "description": "Use cases are accounts of events that occur in a specific context, such as creating accounts to access the system, managing playlists to organize music and other features focused on user experience."
+    },
+    "overall_model": {
+      "title": "Overall Model",
+      "description": "The overall model is a comprehensive view of the system, which includes all the features and requirements of the application."
+    },
+    "interfaces": {
+      "title": "Interfaces",
+      "description": "Interfaces are the ways users interact with the system, such as the user interface to access the application and the API interface to integrate with other systems."
+    },
+    "storyboards": {
+      "title": "Storyboards",
+      "description": "Storyboards are detailed views of the application's interfaces, showing how users interact with the system in different scenarios."
+    },
+    "user_story": {
+      "title": "User Stories",
+      "description": "User stories focus on the needs of the application's users, such as creating accounts to access the system, managing playlists to organize music and other features focused on user experience."
+    },
+    "system_story": {
+      "title": "System Stories",
+      "description": "System stories address administrative and technical features, such as user management for access control and other tasks that ensure the operation and maintenance of the system."
+    },
+    "epic_story": {
+      "title": "What is an Epic Story?",
+      "description": "Epic stories are stories complex enough that they need to be split into several user stories in order to be implemented."
+    },
+    "business_rule": {
+      "title": "What is a Business Rule?",
+      "description": "Business rules are rules the application must follow, such as ensuring users can only access resources if they are authenticated, or ensuring users cannot access resources that are not available."
+    },
+    "business_goal": {
+      "title": "Business Goals",
+      "description": "Business goals are specific targets the application seeks to reach, such as increasing the conversion rate of users to paying customers or increasing the frequency of application usage."
+    },
+    "constraint_goal": {
+      "title": "Constraint Goals",
+      "description": "Constraint goals are specific targets the application seeks to reach, such as increasing the conversion rate of users to paying customers or increasing the frequency of application usage."
+    },
+    "ai_generated_goals": {
+      "title": "Generate Goals with AI",
+      "description": "Uses AI to analyze the initial project description and generate Business Goals and Constraint Goals based on the provided Requirements Interview."
+    },
+    "ai_generated_personas": {
+      "title": "Generate Personas with AI",
+      "description": "Uses AI to create detailed user profiles based on the provided Requirements Interview."
+    },
+    "ai_generated_journey": {
+      "title": "Generate Journeys with AI",
+      "description": "Uses AI to structure user journeys step by step, mapping the ideal path within the system based on the Personas' Goals."
+    },
+    "ai_generated_product_canvas": {
+      "title": "Generate Product Canvas with AI",
+      "description": "Uses AI to map Problems, Solutions, Personas, Constraints and the project scope (Is/Is Not) from the provided Requirements Interview."
+    },
+    "ai_generated_story": {
+      "title": "Generate Stories with AI",
+      "description": "Uses AI to craft User Stories based on the Personas' Goals and Product Journeys, plus System Stories based on the product's Constraint Goals."
+    },
+    "ai_generated_epic": {
+      "title": "Generate Epics with AI",
+      "description": "Uses AI to analyze Epic Stories and separate the complex requirements."
+    },
+    "ai_generated_business_rule": {
+      "title": "Generate Business Rules with AI",
+      "description": "Uses AI to generate new rules by analyzing the project's Story, its Goals and the current Rules."
+    },
+    "ai_generated_usage_scenario": {
+      "title": "Generate Scenarios with AI",
+      "description": "Uses AI to describe detailed interaction narratives (use cases), exemplifying how the user should interact to complete a task."
+    },
+    "ai_generated_overall_model": {
+      "title": "Generate Overall Model with AI",
+      "description": "Uses AI to synthesize the entire defined scope into a unified architectural view, highlighting the main flows and components of the system. Based on the Project Stories."
+    },
+    "ai_generated_interface": {
+      "title": "Suggest Interfaces with AI",
+      "description": "Uses AI to propose the visual structure, required fields and layout of the elements (textual wireframe). Based on the CRC Cards and Stories."
+    },
+    "ai_generated_storyboard": {
+      "title": "Generate Storyboard with AI",
+      "description": "Uses AI to create a narrative sequence that illustrates the user's navigation between the suggested interfaces, validating the visual flow."
+    }
   }
 }

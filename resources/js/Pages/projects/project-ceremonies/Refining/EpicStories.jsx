@@ -17,7 +17,7 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import { usePage } from '@inertiajs/react' 
 import { cn } from '@/lib/utils' 
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 /**
  * Componente para renderizar um único card de estória.
  * Gerencia seu próprio estado de hover para exibir o botão de adicionar.
@@ -350,6 +350,7 @@ const EpicStoryCard = ({
  */
 const EpicStories = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   //ia states
   const [aiGeneratedEpicStories, setAiGeneratedEpicStories] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)

@@ -4,7 +4,7 @@ import { Minus, Check, X, ChevronsUp, Network } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { cn } from '@/lib/utils'
 /**
@@ -172,6 +172,7 @@ const GeneratedItemsModal = ({
 
 const Interfaces = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)

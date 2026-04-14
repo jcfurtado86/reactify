@@ -32,13 +32,14 @@ import {
   usePermissions,
 } from '@/Context/PermissionContext.jsx'
 import Sprint from './project-ceremonies/Sprint/Sprint'
-import { tooltipInfo } from '@/lib/projectData.js'
+import { useTooltipInfo } from '@/lib/projectData.js'
 //chatbot
 import ChatBot from './ChatBot.jsx'
 import { ProjectSettings } from '@/Components/ProjectSettings.jsx'
 
 const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   const [project, setProject] = useState({ ...projectDB })
   const { can } = usePermissions()
   // Inception States

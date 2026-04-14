@@ -25,7 +25,7 @@ import {
 } from '@/lib/utils'
 import { ColorOptions } from '@/Components/ColorComponents'
 import InfoButton from '@/Components/InfoButton'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
@@ -394,6 +394,7 @@ const StoryItem = ({
 
 const Stories = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)

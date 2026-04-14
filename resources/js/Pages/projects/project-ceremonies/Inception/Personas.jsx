@@ -16,7 +16,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import TextareaAutosize from 'react-textarea-autosize'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import { inspectionStatus } from '@/lib/utils'
 import StatusBadge from '@/Components/StatusBadge'
 import { usePage } from '@inertiajs/react' 
@@ -413,6 +413,7 @@ const PersonaItem = ({
 
 const Personas = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)

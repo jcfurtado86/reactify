@@ -21,7 +21,7 @@ import {
   isTemporary,
 } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { ColorOptions } from '@/Components/ColorComponents'
@@ -467,6 +467,7 @@ const GoalItem = ({
 }
 const Goals = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)

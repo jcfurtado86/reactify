@@ -18,7 +18,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import TextareaAutosize from 'react-textarea-autosize'
 import { router } from '@inertiajs/react'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import { usePage } from '@inertiajs/react'
 
 const cardVariants = {
@@ -177,6 +177,7 @@ const ExpandableCard = ({
   maxLength = 2000, // Limite padrão seguro
   error = null, // Mensagem de erro específica para este card
 }) => {
+  const { t } = useTranslation()
   const [isEditing, setIsEditing] = useState(false)
   const [editableContent, setEditableContent] = useState(content || '')
   const [isHovered, setIsHovered] = useState(false)
@@ -386,6 +387,7 @@ const ExpandableCard = ({
 
 const MainView = ({ project = {}, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   //ia states
   const [aiGeneratedProductCanvas, setAiGeneratedProductCanvas] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)

@@ -21,6 +21,7 @@ import {
   selectItems,
 } from './components/sprintTableColumns'
 import SprintTable from './components/SprintTable'
+import SpanButton from '@/Components/SpanButton'
 
 const ProductBacklog = ({ project, setProject }) => {
   const { t } = useTranslation()

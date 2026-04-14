@@ -33,7 +33,7 @@ import { router, usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
 import TextareaAutosize from 'react-textarea-autosize'
 import { cn, inspectionStatus } from '@/lib/utils'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import InvestCard from '../Inspection/InvestCard'
@@ -211,6 +211,7 @@ const JourneyStepItem = ({
 
 const Journeys = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)

@@ -12,7 +12,7 @@ import {
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import { isTemporary, inspectionStatus } from '@/lib/utils'
 import InvestCard from '../Inspection/InvestCard'
 import GenerateAIButton from '@/Components/GenerateAIButton'
@@ -360,6 +360,7 @@ const BusinessRuleCard = ({
  */
 const BusinessRules = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)

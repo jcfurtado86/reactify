@@ -4,7 +4,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import { Plus, StickyNote } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useOverallModelAIStore } from '@/stores/useOverallModelAIStore'
@@ -340,6 +340,7 @@ const CRCCard = ({
 
 const OverallModel = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)

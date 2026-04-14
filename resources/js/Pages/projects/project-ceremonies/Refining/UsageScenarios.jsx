@@ -15,7 +15,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import StatusBadge from '@/Components/StatusBadge'
 import { usePage } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
@@ -595,6 +595,7 @@ const ScenarioCard = ({
  */
 const UsageScenarios = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   // inspection states
   const [inspectionId, setInspectionId] = useState(null)
   const [anchorEl, setAnchorEl] = useState(null)

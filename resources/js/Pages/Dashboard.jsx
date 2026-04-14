@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import ProgressIcon from '@/Components/ProgressIcon'
 import { ExpandableCard } from './projects/project-ceremonies/Inception/ProductCanvas'
 import Interview from '@/Components/Interview'
-import { tooltipInfo } from '@/lib/projectData'
+import { useTooltipInfo } from '@/lib/projectData'
 import { ProjectPermissions } from '@/Components/ProjectPermissions'
 import { ProjectSettings } from '@/Components/ProjectSettings'
 import {
@@ -196,6 +196,7 @@ export const CeremonyCard = ({
 
 const Dashboard = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const tooltipInfo = useTooltipInfo()
   const [date, setDate] = useState(getDateObject(project.due_date))
   const isInitialMount = useRef(true)
   const [progress, setProgress] = useState(0)
