@@ -11,6 +11,7 @@ import {
   X,
   Check,
   Pencil,
+  RotateCcw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -138,6 +139,15 @@ const InterviewListItem = ({ interview, onEditClick }) => {
     setShowConfirmDelete(false)
   }
 
+  const handleRetry = (e) => {
+    e.preventDefault()
+    router.post(
+      route('interview.retry', interview.id),
+      {},
+      { preserveScroll: true },
+    )
+  }
+
   const getFileIcon = (fileName) => {
     if (/\.(mp3|wav|ogg|m4a)$/i.test(fileName)) {
       return <Mic className="h-5 w-5 flex-shrink-0 text-blue-500" />
@@ -190,6 +200,15 @@ const InterviewListItem = ({ interview, onEditClick }) => {
       </div>
 
       <div className="relative flex items-center">
+        {interview.extraction_status === 'failed' && !showConfirmDelete && (
+          <button
+            onClick={handleRetry}
+            className="ml-4 text-muted-foreground opacity-60 transition-opacity hover:opacity-100"
+            title={t('interview.retry_extraction')}
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+        )}
         {interview.extraction_status === 'completed' &&
           interview.transcript &&
           !showConfirmDelete && (

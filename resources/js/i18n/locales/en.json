@@ -89,6 +89,7 @@
     "extraction_processing": "Extracting...",
     "extraction_completed": "Extraction completed",
     "extraction_failed": "Extraction failed",
+    "retry_extraction": "Retry",
     "uploaded_success": "Interview uploaded successfully",
     "upload_error": "Error uploading interview",
     "remove": "Remove",

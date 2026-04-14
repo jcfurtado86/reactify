@@ -414,6 +414,11 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     'destroy',
   ])->name('interview.destroy');
 
+  Route::post('/interviews/{interview}/retry', [
+    InterviewController::class,
+    'retry',
+  ])->name('interview.retry');
+
   Route::patch('/interviews/{interview}/transcript', [
     InterviewController::class,
     'update',

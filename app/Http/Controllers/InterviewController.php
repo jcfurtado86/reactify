@@ -57,6 +57,16 @@ class InterviewController extends Controller
     }
 
     /**
+     * Redispara o job de transcrição para uma entrevista que falhou.
+     */
+    public function retry(Interview $interview)
+    {
+        $interview->update(['extraction_status' => 'processing']);
+        TranscribeInterviewJob::dispatch($interview);
+        return back()->with(['status' => 'success', 'message' => 'Extração reiniciada.']);
+    }
+
+    /**
      * Atualiza o campo de 'transcript' de uma entrevista específica.
      */
     public function update(Request $request, Interview $interview)
