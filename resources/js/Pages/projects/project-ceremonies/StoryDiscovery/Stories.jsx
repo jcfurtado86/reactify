@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useMemo } from 'react'
 import { usePermissions } from '@/Context/PermissionContext'
 import { useTranslation } from 'react-i18next'
 import MotionDivOptions from '@/Components/MotionDivOptions'
@@ -426,8 +426,61 @@ const Stories = ({ project, setProject }) => {
   //
   const { can } = usePermissions()
   const { errors } = usePage().props
+
+  // Map epic_id -> [children] para renderizar filhas indentadas abaixo
+  // da épica-pai. Permite exibição nested preservando as épicas na listagem.
+  const childrenByEpicId = useMemo(() => {
+    const map = new Map()
+    ;(project?.stories || []).forEach((s) => {
+      if (s.epic_id) {
+        if (!map.has(s.epic_id)) map.set(s.epic_id, [])
+        map.get(s.epic_id).push(s)
+      }
+    })
+    map.forEach((arr) => arr.sort((a, b) => (a.epic_index ?? a.id) - (b.epic_index ?? b.id)))
+    return map
+  }, [project?.stories])
+
   const handleInputChange = (e) => {
     setEditValue(e.target.value)
+  }
+
+  // Renderiza uma story + (se for épica) suas filhas indentadas abaixo,
+  // com uma barra lateral conectando visualmente a hierarquia.
+  const renderStoryWithChildren = (story) => {
+    const children = childrenByEpicId.get(story.id) || []
+    const isEpic = (s) => (childrenByEpicId.get(s.id) || []).length > 0
+    const commonProps = (s) => ({
+      story: s,
+      isEditing: editingId === s.id,
+      editValue: editValue,
+      onValueChange: handleInputChange,
+      // INVEST não se aplica a épicas (falham em Small por definição).
+      onInspect: isEpic(s) ? undefined : () => inspectStory(s.id),
+      onEdit: () => editStory(s),
+      onSave: () => editStory(s),
+      onDelete: () => deleteStory(s.id),
+      onCancel: () => setEditingId(null),
+      textareaRef: editingId === s.id ? textareaRef : null,
+      typeSelectId: typeSelectId,
+      onToggleTypeSelect: () => toggleTypeSelect(s.id),
+      onChangeStoryType: changeStoryType,
+      systemColors: project?.system_colors,
+      disabled: !can('userStory.manage'),
+      errors: errors,
+    })
+    return (
+      <React.Fragment key={story.id}>
+        <StoryItem {...commonProps(story)} />
+        {children.length > 0 && (
+          <div className="ml-6 pl-4 border-l-2 border-primary/30 flex flex-col gap-2 my-1">
+            {children.map((child) => (
+              <StoryItem key={child.id} {...commonProps(child)} />
+            ))}
+          </div>
+        )}
+      </React.Fragment>
+    )
   }
 
   const toggleTypeSelect = (storyId) => {
@@ -693,30 +746,7 @@ const Stories = ({ project, setProject }) => {
           project?.stories
             .filter((story) => story.type === 'user' && !story.epic_id)
             .sort((a, b) => a.id - b.id)
-            .map((story, i) => {
-              return (
-                <React.Fragment key={story.id}>
-                  <StoryItem
-                    story={story}
-                    isEditing={editingId === story.id}
-                    editValue={editValue}
-                    onValueChange={handleInputChange}
-                    onInspect={() => inspectStory(story.id)}
-                    onEdit={() => editStory(story)}
-                    onSave={() => editStory(story)}
-                    onDelete={() => deleteStory(story.id)}
-                    onCancel={() => setEditingId(null)}
-                    textareaRef={editingId === story.id ? textareaRef : null}
-                    typeSelectId={typeSelectId}
-                    onToggleTypeSelect={() => toggleTypeSelect(story.id)}
-                    onChangeStoryType={changeStoryType}
-                    systemColors={project?.system_colors}
-                    disabled={!can('userStory.manage')}
-                    errors={errors}
-                  />
-                </React.Fragment>
-              )
-            })
+            .map((story) => renderStoryWithChildren(story))
         ) : (
           <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
             <BookText size={32} className="mb-3 text-primary" />
@@ -748,32 +778,9 @@ const Stories = ({ project, setProject }) => {
         {project?.stories?.filter((story) => story.type === 'system').length >
         0 ? (
           project?.stories
-            .filter((story) => story.type === 'system')
+            .filter((story) => story.type === 'system' && !story.epic_id)
             .sort((a, b) => a.id - b.id)
-            .map((story, i) => {
-              return (
-                <React.Fragment key={story.id}>
-                  <StoryItem
-                    story={story}
-                    isEditing={editingId === story.id}
-                    editValue={editValue}
-                    onValueChange={handleInputChange}
-                    onInspect={() => inspectStory(story.id)}
-                    onEdit={() => editStory(story)}
-                    onSave={() => editStory(story)}
-                    onDelete={() => deleteStory(story.id)}
-                    onCancel={() => setEditingId(null)}
-                    textareaRef={editingId === story.id ? textareaRef : null}
-                    typeSelectId={typeSelectId}
-                    onToggleTypeSelect={() => toggleTypeSelect(story.id)}
-                    onChangeStoryType={changeStoryType}
-                    systemColors={project?.system_colors}
-                    disabled={!can('userStory.manage')}
-                    errors={errors}
-                  />
-                </React.Fragment>
-              )
-            })
+            .map((story) => renderStoryWithChildren(story))
         ) : (
           <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
             <BookText size={32} className="mb-3 text-primary" />
