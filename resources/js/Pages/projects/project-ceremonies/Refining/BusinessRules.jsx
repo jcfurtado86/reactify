@@ -384,6 +384,18 @@ const BusinessRules = ({ project, setProject }) => {
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const hasStories = project?.stories && project.stories.length > 0
 
+  // Stories épicas são aquelas referenciadas por outras via epic_id.
+  // Quando um épico é quebrado, apenas as filhas contam como stories reais;
+  // o épico vira um placeholder e deve sumir dos listings de Business Rules.
+  const epicParentIds = useMemo(() => {
+    const set = new Set()
+    ;(project?.stories || []).forEach((s) => {
+      if (s.epic_id) set.add(s.epic_id)
+    })
+    return set
+  }, [project?.stories])
+  const isBrokenEpic = (story) => epicParentIds.has(story.id)
+
   // Memoriza o estado das business_rules
   const businessRulesByStoryId = useMemo(() => {
     if (!project?.business_rules) return new Map()
@@ -589,7 +601,7 @@ const BusinessRules = ({ project, setProject }) => {
       )}
       {/* user stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'user')
+        ?.filter((story) => story.type === 'user' && !isBrokenEpic(story))
         .sort((a, b) => a.id - b.id)
         .map((story) => {
           const relatedBusinessRules =
@@ -626,7 +638,7 @@ const BusinessRules = ({ project, setProject }) => {
         })}
       {/* system stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'system')
+        ?.filter((story) => story.type === 'system' && !isBrokenEpic(story))
         .sort((a, b) => a.id - b.id)
         .map((story) => {
           const relatedBusinessRules =

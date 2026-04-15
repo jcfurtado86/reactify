@@ -22,8 +22,13 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
     public function missingPrerequisites(Project $project, array $validated): array
     {
         $missing = [];
-        if (!Story::where('project_id', $project->id)->exists()) {
-            $missing[] = 'Story cadastrada';
+        // Épicos são identificados por terem stories filhas (epic_id).
+        // Se foi quebrado, só as filhas contam. Business Rules derivam
+        // das stories reais, nunca do épico.
+        if (!Story::where('project_id', $project->id)
+            ->whereDoesntHave('stories')
+            ->exists()) {
+            $missing[] = 'Story cadastrada (não épica)';
         }
         $hasInterview = Interview::where('project_id', $project->id)
             ->whereNotNull('transcript')->where('transcript', '!=', '')->exists();
@@ -35,7 +40,9 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
 
     public function items(Project $project, array $validated): iterable
     {
-        return Story::where('project_id', $project->id)->get();
+        return Story::where('project_id', $project->id)
+            ->whereDoesntHave('stories')
+            ->get();
     }
 
     public function sharedContext(Project $project, array $validated): mixed

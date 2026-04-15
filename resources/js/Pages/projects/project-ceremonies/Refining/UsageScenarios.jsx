@@ -615,6 +615,18 @@ const UsageScenarios = ({ project, setProject }) => {
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const hasStories = project?.stories && project.stories.length > 0
 
+  // Stories épicas são aquelas referenciadas por outras via epic_id.
+  // Quando um épico é quebrado, apenas as filhas contam; o épico vira
+  // placeholder e deve sumir do listing de Usage Scenarios.
+  const epicParentIds = useMemo(() => {
+    const set = new Set()
+    ;(project?.stories || []).forEach((s) => {
+      if (s.epic_id) set.add(s.epic_id)
+    })
+    return set
+  }, [project?.stories])
+  const isBrokenEpic = (story) => epicParentIds.has(story.id)
+
   // Memoize scenarios grouped by their parent `story_id`.
   const scenariosByStoryId = useMemo(() => {
     if (!project?.usage_scenarios) return new Map()
@@ -810,7 +822,7 @@ const UsageScenarios = ({ project, setProject }) => {
         </div>
       )}
       {project?.stories
-        ?.filter((story) => story.type === 'user' && !story.epic_id)
+        ?.filter((story) => story.type === 'user' && !isBrokenEpic(story))
         .sort((a, b) => a.id - b.id)
         .map((story) => {
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
@@ -844,7 +856,7 @@ const UsageScenarios = ({ project, setProject }) => {
         })}
       {/* system  */}
       {project?.stories
-        ?.filter((story) => story.type === 'system')
+        ?.filter((story) => story.type === 'system' && !isBrokenEpic(story))
         .sort((a, b) => a.id - b.id)
         .map((story) => {
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
