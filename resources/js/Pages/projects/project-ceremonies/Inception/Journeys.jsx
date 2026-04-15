@@ -23,11 +23,13 @@ import {
   Edit,
   Trash,
   Map,
+  MapPin,
   CornerUpRight,
   ChevronRight,
   Minus,
   ChevronsUp,
   ChartArea,
+  GripVertical,
 } from 'lucide-react'
 import { router, usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
@@ -53,25 +55,20 @@ const SortableJourneyStepItem = (props) => {
     isDragging,
   } = useSortable({ id: props.step.id, disabled: props.disabled })
 
-  const currentCursor = () => {
-    if (props.disabled) return 'pointer'
-    if (isDragging) return 'grabbing'
-    return 'grab'
-  }
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 'auto',
     boxShadow: isDragging ? '0px 10px 20px rgba(0,0,0,0.2)' : 'none',
-    cursor: currentCursor(),
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <JourneyStepItem 
-        {...props} 
-        error={props.error} 
+    <div ref={setNodeRef} style={style}>
+      <JourneyStepItem
+        {...props}
+        error={props.error}
+        dragHandleProps={{ ...attributes, ...listeners }}
+        isDragging={isDragging}
       />
     </div>
   )
@@ -89,10 +86,14 @@ const JourneyStepItem = ({
   onSave,
   onCancel,
   onDelete,
+  onToggleTouchpoint,
   disabled = false,
   textareaRef,
-  error
+  error,
+  dragHandleProps,
+  isDragging,
 }) => {
+  const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const [showDeletePopover, setShowDeletePopover] = useState(false)
   const [touchpointChecked, setTouchpointChecked] = useState(step.is_touchpoint)
@@ -112,11 +113,19 @@ const JourneyStepItem = ({
     }
   }
 
+  const grabCursor = disabled || isEditing
+    ? undefined
+    : isDragging
+      ? 'grabbing'
+      : 'grab'
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="relative group flex items-center"
+      style={{ cursor: grabCursor }}
+      {...(disabled || isEditing ? {} : (dragHandleProps || {}))}
     >
       <Badge variant="numberIcon" className={cn(color.bg, 'z-40')}>
         <p className="m-0 text-primary-foreground">{stepIndex + 1}</p>
@@ -156,14 +165,6 @@ const JourneyStepItem = ({
                      </span>
                   </div>
                   
-                  {/* Switch do Touchpoint mantido aqui dentro ou abaixo conforme layout */}
-                  <div className="mt-2">
-                    <Switch
-                        id={`touchpoint-switch-${stepIndex}`}
-                        checked={touchpointChecked}
-                        onCheckedChange={setTouchpointChecked}
-                    />
-                  </div>
               </div>
                 {/* <Button
                     variant="ghost"
@@ -188,11 +189,42 @@ const JourneyStepItem = ({
               </p>
             )}
           </section>
-          {step.is_touchpoint && !isEditing && (
-            <Circle size={16} className="fill-primary stroke-primary mt-1" />
-          )}
         </CardContent>
       </Card>
+
+      {!disabled && !isEditing && (
+        <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggleTouchpoint?.(stepIndex)
+          }}
+          title={
+            step.is_touchpoint
+              ? t('journeys.touchpoint_remove', 'Remover touchpoint')
+              : t('journeys.touchpoint_mark', 'Marcar como touchpoint')
+          }
+          aria-label={
+            step.is_touchpoint
+              ? t('journeys.touchpoint_remove', 'Remover touchpoint')
+              : t('journeys.touchpoint_mark', 'Marcar como touchpoint')
+          }
+          aria-pressed={!!step.is_touchpoint}
+          className={cn(
+            "absolute -bottom-2 -left-2 z-50 flex items-center justify-center h-7 w-7 rounded-full bg-card border border-border shadow-sm transition-colors",
+            step.is_touchpoint
+              ? "text-primary hover:text-primary/80"
+              : "text-muted-foreground/60 hover:text-primary opacity-60 group-hover:opacity-100",
+          )}
+          style={{ cursor: 'pointer' }}
+        >
+          <MapPin
+            size={14}
+            className={step.is_touchpoint ? "fill-primary/20 stroke-primary" : ""}
+          />
+        </button>
+      )}
 
       <MotionDivOptions
         disabled={disabled}
@@ -507,6 +539,26 @@ const Journeys = ({ project, setProject }) => {
     setEditingStep({ journeyId: null, stepIndex: null })
   }
 
+  // Toggle inline de touchpoint (sem entrar em edit mode)
+  const toggleTouchpoint = (journeyId, stepIndex) => {
+    const journey = project.journeys.find((j) => j.id === journeyId)
+    if (!journey || !journey.steps?.[stepIndex]) return
+
+    const updatedSteps = journey.steps.map((s, i) =>
+      i === stepIndex ? { ...s, is_touchpoint: !s.is_touchpoint } : s,
+    )
+    const updatedJourneys = project.journeys.map((j) =>
+      j.id === journeyId ? { ...j, steps: updatedSteps } : j,
+    )
+    setProject({ ...project, journeys: updatedJourneys })
+
+    router.patch(
+      route('journey.update', journeyId),
+      { steps: updatedSteps },
+      { preserveState: true, preserveScroll: true },
+    )
+  }
+
   // Função para excluir um step
   const deleteStep = (journeyId, stepIndex) => {
     if (journeyId === null || stepIndex === null) return
@@ -786,6 +838,9 @@ const Journeys = ({ project, setProject }) => {
                                 onCancel={cancelEditStep}
                                 onDelete={() =>
                                   deleteStep(journey.id, stepIndex)
+                                }
+                                onToggleTouchpoint={(idx) =>
+                                  toggleTouchpoint(journey.id, idx)
                                 }
                                 textareaRef={
                                   isCurrentlyEditing ? textareaRef : null

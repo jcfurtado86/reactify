@@ -490,7 +490,10 @@
     "delete_journey": "Delete Journey",
     "delete_confirm": "Are you sure? All steps will be lost.",
     "new_journey": "New Journey",
-    "empty_steps": "This Journey has no steps."
+    "empty_steps": "This Journey has no steps.",
+    "drag_to_reorder": "Drag to reorder",
+    "touchpoint_mark": "Mark as touchpoint",
+    "touchpoint_remove": "Remove touchpoint"
   },
   "product_canvas": {
     "title": "Product Canvas",

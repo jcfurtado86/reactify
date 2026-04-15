@@ -490,7 +490,10 @@
     "delete_journey": "Excluir Jornada",
     "delete_confirm": "Tem certeza? Todos os passos serão perdidos.",
     "new_journey": "Nova Jornada",
-    "empty_steps": "Essa Jornada não possui nenhum passo."
+    "empty_steps": "Essa Jornada não possui nenhum passo.",
+    "drag_to_reorder": "Arrastar para reordenar",
+    "touchpoint_mark": "Marcar como touchpoint",
+    "touchpoint_remove": "Remover touchpoint"
   },
   "product_canvas": {
     "title": "Canvas do Produto",
