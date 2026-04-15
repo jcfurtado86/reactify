@@ -238,6 +238,7 @@ const EpicStoryCard = ({
       { title: editValue },
       {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => setIsEditing(false),
       },
     )
@@ -250,6 +251,7 @@ const EpicStoryCard = ({
 
     router.delete(route('story.delete', epicStory.id), {
       preserveScroll: true,
+      preserveState: true,
     })
   }
   return (
@@ -379,6 +381,8 @@ const EpicStories = ({ project, setProject }) => {
         title: 'Nova Story Derivada',
       },
       {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => toastSuccess('epic_stories.toast_added'),
         onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },

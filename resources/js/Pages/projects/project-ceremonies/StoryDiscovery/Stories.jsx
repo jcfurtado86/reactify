@@ -204,6 +204,8 @@ const StoryItem = ({
         project_id: story.project_id,
       },
       {
+        preserveScroll: true,
+        preserveState: true,
         onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },
     )
@@ -492,6 +494,8 @@ const Stories = ({ project, setProject }) => {
             title: editValue,
           },
           {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => toastSuccess('stories.toast_updated'),
             onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
           },
@@ -520,9 +524,13 @@ const Stories = ({ project, setProject }) => {
 
       setProject({ ...project, stories: updatedStories })
 
-      router.patch(route('story.update', storyId), {
-        type: newType,
-      })
+      router.patch(
+        route('story.update', storyId),
+        {
+          type: newType,
+        },
+        { preserveScroll: true, preserveState: true },
+      )
     }
 
     setTypeSelectId(null)
@@ -531,7 +539,10 @@ const Stories = ({ project, setProject }) => {
   const deleteStory = (storyId) => {
     const updatedStories = project?.stories.filter((s) => s.id !== storyId)
     setProject({ ...project, stories: updatedStories })
-    router.delete(route('story.delete', storyId))
+    router.delete(route('story.delete', storyId), {
+      preserveScroll: true,
+      preserveState: true,
+    })
   }
 
   //ai functions

@@ -492,9 +492,13 @@ const Journeys = ({ project, setProject }) => {
     })
 
     setProject({ ...project, journeys: updatedJourneys })
-    router.patch(route('journey.update', JourneyId), {
-      steps: [...currentSteps, newStep],
-    })
+    router.patch(
+      route('journey.update', JourneyId),
+      {
+        steps: [...currentSteps, newStep],
+      },
+      { preserveScroll: true, preserveState: true },
+    )
   }
   // Função para salvar a edição de uma journey
   const saveEditJourney = () => {
@@ -510,9 +514,13 @@ const Journeys = ({ project, setProject }) => {
     setProject({ ...project, journeys: updatedJourneys })
     setEditingJourney(null)
 
-    router.patch(route('journey.update', journeyId), {
-      title: editJourneyName,
-    })
+    router.patch(
+      route('journey.update', journeyId),
+      {
+        title: editJourneyName,
+      },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   // Função para salvar a edição de um step
@@ -531,7 +539,11 @@ const Journeys = ({ project, setProject }) => {
     )
     setProject({ ...project, journeys: updatedJourneys })
     cancelEditStep()
-    router.patch(route('journey.update', journeyId), { steps: updatedSteps })
+    router.patch(
+      route('journey.update', journeyId),
+      { steps: updatedSteps },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   // Crie uma função para cancelar a edição
@@ -580,9 +592,13 @@ const Journeys = ({ project, setProject }) => {
 
     setProject({ ...project, journeys: updatedJourneys })
 
-    router.patch(route('journey.update', journeyId), {
-      steps: reorderedSteps,
-    })
+    router.patch(
+      route('journey.update', journeyId),
+      {
+        steps: reorderedSteps,
+      },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   // Função para excluir uma journey inteira
@@ -604,6 +620,7 @@ const Journeys = ({ project, setProject }) => {
 
     router.delete(route('journey.delete', journeyIdToDelete), {
       preserveScroll: true,
+      preserveState: true,
     })
   }
   // reordena os steps

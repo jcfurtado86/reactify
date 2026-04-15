@@ -218,6 +218,8 @@ const GoalItem = ({
         project_id: goal.project_id,
       },
       {
+        preserveScroll: true,
+        preserveState: true,
         onError: (error) =>
           toastApiError(error, 'goals.toast_color_save_error'),
       },
@@ -591,6 +593,8 @@ const Goals = ({ project, setProject }) => {
             title: editValue,
           },
           {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => toastSuccess('goals.toast_updated'),
             onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
           },
@@ -627,6 +631,8 @@ const Goals = ({ project, setProject }) => {
           type: newType,
         },
         {
+          preserveScroll: true,
+          preserveState: true,
           onSuccess: () => toastSuccess('goals.toast_updated'),
           onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
         },
@@ -658,6 +664,8 @@ const Goals = ({ project, setProject }) => {
           priority: newPriority,
         },
         {
+          preserveScroll: true,
+          preserveState: true,
           onSuccess: () => toastSuccess('goals.toast_updated'),
           onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
         },
@@ -673,7 +681,10 @@ const Goals = ({ project, setProject }) => {
     )
     setProject({ ...project, goal_sketches: updatedGoals })
     setDeleteConfirmId(null) // Fecha o diálogo de confirmação
-    router.delete(route('goal.delete', goalId))
+    router.delete(route('goal.delete', goalId), {
+      preserveScroll: true,
+      preserveState: true,
+    })
   }
 
   const generateGoals = async () => {

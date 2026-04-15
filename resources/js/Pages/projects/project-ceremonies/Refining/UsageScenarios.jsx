@@ -302,6 +302,7 @@ const ScenarioCard = ({
       { description: editValues },
       {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => setIsEditing(false),
       },
     )
@@ -319,6 +320,7 @@ const ScenarioCard = ({
     // 2. Backend Request
     router.delete(route('usage-scenario.destroy', scenario.id), {
       preserveScroll: true,
+      preserveState: true,
     })
   }
   const handleKeyDown = (e) => {
@@ -664,6 +666,7 @@ const UsageScenarios = ({ project, setProject }) => {
     // Backend request
     router.post(route('usage-scenario.store'), newScenarioData, {
       preserveScroll: true,
+      preserveState: true,
       onSuccess: () => toastSuccess('usage_scenarios.toast_added'),
       onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
     })

@@ -109,6 +109,8 @@ const InvestCard = ({
         invest_card: investState,
       },
       {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
           toastSuccess('invest_card.toast_saved')
           setInspectionId(null)

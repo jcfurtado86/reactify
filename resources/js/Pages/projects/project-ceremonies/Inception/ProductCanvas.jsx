@@ -408,6 +408,8 @@ const MainView = ({ project = {}, setProject }) => {
         [prop]: newContent,
       },
       {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
           setProject((prev) => ({
             ...prev,
@@ -538,6 +540,7 @@ const MainView = ({ project = {}, setProject }) => {
                 cleared,
                 {
                   preserveScroll: true,
+                  preserveState: true,
                   onSuccess: () => {
                     setProject((prev) => ({
                       ...prev,

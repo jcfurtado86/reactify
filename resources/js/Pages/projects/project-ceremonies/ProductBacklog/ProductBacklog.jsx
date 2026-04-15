@@ -64,6 +64,7 @@ const ProductBacklog = ({ project, setProject }) => {
           story_ids: storyIdsToMove,
         },
         preserveScroll: true,
+        preserveState: true,
         onSuccess: (page) => {
           if (page.props.project) {
             setProject(page.props.project)
@@ -109,6 +110,8 @@ const ProductBacklog = ({ project, setProject }) => {
         story_ids: storyIdsToMove,
       },
       {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: (page) => {
           setIsLoading(false)
 
@@ -313,7 +316,10 @@ const ProductBacklog = ({ project, setProject }) => {
       toast.error(t('sprint.delete_sprint'))
       return
     }
-    router.delete(route('sprint.destroy', selectedSprint.id))
+    router.delete(route('sprint.destroy', selectedSprint.id), {
+      preserveScroll: true,
+      preserveState: true,
+    })
     setSelectedSprint(null)
     setOpenDeleteForm(false)
   }
@@ -333,6 +339,8 @@ const ProductBacklog = ({ project, setProject }) => {
         new_sprint_id: destination,
       },
       {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
           setSelectedSprint(null)
           setOpenEndForm(false)

@@ -261,6 +261,8 @@ const Storyboards = ({ project }) => {
       }
 
       router.post(route('storyboard.store'), formData, {
+        preserveScroll: true,
+        preserveState: true,
         onStart: () => {
           setIsProcessing(true)
         },

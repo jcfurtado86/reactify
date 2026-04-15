@@ -525,9 +525,13 @@ const Personas = ({ project, setProject }) => {
     setProject({ ...project, personas: updatedPersonas })
     setEditingPersona(null)
 
-    router.patch(route('persona.update', personaId), {
-      name: editPersonaName,
-    })
+    router.patch(
+      route('persona.update', personaId),
+      {
+        name: editPersonaName,
+      },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const saveEditField = () => {
@@ -547,11 +551,15 @@ const Personas = ({ project, setProject }) => {
     setProject({ ...project, personas: updatedPersonas })
     setEditingField({ personaId: null, field: null, itemIndex: null })
 
-    router.patch(route('persona.update', personaId), {
-      // ...persona,
-      [field]: updatedArray,
-      project_id: project.id,
-    })
+    router.patch(
+      route('persona.update', personaId),
+      {
+        // ...persona,
+        [field]: updatedArray,
+        project_id: project.id,
+      },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const deleteItem = () => {
@@ -576,11 +584,15 @@ const Personas = ({ project, setProject }) => {
     setProject({ ...project, personas: updatedPersonas })
     setDeleteConfirmItem({ personaId: null, field: null, itemIndex: null })
 
-    router.patch(route('persona.update', personaId), {
-      // ...persona,
-      [field]: updatedArray,
-      project_id: project.id,
-    })
+    router.patch(
+      route('persona.update', personaId),
+      {
+        // ...persona,
+        [field]: updatedArray,
+        project_id: project.id,
+      },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const handleDeletePersona = () => {
@@ -597,7 +609,10 @@ const Personas = ({ project, setProject }) => {
       personas: updatedPersonas,
     }))
 
-    router.delete(route('persona.delete', deleteConfirmPersona))
+    router.delete(route('persona.delete', deleteConfirmPersona), {
+      preserveScroll: true,
+      preserveState: true,
+    })
   }
 
   const addNewItem = (personaId, field) => {
@@ -614,11 +629,15 @@ const Personas = ({ project, setProject }) => {
 
     setProject({ ...project, personas: updatedPersonas })
 
-    router.patch(route('persona.update', personaId), {
-      // ...persona,
-      [field]: updatedArray,
-      project_id: project.id,
-    })
+    router.patch(
+      route('persona.update', personaId),
+      {
+        // ...persona,
+        [field]: updatedArray,
+        project_id: project.id,
+      },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const getFieldTitle = (field) => {

@@ -38,6 +38,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
       { name, color },
       {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
           toast.success(t('edit_priorities.toast_updated'))
         },
@@ -71,6 +72,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
 
     router.delete(route('matrix-priority.destroy', { priority: priority.id }), {
       preserveScroll: true,
+      preserveState: true,
       onSuccess: () => {
         toast.success(t('edit_priorities.toast_deleted'))
       },
@@ -237,6 +239,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
       { name: newName, color: newColor, project_id: projectId },
       {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
           toast.success(t('edit_priorities.toast_created'))
         },

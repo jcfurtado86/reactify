@@ -312,6 +312,7 @@ const Interfaces = ({ project, setProject }) => {
       route('system-interface.destroy', { interface: interfaceData.id }),
       {
         preserveScroll: true,
+        preserveState: true,
       },
     )
   }

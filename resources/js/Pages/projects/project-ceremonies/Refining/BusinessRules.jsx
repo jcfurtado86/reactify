@@ -258,6 +258,7 @@ const BusinessRuleCard = ({
       { title: editValue },
       {
         preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
           toastSuccess('business_rules.toast_updated')
           setIsEditing(false)
@@ -278,6 +279,7 @@ const BusinessRuleCard = ({
 
     router.delete(route('business-rule.destroy', businessRule.id), {
       preserveScroll: true,
+      preserveState: true,
     })
   }
 
@@ -409,12 +411,16 @@ const BusinessRules = ({ project, setProject }) => {
   }
 
   const addBusinessRule = (storyId) => {
-    router.post(route('business-rule.store'), {
-      // Rota atualizada
-      story_id: storyId,
-      project_id: project.id,
-      title: 'Nova Business Rule', // Texto atualizado
-    })
+    router.post(
+      route('business-rule.store'),
+      {
+        // Rota atualizada
+        story_id: storyId,
+        project_id: project.id,
+        title: 'Nova Business Rule', // Texto atualizado
+      },
+      { preserveScroll: true, preserveState: true },
+    )
 
     setProject((prevProject) => ({
       ...prevProject,
