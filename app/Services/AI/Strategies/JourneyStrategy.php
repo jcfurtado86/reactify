@@ -154,10 +154,21 @@ class JourneyStrategy implements BatchedGeneratorStrategy
     public function persistGenerated(array $parsed, Project $project, array $validated): void
     {
         foreach ($parsed['journeys'] ?? [] as $journeyData) {
+            $rawSteps = $journeyData['steps'] ?? [];
+            $steps = [];
+            foreach (array_values($rawSteps) as $i => $step) {
+                $steps[] = [
+                    'id' => 'step_ai_' . uniqid('', true),
+                    'step' => $i + 1,
+                    'description' => $step['description'] ?? '',
+                    'is_touchpoint' => (bool) ($step['is_touchpoint'] ?? false),
+                ];
+            }
+
             Journey::create([
                 'project_id' => $project->id,
                 'title' => $journeyData['title'] ?? 'Jornada sem título',
-                'steps' => $journeyData['steps'] ?? [],
+                'steps' => $steps,
                 'is_ai_generated' => true,
             ]);
         }
