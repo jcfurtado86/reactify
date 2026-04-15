@@ -19,10 +19,12 @@ class RunArtifactGenerationJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * 30 min de orçamento — generoso pra Qwen3:8b em CPU. O queue:listen
-     * já tem timeout=3600s, então cabe.
+     * ~58 min de orçamento — teto seguro abaixo do queue:work --timeout=3600.
+     * Qwen3:8b em CPU leva ~5 min por item em strategies batched (com
+     * 10-15 stories, facilmente passa de 30 min, por isso não cabia no
+     * limite anterior de 1800s).
      */
-    public $timeout = 1800;
+    public $timeout = 3500;
 
     public function __construct(
         public int $generationJobId,
