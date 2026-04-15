@@ -33,6 +33,7 @@ class OllamaGeneratorService extends AbstractLlmGeneratorService
             ->options([
                 'temperature' => 0.1,
                 'num_ctx' => 32768,
+                'num_predict' => 8192,
             ])
             ->stream(false)
             ->ask();

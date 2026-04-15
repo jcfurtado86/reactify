@@ -943,6 +943,7 @@
     "generating": "Gerando",
     "already_running": "Já está gerando esse artefato. Aguarde terminar.",
     "hint": "Você pode navegar livremente. Os artefatos aparecem sozinhos quando ficarem prontos.",
+    "failed_toast": "Falha ao gerar {{label}}. Tente novamente.",
     "types": {
       "personas": "Personas",
       "goals": "Objetivos",

@@ -943,6 +943,7 @@
     "generating": "Generating",
     "already_running": "This artifact is already being generated. Please wait.",
     "hint": "Feel free to navigate. Artifacts will appear automatically when ready.",
+    "failed_toast": "Failed to generate {{label}}. Please try again.",
     "types": {
       "personas": "Personas",
       "goals": "Goals",

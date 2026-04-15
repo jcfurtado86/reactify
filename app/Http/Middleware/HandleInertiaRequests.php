@@ -109,14 +109,22 @@ class HandleInertiaRequests extends Middleware
       'pending_generations' => fn() => $request->user()
         ? GenerationJob::with('project:id,title,emoji')
           ->where('user_id', $request->user()->id)
-          ->whereIn('status', ['queued', 'running'])
+          ->where(function ($q) {
+            $q->whereIn('status', ['queued', 'running'])
+              ->orWhere(function ($q2) {
+                $q2->where('status', 'failed')
+                   ->where('updated_at', '>=', now()->subMinutes(10));
+              });
+          })
           ->orderBy('id', 'asc')
           ->get()
           ->map(fn($j) => [
             'id' => $j->id,
             'type' => $j->type,
             'status' => $j->status,
+            'error' => $j->error,
             'created_at' => $j->created_at?->toIso8601String(),
+            'updated_at' => $j->updated_at?->toIso8601String(),
             'project' => $j->project ? [
               'id' => $j->project->id,
               'title' => $j->project->title,

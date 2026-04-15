@@ -1,7 +1,7 @@
 import { router, usePage } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
 import MotionDivOptions from '@/Components/MotionDivOptions'
-import { Plus, StickyNote } from 'lucide-react'
+import { Plus, StickyNote, X } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import InvestCard from '../Inspection/InvestCard'
@@ -198,9 +198,11 @@ const CRCCard = ({
     const updatedField = updatedCards.find((c) => c.id === cardId)[field]
 
     setProject({ ...project, crc_cards: updatedCards })
-    router.patch(route('overall.update', { id: cardId }), {
-      [field]: updatedField,
-    })
+    router.patch(
+      route('overall.update', { id: cardId }),
+      { [field]: updatedField },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const collaboratorOptions = reusableClasses.filter(
@@ -397,6 +399,8 @@ const OverallModel = ({ project, setProject }) => {
         project_id: project.id,
       },
       {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => toastSuccess('overall_model.toast_class_added'),
         onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },
@@ -408,6 +412,8 @@ const OverallModel = ({ project, setProject }) => {
     const updatedNames = currentNames.filter((item) => item.id !== idToDelete)
     setProject({ ...project, overall_model_classes: updatedNames })
     router.delete(route('overall-model-class.destroy', { id: idToDelete }), {
+      preserveScroll: true,
+      preserveState: true,
       onSuccess: () => toastSuccess('common.toast.deleted'),
       onError: (errors) => toastApiError(errors, 'common.toast.error_delete'),
     })
@@ -430,9 +436,11 @@ const OverallModel = ({ project, setProject }) => {
     )
     setProject({ ...project, crc_cards: updatedCards })
     cancelEditTitle()
-    router.patch(route('overall.update', { id: editingTitleId }), {
-      class: editValue,
-    })
+    router.patch(
+      route('overall.update', { id: editingTitleId }),
+      { class: editValue },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const saveEditListItem = () => {
@@ -446,9 +454,11 @@ const OverallModel = ({ project, setProject }) => {
     )
     setProject({ ...project, crc_cards: updatedCards })
     setEditingField({ cardId: null, field: null, itemIndex: null })
-    router.patch(route('overall.update', { id: cardId }), {
-      [field]: updatedArray,
-    })
+    router.patch(
+      route('overall.update', { id: cardId }),
+      { [field]: updatedArray },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const handleCollaboratorChange = (newValue, cardId, itemIndex) => {
@@ -459,9 +469,11 @@ const OverallModel = ({ project, setProject }) => {
       c.id === cardId ? { ...c, collaborators: updatedArray } : c,
     )
     setProject({ ...project, crc_cards: updatedCards })
-    router.patch(route('overall.update', { model: cardId }), {
-      collaborators: updatedArray,
-    })
+    router.patch(
+      route('overall.update', { model: cardId }),
+      { collaborators: updatedArray },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const handleSave = () => {
@@ -479,9 +491,11 @@ const OverallModel = ({ project, setProject }) => {
       c.id === cardId ? { ...c, [field]: updatedArray } : c,
     )
     setProject({ ...project, crc_cards: updatedCards })
-    router.patch(route('overall.update', { id: cardId }), {
-      [field]: updatedArray,
-    })
+    router.patch(
+      route('overall.update', { id: cardId }),
+      { [field]: updatedArray },
+      { preserveScroll: true, preserveState: true },
+    )
   }
 
   const confirmDeleteCard = (cardId) => {
@@ -495,7 +509,10 @@ const OverallModel = ({ project, setProject }) => {
     )
     setProject({ ...project, crc_cards: updatedCards })
     setDeleteConfirmCardId(null)
-    router.delete(route('overall.destroy', { id: deleteConfirmCardId }))
+    router.delete(route('overall.destroy', { id: deleteConfirmCardId }), {
+      preserveScroll: true,
+      preserveState: true,
+    })
   }
 
   const handleAddCard = () => {
@@ -511,9 +528,13 @@ const OverallModel = ({ project, setProject }) => {
       name: newCard.class,
     }
 
-    // Prepara as listas atualizadas para o estado
-    const updatedCards = [...project.crc_cards, newCard]
-    const updatedClasses = [...project.overall_model_classes, newClass]
+    // Optimistic update: card temp aparece imediato e some quando o
+    // Inertia re-sincroniza projectDB via useEffect em Project.jsx.
+    setProject((prev) => ({
+      ...prev,
+      crc_cards: [...prev.crc_cards, newCard],
+      overall_model_classes: [...prev.overall_model_classes, newClass],
+    }))
 
     router.post(
       route('overall.store'),
@@ -524,15 +545,9 @@ const OverallModel = ({ project, setProject }) => {
         project_id: project.id,
       },
       {
-        onSuccess: () => {
-          toastSuccess('overall_model.toast_card_added')
-          // Atualiza ambos (cards e classes) no sucesso
-          setProject((prev) => ({
-            ...prev,
-            crc_cards: updatedCards,
-            overall_model_classes: updatedClasses,
-          }))
-        },
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => toastSuccess('overall_model.toast_card_added'),
         onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },
     )

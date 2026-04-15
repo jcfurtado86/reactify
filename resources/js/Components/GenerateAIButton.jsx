@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
 import { Sparkles, Loader2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import ButtonWithTooltip from './ButtonWithTooltip'
 import { ShineBorder } from '@/components/magicui/shine-border'
 import {
@@ -108,12 +109,58 @@ const GenerateAIButton = ({
 }) => {
   const { t } = useTranslation()
   const pageProps = usePage().props
-  const pending = Array.isArray(pageProps?.pending_generations)
+  const allJobs = Array.isArray(pageProps?.pending_generations)
     ? pageProps.pending_generations
     : []
+  const pending = allJobs.filter((j) => j.status === 'queued' || j.status === 'running')
+  const failedJobs = allJobs.filter((j) => j.status === 'failed')
   const [panelOpen, setPanelOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const containerRef = useRef(null)
+
+  // Toast único por job falho — persistido em localStorage pra sobreviver
+  // a reloads de página. Cada id de job só notifica uma vez.
+  const SEEN_KEY = 'reactify.seenFailedGenerationIds'
+  const readSeen = () => {
+    try {
+      const raw = localStorage.getItem(SEEN_KEY)
+      return new Set(raw ? JSON.parse(raw) : [])
+    } catch {
+      return new Set()
+    }
+  }
+  const writeSeen = (set) => {
+    try {
+      // Cap em 200 ids pra não crescer infinito.
+      const arr = Array.from(set).slice(-200)
+      localStorage.setItem(SEEN_KEY, JSON.stringify(arr))
+    } catch {}
+  }
+
+  useEffect(() => {
+    const seen = readSeen()
+    let changed = false
+    failedJobs.forEach((job) => {
+      if (seen.has(job.id)) return
+      seen.add(job.id)
+      changed = true
+      const label = t(
+        `generation_status.types.${job.type}`,
+        FALLBACK_TYPE_LABELS[job.type] || job.type,
+      )
+      toast.error(
+        t('generation_status.failed_toast', {
+          defaultValue: 'Falha ao gerar {{label}}. Tente novamente.',
+          label,
+        }),
+        {
+          description: job.error ? String(job.error).slice(0, 200) : undefined,
+          duration: 5000,
+        },
+      )
+    })
+    if (changed) writeSeen(seen)
+  }, [failedJobs.map((j) => j.id).join(','), t])
 
   // Está rodando uma geração desse mesmo tipo? Bloqueia re-trigger e
   // dá feedback visual.
