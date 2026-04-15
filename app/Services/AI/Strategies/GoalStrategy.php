@@ -15,6 +15,29 @@ class GoalStrategy implements GeneratorStrategy
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Goals'; }
+
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'goals' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'title' => ['type' => 'string'],
+                            'type' => ['type' => 'string', 'enum' => ['bg', 'cg']],
+                            'priority' => ['type' => 'string', 'enum' => ['high', 'medium', 'low']],
+                        ],
+                        'required' => ['title', 'type', 'priority'],
+                    ],
+                ],
+            ],
+            'required' => ['goals'],
+        ];
+    }
+
     public function responseKeys(): array { return ['goals']; }
 
     public function missingPrerequisites(Project $project, array $validated): array
@@ -28,10 +51,6 @@ class GoalStrategy implements GeneratorStrategy
 
     public function buildContext(Project $project, array $validated): mixed
     {
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')
-            ->latest()->get();
-
         $existing = Goal::where('project_id', $project->id)
             ->whereNull('deleted_at')->get();
 
@@ -57,7 +76,7 @@ class GoalStrategy implements GeneratorStrategy
         }
 
         return [
-            'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
+            'transcripts' => Interview::aiContextForProject($project->id),
             'existing' => $existingContext,
             'canvas' => $canvasContext,
         ];

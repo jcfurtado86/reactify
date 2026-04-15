@@ -31,10 +31,18 @@ abstract class AbstractLlmGeneratorService implements LlmGeneratorService
 
     /**
      * Cada provider implementa só este método. Recebe o prompt completo
-     * (já com o SYSTEM_PREFIX + prompt da strategy), devolve o texto cru
-     * do modelo. Pode lançar exceção se a chamada ao LLM falhar.
+     * e opcionalmente um JSON Schema pra forçar a estrutura da resposta
+     * (suportado pelo Ollama via constrained decoding). Devolve o texto
+     * cru do modelo. Pode lançar exceção se a chamada ao LLM falhar.
+     *
+     * @param  array<string, mixed>|null  $schema  JSON Schema, se aplicável.
      */
-    abstract protected function callLlm(string $prompt): string;
+    abstract protected function callLlm(string $prompt, ?array $schema = null): string;
+
+    public function runRawPrompt(string $prompt, ?array $schema = null): string
+    {
+        return $this->callLlm(self::SYSTEM_PREFIX . $prompt, $schema);
+    }
 
     public function runAndPersist(GeneratorStrategy $strategy, Project $project, array $input): void
     {
@@ -47,7 +55,7 @@ abstract class AbstractLlmGeneratorService implements LlmGeneratorService
             'prompt' => $fullPrompt,
         ]);
 
-        $responseText = $this->callLlm($fullPrompt);
+        $responseText = $this->callLlm($fullPrompt, $strategy->responseSchema());
 
         $parsed = $strategy->parseResponse($responseText);
         $parsed = $strategy->postProcess($parsed, $project, $input);
@@ -71,7 +79,7 @@ abstract class AbstractLlmGeneratorService implements LlmGeneratorService
                     'prompt' => $prompt,
                 ]);
 
-                $responseText = $this->callLlm($prompt);
+                $responseText = $this->callLlm($prompt, $strategy->responseSchema());
                 $parsed = $strategy->parseResponse($responseText);
 
                 $generatedList = $parsed[$strategy->itemResponseKey()] ?? [];

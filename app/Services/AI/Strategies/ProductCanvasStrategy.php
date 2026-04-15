@@ -23,6 +23,28 @@ class ProductCanvasStrategy implements GeneratorStrategy
         return 'Product Canvas';
     }
 
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'product_canvas' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'key' => ['type' => 'string', 'enum' => ['issues', 'solutions', 'personas', 'restrictions', 'product_is', 'product_is_not']],
+                            'label' => ['type' => 'string'],
+                            'value' => ['type' => 'string'],
+                        ],
+                        'required' => ['key', 'label', 'value'],
+                    ],
+                ],
+            ],
+            'required' => ['product_canvas'],
+        ];
+    }
+
     public function responseKeys(): array
     {
         return ['product_canvas'];
@@ -40,12 +62,6 @@ class ProductCanvasStrategy implements GeneratorStrategy
 
     public function buildContext(Project $project, array $validated): mixed
     {
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')
-            ->where('transcript', '!=', '')
-            ->latest()
-            ->get();
-
         $existing = ProductCanvas::where('project_id', $project->id)
             ->whereNull('deleted_at')
             ->first();
@@ -68,7 +84,7 @@ class ProductCanvasStrategy implements GeneratorStrategy
             : $goals->map(fn($g) => "- \"{$g->title}\" (Tipo: {$g->type})")->implode("\n");
 
         return [
-            'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
+            'transcripts' => Interview::aiContextForProject($project->id),
             'existing' => $existingContext,
             'goals' => $goalsContext,
         ];

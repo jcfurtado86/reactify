@@ -13,8 +13,11 @@ use Gemini\Laravel\Facades\Gemini;
  */
 class GeminiGeneratorService extends AbstractLlmGeneratorService
 {
-    protected function callLlm(string $prompt): string
+    protected function callLlm(string $prompt, ?array $schema = null): string
     {
+        // Gemini tem seu próprio mecanismo de structured output, mas não
+        // está wired aqui ainda. Por enquanto ignoramos o $schema e o
+        // modelo fica em free-form com prompt-only (como era antes).
         $modelName = config('gemini.model');
         $result = Gemini::generativeModel(model: $modelName)->generateContent($prompt);
         return $result->text();

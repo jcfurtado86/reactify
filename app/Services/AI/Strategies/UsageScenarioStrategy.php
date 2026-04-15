@@ -16,6 +16,38 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Cenários de Uso'; }
+
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'usage_scenarios' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'description' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'as' => ['type' => 'string'],
+                                    'given' => ['type' => 'string'],
+                                    'when' => ['type' => 'string'],
+                                    'then_1' => ['type' => 'string'],
+                                    'and' => ['type' => 'string'],
+                                    'then_2' => ['type' => 'string'],
+                                ],
+                                'required' => ['as', 'given', 'when', 'then_1'],
+                            ],
+                        ],
+                        'required' => ['description'],
+                    ],
+                ],
+            ],
+            'required' => ['usage_scenarios'],
+        ];
+    }
+
     public function itemResponseKey(): string { return 'usage_scenarios'; }
     public function aggregateResponseKey(): string { return 'usage_scenarios'; }
 
@@ -46,15 +78,12 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
 
     public function sharedContext(Project $project, array $validated): mixed
     {
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')->get();
-
         $existing = UsageScenario::where('project_id', $project->id)->get();
 
         $rules = BusinessRule::where('project_id', $project->id)->get();
 
         return [
-            'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
+            'transcripts' => Interview::aiContextForProject($project->id),
             'existing_by_story' => $existing->groupBy('story_id'),
             'rules_by_story' => $rules->groupBy('story_id'),
         ];
@@ -114,33 +143,34 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
         **Regras de Negócio DESTA Story (não gere cenários que as violem):**
         {$storyRulesContext}
 
-        O **NOVO** cenário deve seguir a estrutura:
+        Cada cenário deve ter:
         - 'as': O papel do usuário.
         - 'given': A pré-condição ou o contexto inicial.
         - 'when': A ação que o usuário realiza.
         - 'then_1': O resultado esperado principal.
-        - 'and' / 'then_2': Opcionais, sempre em par.
+        - Opcional: par 'and' + 'then_2' (nunca sozinhos — um 'and' sempre vem com um 'then' depois).
 
-        REGRA: Um 'and' em hipótese alguma deve existir sem um 'then' logo apos ele.
+        TAREFA OBRIGATÓRIA: Gere **pelo menos 2 e no máximo 4 cenários NOVOS** para esta story. Sempre existe ao menos um cenário plausível que pode ser derivado da story + contexto — não retorne array vazio.
 
-        Formato de resposta requerido (JSON):
+        Exemplo de resposta válida:
         {
             "usage_scenarios": [
                 {
                     "description": {
-                        "as": "O papel do usuário",
-                        "given": "Dado que...",
-                        "when": "Quando eu...",
-                        "then_1": "Então eu deveria..."
+                        "as": "Cliente autenticado",
+                        "given": "Dado que existem veículos disponíveis no período",
+                        "when": "Quando eu seleciono um veículo e confirmo a reserva",
+                        "then_1": "Então a reserva é criada com status 'pendente'",
+                        "and": "E o sistema inicia o contador de 30 min para confirmação",
+                        "then_2": "Então recebo notificação de sucesso"
                     }
                 }
             ]
         }
 
-        IMPORTANTE: Gere apenas cenários que AINDA NÃO EXISTEM na lista fornecida.
-        IMPORTANTE: Se nenhum novo cenário for encontrado, retorne um array "usage_scenarios" vazio.
-        IMPORTANTE: Retorne apenas o JSON.
-        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais.
+        REGRAS DE FORMATO:
+        - Não gere cenários que repitam cenários existentes.
+        - Respeite as regras de negócio da story (listadas acima) — não crie cenários que as violem.
         PROMPT;
     }
 

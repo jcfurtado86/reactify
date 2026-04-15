@@ -17,6 +17,38 @@ class JourneyStrategy implements BatchedGeneratorStrategy
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Journeys'; }
+
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'journeys' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'title' => ['type' => 'string'],
+                            'steps' => [
+                                'type' => 'array',
+                                'items' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'description' => ['type' => 'string'],
+                                        'is_touchpoint' => ['type' => 'boolean'],
+                                    ],
+                                    'required' => ['description', 'is_touchpoint'],
+                                ],
+                            ],
+                        ],
+                        'required' => ['title', 'steps'],
+                    ],
+                ],
+            ],
+            'required' => ['journeys'],
+        ];
+    }
+
     public function itemResponseKey(): string { return 'journeys'; }
     public function aggregateResponseKey(): string { return 'journeys'; }
 
@@ -45,9 +77,6 @@ class JourneyStrategy implements BatchedGeneratorStrategy
 
     public function sharedContext(Project $project, array $validated): mixed
     {
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')->get();
-
         $existing = Journey::where('project_id', $project->id)
             ->whereNull('deleted_at')->get();
 
@@ -75,7 +104,7 @@ class JourneyStrategy implements BatchedGeneratorStrategy
             : $projectGoals->map(fn($g) => "- \"{$g->title}\" (Tipo: {$g->type})")->implode("\n");
 
         return [
-            'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
+            'transcripts' => Interview::aiContextForProject($project->id),
             'existing' => $existingContext,
             'project_goals' => $projectGoalsContext,
         ];

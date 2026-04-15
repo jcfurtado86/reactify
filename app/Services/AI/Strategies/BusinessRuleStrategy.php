@@ -16,6 +16,28 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Regras de Negócio'; }
+
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'business_rules' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'title' => ['type' => 'string'],
+                            'rule_type' => ['type' => 'string', 'enum' => ['structural', 'dynamic']],
+                        ],
+                        'required' => ['title', 'rule_type'],
+                    ],
+                ],
+            ],
+            'required' => ['business_rules'],
+        ];
+    }
+
     public function itemResponseKey(): string { return 'business_rules'; }
     public function aggregateResponseKey(): string { return 'business_rules'; }
 
@@ -47,9 +69,6 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
 
     public function sharedContext(Project $project, array $validated): mixed
     {
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')->get();
-
         $goals = Goal::where('project_id', $project->id)->get();
         $goalsContext = 'Nenhum goal definido.';
         if ($goals->isNotEmpty()) {
@@ -61,7 +80,7 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
         $existingRules = BusinessRule::where('project_id', $project->id)->get();
 
         return [
-            'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
+            'transcripts' => Interview::aiContextForProject($project->id),
             'goals' => $goalsContext,
             'existing_by_story' => $existingRules->groupBy('story_id'),
         ];
@@ -106,17 +125,19 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
         - **structural**: invariante sobre dados ou entidades (ex: "CPF deve ser único", "Veículo não pode ter duas reservas sobrepostas").
         - **dynamic**: condição ou fluxo de comportamento (ex: "Reserva não confirmada em 30 min é cancelada", "Cliente inadimplente é bloqueado ao tentar alugar").
 
-        Formato de resposta requerido (JSON):
+        TAREFA OBRIGATÓRIA: Gere **pelo menos 2 e no máximo 5 regras de negócio NOVAS** para esta story. Use a entrevista, os goals e o contexto da story pra extrair regras concretas. Não retorne array vazio — sempre existe ao menos uma regra plausível que pode ser derivada do contexto.
+
+        Exemplo de resposta válida:
         {
             "business_rules": [
-                { "title": "Título da regra", "rule_type": "structural" }
+                { "title": "Cliente não pode ter duas reservas ativas para o mesmo período", "rule_type": "structural" },
+                { "title": "Reserva é automaticamente cancelada se não confirmada em 30 minutos", "rule_type": "dynamic" }
             ]
         }
 
-        REGRAS:
-        - Não gere regras que repitam ou completem regras já existentes.
-        - Se nenhuma nova regra for pensada, retorne um array "business_rules" vazio.
-        - Todo item deve ter `rule_type` preenchido com exatamente "structural" ou "dynamic".
+        REGRAS DE FORMATO:
+        - Não gere regras que repitam ou completem regras já existentes (veja a lista acima).
+        - Todo item DEVE ter `title` (string) e `rule_type` ("structural" ou "dynamic").
         PROMPT;
     }
 

@@ -67,4 +67,12 @@ interface BatchedGeneratorStrategy
      * agregado no formato `[aggregateResponseKey() => [...itens]]`.
      */
     public function persistGenerated(array $parsed, Project $project, array $validated): void;
+
+    /**
+     * JSON Schema que o LLM deve seguir. Para batched, é o schema de
+     * UMA call (um item), já que cada iteração é uma chamada separada.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function responseSchema(): ?array;
 }

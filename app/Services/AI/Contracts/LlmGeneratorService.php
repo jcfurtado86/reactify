@@ -20,4 +20,11 @@ interface LlmGeneratorService
     public function runAndPersist(GeneratorStrategy $strategy, Project $project, array $input): void;
 
     public function runBatchedAndPersist(BatchedGeneratorStrategy $strategy, Project $project, array $input): void;
+
+    /**
+     * Passthrough pra chamar o LLM com um prompt cru. Não envolve strategy,
+     * não persiste nada — devolve só o texto bruto. Usado pelo
+     * SummarizeInterviewJob e outros casos fora do pipeline de artefatos.
+     */
+    public function runRawPrompt(string $prompt, ?array $schema = null): string;
 }

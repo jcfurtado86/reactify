@@ -20,17 +20,30 @@ use Illuminate\Support\Facades\Log;
  */
 class OllamaGeneratorService extends AbstractLlmGeneratorService
 {
-    protected function callLlm(string $prompt): string
+    protected function callLlm(string $prompt, ?array $schema = null): string
     {
         $model = config('services.artifact_llm.ollama_model');
         $think = (bool) config('services.artifact_llm.ollama_think', false);
 
         $prefix = $think ? '' : '/no_think ';
 
-        $response = Ollama::agent('Você é um especialista em engenharia de software.')
+        // Se a strategy forneceu um JSON Schema, passamos ele pro Ollama
+        // via ->format($schema) — o Ollama aplica constrained decoding
+        // que força a resposta a seguir EXATAMENTE o schema. Quando o
+        // chamador não passa schema (ex: SummarizeInterviewJob que quer
+        // markdown cru), NÃO aplicamos format, deixando o modelo livre
+        // pra emitir texto. Passar 'json' como fallback faria o modelo
+        // envelopar o texto em JSON automaticamente, o que não é o que
+        // queremos nesse caso.
+        $builder = Ollama::agent('Você é um especialista em engenharia de software.')
             ->prompt($prefix . $prompt)
-            ->model($model)
-            ->format('json')
+            ->model($model);
+
+        if ($schema !== null) {
+            $builder->format($schema);
+        }
+
+        $response = $builder
             ->options([
                 'temperature' => 0.1,
                 'num_ctx' => 32768,

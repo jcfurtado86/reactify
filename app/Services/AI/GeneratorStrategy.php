@@ -82,4 +82,14 @@ interface GeneratorStrategy
      * Rótulo curto usado em logs ("Personas", "Stories"...).
      */
     public function label(): string;
+
+    /**
+     * JSON Schema que o LLM deve seguir na resposta. Passado ao Ollama
+     * via `->format($schema)`, que usa constrained decoding pra forçar
+     * EXATAMENTE essa estrutura. Retornar null desativa o schema
+     * (cai no `->format('json')` genérico).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function responseSchema(): ?array;
 }

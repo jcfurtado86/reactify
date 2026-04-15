@@ -17,6 +17,39 @@ class OverallModelStrategy implements GeneratorStrategy
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Overall Model'; }
+
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'crc_cards' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'class' => ['type' => 'string'],
+                            'responsabilities' => ['type' => 'array', 'items' => ['type' => 'string']],
+                            'collaborators' => ['type' => 'array', 'items' => ['type' => 'string']],
+                        ],
+                        'required' => ['class', 'responsabilities', 'collaborators'],
+                    ],
+                ],
+                'overall_model_classes' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'name' => ['type' => 'string'],
+                        ],
+                        'required' => ['name'],
+                    ],
+                ],
+            ],
+            'required' => ['crc_cards', 'overall_model_classes'],
+        ];
+    }
+
     public function responseKeys(): array { return ['crc_cards', 'overall_model_classes']; }
 
     public function missingPrerequisites(Project $project, array $validated): array
@@ -37,8 +70,6 @@ class OverallModelStrategy implements GeneratorStrategy
     public function buildContext(Project $project, array $validated): mixed
     {
         $stories = Story::where('project_id', $project->id)->get();
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')->get();
 
         $existingCrc = CrcCard::where('project_id', $project->id)->get();
         $existingClasses = OverallModelClass::where('project_id', $project->id)->get();
@@ -68,7 +99,7 @@ class OverallModelStrategy implements GeneratorStrategy
 
         return [
             'stories' => $stories->map(fn($s) => "- ({$s->type}): {$s->title}")->implode("\n"),
-            'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
+            'transcripts' => Interview::aiContextForProject($project->id),
             'existing_crc' => $existingCrcContext,
             'existing_classes' => $existingClassesContext,
             'rules' => $rulesContext,
@@ -128,13 +159,35 @@ class OverallModelStrategy implements GeneratorStrategy
             ]
         }
 
-        REGRA DE CONSISTÊNCIA: Toda classe mencionada em qualquer `collaborators` de um CRC Card **deve** estar presente em `overall_model_classes`. Se precisar referenciar uma classe que não foi listada ainda, adicione-a em `overall_model_classes` também.
+        TAREFA OBRIGATÓRIA: Gere **pelo menos 3 e no máximo 8 CRC Cards NOVOS** com suas classes correspondentes. Sempre existem classes centrais plausíveis a partir das stories e do contexto.
 
-        REGRAS:
+        Exemplo de resposta válida:
+        {
+            "crc_cards": [
+                {
+                    "class": "Reserva",
+                    "responsabilities": ["Bloquear veículo no período escolhido", "Calcular valor da diária"],
+                    "collaborators": ["Veiculo", "Cliente", "Pagamento"]
+                },
+                {
+                    "class": "Veiculo",
+                    "responsabilities": ["Manter status de disponibilidade", "Registrar histórico de uso"],
+                    "collaborators": ["Reserva"]
+                }
+            ],
+            "overall_model_classes": [
+                { "name": "Reserva" },
+                { "name": "Veiculo" },
+                { "name": "Cliente" },
+                { "name": "Pagamento" }
+            ]
+        }
+
+        REGRAS DE CONSISTÊNCIA:
+        - Toda classe em `collaborators` DEVE estar em `overall_model_classes`.
         - `overall_model_classes` contém todas as classes (novas + existentes) de forma única.
-        - `crc_cards` contém apenas as **NOVAS** classes identificadas.
-        - Não repita classes ou CRC cards existentes.
-        - Foque nas classes centrais do domínio, não em utilidades técnicas.
+        - `crc_cards` contém apenas as NOVAS classes identificadas.
+        - Não repita classes/CRC cards existentes.
         PROMPT;
     }
 

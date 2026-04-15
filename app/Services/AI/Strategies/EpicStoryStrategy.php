@@ -14,6 +14,39 @@ class EpicStoryStrategy implements GeneratorStrategy
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Epic Stories'; }
+
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'decomposed_epics' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'original_epic_id' => ['type' => 'integer'],
+                            'original_epic_title' => ['type' => 'string'],
+                            'new_stories' => [
+                                'type' => 'array',
+                                'items' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'title' => ['type' => 'string'],
+                                        'type' => ['type' => 'string', 'enum' => ['user', 'system']],
+                                    ],
+                                    'required' => ['title', 'type'],
+                                ],
+                            ],
+                        ],
+                        'required' => ['original_epic_id', 'original_epic_title', 'new_stories'],
+                    ],
+                ],
+            ],
+            'required' => ['decomposed_epics'],
+        ];
+    }
+
     public function responseKeys(): array { return ['decomposed_epics']; }
 
     public function missingPrerequisites(Project $project, array $validated): array
@@ -49,12 +82,9 @@ class EpicStoryStrategy implements GeneratorStrategy
             ->whereNotIn('id', $decomposedEpicIds)
             ->get();
 
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')->get();
-
         return [
             'stories' => $stories,
-            'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
+            'transcripts' => Interview::aiContextForProject($project->id),
         ];
     }
 

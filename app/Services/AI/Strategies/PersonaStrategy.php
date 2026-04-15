@@ -15,6 +15,30 @@ class PersonaStrategy implements GeneratorStrategy
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Personas'; }
+
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'personas' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'name' => ['type' => 'string'],
+                            'profile' => ['type' => 'array', 'items' => ['type' => 'string']],
+                            'expectations' => ['type' => 'array', 'items' => ['type' => 'string']],
+                            'goals' => ['type' => 'array', 'items' => ['type' => 'string']],
+                        ],
+                        'required' => ['name', 'profile', 'expectations', 'goals'],
+                    ],
+                ],
+            ],
+            'required' => ['personas'],
+        ];
+    }
+
     public function responseKeys(): array { return ['personas']; }
 
     public function missingPrerequisites(Project $project, array $validated): array
@@ -28,10 +52,6 @@ class PersonaStrategy implements GeneratorStrategy
 
     public function buildContext(Project $project, array $validated): mixed
     {
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')
-            ->latest()->get();
-
         $existing = Persona::where('project_id', $project->id)
             ->whereNull('deleted_at')->get();
 
@@ -64,7 +84,7 @@ class PersonaStrategy implements GeneratorStrategy
             : $goals->map(fn($g) => "- \"{$g->title}\" (Tipo: {$g->type})")->implode("\n");
 
         return [
-            'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
+            'transcripts' => Interview::aiContextForProject($project->id),
             'existing' => $existingContext,
             'goals' => $goalsContext,
         ];
@@ -88,13 +108,13 @@ class PersonaStrategy implements GeneratorStrategy
         LISTA DE PERSONAS JÁ EXISTENTES (NÃO REPITA):
         {$existing}
 
-        Sua tarefa é extrair informações do que foi dito na entrevista para preencher os seguintes campos para cada persona:
-        - 'name': Crie um nome fictício que represente o perfil do entrevistado.
-        - 'profile': Descreva quem é a persona (idade, profissão, hobbies, motivações, comportamentos) com base nas informações da transcrição.
-        - 'expectations': Liste o que a persona declarou esperar de um produto ou serviço.
-        - 'goals': Liste quais são os objetivos e necessidades que a persona quer alcançar, conforme mencionado na entrevista.
+        A resposta DEVE seguir exatamente este schema — não invente campos diferentes, não use 'email'/'phone'/'address':
+        - 'name' (string): nome fictício que represente o perfil do entrevistado.
+        - 'profile' (array de strings): lista de traços da persona (idade, profissão, hobbies, motivações, comportamentos).
+        - 'expectations' (array de strings): lista do que a persona declarou esperar de um produto ou serviço.
+        - 'goals' (array de strings): lista dos objetivos e necessidades que a persona quer alcançar.
 
-        REGRA DE ATERRAMENTO: Cada item listado em `profile`, `expectations` e `goals` deve refletir informação que aparece literal ou implicitamente no trecho da entrevista fornecido. Não invente traços, idades, cargos ou objetivos que não estejam no texto.
+        REGRA DE ATERRAMENTO: Cada item listado em `profile`, `expectations` e `goals` deve refletir informação que aparece literal ou implicitamente no trecho da entrevista. Não invente idades, cargos ou objetivos que não estejam no texto.
 
         Formato de resposta requerido (JSON):
         {

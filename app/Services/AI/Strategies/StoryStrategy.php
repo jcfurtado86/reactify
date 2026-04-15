@@ -16,6 +16,27 @@ class StoryStrategy implements GeneratorStrategy
     public function validationRules(): array { return []; }
     public function label(): string { return 'Stories'; }
 
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'stories' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'title' => ['type' => 'string'],
+                            'type' => ['type' => 'string', 'enum' => ['user', 'system']],
+                        ],
+                        'required' => ['title', 'type'],
+                    ],
+                ],
+            ],
+            'required' => ['stories'],
+        ];
+    }
+
     // O frontend espera `data.message.stories` (legado — manter esse
     // wrapping por agora, pra não quebrar o consumer).
     public function responseKeys(): array { return ['message']; }
@@ -61,10 +82,6 @@ class StoryStrategy implements GeneratorStrategy
     {
         $projectId = $project->id;
 
-        $interviews = Interview::where('project_id', $projectId)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')
-            ->pluck('transcript')->toArray();
-
         $personas = DB::table('personas')->select('goals')
             ->where('project_id', $projectId)->whereNull('deleted_at')->get()->toArray();
 
@@ -92,7 +109,7 @@ class StoryStrategy implements GeneratorStrategy
         }
 
         return [
-            'interviews' => $this->formatInterviews($interviews),
+            'interviews' => Interview::aiContextForProject($projectId),
             'personas' => $this->formatPersonas($personas),
             'journeys' => $this->formatJourneys($journeys),
             'constraints' => $this->formatConstraints($productConstraints),
@@ -146,19 +163,20 @@ class StoryStrategy implements GeneratorStrategy
         - Small (pequena): cabe numa sprint curta; se for grande demais, quebre em várias.
         - Testável: dá pra escrever um critério de aceitação concreto pra ela.
 
-        FORMATO REQUERIDO:
+        TAREFA OBRIGATÓRIA: Gere **pelo menos 3 e no máximo 10 stories NOVAS** cobrindo tanto user quanto system stories. Sempre existem stories plausíveis — não retorne array vazio.
+
+        Exemplo de resposta válida:
         {
-          "stories":
-            [
-              { "title":"texto da story", "type":"user|system" }
-            ]
+          "stories": [
+            { "title": "Como cliente, quero reservar um veículo online para evitar deslocamentos à loja", "type": "user" },
+            { "title": "Como sistema, devo bloquear veículos automaticamente no período reservado", "type": "system" }
+          ]
         }
 
-        REGRAS:
-        - Não REPITA stories existentes, nem variações semânticas delas.
-        - Se nenhuma nova story for encontrada, retorne um array "stories" vazio.
-        - Baseie-se exclusivamente nos contextos acima. Não invente funcionalidades.
-        - Foque nas stories mais centrais do produto, não exaustivas.
+        REGRAS DE FORMATO:
+        - Todo item DEVE ter `title` (string) e `type` ("user" ou "system").
+        - Não repita stories existentes nem variações semânticas.
+        - Baseie-se nos contextos acima, não invente funcionalidades fora do domínio.
         PROMPT;
     }
 

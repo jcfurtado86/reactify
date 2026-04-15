@@ -17,6 +17,31 @@ class SystemInterfaceStrategy implements GeneratorStrategy
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Interfaces de Sistema'; }
+
+    public function responseSchema(): ?array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'system_interfaces' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'title' => ['type' => 'string'],
+                            'input' => ['type' => 'string'],
+                            'output' => ['type' => 'string'],
+                            'type' => ['type' => 'string', 'enum' => ['internal', 'external']],
+                            'related_classes' => ['type' => 'array', 'items' => ['type' => 'string']],
+                        ],
+                        'required' => ['title', 'input', 'output', 'type', 'related_classes'],
+                    ],
+                ],
+            ],
+            'required' => ['system_interfaces'],
+        ];
+    }
+
     public function responseKeys(): array { return ['system_interfaces']; }
 
     public function missingPrerequisites(Project $project, array $validated): array
@@ -40,8 +65,6 @@ class SystemInterfaceStrategy implements GeneratorStrategy
     {
         $crcCards = CrcCard::where('project_id', $project->id)->get();
         $stories = Story::where('project_id', $project->id)->get();
-        $interviews = Interview::where('project_id', $project->id)
-            ->whereNotNull('transcript')->where('transcript', '!=', '')->get();
 
         $existing = SystemInterface::where('project_id', $project->id)->get();
         $existingContext = 'Nenhuma.';
@@ -79,7 +102,7 @@ class SystemInterfaceStrategy implements GeneratorStrategy
             $context .= "- {$story->title}\n";
         });
 
-        $context .= "\nContexto das Entrevistas:\n" . $interviews->pluck('transcript')->implode("\n\n---\n\n");
+        $context .= "\nContexto das Entrevistas:\n" . Interview::aiContextForProject($project->id);
 
         return [
             'context' => $context,
