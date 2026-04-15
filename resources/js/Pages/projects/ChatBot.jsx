@@ -73,7 +73,13 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
           animate: false,
           feedback: m.feedback,
         }))
-        setMessages(loaded.length > 0 ? loaded : [welcomeMessage(t)])
+        setMessages((prev) => {
+          // Se o usuário já enviou algo antes do fetch resolver, não
+          // sobrescreve — só substitui o welcome placeholder inicial.
+          const isInitial = prev.length === 1 && prev[0].id === 'welcome'
+          if (!isInitial) return prev
+          return loaded.length > 0 ? loaded : prev
+        })
         setHistoryLoaded(true)
       })
       .catch((err) => {

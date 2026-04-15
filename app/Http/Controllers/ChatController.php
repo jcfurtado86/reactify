@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ChatMessageSender;
 use App\Models\ChatMessage;
 use App\Models\Project;
 use App\Jobs\ProcessChatJob;
@@ -22,14 +23,14 @@ class ChatController extends Controller
 
         $user = Auth::user();
 
-        if (!$project->users()->where('user_id', $user->id)->exists()) {
+        if (!$project->hasMember($user)) {
             abort(403, 'Acesso negado');
         }
 
         ChatMessage::create([
             'project_id' => $project->id,
             'user_id' => $user->id,
-            'sender' => 'user',
+            'sender' => ChatMessageSender::USER,
             'message' => $validated['message'],
             'page_context' => $validated['page_context'],
         ]);
@@ -49,7 +50,7 @@ class ChatController extends Controller
     {
         $user = Auth::user();
 
-        if (!$project->users()->where('user_id', $user->id)->exists()) {
+        if (!$project->hasMember($user)) {
             abort(403, 'Acesso negado');
         }
 

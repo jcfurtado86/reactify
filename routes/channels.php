@@ -17,5 +17,5 @@ Broadcast::channel('projects', function ($user) {
 });
 
 Broadcast::channel('project.{project}', function ($user, Project $project) {
-    return $project->users()->where('user_id', $user->id)->exists();
+    return $project->hasMember($user);
 });

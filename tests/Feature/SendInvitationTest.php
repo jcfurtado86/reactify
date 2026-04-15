@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Models\User;
 use App\Models\Project;
 use App\Notifications\UserInvitedToProject;
@@ -9,14 +10,14 @@ test('sending REAL project invitation notification to unregistered user', functi
   $owner = User::factory()->create();
   $userToInvite = "lumagabriela3331@gmail.com";
   $project = Project::factory()->create();
-  $project->users()->attach($owner->id, ['role' => 'admin']);
+  $project->users()->attach($owner->id, ['role' => UserRole::ADMINISTRATOR->value]);
 
   $response = $this
     ->actingAs($owner)
     ->from(route('dashboard'))
     ->post(route('projects.invitations.store', $project->id), [
       'email' => $userToInvite,
-      'role' => 'member',
+      'role' => UserRole::TEAM->value,
     ]);
 
   $response
@@ -29,21 +30,21 @@ test('sending REAL project invitation notification to unregistered user', functi
     ->assertDatabaseHas('project_invitations', [
       'email' => $userToInvite,
       'project_id' => $project->id,
-      'role' => 'member',
+      'role' => UserRole::TEAM->value,
     ]);
 });
 test('sending REAL project invitation notification to registered user', function () {
   $owner = User::factory()->create();
   $userToInvite = User::factory()->create();
   $project = Project::factory()->create();
-  $project->users()->attach($owner->id, ['role' => 'admin']);
+  $project->users()->attach($owner->id, ['role' => UserRole::ADMINISTRATOR->value]);
 
   $response = $this
     ->actingAs($owner)
     ->from(route('dashboard'))
     ->post(route('projects.invitations.store', $project->id), [
       'email' => $userToInvite->email,
-      'role' => 'member',
+      'role' => UserRole::TEAM->value,
     ]);
 
   $response
@@ -60,7 +61,7 @@ test('sending REAL project invitation notification to registered user', function
     ->assertDatabaseHas('project_invitations', [
       'email' => $userToInvite->email,
       'project_id' => $project->id,
-      'role' => 'member',
+      'role' => UserRole::TEAM->value,
     ]);
 });
 
@@ -70,14 +71,14 @@ test('sending FAKE project invitation notification to registered user', function
   $owner = User::factory()->create();
   $userToInvite = User::factory()->create();
   $project = Project::factory()->create();
-  $project->users()->attach($owner->id, ['role' => 'admin']);
+  $project->users()->attach($owner->id, ['role' => UserRole::ADMINISTRATOR->value]);
 
   $response = $this
     ->actingAs($owner)
     ->from(route('dashboard'))
     ->post(route('projects.invitations.store', $project->id), [
       'email' => $userToInvite->email,
-      'role' => 'member',
+      'role' => UserRole::TEAM->value,
     ]);
   //testa o envio do e-mail
   Notification::assertSentTo(
@@ -105,6 +106,6 @@ test('sending FAKE project invitation notification to registered user', function
     ->assertDatabaseHas('project_invitations', [
       'email' => $userToInvite->email,
       'project_id' => $project->id,
-      'role' => 'member',
+      'role' => UserRole::TEAM->value,
     ]);
 });

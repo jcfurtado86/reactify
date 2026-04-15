@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ChatMessageSender;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -25,6 +26,7 @@ class ChatMessage extends Model
     protected $casts = [
         'page_context' => 'array',
         'created_at' => 'datetime',
+        'sender' => ChatMessageSender::class,
     ];
 
     public function project(): BelongsTo

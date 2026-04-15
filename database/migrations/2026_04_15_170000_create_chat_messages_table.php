@@ -8,9 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Tabelas antigas dead code (chat_sessions + chat_messages com
-        // chat_session_id) nunca foram usadas de verdade. Dropa antes
-        // de recriar chat_messages com schema novo.
         Schema::dropIfExists('chat_messages');
         Schema::dropIfExists('chat_sessions');
 

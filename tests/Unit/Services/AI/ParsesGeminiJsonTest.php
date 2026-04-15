@@ -1,10 +1,10 @@
 <?php
 
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class ParsesGeminiJsonHarness
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function parse(string $content): array
     {

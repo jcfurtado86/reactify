@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\UserRole;
 use App\Models\ProjectInvitation;
 use App\Services\InvitationService;
 use Illuminate\Auth\Events\Registered;
@@ -41,13 +40,11 @@ class RegisteredUserController extends Controller
       'invitation_token' => 'nullable|string|exists:project_invitations,token'
     ]);
 
-    $userRole = UserRole::where('name', 'user')->firstOrFail();
-
     $user = User::create([
       'name' => $request->name,
       'email' => $request->email,
       'password' => Hash::make($request->password),
-      'user_role_id' => $userRole->id,
+      'active' => true,
     ]);
 
 

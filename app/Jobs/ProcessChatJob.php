@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\ChatMessageSender;
 use App\Models\ChatMessage;
 use App\Models\Project;
 use App\Models\User;
@@ -51,7 +52,7 @@ class ProcessChatJob implements ShouldQueue
                 ChatMessage::create([
                     'project_id' => $this->project->id,
                     'user_id' => $this->user->id,
-                    'sender' => 'model',
+                    'sender' => ChatMessageSender::MODEL,
                     'message' => $fullResponse,
                     'page_context' => $this->pageContext,
                     'model_provider' => config('services.llm.provider'),

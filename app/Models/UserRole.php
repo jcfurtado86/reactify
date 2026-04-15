@@ -11,6 +11,8 @@ class UserRole extends Model
 {
   use SoftDeletes;
 
+  public $timestamps = false;
+
   protected $fillable = [
     'name',
     'user_role_id',

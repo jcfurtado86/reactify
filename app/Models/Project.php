@@ -24,6 +24,11 @@ class Project extends Model
     'due_date' => 'date',
   ];
 
+  public function hasMember(User $user): bool
+  {
+    return $this->users()->where('user_id', $user->id)->exists();
+  }
+
   public function journeys(): HasMany
   {
     return $this->hasMany(Journey::class);
