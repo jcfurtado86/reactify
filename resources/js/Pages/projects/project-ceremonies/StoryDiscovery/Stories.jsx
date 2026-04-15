@@ -17,7 +17,7 @@ import { router, usePage } from '@inertiajs/react'
 import TextareaAutosize from 'react-textarea-autosize'
 import axios from 'axios'
 import { toast } from 'sonner'
-import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
+import { toastApiError } from '@/lib/toastHelpers'
 import {
   PREDEFINED_COLORS,
   isTemporary,
@@ -549,7 +549,6 @@ const Stories = ({ project, setProject }) => {
           {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: () => toastSuccess('stories.toast_updated'),
             onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
           },
         )
@@ -611,7 +610,7 @@ const Stories = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar stories:', error)
@@ -645,7 +644,7 @@ const Stories = ({ project, setProject }) => {
     )
 
     if (selectedStories.length === 0) {
-      toast.warning(t('common.select_at_least_one'))
+      toast.error(t('common.select_at_least_one'))
       return
     }
 
@@ -674,7 +673,6 @@ const Stories = ({ project, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(t('stories.toast_generated'))
           setAiGeneratedStories(remainingStories)
           if (remainingStories.length === 0) {
             setShowAiModal(false)

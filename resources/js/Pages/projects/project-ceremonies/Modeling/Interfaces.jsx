@@ -400,7 +400,7 @@ const Interfaces = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar interfaces:', error)
@@ -421,7 +421,7 @@ const Interfaces = ({ project, setProject }) => {
     )
 
     if (selectedInterfaces.length === 0) {
-      toast.warning(t('common.select_at_least_one'))
+      toast.error(t('common.select_at_least_one'))
       return
     }
 

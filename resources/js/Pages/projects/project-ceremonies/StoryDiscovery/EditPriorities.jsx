@@ -20,7 +20,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
   function handleSubmit(e) {
     e.preventDefault()
     if (name === priority.name && color === priority.color) {
-      toast.info(t('common.toast.no_changes'))
+      toast.error(t('common.toast.no_changes'))
       return
     }
 
@@ -39,9 +39,6 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
       {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => {
-          toast.success(t('edit_priorities.toast_updated'))
-        },
         onError: (errors) => {
           setProject((prev) => ({ ...prev, matrix_priorities: oldPriorities }))
           setName(priority.name)
@@ -240,9 +237,6 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
       {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => {
-          toast.success(t('edit_priorities.toast_created'))
-        },
         onError: (errors) => {
           setProject((prev) => ({
             ...prev,

@@ -414,7 +414,7 @@ const EpicStories = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar epic stories:', error)
@@ -435,7 +435,7 @@ const EpicStories = ({ project, setProject }) => {
     )
 
     if (selectedEpicStories.length === 0) {
-      toast.warning(t('common.select_at_least_one'))
+      toast.error(t('common.select_at_least_one'))
       return
     }
 

@@ -437,7 +437,7 @@ const MainView = ({ project = {}, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar Product Canvas:', error)
@@ -458,7 +458,7 @@ const MainView = ({ project = {}, setProject }) => {
     )
 
     if (selectedProductCanvas.length === 0) {
-      toast.warning(t('common.select_at_least_one'))
+      toast.error(t('common.select_at_least_one'))
       return
     }
 
@@ -484,7 +484,6 @@ const MainView = ({ project = {}, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(t('product_canvas.toast_save_success'))
           setAiGeneratedProductCanvas(remainingProductCanvas)
           if (remainingProductCanvas.length === 0) {
             setShowAiModal(false)

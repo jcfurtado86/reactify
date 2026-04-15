@@ -12,7 +12,7 @@ import {
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
-import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
+import { toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
 import { isTemporary, inspectionStatus } from '@/lib/utils'
 import GenerateAIButton from '@/Components/GenerateAIButton'
@@ -258,7 +258,6 @@ const BusinessRuleCard = ({
         preserveScroll: true,
         preserveState: true,
         onSuccess: () => {
-          toastSuccess('business_rules.toast_updated')
           setIsEditing(false)
         },
         onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
@@ -443,7 +442,7 @@ const BusinessRules = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar Business Rules:', error)
@@ -464,7 +463,7 @@ const BusinessRules = ({ project, setProject }) => {
     )
 
     if (selectedBusinessRules.length === 0) {
-      toast.warning(t('common.select_at_least_one'))
+      toast.error(t('common.select_at_least_one'))
       return
     }
 
@@ -498,9 +497,6 @@ const BusinessRules = ({ project, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(
-            `${selectedBusinessRules.length} Business Rules adicionada com sucesso!`,
-          )
           setAiGeneratedBusinessRules(remainingBusinessRules)
           if (remainingBusinessRules.length === 0) {
             setShowAiModal(false)

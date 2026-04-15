@@ -34,6 +34,13 @@ createInertiaApp({
             richColors={true}
             position="bottom-center"
             duration={3000}
+            toastOptions={{
+              classNames: {
+                toast: 'justify-center',
+                title: 'w-full text-center',
+                description: 'w-full text-center',
+              },
+            }}
           />
           <App {...props} />
         </TooltipProvider>,

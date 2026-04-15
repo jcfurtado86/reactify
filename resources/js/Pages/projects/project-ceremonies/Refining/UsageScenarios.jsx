@@ -14,7 +14,7 @@ import { isTemporary, inspectionStatus } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { toast } from 'sonner'
-import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
+import { toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
 import StatusBadge from '@/Components/StatusBadge'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
@@ -659,7 +659,6 @@ const UsageScenarios = ({ project, setProject }) => {
     router.post(route('usage-scenario.store'), newScenarioData, {
       preserveScroll: true,
       preserveState: true,
-      onSuccess: () => toastSuccess('usage_scenarios.toast_added'),
       onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
     })
   }
@@ -676,7 +675,7 @@ const UsageScenarios = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar cenários de uso:', error)
@@ -697,7 +696,7 @@ const UsageScenarios = ({ project, setProject }) => {
     )
 
     if (selectedUsageScenarios.length === 0) {
-      toast.warning(t('common.select_at_least_one'))
+      toast.error(t('common.select_at_least_one'))
       return
     }
 
@@ -726,9 +725,6 @@ const UsageScenarios = ({ project, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(
-            `${selectedUsageScenarios.length} cenários de uso adicionados com sucesso!`,
-          )
           setAiGeneratedUsageScenarios(remainingUsageScenarios)
           if (remainingUsageScenarios.length === 0) {
             setShowAiModal(false)

@@ -32,7 +32,7 @@ import {
 } from 'lucide-react'
 import { router, usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
-import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
+import { toastApiError } from '@/lib/toastHelpers'
 import TextareaAutosize from 'react-textarea-autosize'
 import { cn, inspectionStatus } from '@/lib/utils'
 import { useTooltipInfo } from '@/lib/projectData'
@@ -329,7 +329,7 @@ const Journeys = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       toast.error(t('journeys.toast_comm_error'))
@@ -344,7 +344,7 @@ const Journeys = ({ project, setProject }) => {
     const selectedJourneys = generatedJourneys.filter((j) => j.selected)
 
     if (selectedJourneys.length === 0) {
-      toast.warning(t('common.toast.select_at_least_one'))
+      toast.error(t('common.toast.select_at_least_one'))
       return
     }
 
@@ -384,9 +384,6 @@ const Journeys = ({ project, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(
-            t('journeys.toast_added', { count: selectedJourneys.length }),
-          )
           markConfirmed()
         },
         onError: () => {
@@ -443,7 +440,6 @@ const Journeys = ({ project, setProject }) => {
       {
         preserveState: true,
         preserveScroll: true,
-        onSuccess: () => toastSuccess('journeys.toast_added_one'),
         onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },
     )

@@ -27,7 +27,7 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import { ColorOptions } from '@/Components/ColorComponents'
 import { toast } from 'sonner'
-import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
+import { toastApiError } from '@/lib/toastHelpers'
 import StatusBadge from '@/Components/StatusBadge'
 import { usePage } from '@inertiajs/react'
 
@@ -577,7 +577,6 @@ const Goals = ({ project, setProject }) => {
           {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: () => toastSuccess('goals.toast_updated'),
             onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
           },
         )
@@ -615,7 +614,6 @@ const Goals = ({ project, setProject }) => {
         {
           preserveScroll: true,
           preserveState: true,
-          onSuccess: () => toastSuccess('goals.toast_updated'),
           onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
         },
       )
@@ -648,7 +646,6 @@ const Goals = ({ project, setProject }) => {
         {
           preserveScroll: true,
           preserveState: true,
-          onSuccess: () => toastSuccess('goals.toast_updated'),
           onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
         },
       )
@@ -681,7 +678,7 @@ const Goals = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar goals:', error)
@@ -698,7 +695,7 @@ const Goals = ({ project, setProject }) => {
     const remainingGoals = aiGeneratedGoals.filter((goal) => !goal.selected)
 
     if (selectedGoals.length === 0) {
-      toast.warning(t('common.toast.select_at_least_one'))
+      toast.error(t('common.toast.select_at_least_one'))
       return
     }
 
@@ -728,7 +725,6 @@ const Goals = ({ project, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(t('goals.toast_saved'))
           setAiGeneratedGoals(remainingGoals)
           if (remainingGoals.length === 0) {
             setShowAiModal(false)

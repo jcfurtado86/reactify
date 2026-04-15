@@ -382,7 +382,6 @@ const OverallModel = ({ project, setProject }) => {
       {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => toastSuccess('overall_model.toast_class_added'),
         onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },
     )
@@ -395,7 +394,6 @@ const OverallModel = ({ project, setProject }) => {
     router.delete(route('overall-model-class.destroy', { id: idToDelete }), {
       preserveScroll: true,
       preserveState: true,
-      onSuccess: () => toastSuccess('common.toast.deleted'),
       onError: (errors) => toastApiError(errors, 'common.toast.error_delete'),
     })
   }
@@ -528,7 +526,6 @@ const OverallModel = ({ project, setProject }) => {
       {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => toastSuccess('overall_model.toast_card_added'),
         onError: (errors) => toastApiError(errors, 'common.toast.error_save'),
       },
     )
@@ -546,7 +543,7 @@ const OverallModel = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       toastApiError(error, 'ai.toast.error')
@@ -562,7 +559,7 @@ const OverallModel = ({ project, setProject }) => {
     const selectedClasses = state.classes.filter((c) => c.selected)
 
     if (selectedCards.length === 0 && selectedClasses.length === 0) {
-      toast.warning(t('common.toast.select_at_least_one'))
+      toast.error(t('common.toast.select_at_least_one'))
       return
     }
 

@@ -660,7 +660,7 @@ const Personas = ({ project, setProject }) => {
         )
         router.reload({ only: ['pending_generations'] })
       } else if (response.data?.status === 'warning') {
-        toast.warning(response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar personas:', error)
@@ -681,7 +681,7 @@ const Personas = ({ project, setProject }) => {
     )
 
     if (selectedPersonas.length === 0) {
-      toast.warning(t('common.select_at_least_one'))
+      toast.error(t('common.select_at_least_one'))
       return
     }
 
@@ -711,9 +711,6 @@ const Personas = ({ project, setProject }) => {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
-          toast.success(
-            t('personas.toast_saved'),
-          )
           setAiGeneratedPersonas(remainingPersonas)
           if (remainingPersonas.length === 0) {
             setShowAiModal(false)
