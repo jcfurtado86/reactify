@@ -1,7 +1,7 @@
 import { useForm, usePage } from '@inertiajs/react'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import { cn } from '@/lib/utils'
+import { cn, currentDateFnsLocale } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useTranslation } from 'react-i18next'
 const ChangeRequestForm = ({ project, stories = [], onClose }) => {
@@ -115,7 +115,7 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
           <div className="space-y-2">
           
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, 'PPP') : <span>{t('change_request.set_deadline')}</span>}
+            {date ? format(date, 'PPP', { locale: currentDateFnsLocale() }) : <span>{t('change_request.set_deadline')}</span>}
 
             <div className="space-y-2">
               <Label htmlFor="requester_name">{t('change_request.requester')}</Label>

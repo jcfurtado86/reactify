@@ -2,7 +2,7 @@ import { router, useForm, usePage } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
 import { cn, formatDate, isSprintActive, parseDateAsLocal } from '@/lib/utils'
 import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { currentDateFnsLocale } from '@/lib/utils'
 import {
   Calendar as CalendarIcon,
   Trash2Icon as TrashIcon,
@@ -529,7 +529,7 @@ const ProductBacklog = ({ project, setProject }) => {
                       selected={startDate}
                       onSelect={setStartDate}
                       disabled={{ before: new Date() }}
-                      locale={ptBR}
+                      locale={currentDateFnsLocale()}
                       initialFocus
                     />
                   </PopoverContent>
@@ -565,7 +565,7 @@ const ProductBacklog = ({ project, setProject }) => {
                       selected={endDate}
                       onSelect={setEndDate}
                       disabled={{ before: new Date() }}
-                      locale={ptBR}
+                      locale={currentDateFnsLocale()}
                       initialFocus
                     />
                   </PopoverContent>

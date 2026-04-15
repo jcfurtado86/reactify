@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useTranslation } from 'react-i18next'
+import { formatDate } from '@/lib/utils'
 
 const ChangeLog = ({ project }) => {
   const { t } = useTranslation()
@@ -103,7 +104,7 @@ const ChangeLog = ({ project }) => {
               <TableRow key={request.id}>
                 <TableCell className="text-center">{request.id}</TableCell>
                 <TableCell className="text-center">
-                  {new Date(request.request_date).toLocaleDateString('pt-BR')}
+                  {formatDate(request.request_date)}
                 </TableCell>
                 <TableCell className="text-center">
                   {request.requester_name || request.requester?.name || 'N/A'}

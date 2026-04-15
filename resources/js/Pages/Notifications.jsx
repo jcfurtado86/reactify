@@ -2,6 +2,7 @@ import MainLayout from '@/Layouts/MainLayout'
 import { usePage, router, Head } from '@inertiajs/react'
 import { BellRing, Trash } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { currentIntlLocale } from '@/lib/utils'
 
 const Notifications = () => {
   const { t } = useTranslation()
@@ -23,9 +24,7 @@ const Notifications = () => {
       hour12: false, // Usar formato 24h, se preferir 12h, coloque true
     }
 
-    // Usamos 'pt-BR' para garantir a formatação correta para o Brasil (dia/mês)
-    // O método format() retorna a string final.
-    return new Intl.DateTimeFormat('pt-BR', options).format(date)
+    return new Intl.DateTimeFormat(currentIntlLocale(), options).format(date)
   }
 
   return (

@@ -14,7 +14,7 @@ import {
   Pencil,
   RotateCcw,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import TextareaAutosize from 'react-textarea-autosize'
@@ -112,17 +112,10 @@ const InterviewEditModal = ({ interview, onClose }) => {
 }
 
 const InterviewListItem = ({ interview, onEditClick }) => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
 
-  const formattedDate = new Date(interview.created_at).toLocaleDateString(
-    i18n.language === 'pt' ? 'pt-BR' : 'en-US',
-    {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    },
-  )
+  const formattedDate = formatDate(interview.created_at)
 
   const handleDelete = (e) => {
     e.preventDefault()

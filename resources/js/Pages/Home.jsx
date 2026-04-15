@@ -17,7 +17,7 @@ import {
 } from '@tanstack/react-table'
 import { useEffect, useRef, useState } from 'react'
 import TableComponent from '@/Components/TableComponent'
-import { cn } from '@/lib/utils'
+import { cn, currentIntlLocale } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 
 const NAME_MAX = 50
@@ -110,7 +110,7 @@ const Home = ({}) => {
       header: t('home.columns.created'),
       cell: ({ row }) => (
         <div className="flex items-center whitespace-nowrap">
-          {new Date(row.getValue('created_at')).toLocaleString('pt-BR', {
+          {new Date(row.getValue('created_at')).toLocaleString(currentIntlLocale(), {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

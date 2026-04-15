@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import SpanButton from '@/Components/SpanButton'
 import MainLayout from '@/Layouts/MainLayout'
-import { cn } from '@/lib/utils'
+import { cn, currentIntlLocale } from '@/lib/utils'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const roleBadgeVariant = {
@@ -91,7 +91,7 @@ const SprintTimeline = ({ sprints, onSelect }) => {
   const fmt = (iso) => {
     if (!iso) return ''
     const d = new Date(iso)
-    return d.toLocaleDateString(i18n.language === 'pt' ? 'pt-BR' : 'en-US', {
+    return d.toLocaleDateString(currentIntlLocale(), {
       day: '2-digit',
       month: '2-digit',
     })
@@ -842,7 +842,7 @@ const Dashboard = ({ project, setProject }) => {
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock size={14} />
             {project.updated_at
-              ? new Date(project.updated_at).toLocaleString()
+              ? new Date(project.updated_at).toLocaleString(currentIntlLocale())
               : t('dashboard.updated_never')}
           </span>
         </section>

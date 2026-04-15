@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { router } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
+import { formatDate } from '@/lib/utils'
 import {
   DialogHeader,
   DialogTitle,
@@ -21,7 +22,7 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 
 const ChangeRequestDetails = ({ request, onClose }) => {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [status, setStatus] = useState(request.status)
   const [loading, setLoading] = useState(false)
 
@@ -67,9 +68,7 @@ const ChangeRequestDetails = ({ request, onClose }) => {
   const currentStatusObj =
     statusOptions.find((s) => s.value === status) || statusOptions[0]
 
-  const formattedDate = new Date(request.request_date).toLocaleDateString(
-    i18n.language === 'pt' ? 'pt-BR' : 'en-US',
-  )
+  const formattedDate = formatDate(request.request_date)
 
   return (
     <div className="space-y-6">

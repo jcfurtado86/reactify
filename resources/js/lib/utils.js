@@ -1,7 +1,19 @@
 import { clsx } from 'clsx'
 import { format } from 'date-fns'
 import { twMerge } from 'tailwind-merge'
-import { ptBR } from 'date-fns/locale'
+import { ptBR, enUS } from 'date-fns/locale'
+import i18n from '@/i18n'
+
+// Resolve o locale do date-fns a partir do idioma ativo no i18n.
+// Single source of truth para toda a formatação de data no front.
+export const currentDateFnsLocale = () => {
+  const lng = (i18n?.language || 'pt').toLowerCase()
+  return lng.startsWith('en') ? enUS : ptBR
+}
+export const currentIntlLocale = () => {
+  const lng = (i18n?.language || 'pt').toLowerCase()
+  return lng.startsWith('en') ? 'en-US' : 'pt-BR'
+}
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -152,11 +164,11 @@ export const formatDate = (dateInput) => {
     dateToFormat = dateInput + 'T00:00:00'
   }
 
-  // 4. Agora, 'format' recebe ou a string corrigida ("2025-11-16T00:00:00")
-  //    ou o objeto Date original (vindo do calendário), e formata corretamente.
-  return format(new Date(dateToFormat), 'dd/MM/yyyy', {
-    locale: ptBR,
-  })
+  // 4. 'format' com locale do idioma ativo — pt-BR: dd/MM/yyyy,
+  //    en-US: MM/dd/yyyy. Resolvido em runtime pra refletir trocas de idioma.
+  const locale = currentDateFnsLocale()
+  const pattern = locale === enUS ? 'MM/dd/yyyy' : 'dd/MM/yyyy'
+  return format(new Date(dateToFormat), pattern, { locale })
 }
 export const parseDateAsLocal = (dateString) => {
   // Se a string for nula, indefinida ou vazia, retorne null
