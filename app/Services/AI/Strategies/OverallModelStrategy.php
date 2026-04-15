@@ -128,11 +128,13 @@ class OverallModelStrategy implements GeneratorStrategy
             ]
         }
 
-        IMPORTANTE: A lista 'overall_model_classes' deve conter todos os nomes de classes de forma única (novas + existentes).
-        IMPORTANTE: A lista 'crc_cards' deve conter apenas as **NOVAS** classes identificadas.
-        IMPORTANTE: Retorne apenas o JSON.
-        IMPORTANTE: Não repita Classes ou CRC Cards em hipótese alguma.
-        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
+        REGRA DE CONSISTÊNCIA: Toda classe mencionada em qualquer `collaborators` de um CRC Card **deve** estar presente em `overall_model_classes`. Se precisar referenciar uma classe que não foi listada ainda, adicione-a em `overall_model_classes` também.
+
+        REGRAS:
+        - `overall_model_classes` contém todas as classes (novas + existentes) de forma única.
+        - `crc_cards` contém apenas as **NOVAS** classes identificadas.
+        - Não repita classes ou CRC cards existentes.
+        - Foque nas classes centrais do domínio, não em utilidades técnicas.
         PROMPT;
     }
 
@@ -147,6 +149,31 @@ class OverallModelStrategy implements GeneratorStrategy
 
     public function postProcess(array $parsed, Project $project, array $validated): array
     {
+        // Sanity check: garante que toda classe em collaborators também
+        // aparece em overall_model_classes. Se o modelo esqueceu alguma,
+        // injeta automaticamente — evita dangling references no overall model.
+        $classNames = collect($parsed['overall_model_classes'] ?? [])
+            ->pluck('name')
+            ->filter()
+            ->map(fn($n) => trim((string) $n))
+            ->filter()
+            ->values();
+
+        $existingLower = $classNames->map(fn($n) => mb_strtolower($n))->all();
+
+        foreach ($parsed['crc_cards'] ?? [] as $card) {
+            foreach ($card['collaborators'] ?? [] as $collab) {
+                $name = trim((string) $collab);
+                if ($name === '') {
+                    continue;
+                }
+                if (!in_array(mb_strtolower($name), $existingLower, true)) {
+                    $parsed['overall_model_classes'][] = ['name' => $name];
+                    $existingLower[] = mb_strtolower($name);
+                }
+            }
+        }
+
         return $parsed;
     }
 

@@ -94,6 +94,8 @@ class PersonaStrategy implements GeneratorStrategy
         - 'expectations': Liste o que a persona declarou esperar de um produto ou serviço.
         - 'goals': Liste quais são os objetivos e necessidades que a persona quer alcançar, conforme mencionado na entrevista.
 
+        REGRA DE ATERRAMENTO: Cada item listado em `profile`, `expectations` e `goals` deve refletir informação que aparece literal ou implicitamente no trecho da entrevista fornecido. Não invente traços, idades, cargos ou objetivos que não estejam no texto.
+
         Formato de resposta requerido (JSON):
         {
             "personas": [

@@ -68,11 +68,17 @@ class EpicStoryStrategy implements GeneratorStrategy
         )->implode("\n");
 
         return <<<PROMPT
-        Sua primeira e mais importante tarefa é analisar CUIDADOSAMENTE cada User Story para determinar se ela é, de fato, um "Épico".
-        Um épico é uma estória que é claramente grande demais, que abrange múltiplas funcionalidades distintas ou que não poderia ser concluída em um único ciclo de desenvolvimento (sprint).
+        Sua tarefa é analisar cada story e decidir se ela é um **épico** que precisa ser decomposto em stories menores.
 
-        REGRA: Se uma estória descreve uma única ação ou um fluxo contínuo e coeso, ela NÃO é um épico e NÃO deve ser decomposta.
-        Apenas depois de justificar internamente que uma estória é um épico, você deve prosseguir para a sua decomposição.
+        DEFINIÇÃO DE ÉPICO: uma story é épica se **qualquer** um destes critérios for verdadeiro:
+        - Exige esforço acima de uma sprint (~2 semanas) pra ser entregue.
+        - Abrange **múltiplas funcionalidades distintas** (ex: "cadastrar + notificar + relatar" = 3 stories).
+        - Exige refactor ou mudança em múltiplos módulos do sistema simultaneamente.
+
+        Exemplo de ÉPICO (decomponha): "Como gestor, quero um painel completo de analytics com filtros, gráficos, exportação e alertas configuráveis."
+        Exemplo de story NORMAL (não decomponha): "Como cliente, quero filtrar veículos disponíveis por data."
+
+        REGRA: Se uma story descreve uma única ação ou um fluxo contínuo e coeso, ela NÃO é um épico e NÃO deve ser decomposta.
 
         Lista de Stories para Análise (Apenas estórias que ainda não foram decompostas):
         {$storyContext}

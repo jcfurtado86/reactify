@@ -81,8 +81,12 @@ class GoalStrategy implements GeneratorStrategy
         {$existing}
 
         Sua tarefa é identificar:
-        1.  **Business Goals (type: "bg")**: Objetivos principais que o negócio ou o usuário quer alcançar. O que gera valor? Ex: "Aumentar o engajamento", "Facilitar a busca por filmes".
-        2.  **Constraint Goals (type: "cg")**: Restrições, qualidades ou requisitos não-funcionais que o sistema deve ter. Ex: "A plataforma deve ser segura", "O carregamento precisa ser rápido", "Deve funcionar em celulares".
+        1.  **Business Goals (type: "bg")**: Objetivos principais que o negócio ou o usuário quer alcançar. O que gera valor?
+        2.  **Constraint Goals (type: "cg")**: Restrições, qualidades ou requisitos não-funcionais que o sistema deve ter.
+
+        Exemplos:
+        - Business Goal: "Reduzir em 30% o tempo de checkout do aluguel."
+        - Constraint Goal: "O sistema deve estar disponível em desktop e mobile."
 
         Para cada goal identificado, atribua uma prioridade ('high', 'medium', 'low') com base na ênfase dada pelo entrevistado.
 

@@ -94,31 +94,23 @@ class ProductCanvasStrategy implements GeneratorStrategy
         **Product Canvas ATUAL (Use como base para refinar):**
         {$existing}
 
-        Analise a transcrição e extraia as informações para preencher os seguintes campos. O valor de cada campo deve ser um texto conciso e principalmente direto e resumido, formatado com quebras de linha (`\n`) se necessário.
-        - 'issues': Os problemas que serão solucionados com o produto.
-        - 'solutions': A solução proposta para resolver esses problemas.
-        - 'personas': As personas ou usuários-chave da solução.
-        - 'restrictions': As restrições do produto, listando as limitações que a solução deve obedecer.
-        - 'product_is': O que a solução ou produto será.
-        - 'product_is_not': O que a solução ou produto não será.
-
-        O formato de resposta requerido é um JSON com um array de objetos, onde cada objeto representa um campo do canvas.
+        Preencha os 6 campos abaixo com base nas transcrições. Cada valor deve ser um texto conciso e direto, com quebras de linha (`\n`) se precisar.
 
         Formato de resposta requerido (JSON):
         {
             "product_canvas": [
-                { "key": "issues", "label": "Problems", "value": "Texto extraído sobre os problemas..." },
-                { "key": "solutions", "label": "Solutions", "value": "Texto extraído sobre as soluções..." },
-                { "key": "personas", "label": "Personas", "value": "Texto extraído sobre as personas..." },
-                { "key": "restrictions", "label": "Restrictions", "value": "Texto extraído sobre as restrições..." },
-                { "key": "product_is", "label": "Product Is", "value": "Texto extraído sobre o que o produto é..." },
-                { "key": "product_is_not", "label": "Product Is Not", "value": "Texto extraído sobre o que o produto não é..." }
+                { "key": "issues", "label": "Problems", "value": "Os problemas que o produto vai resolver." },
+                { "key": "solutions", "label": "Solutions", "value": "A solução proposta para esses problemas." },
+                { "key": "personas", "label": "Personas", "value": "Os usuários-chave da solução." },
+                { "key": "restrictions", "label": "Restrictions", "value": "As limitações que a solução deve obedecer." },
+                { "key": "product_is", "label": "Product Is", "value": "O que o produto é." },
+                { "key": "product_is_not", "label": "Product Is Not", "value": "O que o produto não é." }
             ]
         }
 
-        IMPORTANTE: Baseie-se nas transcrições para **refinar o canvas atual**.
-        IMPORTANTE: Retorne apenas o JSON.
-        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
+        REGRAS:
+        - Use as transcrições e os goals como base para refinar o canvas atual.
+        - Foque no núcleo do projeto, não liste coisas periféricas.
         PROMPT;
     }
 

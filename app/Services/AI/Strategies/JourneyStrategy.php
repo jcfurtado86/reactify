@@ -97,6 +97,10 @@ class JourneyStrategy implements BatchedGeneratorStrategy
         um ponto de contato que representa uma possível e futura funcionalidade do produto pretendido.
         Esse passo a passo deve incluir também as respostas do produto e não apenas as ações da persona.
 
+        Exemplo:
+        - Step NÃO touchpoint: "Sistema calcula tarifa baseado em km rodados." (lógica interna, sem contato)
+        - Step TOUCHPOINT: "Cliente confirma reserva no app." (contato direto com o produto)
+
         Crie journeys para as goals de uma persona listados abaixo:
 
         - Persona: {$persona->name}

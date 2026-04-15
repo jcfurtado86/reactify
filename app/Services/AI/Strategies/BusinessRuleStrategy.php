@@ -102,17 +102,21 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
         **Regras de negócios do Projeto já existentes**
         {$storyRulesContext}
 
+        CLASSIFICAÇÃO DA REGRA — cada regra gerada deve ter um `rule_type`:
+        - **structural**: invariante sobre dados ou entidades (ex: "CPF deve ser único", "Veículo não pode ter duas reservas sobrepostas").
+        - **dynamic**: condição ou fluxo de comportamento (ex: "Reserva não confirmada em 30 min é cancelada", "Cliente inadimplente é bloqueado ao tentar alugar").
+
         Formato de resposta requerido (JSON):
         {
             "business_rules": [
-                { "title": "Título da primeira regra de negócio." }
+                { "title": "Título da regra", "rule_type": "structural" }
             ]
         }
 
-        IMPORTANTE: Não gere novas regras que contenham o mesmo conteúdo das regras já existestes em nenhum grau.
-        IMPORTANTE: Se nenhuma nova regra for pensada, retorne um array "business_rules" vazio.
-        IMPORTANTE: Retorne apenas o JSON.
-        IMPORTANTE: Não gere novas regras que completam as existentes.
+        REGRAS:
+        - Não gere regras que repitam ou completem regras já existentes.
+        - Se nenhuma nova regra for pensada, retorne um array "business_rules" vazio.
+        - Todo item deve ter `rule_type` preenchido com exatamente "structural" ou "dynamic".
         PROMPT;
     }
 
@@ -135,10 +139,15 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
     public function persistGenerated(array $parsed, Project $project, array $validated): void
     {
         foreach ($parsed['business_rules'] ?? [] as $ruleData) {
+            $ruleType = $ruleData['rule_type'] ?? null;
+            if (!in_array($ruleType, ['structural', 'dynamic'], true)) {
+                $ruleType = null;
+            }
             BusinessRule::create([
                 'project_id' => $project->id,
                 'story_id' => $ruleData['story_id'] ?? null,
                 'title' => $ruleData['title'] ?? '',
+                'rule_type' => $ruleType,
                 'is_ai_generated' => true,
             ]);
         }

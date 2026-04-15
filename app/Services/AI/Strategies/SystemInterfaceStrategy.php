@@ -109,10 +109,14 @@ class SystemInterfaceStrategy implements GeneratorStrategy
         {$existing}
 
         - 'title': Um nome claro para a interface.
-        - 'input': Os dados que a interface recebe.
-        - 'output': Os dados que a interface retorna.
+        - 'input': Lista estruturada dos dados que a interface recebe, no formato `nome_campo: tipo`, um por linha. Tipos válidos: `string`, `int`, `boolean`, `datetime`, `float`, `array<T>`, `object`. Nada de descrições vagas tipo "dados do usuário".
+        - 'output': Lista estruturada dos dados que a interface retorna, no mesmo formato `nome_campo: tipo`.
         - 'type': "external" ou "internal".
         - 'related_classes': Uma lista com os nomes das classes do Overall Model que estão envolvidas nesta interface. Escolha apenas a partir da seguinte lista de classes disponíveis: "{$classList}".
+
+        Exemplo de formato correto de `input`/`output`:
+        "input": "username: string\\npassword: string\\nremember_me: boolean"
+        "output": "token: string\\nexpires_at: datetime\\nuser_id: int"
 
         Formato de resposta requerido (JSON):
         {

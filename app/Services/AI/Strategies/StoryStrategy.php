@@ -138,6 +138,14 @@ class StoryStrategy implements GeneratorStrategy
         1. Para **NOVAS** USER STORIES: Use as Goals das Personas e Journeys como contexto para criar histórias centradas no usuário.
         2. Para **NOVAS** SYSTEM STORIES: Use as Restrições do Produto e Constraint Goals como contexto para criar histórias do sistema. Também acrescente atributos de qualidade na descrição das system stories.
 
+        ORIENTAÇÃO INVEST (use como guia ao escrever cada story; a validação será feita por humanos):
+        - Independente: a story faz sentido sozinha, não depende de outras pra ser implementada.
+        - Negociável: descreve o que o usuário quer, não a implementação exata.
+        - Valiosa: o benefício pro usuário ou negócio é claro.
+        - Estimável: tem escopo claro o suficiente pra o time estimar.
+        - Small (pequena): cabe numa sprint curta; se for grande demais, quebre em várias.
+        - Testável: dá pra escrever um critério de aceitação concreto pra ela.
+
         FORMATO REQUERIDO:
         {
           "stories":
@@ -146,15 +154,11 @@ class StoryStrategy implements GeneratorStrategy
             ]
         }
 
-        3. Após escrever as stories, deve verificar e validar esses requisitos com os critérios INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable).
-
-        IMPORTANTE: Retorne apenas o JSON e não use \ para escapar caracteres especiais.
-        IMPORTANTE: Não REPITA as stories existentes.
-        IMPORTANTE: Se nenhuma nova story nova for gerada, retorne um array "stories" vazio.
-        IMPORTANTE: As novas stories não devem ser parecidas com as stories existentes em nenhum grau de variância ou significado.
-        IMPORTANTE: Gere stories baseadas totalmente nos exemplos e informações fornecidos acima.
-        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
-        IMPORTANTE: As stories devem acima de tudo seguir os critérios INVEST descritos acima.
+        REGRAS:
+        - Não REPITA stories existentes, nem variações semânticas delas.
+        - Se nenhuma nova story for encontrada, retorne um array "stories" vazio.
+        - Baseie-se exclusivamente nos contextos acima. Não invente funcionalidades.
+        - Foque nas stories mais centrais do produto, não exaustivas.
         PROMPT;
     }
 

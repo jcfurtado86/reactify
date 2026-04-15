@@ -30,6 +30,7 @@ class OllamaGeneratorService extends AbstractLlmGeneratorService
         $response = Ollama::agent('Você é um especialista em engenharia de software.')
             ->prompt($prefix . $prompt)
             ->model($model)
+            ->format('json')
             ->options([
                 'temperature' => 0.1,
                 'num_ctx' => 32768,
