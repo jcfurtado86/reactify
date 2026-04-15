@@ -42,14 +42,8 @@ class TranscribeInterviewJob implements ShouldQueue
                 $this->interview->update([
                     'transcript_raw' => $response->json('transcript_raw'),
                     'transcript' => $response->json('transcript'),
-                    'transcript_summary' => null, // força resumir de novo
                     'extraction_status' => 'completed'
                 ]);
-
-                // Encadeia o resumo estruturado: as strategies de IA usam
-                // transcript_summary em vez do transcript cru pra reduzir
-                // o tamanho do contexto dos prompts.
-                SummarizeInterviewJob::dispatch($this->interview->id);
             } else {
                 throw new \Exception('Serviço de transcrição retornou um erro: ' . $response->body());
             }

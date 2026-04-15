@@ -125,7 +125,7 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
         - **structural**: invariante sobre dados ou entidades (ex: "CPF deve ser único", "Veículo não pode ter duas reservas sobrepostas").
         - **dynamic**: condição ou fluxo de comportamento (ex: "Reserva não confirmada em 30 min é cancelada", "Cliente inadimplente é bloqueado ao tentar alugar").
 
-        TAREFA OBRIGATÓRIA: Gere **pelo menos 2 e no máximo 5 regras de negócio NOVAS** para esta story. Use a entrevista, os goals e o contexto da story pra extrair regras concretas. Não retorne array vazio — sempre existe ao menos uma regra plausível que pode ser derivada do contexto.
+        TAREFA OBRIGATÓRIA: Extraia TODAS as regras de negócio aplicáveis a esta story. Mínimo 3 regras. Não limite o máximo — stories complexas podem ter 5-10 regras relevantes. Use a entrevista, os goals e o contexto da story pra extrair regras concretas. Não retorne array vazio.
 
         Exemplo de resposta válida:
         {

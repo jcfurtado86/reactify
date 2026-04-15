@@ -97,7 +97,7 @@ class PersonaStrategy implements GeneratorStrategy
         $goals = $context['goals'];
 
         return <<<PROMPT
-        Com base na transcrição da entrevista de usuário fornecida abaixo, analise o texto e crie 1 a 2 personas detalhadas.
+        Com base na transcrição da entrevista de usuário fornecida abaixo, analise o texto e crie de 2 a 5 personas distintas baseadas nos diferentes arquétipos de usuário mencionados nas entrevistas.
 
         Transcrição da Entrevista:
         {$escapedTranscript}
@@ -113,6 +113,8 @@ class PersonaStrategy implements GeneratorStrategy
         - 'profile' (array de strings): lista de traços da persona (idade, profissão, hobbies, motivações, comportamentos).
         - 'expectations' (array de strings): lista do que a persona declarou esperar de um produto ou serviço.
         - 'goals' (array de strings): lista dos objetivos e necessidades que a persona quer alcançar.
+
+        TAREFA OBRIGATÓRIA: Identifique TODOS os arquétipos de usuário distintos mencionados ou implicados nas entrevistas. Mínimo 2 personas. Não retorne array vazio.
 
         REGRA DE ATERRAMENTO: Cada item listado em `profile`, `expectations` e `goals` deve refletir informação que aparece literal ou implicitamente no trecho da entrevista. Não invente idades, cargos ou objetivos que não estejam no texto.
 
@@ -131,7 +133,6 @@ class PersonaStrategy implements GeneratorStrategy
         IMPORTANTE: Baseie-se exclusivamente no conteúdo da transcrição fornecida. Não invente informações.
         IMPORTANTE: Gere apenas personas que AINDA NÃO EXISTEM na lista fornecida. Se nenhuma nova persona for identificada, retorne um array "personas" vazio.
         IMPORTANTE: Retorne apenas o JSON. Não inclua texto adicional, explicações ou marcadores de código.
-        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais que refletem bem o núcleo do projeto.
         PROMPT;
     }
 

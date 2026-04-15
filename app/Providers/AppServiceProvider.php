@@ -61,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
         return match (config('services.artifact_llm.provider', 'ollama')) {
           'ollama' => new \App\Services\AI\Generators\OllamaGeneratorService(),
           'gemini' => new \App\Services\AI\Generators\GeminiGeneratorService(),
+          'claude' => new \App\Services\AI\Generators\ClaudeGeneratorService(),
           default => throw new \RuntimeException(
             'ARTIFACT_LLM_PROVIDER inválido: ' . config('services.artifact_llm.provider')
           ),

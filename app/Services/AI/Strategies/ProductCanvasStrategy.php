@@ -126,7 +126,6 @@ class ProductCanvasStrategy implements GeneratorStrategy
 
         REGRAS:
         - Use as transcrições e os goals como base para refinar o canvas atual.
-        - Foque no núcleo do projeto, não liste coisas periféricas.
         PROMPT;
     }
 

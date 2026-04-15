@@ -55,5 +55,8 @@ return [
     'provider' => env('ARTIFACT_LLM_PROVIDER', 'ollama'),
     'ollama_model' => env('ARTIFACT_LLM_OLLAMA_MODEL', 'qwen3:8b'),
     'ollama_think' => filter_var(env('ARTIFACT_LLM_OLLAMA_THINK', false), FILTER_VALIDATE_BOOLEAN),
+    'claude_model' => env('ARTIFACT_LLM_CLAUDE_MODEL', 'claude-haiku-4-5-20251001'),
+    'claude_api_key' => env('ANTHROPIC_API_KEY'),
+    'gemini_model' => env('ARTIFACT_LLM_GEMINI_MODEL', 'gemini-2.5-flash'),
   ],
 ];

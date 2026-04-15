@@ -150,7 +150,7 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
         - 'then_1': O resultado esperado principal.
         - Opcional: par 'and' + 'then_2' (nunca sozinhos — um 'and' sempre vem com um 'then' depois).
 
-        TAREFA OBRIGATÓRIA: Gere **pelo menos 2 e no máximo 4 cenários NOVOS** para esta story. Sempre existe ao menos um cenário plausível que pode ser derivado da story + contexto — não retorne array vazio.
+        TAREFA OBRIGATÓRIA: Cubra TODOS os cenários de uso relevantes pra esta story — caminho feliz, condições alternativas, erros e edge cases. Mínimo 3 cenários. Não retorne array vazio.
 
         Exemplo de resposta válida:
         {

@@ -154,9 +154,10 @@ class SystemInterfaceStrategy implements GeneratorStrategy
             ]
         }
 
+        TAREFA OBRIGATÓRIA: Identifique TODAS as interfaces relevantes — internas (entre CRC cards) e externas (com sistemas de terceiros mencionados nas stories). Mínimo 4 interfaces. Um projeto típico tem 5-12 interfaces identificáveis.
+
         IMPORTANTE: Gere apenas interfaces que AINDA NÃO EXISTEM na lista fornecida.
         IMPORTANTE: Retorne apenas o JSON.
-        IMPORTANTE: Gere o mínimo de artefatos, foque nas principais.
         PROMPT;
     }
 
@@ -201,12 +202,12 @@ class SystemInterfaceStrategy implements GeneratorStrategy
                 'input' => $interfaceData['input'] ?? '',
                 'output' => $interfaceData['output'] ?? '',
                 'type' => $interfaceData['type'] ?? 'internal',
-                'overall_model_class_id' => $classIds[0] ?? null,
                 'is_ai_generated' => true,
             ]);
 
-            // Vincula as classes adicionais via tabela pivot.
-            if (count($classIds) > 1) {
+            // A relação com classes é exclusivamente via pivot
+            // overall_model_class_system_interface.
+            if (!empty($classIds)) {
                 $interface->overallModelClasses()->sync($classIds);
             }
         }

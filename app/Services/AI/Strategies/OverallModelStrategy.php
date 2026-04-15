@@ -159,7 +159,7 @@ class OverallModelStrategy implements GeneratorStrategy
             ]
         }
 
-        TAREFA OBRIGATÓRIA: Gere **pelo menos 3 e no máximo 8 CRC Cards NOVOS** com suas classes correspondentes. Sempre existem classes centrais plausíveis a partir das stories e do contexto.
+        TAREFA OBRIGATÓRIA: Derive o modelo de domínio COMPLETO do projeto. Mínimo 5 CRC cards cobrindo as classes centrais. Projetos típicos têm 8-15 classes relevantes. Não retorne array vazio.
 
         Exemplo de resposta válida:
         {

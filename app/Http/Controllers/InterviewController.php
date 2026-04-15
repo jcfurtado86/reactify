@@ -81,12 +81,7 @@ class InterviewController extends Controller
         try {
             $interview->update([
                 'transcript' => $validated['transcript'],
-                'transcript_summary' => null, // summary antigo ficou incoerente
             ]);
-
-            // Re-enfileira o resumo pra refletir a edição manual. Enquanto
-            // o job não roda, as strategies caem no fallback (transcript cru).
-            SummarizeInterviewJob::dispatch($interview->id);
 
             return back()->with('success', 'Transcrição atualizada com sucesso.');
 

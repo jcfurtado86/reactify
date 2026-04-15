@@ -375,6 +375,7 @@ export const CeremonyCard = ({
     }
   }
   const getProductCanvasAmount = (canvas) => {
+    if (!canvas) return 0
     if (
       canvas.product_is &&
       canvas.product_is_not &&

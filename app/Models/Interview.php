@@ -24,10 +24,11 @@ class Interview extends Model
 
     /**
      * Retorna o contexto consolidado das entrevistas de um projeto pra
-     * alimentar as strategies de IA. Usa o `transcript_summary` quando
-     * existir (cache denso gerado por SummarizeInterviewJob), senão
-     * cai no `transcript` cru. Zero regressão quando o summary ainda
-     * não foi gerado.
+     * alimentar as strategies de IA. Usa o `transcript` cru — o summary
+     * cacheado (coluna `transcript_summary`) foi desativado porque agora
+     * rodamos em provider cloud (Claude/Gemini) que aguenta transcript
+     * completo sem pressão, e a camada de resumo é lossy demais. A coluna
+     * segue existindo pra eventual revival se voltarmos pro Ollama local.
      */
     public static function aiContextForProject(int $projectId): string
     {
@@ -35,7 +36,7 @@ class Interview extends Model
             ->whereNotNull('transcript')
             ->where('transcript', '!=', '')
             ->get()
-            ->map(fn($i) => $i->transcript_summary ?: $i->transcript)
+            ->map(fn($i) => $i->transcript)
             ->implode("\n\n---\n\n");
     }
 

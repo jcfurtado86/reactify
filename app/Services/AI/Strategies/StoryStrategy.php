@@ -163,7 +163,7 @@ class StoryStrategy implements GeneratorStrategy
         - Small (pequena): cabe numa sprint curta; se for grande demais, quebre em várias.
         - Testável: dá pra escrever um critério de aceitação concreto pra ela.
 
-        TAREFA OBRIGATÓRIA: Gere **pelo menos 3 e no máximo 10 stories NOVAS** cobrindo tanto user quanto system stories. Sempre existem stories plausíveis — não retorne array vazio.
+        TAREFA OBRIGATÓRIA: Gere **pelo menos 8 stories NOVAS** cobrindo tanto user quanto system stories de forma EXAUSTIVA. Não limite artificialmente — o projeto típico tem 15-25 stories derivaveis do contexto. Não retorne array vazio.
 
         Exemplo de resposta válida:
         {

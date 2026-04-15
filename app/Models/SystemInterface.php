@@ -12,7 +12,6 @@ class SystemInterface extends Model
     'input',
     'output',
     'type',
-    'overall_model_class_id',
     'project_id',
     'is_ai_generated',
   ];

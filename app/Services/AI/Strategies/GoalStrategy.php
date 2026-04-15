@@ -120,8 +120,10 @@ class GoalStrategy implements GeneratorStrategy
             ]
         }
 
+        TAREFA OBRIGATÓRIA: Extraia TODOS os goals (bg e cg) identificáveis a partir do contexto. Mínimo 5 goals. Não retorne array vazio na primeira rodada — sempre existem objetivos derivaveis da entrevista e do canvas.
+
         IMPORTANTE: Baseie-se **exclusivamente** no conteúdo da transcrição.
-        IMPORTANTE: Gere apenas goals que AINDA NÃO EXISTEM na lista de "Goals já existentes". Se nenhum novo goal for encontrado, retorne um array "goals" vazio.
+        IMPORTANTE: Não repita goals que já existem na lista acima.
         IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }
