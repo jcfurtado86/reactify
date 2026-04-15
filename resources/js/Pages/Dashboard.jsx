@@ -509,8 +509,14 @@ const Dashboard = ({ project, setProject }) => {
     const sprints = project?.sprints || []
     const activeSprint = sprints.find((s) => s.status === 'active')
 
+    // Uma story é "priorizada" quando tem uma linha correspondente em
+    // project.prioritizations (onde mora o priority_id e a position).
+    // Os campos s.value/s.complexity são de outro contexto e ficavam null.
+    const prioritizedIds = new Set(
+      (project?.prioritizations || []).map((p) => p.story_id),
+    )
     const unprioritized = stories.filter(
-      (s) => s.value == null || s.complexity == null,
+      (s) => !prioritizedIds.has(s.id),
     ).length
 
     const investNotOk = stories.filter((s) => {
