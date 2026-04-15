@@ -8,13 +8,6 @@ import { useTooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { cn } from '@/lib/utils'
-import { useOverallModelAIStore } from '@/stores/useOverallModelAIStore'
-import OverallModelAIModal from './components/OverallModelAIModal'
-
-// Q2/Q4 do plano de qualidade: o GeneratedItemsModal que ficava inline
-// neste arquivo foi movido para ./components/OverallModelAIModal.jsx e
-// o estado de UI (cards/classes geradas, isOpen, isMinimized) migrou
-// para useOverallModelAIStore.
 
 // Componente para a lista de Responsabilidades (com Input)
 const EditableListItem = ({
@@ -347,14 +340,6 @@ const CRCCard = ({
 const OverallModel = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // IA states movidos para useOverallModelAIStore (Q2/Q4).
-  // Lemos só o que precisamos dentro deste componente; o modal
-  // externo (OverallModelAIModal) consome o store diretamente.
-  const isGenerating = useOverallModelAIStore((s) => s.isGenerating)
-  const startGeneratingAI = useOverallModelAIStore((s) => s.startGenerating)
-  const stopGeneratingAI = useOverallModelAIStore((s) => s.stopGenerating)
-  const setGeneratedAI = useOverallModelAIStore((s) => s.setGenerated)
-  const cancelAI = useOverallModelAIStore((s) => s.cancel)
   const [editingField, setEditingField] = useState({
     cardId: null,
     field: null,
@@ -532,7 +517,6 @@ const OverallModel = ({ project, setProject }) => {
   }
 
   const generateCRCCards = async () => {
-    startGeneratingAI()
     try {
       const response = await axios.post(route('overall-model.generate'), {
         project_id: project.id,
@@ -547,80 +531,11 @@ const OverallModel = ({ project, setProject }) => {
       }
     } catch (error) {
       toastApiError(error, 'ai.toast.error')
-    } finally {
-      stopGeneratingAI()
-    }
-  }
-
-  const confirmGeneratedCards = () => {
-    // Lê do store via getState (não precisa subscribe fino aqui)
-    const state = useOverallModelAIStore.getState()
-    const selectedCards = state.cards.filter((card) => card.selected)
-    const selectedClasses = state.classes.filter((c) => c.selected)
-
-    if (selectedCards.length === 0 && selectedClasses.length === 0) {
-      toast.error(t('common.toast.select_at_least_one'))
-      return
-    }
-
-    const cardsForBackend = selectedCards.map((card) => ({
-      class: card.class,
-      responsabilities: card.responsabilities,
-      collaborators: card.collaborators,
-      project_id: project.id,
-    }))
-
-    const classesForBackend = selectedClasses.map(({ name }) => ({
-      name,
-      project_id: project.id,
-    }))
-
-    const saveCards = () => {
-      if (cardsForBackend.length > 0) {
-        router.post(
-          route('overall.bulk-store'),
-          { crc_cards: cardsForBackend },
-          {
-            preserveScroll: true,
-            onSuccess: () => {
-              toastSuccess('overall_model.toast_cards_saved', {
-                count: cardsForBackend.length,
-              })
-              cancelAI()
-            },
-            onError: (errors) =>
-              toastApiError(errors, 'common.toast.error_save'),
-          },
-        )
-      } else {
-        cancelAI()
-      }
-    }
-
-    if (classesForBackend.length > 0) {
-      router.post(
-        route('overall-model-class.bulk-store'),
-        { classes: classesForBackend },
-        {
-          preserveScroll: true,
-          onSuccess: () => {
-            toastSuccess('overall_model.toast_classes_saved', {
-              count: classesForBackend.length,
-            })
-            saveCards()
-          },
-          onError: (errors) =>
-            toastApiError(errors, 'overall_model.toast_classes_save_error'),
-        },
-      )
-    } else {
-      saveCards()
     }
   }
 
   return (
     <div className="p-4 flex flex-col gap-3">
-      <OverallModelAIModal onConfirm={confirmGeneratedCards} />
       <section className="flex gap-2 ">
         <Accordion
           type="single"
@@ -768,7 +683,6 @@ const OverallModel = ({ project, setProject }) => {
       </AlertDialog>
       <GenerateAIButton
         type="overall_model"
-        isGenerating={isGenerating}
         onClick={generateCRCCards}
         tooltip={tooltipInfo.aiGeneratedOverallModel}
         className="w-1/2"

@@ -26,8 +26,7 @@ class GeminiGeneratorService extends AbstractLlmGeneratorService
 {
     protected function callLlm(string $prompt, ?array $schema = null): string
     {
-        $modelName = config('services.llm.gemini_model')
-            ?: config('gemini.model');
+        $modelName = config('services.llm.gemini_model');
 
         $maxAttempts = 3;
         $attempt = 0;

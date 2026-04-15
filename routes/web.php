@@ -13,7 +13,6 @@ use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ProductCanvasController;
 use App\Http\Controllers\OverallModelController;
 use App\Http\Controllers\OverallModelClassController;
-use App\Http\Controllers\WelcomeEmailController;
 use App\Http\Controllers\ProjectPermissionController;
 
 use App\Http\Controllers\ProjectInvitationController;
@@ -37,10 +36,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-//rota para envio de email
-Route::post('/email/welcome', [WelcomeEmailController::class, 'store'])->name(
-  'welcome-email.store'
-);
 
 //rotas de autorizacao com socialite
 Route::get('/auth/{provider}/redirect', function (string $provider) {

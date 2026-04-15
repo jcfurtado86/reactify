@@ -85,7 +85,7 @@ class ProjectController extends Controller
   {
     $user = Auth::user();
 
-    if (!$project->users()->where('users.id', $user->id)->exists()) {
+    if (!$project->hasMember($user)) {
       abort(403, 'Acesso não autorizado a este projeto.');
     }
 
@@ -123,7 +123,7 @@ class ProjectController extends Controller
   ): InertiaResponse {
     $user = Auth::user();
 
-    if (!$project->users()->where('users.id', $user->id)->exists()) {
+    if (!$project->hasMember($user)) {
       abort(403, 'Acesso não autorizado a este projeto.');
     }
 

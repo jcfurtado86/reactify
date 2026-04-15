@@ -40,8 +40,6 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import StatusBadge from '@/Components/StatusBadge'
-import { useJourneysAIStore } from '@/stores/useJourneysAIStore'
-import JourneysAIModal from './components/JourneysAIModal'
 
 const SortableJourneyStepItem = (props) => {
   const {
@@ -253,16 +251,6 @@ const Journeys = ({ project, setProject }) => {
   const [editingJourney, setEditingJourney] = useState(null)
   const [editJourneyName, setEditJourneyTitle] = useState('')
 
-  // Estado de UI do fluxo de geração via IA: movido para Zustand store
-  // (useJourneysAIStore) como piloto do padrão Q2+Q4 do plano de qualidade.
-  const isGeneratingAI = useJourneysAIStore((s) => s.isGenerating)
-  const generatedJourneys = useJourneysAIStore((s) => s.generated)
-  const startGenerating = useJourneysAIStore((s) => s.startGenerating)
-  const stopGenerating = useJourneysAIStore((s) => s.stopGenerating)
-  const setGeneratedAI = useJourneysAIStore((s) => s.setGenerated)
-  const markConfirmed = useJourneysAIStore((s) => s.markConfirmed)
-  const cancelGeneratedJourneys = useJourneysAIStore((s) => s.cancel)
-
   const { errors } = usePage().props
   const TITLE_MAX = 50;
 
@@ -314,11 +302,7 @@ const Journeys = ({ project, setProject }) => {
       handleReorderSteps(journeyId, reorderedSteps)
     }
   }
-  // Função para gerar journeys com IA.
-  // O estado de UI (loading / lista gerada / modal aberto) vive no
-  // useJourneysAIStore; aqui só orquestramos a chamada e os toasts.
   const generateJourneys = async () => {
-    startGenerating()
     try {
       const response = await axios.post(route('journey.generate'), {
         project_id: project.id,
@@ -334,63 +318,7 @@ const Journeys = ({ project, setProject }) => {
     } catch (error) {
       toast.error(t('journeys.toast_comm_error'))
       console.error('Erro ao gerar journeys:', error)
-    } finally {
-      stopGenerating()
     }
-  }
-
-  // Confirma as journeys selecionadas e persiste no backend.
-  const confirmGeneratedJourneys = () => {
-    const selectedJourneys = generatedJourneys.filter((j) => j.selected)
-
-    if (selectedJourneys.length === 0) {
-      toast.error(t('common.toast.select_at_least_one'))
-      return
-    }
-
-    // Optimistic update do estado do projeto
-    const journeysToAdd = selectedJourneys.map((journey) => {
-      const { selected, ...rest } = journey
-      return {
-        id: Date.now() + Math.random(),
-        created_at: new Date().toISOString(),
-        project_id: project.id,
-        ...rest,
-      }
-    })
-    const updatedProjectJourneys = project.journeys
-      ? [...project.journeys, ...journeysToAdd]
-      : [...journeysToAdd]
-    setProject({ ...project, journeys: updatedProjectJourneys })
-
-    // Payload limpo pro backend
-    const journeysForBackend = selectedJourneys.map(
-      ({ id, created_at, project_id, selected, ...rest }) => ({
-        ...rest,
-        steps: rest.steps.map((step) => ({
-          description: step.description,
-          is_touchpoint: step.is_touchpoint || false,
-        })),
-      }),
-    )
-
-    router.post(
-      route('journey.bulk-store'),
-      {
-        project_id: project.id,
-        journeys: journeysForBackend,
-      },
-      {
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-          markConfirmed()
-        },
-        onError: () => {
-          toast.error(t('journeys.toast_add_error'))
-        },
-      },
-    )
   }
 
   // Todas as funções existentes permanecem inalteradas
@@ -628,11 +556,6 @@ const Journeys = ({ project, setProject }) => {
 
   return (
     <div className="flex flex-col gap-4 p-4 w-full">
-      {/* AI Generated Journeys Modal — extraído para componente +
-          Zustand store (Q2/Q4 do plano de qualidade). */}
-      <JourneysAIModal colors={colors} onConfirm={confirmGeneratedJourneys} />
-
-
       {/* Journeys List */}
       {project.journeys && project.journeys.length > 0 ? (
         project.journeys
@@ -886,7 +809,6 @@ const Journeys = ({ project, setProject }) => {
             </Button>
             <GenerateAIButton
               type="journeys"
-              isGenerating={isGeneratingAI}
               onClick={generateJourneys}
               tooltip={tooltipInfo.aiGeneratedJourney}
               className="w-1/2"

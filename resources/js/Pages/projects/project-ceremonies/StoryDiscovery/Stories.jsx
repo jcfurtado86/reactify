@@ -7,8 +7,6 @@ import {
   X,
   Check,
   LoaderCircle,
-  ChevronsUp,
-  Minus,
   ChevronDown,
   BookText,
 } from 'lucide-react'
@@ -31,140 +29,6 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
-const GeneratedItemsModal = ({
-  isModalMinimized,
-  changeModalState,
-  cancelGeneratedItems,
-  generatedItems,
-  toggleItemSelection,
-  confirmGeneratedItems,
-  toggleAllItems,
-  systemColors,
-}) => {
-  const { t } = useTranslation()
-  const storyVariants = systemColors?.stories || {}
-  return (
-    <div
-      className={`
-          transition-all duration-300 z-50
-          ${
-            isModalMinimized
-              ? 'fixed bottom-4 right-4 w-[400px]'
-              : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
-          }
-        `}
-    >
-      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
-          <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized &&
-              t('ai_modal.ai_generated_title', {
-                artifact: t('stories.plural'),
-              })}
-            {isModalMinimized &&
-              t('ai_modal.ai_generated_title_minimized', {
-                artifact: t('stories.plural'),
-              })}
-          </h3>
-          <div className="flex items-center gap-2">
-            <Button onClick={changeModalState} size="icon" variant="secondary">
-              {isModalMinimized ? (
-                <ChevronsUp size={20} />
-              ) : (
-                <Minus size={20} />
-              )}
-            </Button>
-            <Button
-              onClick={cancelGeneratedItems}
-              size="icon"
-              variant="secondary"
-            >
-              <X size={24} />
-            </Button>
-          </div>
-        </div>
-
-        {!isModalMinimized && (
-          <>
-            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
-              <span className="text-foreground font-medium">
-                {t('ai_modal.selected_of', {
-                  count: generatedItems.filter((j) => j.selected).length,
-                  total: generatedItems.length,
-                })}
-              </span>
-              <Button
-                onClick={toggleAllItems}
-                className="px-3 py-1 bg-primary hover:bg-primary/90 text-foreground text-sm rounded transition-colors"
-              >
-                {generatedItems.every((story) => story.selected)
-                  ? t('common.deselect_all')
-                  : t('common.select_all')}
-              </Button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 min-h-0">
-              <div className="space-y-2 pb-4">
-                {generatedItems.map((story, index) => {
-                  const selectedVariant = storyVariants[story.type] || '#444'
-                  return (
-                    <div
-                      key={'temp-' + index}
-                      className={`rounded-lg p-3 border-2 transition-colors flex items-center gap-4 ${
-                        story.selected
-                          ? 'bg-muted border-primary'
-                          : 'bg-muted/50 border-border hover:border-muted-foreground'
-                      }`}
-                    >
-                      <label className="flex items-center justify-between cursor-pointer flex-1 gap-4">
-                        <div className="flex items-center gap-2 text-left">
-                          <Badge
-                            style={{
-                              backgroundColor: selectedVariant,
-                            }}
-                            variant="outline"
-                            className={`border-transparent text-foreground font-bold w-fit cursor-pointer`}
-                          >
-                            {story.type === 'system' ? 'SS' : 'US'}
-                          </Badge>
-                          <span className="text-sm text-foreground">
-                            {story.title}
-                          </span>
-                        </div>
-                        <Checkbox
-                          checked={story.selected}
-                          onCheckedChange={() => toggleItemSelection(index)}
-                        />
-                      </label>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-3 p-6 pt-4 border-t border-border flex-shrink-0">
-              <Button
-                onClick={cancelGeneratedItems}
-                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                onClick={confirmGeneratedItems}
-                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
-                disabled={generatedItems.filter((j) => j.selected).length === 0}
-              >
-                <Check className="mr-2" size={16} />
-                {t('common.confirm_and_add')} (
-                {generatedItems.filter((j) => j.selected).length})
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
 
 const StoryItem = ({
   story,
@@ -418,11 +282,6 @@ const Stories = ({ project, setProject }) => {
   const [editValue, setEditValue] = useState('')
   const textareaRef = useRef(null)
   const [typeSelectId, setTypeSelectId] = useState(null)
-  // ai states
-  const [aiGeneratedStories, setAiGeneratedStories] = useState([])
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [showAiModal, setShowAiModal] = useState(false)
-  const [isModalMinimized, setIsModalMinimized] = useState(false)
   //
   const { can } = usePermissions()
   const { errors } = usePage().props
@@ -599,7 +458,6 @@ const Stories = ({ project, setProject }) => {
 
   //ai functions
   const generateStories = async () => {
-    setIsGenerating(true)
     try {
       const response = await axios.post(route('story.generate'), {
         project_id: project.id,
@@ -617,105 +475,11 @@ const Stories = ({ project, setProject }) => {
       toast.error(
         error.response?.data?.message || t('ai_errors.server_error'),
       )
-    } finally {
-      setIsGenerating(false)
     }
-  }
-
-  const toggleStorySelection = (index) => {
-    setAiGeneratedStories((prev) =>
-      prev.map((story, i) =>
-        i === index ? { ...story, selected: !story.selected } : story,
-      ),
-    )
-  }
-
-  const toggleAllStories = () => {
-    const allSelected = aiGeneratedStories.every((story) => story.selected)
-    setAiGeneratedStories((prev) =>
-      prev.map((story) => ({ ...story, selected: !allSelected })),
-    )
-  }
-
-  const confirmGeneratedStories = () => {
-    const selectedStories = aiGeneratedStories.filter((story) => story.selected)
-    const remainingStories = aiGeneratedStories.filter(
-      (story) => !story.selected,
-    )
-
-    if (selectedStories.length === 0) {
-      toast.error(t('common.select_at_least_one'))
-      return
-    }
-
-    const storiesToAdd = selectedStories.map((story) => ({
-      id: `temp-${Date.now()}-${Math.random()}`,
-      created_at: new Date().toISOString(),
-      project_id: project.id,
-      ...story,
-    }))
-
-    setProject((prevProject) => ({
-      ...prevProject,
-      stories: [...(prevProject.stories || []), ...storiesToAdd],
-    }))
-
-    const storiesForBackend = selectedStories.map(({ title, type }) => ({
-      title,
-      type,
-      project_id: project.id,
-    }))
-
-    router.post(
-      route('story.bulk-store'),
-      { stories: storiesForBackend },
-      {
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-          setAiGeneratedStories(remainingStories)
-          if (remainingStories.length === 0) {
-            setShowAiModal(false)
-            setIsModalMinimized(false)
-          }
-        },
-        onError: (errors) => {
-          toast.error(t('common.error'))
-          console.error('Erro do backend:', errors)
-          setProject((prevProject) => {
-            const storiesToAddIds = storiesToAdd.map((s) => s.id)
-            return {
-              ...prevProject,
-              stories: prevProject.stories.filter(
-                (s) => !storiesToAddIds.includes(s.id),
-              ),
-            }
-          })
-        },
-      },
-    )
-  }
-
-  const cancelGeneratedStories = () => {
-    setShowAiModal(false)
-    setAiGeneratedStories([])
-    setIsModalMinimized(false)
   }
 
   return (
     <div className="stories rounded grid grid-cols-2 gap-2 w-full p-4 cursor-pointer items-start">
-      {showAiModal && (
-        <GeneratedItemsModal
-          isModalMinimized={isModalMinimized}
-          changeModalState={() => setIsModalMinimized(!isModalMinimized)}
-          cancelGeneratedItems={cancelGeneratedStories}
-          generatedItems={aiGeneratedStories}
-          toggleItemSelection={toggleStorySelection}
-          confirmGeneratedItems={confirmGeneratedStories}
-          toggleAllItems={toggleAllStories}
-          systemColors={project?.system_colors}
-        />
-      )}
       {inspectionId && can('userStory.manage') && (
         <InvestCard
           itemCategory={'stories'}
@@ -799,7 +563,6 @@ const Stories = ({ project, setProject }) => {
             </Button>
             <GenerateAIButton
               type="stories"
-              isGenerating={isGenerating}
               onClick={generateStories}
               tooltip={tooltipInfo.aiGeneratedStory}
               className="w-1/2"

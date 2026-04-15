@@ -1,6 +1,6 @@
 import { useForm, router } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
-import { Minus, Check, X, ChevronsUp, Network } from 'lucide-react'
+import { Network } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import { toast } from 'sonner'
@@ -14,174 +14,12 @@ import { cn } from '@/lib/utils'
  * @param {{ project: object }} props
  */
 
-const GeneratedItemsModal = ({
-  allClassModels,
-  isModalMinimized,
-  changeModalState,
-  cancelGeneratedItems,
-  generatedItems,
-  toggleItemSelection,
-  confirmGeneratedItems,
-  toggleAllItems,
-}) => {
-  const { t } = useTranslation()
-  const formatType = (type) => {
-    if (!type) return 'Não definido'
-    return type.charAt(0).toUpperCase() + type.slice(1)
-  }
-
-  return (
-    <div
-      className={`
-            transition-all duration-300 z-50
-            ${
-              isModalMinimized
-                ? 'fixed bottom-4 right-4 w-[400px]'
-                : 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'
-            }
-          `}
-    >
-      <div className="bg-card rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between p-3 flex-shrink-0">
-          <h3 className="text-xl font-bold text-foreground flex items-center">
-            {!isModalMinimized && 'Interfaces por IA'}
-            {isModalMinimized && 'Interfaces Geradas'}
-          </h3>
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="secondary" onClick={changeModalState}>
-              {isModalMinimized ? (
-                <ChevronsUp size={20} />
-              ) : (
-                <Minus size={20} />
-              )}
-            </Button>
-            <Button
-              onClick={cancelGeneratedItems}
-              size="icon"
-              variant="secondary"
-            >
-              <X size={24} />
-            </Button>
-          </div>
-        </div>
-
-        {!isModalMinimized && (
-          <>
-            <div className="flex items-center justify-between mx-6 mb-4 p-3 bg-muted rounded-lg flex-shrink-0">
-              <span className="text-foreground font-medium">
-                {t('ai_modal.selected_of', {
-                  count: generatedItems.filter((item) => item.selected).length,
-                  total: generatedItems.length,
-                })}
-              </span>
-              <Button
-                onClick={toggleAllItems}
-                className="px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm rounded transition-colors"
-              >
-                {generatedItems.every((item) => item.selected)
-                  ? t('common.deselect_all')
-                  : t('common.select_all')}
-              </Button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 min-h-0">
-              <div className="space-y-2 pb-4">
-                {generatedItems.map((item, index) => {
-                  const relatedIds = item.overall_model_class_ids || []
-                  const idsToString =
-                    relatedIds.length > 0 ? `C${relatedIds.join('-C')}` : ''
-                  // Busca os dados completos das classes relacionadas usando a lista `allClassModels`
-                  const relatedClasses = relatedIds
-                    .map((id) =>
-                      allClassModels.find((model) => model.id === id),
-                    )
-                    .filter(Boolean) // .filter(Boolean) remove quaisquer resultados nulos se um ID não for encontrado
-
-                  return (
-                    <div
-                      key={item.id}
-                      className={`rounded-lg p-3 border-2 transition-colors ${
-                        item.selected
-                          ? 'bg-muted border-primary'
-                          : 'bg-muted/50 border-border hover:border-muted-foreground'
-                      }`}
-                    >
-                      {/* 1. CABEÇALHO DO CARD (imita o estilo da sua lista de 'story') */}
-                      <label className="flex items-center justify-between cursor-pointer flex-1 gap-4 ">
-                        {/* 2. DIVISÓRIA E CORPO DO CARD (sempre visível) */}
-                        <section className="grid grid-cols-2 gap-3 w-full">
-                          <div className="w-full col-span-2 border-b border-border text-lg text-foreground font-semibold text-left">
-                            {item.title}
-                          </div>
-                          <div className="grid gap-1 text-left text-muted-foreground text-sm">
-                            <p className="">{t('common.type')}: {formatType(item.type)}</p>
-                            <p className="">{t('system_interfaces.input')}: {item.input}</p>
-                            <p className="">{t('system_interfaces.output')}: {item.output}</p>
-                            <p className="text-muted-foreground">
-                              {t('system_interfaces.related_classes')}:
-                            </p>
-                          </div>
-                          <div className="grid gap-1 w-full text-left text-muted-foreground text-sm">
-                            {relatedClasses.map((classData) => (
-                              <div
-                                key={classData.id}
-                                className="border p-3 rounded-lg bg-muted/50 flex items-center"
-                              >
-                                <h4 className="font-semibold text-sm">
-                                  {/* Usando a propriedade 'name' como no seu código anterior */}
-                                  {classData.id}: {classData.name}
-                                </h4>
-                              </div>
-                            ))}
-                          </div>
-                        </section>
-                        <Checkbox
-                          checked={item.selected}
-                          onCheckedChange={() => toggleItemSelection(index)}
-                        />
-                      </label>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 p-6 pt-4 border-t border-border flex-shrink-0">
-              <Button
-                onClick={cancelGeneratedItems}
-                className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg transition-colors"
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                onClick={confirmGeneratedItems}
-                className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center"
-                disabled={generatedItems.filter((j) => j.selected).length === 0}
-              >
-                <Check className="mr-2" size={16} />
-                {t('ai_modal.confirm_add_count', {
-                  count: generatedItems.filter((j) => j.selected).length,
-                })}
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
-
 const Interfaces = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
   // A lista de todas as classes disponíveis para o formulário.
   const allClassModels = project.overall_model_classes || []
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  //ia states
-  const [aiGeneratedInterfaces, setAiGeneratedInterfaces] = useState([])
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [showAiModal, setShowAiModal] = useState(false)
-  const [isModalMinimized, setIsModalMinimized] = useState(false)
 
   const MAX_LIMIT = 50
   const internalInterfaces =
@@ -389,7 +227,6 @@ const Interfaces = ({ project, setProject }) => {
   }
 
   const generateInterfaces = async () => {
-    setIsGenerating(true)
     try {
       const response = await axios.post(route('system-interface.generate'), {
         project_id: project.id,
@@ -407,100 +244,12 @@ const Interfaces = ({ project, setProject }) => {
       toast.error(
         error.response?.data?.message || t('ai_errors.server_error'),
       )
-    } finally {
-      setIsGenerating(false)
     }
-  }
-
-  const confirmGeneratedInterfaces = () => {
-    const selectedInterfaces = aiGeneratedInterfaces.filter(
-      (item) => item.selected,
-    )
-    const remainingInterfaces = aiGeneratedInterfaces.filter(
-      (item) => !item.selected,
-    )
-
-    if (selectedInterfaces.length === 0) {
-      toast.error(t('common.select_at_least_one'))
-      return
-    }
-
-    const interfacesForBackend = selectedInterfaces.map(
-      ({ title, input, output, type, overall_model_class_ids }) => ({
-        title,
-        input,
-        output,
-        type,
-        project_id: project.id, // Adiciona o project_id
-        overall_model_class_ids,
-      }),
-    )
-
-    router.post(
-      route('system-interface.bulk-store'),
-      { system_interfaces: interfacesForBackend },
-      {
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-          toast.success(
-            `${selectedInterfaces.length} interface(s) adicionada(s) com sucesso!`,
-          )
-          setAiGeneratedInterfaces(remainingInterfaces)
-
-          if (remainingInterfaces.length === 0) {
-            setShowAiModal(false)
-            setIsModalMinimized(false)
-          }
-        },
-        onError: (errors) => {
-          toast.error(t('common.error'))
-          console.error('Erro do backend:', errors)
-        },
-      },
-    )
-  }
-
-  const cancelGeneratedInterfaces = () => {
-    setShowAiModal(false)
-    setAiGeneratedInterfaces([])
-    setIsModalMinimized(false)
-  }
-
-  const toggleInterfaceSelection = (index) => {
-    setAiGeneratedInterfaces((prev) =>
-      prev.map((ai_interface, i) =>
-        i === index
-          ? { ...ai_interface, selected: !ai_interface.selected }
-          : ai_interface,
-      ),
-    )
-  }
-
-  const toggleAllInterfaces = () => {
-    const allSelected = aiGeneratedInterfaces.every(
-      (ai_interface) => ai_interface.selected,
-    )
-    setAiGeneratedInterfaces((prev) =>
-      prev.map((ai_interface) => ({ ...ai_interface, selected: !allSelected })),
-    )
   }
 
   return (
     <div className="p-4 flex flex-col gap-2">
       <div className="mx-auto gap-2">
-        {showAiModal && (
-          <GeneratedItemsModal
-            allClassModels={allClassModels}
-            isModalMinimized={isModalMinimized}
-            changeModalState={() => setIsModalMinimized(!isModalMinimized)}
-            cancelGeneratedItems={cancelGeneratedInterfaces}
-            generatedItems={aiGeneratedInterfaces}
-            toggleItemSelection={toggleInterfaceSelection}
-            confirmGeneratedItems={confirmGeneratedInterfaces}
-            toggleAllItems={toggleAllInterfaces}
-          />
-        )}
         {/* dialog for adding interface*/}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <Button variant="secondary" onClick={handleOpenForCreate}>
@@ -753,7 +502,6 @@ const Interfaces = ({ project, setProject }) => {
       </div>
       <GenerateAIButton
         type="system_interfaces"
-        isGenerating={isGenerating}
         onClick={generateInterfaces}
         tooltip={tooltipInfo.aiGeneratedInterface}
         className="md:col-span-2 w-1/2"
