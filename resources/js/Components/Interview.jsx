@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { router } from '@inertiajs/react'
+import { useEcho } from '@laravel/echo-react'
 import {
   UploadCloud,
   FileText,
@@ -268,6 +269,13 @@ const InterviewUploadCard = ({
   const fileInputRef = useRef(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedInterview, setSelectedInterview] = useState(null)
+
+  // Escuta atualizações do projeto (disparadas pelo TranscribeInterviewJob
+  // e pelo retry) e recarrega só a prop 'project' pra refletir o novo
+  // extraction_status sem F5 do usuário.
+  useEcho(`project.${projectId}`, 'ProjectUpdated', () => {
+    router.reload({ only: ['project'], preserveScroll: true })
+  })
 
   const validateFile = (file) => {
     const allowedTypes = ['pdf', 'mp3', 'mp4']

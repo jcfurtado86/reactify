@@ -61,7 +61,7 @@ class Project extends Model
 
   public function interviews(): HasMany
   {
-    return $this->hasMany(Interview::class);
+    return $this->hasMany(Interview::class)->orderBy('id', 'asc');
   }
 
   public function business_rules(): HasMany

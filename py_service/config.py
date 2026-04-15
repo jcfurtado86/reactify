@@ -30,6 +30,19 @@ class Config:
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY", "")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
+    # --- Transcrição (áudio/vídeo) ---
+    TRANSCRIBER_PROVIDER = os.getenv("TRANSCRIBER_PROVIDER", "local")
+    WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL_SIZE", "base")
+    WHISPER_COMPUTE_TYPE = os.getenv("WHISPER_COMPUTE_TYPE", "int8")
+    WHISPER_MODEL_DIR = os.getenv("WHISPER_MODEL_DIR", "./.whisper_models")
+    WHISPER_LANGUAGE = os.getenv("WHISPER_LANGUAGE", "pt")
+
+    # --- Pós-processamento (cleanup via LLM) ---
+    POSTPROCESSOR_PROVIDER = os.getenv("POSTPROCESSOR_PROVIDER", "qwen_ollama")
+    POSTPROCESSOR_MODEL = os.getenv("POSTPROCESSOR_MODEL", "qwen3:14b")
+    POSTPROCESSOR_THINK = _bool_env("POSTPROCESSOR_THINK", False)
+    POSTPROCESSOR_TIMEOUT = int(os.getenv("POSTPROCESSOR_TIMEOUT", "600"))
+
     # --- Embeddings / RAG ---
     EMBEDDINGS_SPEC = os.getenv("EMBEDDINGS_SPEC", "openai:text-embedding-3-small")
     PGVECTOR_COLLECTION = os.getenv("PGVECTOR_COLLECTION", "react")

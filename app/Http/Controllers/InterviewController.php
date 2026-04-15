@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Cloudinary\Api\Exception\NotFound;
 use Log;
 use App\Jobs\TranscribeInterviewJob; // Importa o novo Job
+use App\Events\ProjectUpdated;
 
 class InterviewController extends Controller
 {
@@ -62,6 +63,7 @@ class InterviewController extends Controller
     public function retry(Interview $interview)
     {
         $interview->update(['extraction_status' => 'processing']);
+        broadcast(new ProjectUpdated($interview->project));
         TranscribeInterviewJob::dispatch($interview);
         return back()->with(['status' => 'success', 'message' => 'Extração reiniciada.']);
     }

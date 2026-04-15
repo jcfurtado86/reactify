@@ -17,6 +17,7 @@ class Interview extends Model
         'public_id',
         'extraction_status',
         'transcript',
+        'transcript_raw',
         'resource_type',
     ];
 

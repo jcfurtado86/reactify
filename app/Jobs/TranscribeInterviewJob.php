@@ -16,8 +16,9 @@ class TranscribeInterviewJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    // Aumenta o tempo máximo que o job pode rodar para 5 minutos (300 segundos)
-    public $timeout = 1800;
+    // 1h de orçamento: cobre whisper local + cleanup Qwen3:14b em CPU
+    // mesmo pra entrevistas grandes (30+ min de áudio / 50+ páginas de PDF).
+    public $timeout = 3600;
 
     protected $interview;
 
@@ -38,9 +39,9 @@ class TranscribeInterviewJob implements ShouldQueue
                 ]);
 
             if ($response->successful()) {
-                $transcript = $response->json('transcript');
                 $this->interview->update([
-                    'transcript' => $transcript,
+                    'transcript_raw' => $response->json('transcript_raw'),
+                    'transcript' => $response->json('transcript'),
                     'extraction_status' => 'completed'
                 ]);
             } else {
@@ -50,10 +51,12 @@ class TranscribeInterviewJob implements ShouldQueue
         } catch (\Exception $e) {
             Log::error('Falha no job de transcrição: ' . $e->getMessage());
             $this->interview->update(['extraction_status' => 'failed']);
+            broadcast(new ProjectUpdated($this->interview->project));
             $this->fail($e); // Marca o job como falho
             return;
         }
-        
+
+        broadcast(new ProjectUpdated($this->interview->project));
         Log::info("Job concluído para a entrevista ID: {$this->interview->id}.");
     }
 }
