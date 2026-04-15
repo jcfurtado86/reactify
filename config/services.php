@@ -51,4 +51,9 @@ return [
         'url' => env('PYTHON_CHAT_SERVICE_URL', 'http://127.0.0.1:5002/chat-stream'),
         'api_key' => env('PYTHON_SERVICE_API_KEY'),
     ],
+  'artifact_llm' => [
+    'provider' => env('ARTIFACT_LLM_PROVIDER', 'ollama'),
+    'ollama_model' => env('ARTIFACT_LLM_OLLAMA_MODEL', 'qwen3:8b'),
+    'ollama_think' => filter_var(env('ARTIFACT_LLM_OLLAMA_THINK', false), FILTER_VALIDATE_BOOLEAN),
+  ],
 ];

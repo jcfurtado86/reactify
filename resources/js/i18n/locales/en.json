@@ -462,7 +462,9 @@
     "confirm_delete_action": "Yes, delete",
     "confirm_delete_item_title": "Delete this item?",
     "confirm_delete_item_body": "This action cannot be undone.",
-    "toast_added": "Persona added"
+    "toast_added": "Persona added",
+    "click_to_add": "Click edit to add",
+    "default_name": "New Persona"
   },
   "journeys": {
     "singular": "Journey",
@@ -924,6 +926,39 @@
       "success": "{{count}} suggestions generated. Review and confirm.",
       "error": "AI generation failed. Please try again.",
       "unexpected": "Unexpected server response"
+    },
+    "generation_queued": "Generation queued. It will appear on screen when ready.",
+    "confirm": {
+      "title": "Generate with AI?",
+      "description": "Generation takes a few minutes. You can watch progress on the badge counter.",
+      "action": "Generate"
     }
+  },
+  "generation_status": {
+    "title": "Generating with AI",
+    "fab_title": "AI generations in progress",
+    "generating": "Generating",
+    "already_running": "This artifact is already being generated. Please wait.",
+    "hint": "Feel free to navigate. Artifacts will appear automatically when ready.",
+    "types": {
+      "personas": "Personas",
+      "goals": "Goals",
+      "journeys": "Journeys",
+      "stories": "Stories",
+      "epic_stories": "Epic Stories",
+      "business_rules": "Business Rules",
+      "usage_scenarios": "Usage Scenarios",
+      "system_interfaces": "System Interfaces",
+      "overall_model": "Overall Model",
+      "product_canvas": "Product Canvas"
+    }
+  },
+  "ai_review": {
+    "badge_label": "AI",
+    "badge_tooltip": "AI-generated, review before approving",
+    "approve": "Approve",
+    "discard": "Discard",
+    "approved": "Approved",
+    "error": "Failed to approve"
   }
 }

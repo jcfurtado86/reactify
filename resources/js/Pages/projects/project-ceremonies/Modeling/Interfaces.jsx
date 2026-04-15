@@ -2,6 +2,7 @@ import { useForm, router } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
 import { Minus, Check, X, ChevronsUp, Network } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
@@ -343,7 +344,14 @@ const Interfaces = ({ project, setProject }) => {
           className="cursor-pointer"
           onClick={() => onClick(data)}
         >
-          <h4 className="font-bold text-sm mb-2">{data.title}</h4>
+          <div className="flex items-start gap-2 mb-2">
+            <h4 className="font-bold text-sm flex-1 m-0">{data.title}</h4>
+            <AiGeneratedBadge
+              item={data}
+              type="system_interfaces"
+              onDiscard={() => onDelete(data)}
+            />
+          </div>
           <p>
             <span className="font-bold text-sm">{t('system_interfaces.input')}: </span>
             <span className="text-sm text-muted-foreground">{data.input}</span>
@@ -400,41 +408,22 @@ const Interfaces = ({ project, setProject }) => {
 
   const generateInterfaces = async () => {
     setIsGenerating(true)
-    setIsModalMinimized(false)
-
     try {
       const response = await axios.post(route('system-interface.generate'), {
         project_id: project.id,
       })
-
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        const interfacesWithSelection = data.system_interfaces.map((item) => ({
-          ...item,
-          selected: true,
-        }))
-
-        if (interfacesWithSelection.length === 0) {
-          toast.info(t('system_interfaces.empty'))
-          return
-        }
-
-        setAiGeneratedInterfaces(interfacesWithSelection)
-        setShowAiModal(true)
-        toast.success(
-          `${interfacesWithSelection.length} interface(s) foram sugeridas.`,
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
         )
-      } else {
-        toast[data.status]
-          ? toast[data.status](data.message)
-          : toast.error(data.message)
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar interfaces:', error)
       toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
+        error.response?.data?.message || t('ai_errors.server_error'),
       )
     } finally {
       setIsGenerating(false)
@@ -793,6 +782,7 @@ const Interfaces = ({ project, setProject }) => {
         </section>
       </div>
       <GenerateAIButton
+        type="system_interfaces"
         isGenerating={isGenerating}
         onClick={generateInterfaces}
         tooltip={tooltipInfo.aiGeneratedInterface}

@@ -14,6 +14,7 @@ import {
   ChevronsUp,
 } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import TextareaAutosize from 'react-textarea-autosize'
@@ -419,37 +420,17 @@ const MainView = ({ project = {}, setProject }) => {
 
   const generateProductCanvas = async () => {
     setIsGenerating(true)
-    setIsModalMinimized(false)
-
     try {
       const response = await axios.post(route('product-canvas.generate'), {
         project_id: project.id,
       })
-
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        const productCanvasWithSelection = data.product_canvas.map(
-          (canvas) => ({
-            ...canvas,
-            selected: true,
-          }),
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
         )
-
-        if (productCanvasWithSelection.length === 0) {
-          toast.info(t('product_canvas.empty'))
-          return
-        }
-
-        setAiGeneratedProductCanvas(productCanvasWithSelection)
-        setShowAiModal(true)
-        toast.success(t('product_canvas.toast_generated'))
-      } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(data.message || t('ai_errors.unexpected'))
-        }
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar Product Canvas:', error)
@@ -534,6 +515,41 @@ const MainView = ({ project = {}, setProject }) => {
 
   return (
     <div className="w-full text-foreground p-4">
+      {project?.product_canvas?.is_ai_generated && (
+        <div className="flex items-center justify-end mb-2">
+          <AiGeneratedBadge
+            item={project.product_canvas}
+            type="product_canvas"
+            onDiscard={() => {
+              // Singleton: descartar = limpar todos os 6 campos de uma vez.
+              // Tem que ser UM PATCH só, porque Inertia router cancela
+              // requests concorrentes (forEach paralelo só salva a última).
+              const cleared = {
+                issues: '',
+                solutions: '',
+                personas: '',
+                restrictions: '',
+                product_is: '',
+                product_is_not: '',
+                is_ai_generated: false,
+              }
+              router.patch(
+                route('product-canvas.update', project.product_canvas.id),
+                cleared,
+                {
+                  preserveScroll: true,
+                  onSuccess: () => {
+                    setProject((prev) => ({
+                      ...prev,
+                      product_canvas: { ...prev.product_canvas, ...cleared },
+                    }))
+                  },
+                },
+              )
+            }}
+          />
+        </div>
+      )}
       {showAiModal && (
         <GeneratedItemsModal
           isModalMinimized={isModalMinimized}
@@ -626,6 +642,7 @@ const MainView = ({ project = {}, setProject }) => {
       </div>
       {can('productCanvas.manage') && (
         <GenerateAIButton
+          type="product_canvas"
           isGenerating={isGenerating}
           onClick={generateProductCanvas}
           tooltip={tooltipInfo.aiGeneratedProductCanvas}

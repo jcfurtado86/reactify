@@ -15,6 +15,7 @@ import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { router } from '@inertiajs/react'
 import { isTemporary, useGroupedStories } from '@/lib/utils'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import { usePage } from '@inertiajs/react' 
 import { cn } from '@/lib/utils' 
@@ -335,9 +336,16 @@ const EpicStoryCard = ({
               </div>
             </div>
           ) : (
-            <p className="text-sm w-full min-h-[32px] flex items-center justify-start break-words whitespace-pre-wrap">
-              {epicStory.title}
-            </p>
+            <div className="flex items-start gap-2 w-full min-h-[32px]">
+              <p className="text-sm flex-1 flex items-center justify-start break-words whitespace-pre-wrap m-0">
+                {epicStory.title}
+              </p>
+              <AiGeneratedBadge
+                item={epicStory}
+                type="stories"
+                onDiscard={handleDelete}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -392,49 +400,22 @@ const EpicStories = ({ project, setProject }) => {
   // ai functions
   const generateEpicStories = async () => {
     setIsGenerating(true)
-    setIsModalMinimized(false)
-
     try {
       const response = await axios.post(route('epic-story.generate'), {
         project_id: project.id,
       })
-
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        const epicStoriesWithSelection = data.decomposed_epics.flatMap((epic) =>
-          epic.new_stories.map((newStory, index) => ({
-            ...newStory,
-            story_id: epic.original_epic_id,
-            selected: true,
-            new_epic_identifier: `${epic.original_epic_id}.${index + 1}`,
-          })),
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
         )
-
-        if (epicStoriesWithSelection.length === 0) {
-          toast.info(t('ai.toast.empty'))
-          return
-        }
-
-        setAiGeneratedEpicStories(epicStoriesWithSelection)
-        setShowAiModal(true)
-        toast.success(
-          `${epicStoriesWithSelection.length} estórias menores foram sugeridas.`,
-        )
-      } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
-        }
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar epic stories:', error)
       toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
+        error.response?.data?.message || t('ai_errors.server_error'),
       )
     } finally {
       setIsGenerating(false)
@@ -600,6 +581,7 @@ const EpicStories = ({ project, setProject }) => {
         })}
 
       <GenerateAIButton
+        type="epic_stories"
         isGenerating={isGenerating}
         onClick={generateEpicStories}
         tooltip={tooltipInfo.aiGeneratedEpic}

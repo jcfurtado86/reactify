@@ -60,4 +60,11 @@ interface BatchedGeneratorStrategy
      * Recebe um item gerado e o item original que o gerou.
      */
     public function enrichGeneratedItem(array $generated, mixed $sourceItem, Project $project, array $validated): array;
+
+    /**
+     * Persiste as rows agregadas pela IA diretamente nas tabelas do
+     * artefato, com `is_ai_generated = true`. Recebe o resultado já
+     * agregado no formato `[aggregateResponseKey() => [...itens]]`.
+     */
+    public function persistGenerated(array $parsed, Project $project, array $validated): void;
 }

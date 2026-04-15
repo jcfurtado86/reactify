@@ -16,6 +16,7 @@ class CrcCard extends Model
     'responsabilities',
     'project_id',
     'invest_card',
+    'is_ai_generated',
   ];
 
   protected $casts = [

@@ -71,6 +71,14 @@ interface GeneratorStrategy
     public function postProcess(array $parsed, Project $project, array $validated): array;
 
     /**
+     * Persiste as rows geradas pela IA diretamente nas tabelas do
+     * artefato, com `is_ai_generated = true`. Chamado pelo
+     * AbstractLlmGeneratorService::runAndPersist() depois do parse +
+     * postProcess. O usuário revisa/aprova depois via UI.
+     */
+    public function persistGenerated(array $parsed, Project $project, array $validated): void;
+
+    /**
      * Rótulo curto usado em logs ("Personas", "Stories"...).
      */
     public function label(): string;

@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
 import StatusBadge from '@/Components/StatusBadge'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import { usePage } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
 /**
@@ -546,6 +547,11 @@ const ScenarioCard = ({
                   {`US${isTemporary(scenario.id) ? '' : scenario.id}`.toUpperCase()}
                 </Badge>
                 <StatusBadge status={status} />
+                <AiGeneratedBadge
+                  item={scenario}
+                  type="usage_scenarios"
+                  onDiscard={handleDelete}
+                />
                 <span className="font-bold text-sm">{scenario.title}</span>
               </div>
               <ul className="space-y-2 text-sm font-normal text-left mt-3 pl-1">
@@ -665,44 +671,22 @@ const UsageScenarios = ({ project, setProject }) => {
 
   const generateUsageScenarios = async () => {
     setIsGenerating(true)
-    setIsModalMinimized(false)
-
     try {
       const response = await axios.post(route('usage-scenario.generate'), {
         project_id: project.id,
       })
-
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        const usageScenariosWithSelection = data.usage_scenarios.map(
-          (scenario) => ({ ...scenario, selected: true }),
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
         )
-
-        if (usageScenariosWithSelection.length === 0) {
-          toast.info(t('ai.toast.empty'))
-          return
-        }
-
-        setAiGeneratedUsageScenarios(usageScenariosWithSelection)
-        setShowAiModal(true)
-        toast.success(
-          `${usageScenariosWithSelection.length} cenários de uso foram sugeridos.`,
-        )
-      } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
-        }
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar cenários de uso:', error)
       toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
+        error.response?.data?.message || t('ai_errors.server_error'),
       )
     } finally {
       setIsGenerating(false)
@@ -892,6 +876,7 @@ const UsageScenarios = ({ project, setProject }) => {
           )
         })}
       <GenerateAIButton
+        type="usage_scenarios"
         isGenerating={isGenerating}
         onClick={generateUsageScenarios}
         tooltip={tooltipInfo.aiGeneratedUsageScenario}

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import { Plus, StickyNote } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import InvestCard from '../Inspection/InvestCard'
 import { useTooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
@@ -268,6 +269,11 @@ const CRCCard = ({
           <>
             <h3 className="text-lg font-semibold">{card.class}</h3>
             <span className="text-sm font-bold ">{card.id}</span>
+            <AiGeneratedBadge
+              item={card}
+              type="crc_cards"
+              onDiscard={() => confirmDeleteCard(card.id)}
+            />
             <MotionDivOptions
               isHovered={isHeaderHovered}
               onEdit={() => startEditTitle(card)}
@@ -538,24 +544,13 @@ const OverallModel = ({ project, setProject }) => {
       const response = await axios.post(route('overall-model.generate'), {
         project_id: project.id,
       })
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        if (!data.crc_cards || data.crc_cards.length === 0) {
-          toast.info(t('ai.toast.empty'))
-          return
-        }
-        setGeneratedAI({
-          cards: data.crc_cards,
-          classes: data.overall_model_classes,
-        })
-        toast.success(
-          t('overall_model.toast_generated', { count: data.crc_cards.length }),
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
         )
-      } else if (data.status === 'warning') {
-        toast.warning(data.message)
-      } else {
-        toast.error(data.message || t('ai.toast.unexpected'))
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       toastApiError(error, 'ai.toast.error')
@@ -790,6 +785,7 @@ const OverallModel = ({ project, setProject }) => {
         </AlertDialogContent>
       </AlertDialog>
       <GenerateAIButton
+        type="overall_model"
         isGenerating={isGenerating}
         onClick={generateCRCCards}
         tooltip={tooltipInfo.aiGeneratedOverallModel}

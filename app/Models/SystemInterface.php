@@ -15,6 +15,7 @@ class SystemInterface extends Model
     'overall_model_class_id',
     'project_id',
     'invest_card',
+    'is_ai_generated',
   ];
 
   protected $casts = [

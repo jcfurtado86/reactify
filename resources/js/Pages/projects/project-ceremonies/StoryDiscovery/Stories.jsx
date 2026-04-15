@@ -30,6 +30,7 @@ import { useTooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 const GeneratedItemsModal = ({
   isModalMinimized,
   changeModalState,
@@ -315,6 +316,11 @@ const StoryItem = ({
                 </Badge>
               )}
               <StatusBadge status={status} />
+              <AiGeneratedBadge
+                item={story}
+                type="stories"
+                onDiscard={() => onDelete(story.id)}
+              />
               <div className="flex items-center gap-1">
                 {isTemporary(story.id) && (
                   <LoaderCircle className="text-primary animate-spin size-5" />
@@ -531,36 +537,17 @@ const Stories = ({ project, setProject }) => {
   //ai functions
   const generateStories = async () => {
     setIsGenerating(true)
-    setIsModalMinimized(false)
-
     try {
       const response = await axios.post(route('story.generate'), {
         project_id: project.id,
       })
-
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        const storiesWithSelection = data.message.stories.map((story) => ({
-          ...story,
-          selected: true,
-        }))
-
-        if (storiesWithSelection.length === 0) {
-          toast.info(t('ai.toast.empty'))
-          setIsGenerating(false)
-          return
-        }
-
-        setAiGeneratedStories(storiesWithSelection)
-        setShowAiModal(true)
-        toast.success(t('stories.toast_generated'))
-      } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(data.message || t('ai_errors.unexpected'))
-        }
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
+        )
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar stories:', error)
@@ -795,6 +782,7 @@ const Stories = ({ project, setProject }) => {
               <span>{t('stories.new_system_story')}</span>
             </Button>
             <GenerateAIButton
+              type="stories"
               isGenerating={isGenerating}
               onClick={generateStories}
               tooltip={tooltipInfo.aiGeneratedStory}

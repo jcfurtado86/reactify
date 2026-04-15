@@ -20,6 +20,7 @@ class UsageScenario extends Model
     'project_id',
     'description',
     'invest_card',
+    'is_ai_generated',
   ];
   /**
    * The attributes that should be cast.

@@ -6,11 +6,11 @@ use App\Models\Goal;
 use App\Models\Interview;
 use App\Models\Project;
 use App\Services\AI\GeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class GoalStrategy implements GeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Goals'; }
@@ -95,5 +95,18 @@ class GoalStrategy implements GeneratorStrategy
     public function postProcess(array $parsed, Project $project, array $validated): array
     {
         return $parsed;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        foreach ($parsed['goals'] ?? [] as $goalData) {
+            Goal::create([
+                'project_id' => $project->id,
+                'title' => $goalData['title'] ?? '',
+                'type' => $goalData['type'] ?? 'bg',
+                'priority' => $goalData['priority'] ?? 'medium',
+                'is_ai_generated' => true,
+            ]);
+        }
     }
 }

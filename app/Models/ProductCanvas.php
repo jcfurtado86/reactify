@@ -16,7 +16,8 @@ class ProductCanvas extends Model
     'restrictions',
     'product_is',
     'product_is_not',
-    'project_id'
+    'project_id',
+    'is_ai_generated',
   ];
 
   protected $table = 'product_canvas';

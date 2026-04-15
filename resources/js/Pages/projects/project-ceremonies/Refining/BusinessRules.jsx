@@ -19,6 +19,7 @@ import InvestCard from '../Inspection/InvestCard'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import StatusBadge from '@/Components/StatusBadge'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import { usePage } from '@inertiajs/react' 
 import { cn } from '@/lib/utils'
 /**
@@ -317,6 +318,11 @@ const BusinessRuleCard = ({
             }`.toUpperCase()}
           </Badge>
           <StatusBadge status={status} />
+          <AiGeneratedBadge
+            item={businessRule}
+            type="business_rules"
+            onDiscard={handleDelete}
+          />
           {/* 🎨 RENDERIZAÇÃO CONDICIONAL: MODO DE EDIÇÃO OU VISUALIZAÇÃO */}
           {isEditing ? (
             <div className="w-full flex flex-col items-center gap-2">
@@ -427,47 +433,22 @@ const BusinessRules = ({ project, setProject }) => {
 
   const generateBusinessRules = async () => {
     setIsGenerating(true)
-    setIsModalMinimized(false)
-
     try {
       const response = await axios.post(route('business-rule.generate'), {
         project_id: project.id,
       })
-
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        const businessRulesWithSelection = data.business_rules.map(
-          (business_rule) => ({
-            ...business_rule,
-            selected: true,
-          }),
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
         )
-
-        if (businessRulesWithSelection.length === 0) {
-          toast.info(
-            'A IA não gerou novas Regras de Negócio com base nas estórias.',
-          )
-          return
-        }
-
-        setAiGeneratedBusinessRules(businessRulesWithSelection)
-        setShowAiModal(true)
-        toast.success(t('business_rules.toast_generated'))
-      } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(
-            data.message || 'Ocorreu uma resposta inesperada do servidor.',
-          )
-        }
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar Business Rules:', error)
       toast.error(
-        error.response?.data?.message ||
-          'Não foi possível conectar ao servidor.',
+        error.response?.data?.message || t('ai_errors.server_error'),
       )
     } finally {
       setIsGenerating(false)
@@ -675,6 +656,7 @@ const BusinessRules = ({ project, setProject }) => {
           )
         })}
       <GenerateAIButton
+        type="business_rules"
         isGenerating={isGenerating}
         onClick={generateBusinessRules}
         tooltip={tooltipInfo.aiGeneratedBusinessRule}

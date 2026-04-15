@@ -16,7 +16,8 @@ class Persona extends Model
     'profile',
     'expectations',
     'invest_card',
-    'goals'
+    'goals',
+    'is_ai_generated',
   ];
 
   protected $casts = [

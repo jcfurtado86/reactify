@@ -7,11 +7,11 @@ use App\Models\Project;
 use App\Models\Story;
 use App\Models\UsageScenario;
 use App\Services\AI\BatchedGeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class UsageScenarioStrategy implements BatchedGeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Cenários de Uso'; }
@@ -137,5 +137,17 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
         $generated['story_id'] = $sourceItem->id;
         $generated['project_id'] = $project->id;
         return $generated;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        foreach ($parsed['usage_scenarios'] ?? [] as $scenarioData) {
+            UsageScenario::create([
+                'project_id' => $project->id,
+                'story_id' => $scenarioData['story_id'] ?? null,
+                'description' => $scenarioData['description'] ?? [],
+                'is_ai_generated' => true,
+            ]);
+        }
     }
 }

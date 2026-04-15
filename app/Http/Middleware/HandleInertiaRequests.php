@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\GenerationJob;
 use App\Models\ProjectInvitation;
 use App\Notifications\UserInvitedToProject;
 
@@ -101,6 +102,29 @@ class HandleInertiaRequests extends Middleware
         'status' => fn() => $request->session()->get('status'),
         'flash_key' => fn() => Str::uuid(),
       ],
+      // Gerações de IA em curso (queued ou running) do usuário, em todos
+      // os projetos. Alimenta o GenerationStatusFab global. Refresh via
+      // router.reload({ only: ['pending_generations'] }) a cada 10s
+      // enquanto houver entradas.
+      'pending_generations' => fn() => $request->user()
+        ? GenerationJob::with('project:id,title,emoji')
+          ->where('user_id', $request->user()->id)
+          ->whereIn('status', ['queued', 'running'])
+          ->orderBy('id', 'asc')
+          ->get()
+          ->map(fn($j) => [
+            'id' => $j->id,
+            'type' => $j->type,
+            'status' => $j->status,
+            'created_at' => $j->created_at?->toIso8601String(),
+            'project' => $j->project ? [
+              'id' => $j->project->id,
+              'title' => $j->project->title,
+              'emoji' => $j->project->emoji,
+            ] : null,
+          ])
+          ->all()
+        : [],
     ]);
   }
 }

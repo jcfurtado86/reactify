@@ -462,7 +462,9 @@
     "confirm_delete_action": "Sim, excluir",
     "confirm_delete_item_title": "Excluir este item?",
     "confirm_delete_item_body": "Esta ação não pode ser desfeita.",
-    "toast_added": "Persona adicionada"
+    "toast_added": "Persona adicionada",
+    "click_to_add": "Clique em editar para adicionar",
+    "default_name": "Nova Persona"
   },
   "journeys": {
     "singular": "Jornada",
@@ -924,6 +926,39 @@
       "success": "{{count}} sugestões geradas. Revise e confirme.",
       "error": "Falha ao gerar com IA. Tente novamente.",
       "unexpected": "Resposta inesperada do servidor"
+    },
+    "generation_queued": "Geração na fila. Vai aparecer na tela quando ficar pronta.",
+    "confirm": {
+      "title": "Gerar com IA?",
+      "description": "A geração leva alguns minutos. Você pode acompanhar o progresso pelo contador no botão.",
+      "action": "Gerar"
     }
+  },
+  "generation_status": {
+    "title": "Gerando com IA",
+    "fab_title": "Gerações de IA em curso",
+    "generating": "Gerando",
+    "already_running": "Já está gerando esse artefato. Aguarde terminar.",
+    "hint": "Você pode navegar livremente. Os artefatos aparecem sozinhos quando ficarem prontos.",
+    "types": {
+      "personas": "Personas",
+      "goals": "Objetivos",
+      "journeys": "Jornadas",
+      "stories": "Estórias",
+      "epic_stories": "Estórias Épicas",
+      "business_rules": "Regras de Negócio",
+      "usage_scenarios": "Cenários de Uso",
+      "system_interfaces": "Interfaces de Sistema",
+      "overall_model": "Overall Model",
+      "product_canvas": "Product Canvas"
+    }
+  },
+  "ai_review": {
+    "badge_label": "IA",
+    "badge_tooltip": "Gerado por IA, revise antes de aprovar",
+    "approve": "Aprovar",
+    "discard": "Descartar",
+    "approved": "Aprovado",
+    "error": "Erro ao aprovar"
   }
 }

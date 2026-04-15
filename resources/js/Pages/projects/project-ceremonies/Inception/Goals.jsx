@@ -24,6 +24,7 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import { useTooltipInfo } from '@/lib/projectData'
 import InfoButton from '@/Components/InfoButton'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import { ColorOptions } from '@/Components/ColorComponents'
 import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
@@ -264,7 +265,7 @@ const GoalItem = ({
                 open={!disabled && typeSelectId === goal.id}
                 onOpenChange={onToggleTypeSelect}
               >
-                <PopoverTrigger disabled={isTemporary} className="flex">
+                <PopoverTrigger disabled={isTemporary(goal.id)} className="flex">
                   <Badge
                     style={{ backgroundColor: selectedType }}
                     className={cn(
@@ -329,7 +330,7 @@ const GoalItem = ({
                 open={!disabled && prioritySelectId === goal.id}
                 onOpenChange={onTogglePrioritySelect}
               >
-                <PopoverTrigger disabled={isTemporary} className="flex">
+                <PopoverTrigger disabled={isTemporary(goal.id)} className="flex">
                   <Badge
                     style={{ backgroundColor: selectedPriority }}
                     className={cn(
@@ -391,6 +392,7 @@ const GoalItem = ({
                 </PopoverContent>
               </Popover>
               <StatusBadge status={status} />
+              <AiGeneratedBadge item={goal} type="goals" onDiscard={onDelete} />
             </div>{' '}
             <div className="flex items-center gap-1">
               {isTemporary(goal.id) && (
@@ -676,35 +678,17 @@ const Goals = ({ project, setProject }) => {
 
   const generateGoals = async () => {
     setIsGenerating(true)
-    setIsModalMinimized(false)
-
     try {
       const response = await axios.post(route('goal.generate'), {
         project_id: project.id,
       })
-
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        const goalsWithSelection = data.goals.map((goal) => ({
-          ...goal,
-          selected: true,
-        }))
-
-        if (goalsWithSelection.length === 0) {
-          toast.info(t('ai.toast.empty'))
-          return
-        }
-
-        setAiGeneratedGoals(goalsWithSelection)
-        setShowAiModal(true)
-        toast.success(t('goals.toast_generated'))
-      } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(data.message || t('ai_errors.unexpected'))
-        }
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
+        )
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar goals:', error)
@@ -937,6 +921,7 @@ const Goals = ({ project, setProject }) => {
               <span>{t('goals.new_business')}</span>
             </Button>
             <GenerateAIButton
+              type="goals"
               isGenerating={isGenerating}
               onClick={generateGoals}
               tooltip={tooltipInfo.aiGeneratedGoals}

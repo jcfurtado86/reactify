@@ -9,11 +9,11 @@ use App\Models\Project;
 use App\Models\Story;
 use App\Models\SystemInterface;
 use App\Services\AI\GeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class SystemInterfaceStrategy implements GeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Interfaces de Sistema'; }
@@ -162,5 +162,26 @@ class SystemInterfaceStrategy implements GeneratorStrategy
         }, $parsed['system_interfaces']);
 
         return $parsed;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        foreach ($parsed['system_interfaces'] ?? [] as $interfaceData) {
+            $classIds = $interfaceData['overall_model_class_ids'] ?? [];
+            $interface = SystemInterface::create([
+                'project_id' => $project->id,
+                'title' => $interfaceData['title'] ?? '',
+                'input' => $interfaceData['input'] ?? '',
+                'output' => $interfaceData['output'] ?? '',
+                'type' => $interfaceData['type'] ?? 'internal',
+                'overall_model_class_id' => $classIds[0] ?? null,
+                'is_ai_generated' => true,
+            ]);
+
+            // Vincula as classes adicionais via tabela pivot.
+            if (count($classIds) > 1) {
+                $interface->overallModelClasses()->sync($classIds);
+            }
+        }
     }
 }

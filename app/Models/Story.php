@@ -20,6 +20,7 @@ class Story extends Model
     'invest_card',
     'value',
     'complexity',
+    'is_ai_generated',
   ];
 
   protected $casts = [

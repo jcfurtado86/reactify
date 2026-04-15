@@ -6,11 +6,11 @@ use App\Models\Interview;
 use App\Models\Persona;
 use App\Models\Project;
 use App\Services\AI\GeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class PersonaStrategy implements GeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Personas'; }
@@ -114,5 +114,19 @@ class PersonaStrategy implements GeneratorStrategy
     public function postProcess(array $parsed, Project $project, array $validated): array
     {
         return $parsed;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        foreach ($parsed['personas'] ?? [] as $personaData) {
+            Persona::create([
+                'project_id' => $project->id,
+                'name' => $personaData['name'] ?? 'Persona sem nome',
+                'profile' => $personaData['profile'] ?? [],
+                'expectations' => $personaData['expectations'] ?? [],
+                'goals' => $personaData['goals'] ?? [],
+                'is_ai_generated' => true,
+            ]);
+        }
     }
 }

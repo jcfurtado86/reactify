@@ -8,11 +8,11 @@ use App\Models\Interview;
 use App\Models\Project;
 use App\Models\Story;
 use App\Services\AI\BatchedGeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class BusinessRuleStrategy implements BatchedGeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Regras de Negócio'; }
@@ -123,5 +123,17 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
         $generated['story_id'] = $sourceItem->id;
         $generated['project_id'] = $project->id;
         return $generated;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        foreach ($parsed['business_rules'] ?? [] as $ruleData) {
+            BusinessRule::create([
+                'project_id' => $project->id,
+                'story_id' => $ruleData['story_id'] ?? null,
+                'title' => $ruleData['title'] ?? '',
+                'is_ai_generated' => true,
+            ]);
+        }
     }
 }

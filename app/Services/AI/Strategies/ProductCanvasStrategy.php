@@ -6,11 +6,11 @@ use App\Models\Interview;
 use App\Models\Project;
 use App\Models\ProductCanvas;
 use App\Services\AI\GeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class ProductCanvasStrategy implements GeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array
     {
@@ -123,5 +123,31 @@ class ProductCanvasStrategy implements GeneratorStrategy
     public function postProcess(array $parsed, Project $project, array $validated): array
     {
         return $parsed;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        // O canvas é singleton por projeto. updateOrCreate na row existente
+        // (se houver) ou cria nova. Cada item do array tem {key, value} —
+        // mapeamos pra colunas reais.
+        $items = $parsed['product_canvas'] ?? [];
+        $payload = ['is_ai_generated' => true];
+
+        foreach ($items as $item) {
+            $key = $item['key'] ?? null;
+            $value = $item['value'] ?? null;
+            if (!$key || $value === null) {
+                continue;
+            }
+            // Aceita só os campos conhecidos do canvas.
+            if (in_array($key, ['issues', 'solutions', 'personas', 'restrictions', 'product_is', 'product_is_not'], true)) {
+                $payload[$key] = $value;
+            }
+        }
+
+        ProductCanvas::updateOrCreate(
+            ['project_id' => $project->id],
+            $payload
+        );
     }
 }

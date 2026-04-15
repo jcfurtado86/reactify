@@ -15,7 +15,7 @@ class BusinessRule extends Model
    *
    * @var array<int, string>
    */
-  protected $fillable = ['title', 'story_id', 'project_id', 'invest_card'];
+  protected $fillable = ['title', 'story_id', 'project_id', 'invest_card', 'is_ai_generated'];
   protected $casts = [
     'invest_card' => 'array',
   ];

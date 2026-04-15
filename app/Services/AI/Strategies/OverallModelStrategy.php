@@ -8,11 +8,11 @@ use App\Models\OverallModelClass;
 use App\Models\Project;
 use App\Models\Story;
 use App\Services\AI\GeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class OverallModelStrategy implements GeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Overall Model'; }
@@ -137,5 +137,44 @@ class OverallModelStrategy implements GeneratorStrategy
     public function postProcess(array $parsed, Project $project, array $validated): array
     {
         return $parsed;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        // Cria primeiro as classes (overall_model_classes) — só as novas.
+        $existingClassNames = OverallModelClass::where('project_id', $project->id)
+            ->pluck('name')
+            ->toArray();
+
+        foreach ($parsed['overall_model_classes'] ?? [] as $classData) {
+            $name = $classData['name'] ?? null;
+            if (!$name || in_array($name, $existingClassNames, true)) {
+                continue;
+            }
+            OverallModelClass::create([
+                'project_id' => $project->id,
+                'name' => $name,
+                'is_ai_generated' => true,
+            ]);
+        }
+
+        // Depois cria os CRC Cards — só as novas classes.
+        $existingCrcClasses = CrcCard::where('project_id', $project->id)
+            ->pluck('class')
+            ->toArray();
+
+        foreach ($parsed['crc_cards'] ?? [] as $crcData) {
+            $className = $crcData['class'] ?? null;
+            if (!$className || in_array($className, $existingCrcClasses, true)) {
+                continue;
+            }
+            CrcCard::create([
+                'project_id' => $project->id,
+                'class' => $className,
+                'responsabilities' => $crcData['responsabilities'] ?? [],
+                'collaborators' => $crcData['collaborators'] ?? [],
+                'is_ai_generated' => true,
+            ]);
+        }
     }
 }

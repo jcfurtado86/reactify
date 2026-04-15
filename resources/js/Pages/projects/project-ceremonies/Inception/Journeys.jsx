@@ -36,6 +36,7 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { cn, inspectionStatus } from '@/lib/utils'
 import { useTooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
@@ -307,15 +308,13 @@ const Journeys = ({ project, setProject }) => {
       const response = await axios.post(route('journey.generate'), {
         project_id: project.id,
       })
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        setGeneratedAI(data.journeys)
-        toast.success(t('journeys.toast_generated'))
-      } else if (data.status === 'warning') {
-        toast.warning(data.message)
-      } else {
-        toast.error(data.message || t('ai_errors.unexpected'))
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
+        )
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       toast.error(t('journeys.toast_comm_error'))
@@ -645,6 +644,11 @@ const Journeys = ({ project, setProject }) => {
                       </h4>
                     )}{' '}
                     <StatusBadge status={status} />
+                    <AiGeneratedBadge
+                      item={journey}
+                      type="journeys"
+                      onDiscard={() => deleteJourney(journey.id)}
+                    />
                   </div>
 
                   <div className="flex items-center">
@@ -709,13 +713,15 @@ const Journeys = ({ project, setProject }) => {
                                 {t('journeys.delete_confirm')}
                               </p>
                               <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => deleteJourney(journey.id)}
-                                >
-                                  {t('common.delete')}
-                                </Button>
+                                <PopoverClose asChild>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => deleteJourney(journey.id)}
+                                  >
+                                    {t('common.delete')}
+                                  </Button>
+                                </PopoverClose>
                               </div>
                             </div>
                           </PopoverContent>
@@ -732,8 +738,13 @@ const Journeys = ({ project, setProject }) => {
                   </div>
                 </div>
 
-                {/* {expandedJourney === journey.id && (*/}
-                <>
+                <div
+                  className={`${
+                    expandedJourney === journey.id
+                      ? 'max-h-screen opacity-100'
+                      : 'max-h-0 opacity-0 pointer-events-none overflow-hidden'
+                  } transition-all duration-300`}
+                >
                   {journey.steps && journey.steps.length > 0 ? (
                     <DndContext
                       sensors={sensors}
@@ -744,9 +755,7 @@ const Journeys = ({ project, setProject }) => {
                         items={journey.steps.map((s) => s.id)}
                         strategy={rectSortingStrategy}
                       >
-                        <div
-                          className={`${expandedJourney === journey.id ? 'max-h-screen opacity-1 p-4' : 'max-h-0 opacity-0'} transition-all duration-300 grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start justify-center  `}
-                        >
+                        <div className="p-4 grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start justify-center">
                           {journey.steps.map((step, stepIndex) => {
                             const isCurrentlyEditing =
                               editingStep.journeyId === journey.id &&
@@ -817,7 +826,7 @@ const Journeys = ({ project, setProject }) => {
                       )}
                     </div>
                   )}
-                </>
+                </div>
               </div>
             )
           })
@@ -844,6 +853,7 @@ const Journeys = ({ project, setProject }) => {
               <Plus size={18} className="mr-2" /> {t('journeys.new_journey')}
             </Button>
             <GenerateAIButton
+              type="journeys"
               isGenerating={isGeneratingAI}
               onClick={generateJourneys}
               tooltip={tooltipInfo.aiGeneratedJourney}

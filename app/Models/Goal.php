@@ -14,6 +14,7 @@ class Goal extends Model
     'priority',
     'project_id',
     'invest_card',
+    'is_ai_generated',
   ];
   protected $casts = [
     'invest_card' => 'array',

@@ -7,12 +7,12 @@ use App\Models\Journey;
 use App\Models\Persona;
 use App\Models\Project;
 use App\Services\AI\BatchedGeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 use Illuminate\Support\Facades\Log;
 
 class JourneyStrategy implements BatchedGeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Journeys'; }
@@ -149,6 +149,18 @@ class JourneyStrategy implements BatchedGeneratorStrategy
             'title' => $generated['title'],
             'steps' => $validatedSteps,
         ];
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        foreach ($parsed['journeys'] ?? [] as $journeyData) {
+            Journey::create([
+                'project_id' => $project->id,
+                'title' => $journeyData['title'] ?? 'Jornada sem título',
+                'steps' => $journeyData['steps'] ?? [],
+                'is_ai_generated' => true,
+            ]);
+        }
     }
 
     private function hasValidGoals(Persona $persona): bool

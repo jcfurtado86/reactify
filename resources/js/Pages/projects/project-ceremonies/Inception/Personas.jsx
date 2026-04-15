@@ -16,6 +16,7 @@ import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import TextareaAutosize from 'react-textarea-autosize'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import InvestCard from '../Inspection/InvestCard'
 import { useTooltipInfo } from '@/lib/projectData'
 import { inspectionStatus } from '@/lib/utils'
@@ -262,6 +263,11 @@ const PersonaCard = ({
               <CardTitle className="ml-3 text-xl">{persona.name}</CardTitle>
             )}
             <StatusBadge status={status} />
+            <AiGeneratedBadge
+              item={persona}
+              type="personas"
+              onDiscard={() => confirmDeletePersona(persona.id)}
+            />
           </div>
         </AccordionTrigger>
         <AccordionContent className="persona grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
@@ -343,6 +349,7 @@ const PersonaItem = ({
   textareaRef,
   error
 }) => {
+  const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const ITEM_MAX = 255;
 
@@ -396,7 +403,7 @@ const PersonaItem = ({
             !item ? 'italic text-muted-foreground/50' : ''
           )}
         >
-          {item || 'Clique em editar para adicionar'}
+          {item || t('personas.click_to_add')}
         </p>
       )}
 
@@ -473,7 +480,7 @@ const Personas = ({ project, setProject }) => {
     setIsSubmitting(true)
 
     const newPersona = {
-      name: 'Nova Persona',
+      name: t('personas.default_name'),
       profile: [],
       expectations: [],
       goals: [],
@@ -617,11 +624,11 @@ const Personas = ({ project, setProject }) => {
   const getFieldTitle = (field) => {
     switch (field) {
       case 'profile':
-        return 'Perfil'
+        return t('personas.profile')
       case 'expectations':
-        return 'Expectativas'
+        return t('personas.expectations')
       case 'goals':
-        return 'Objetivos'
+        return t('personas.goals')
       default:
         return field
     }
@@ -641,35 +648,17 @@ const Personas = ({ project, setProject }) => {
   //ia functions
   const generatePersonas = async () => {
     setIsGenerating(true)
-    setIsModalMinimized(false)
-
     try {
       const response = await axios.post(route('persona.generate'), {
         project_id: project.id,
       })
-
-      const data = response.data
-
-      if (data.status === 'sucesso') {
-        const personasWithSelection = data.personas.map((persona) => ({
-          ...persona,
-          selected: true,
-        }))
-
-        if (personasWithSelection.length === 0) {
-          toast.info(t('ai.toast.empty'))
-          return
-        }
-
-        setAiGeneratedPersonas(personasWithSelection)
-        setShowAiModal(true)
-        toast.success(t('personas.toast_generated'))
-      } else {
-        if (data.status === 'warning') {
-          toast.warning(data.message)
-        } else {
-          toast.error(data.message || t('ai_errors.unexpected'))
-        }
+      if (response.status === 202) {
+        toast.info(
+          t('ai.generation_queued', 'Geração na fila. Vai aparecer na tela quando ficar pronta.'),
+        )
+        router.reload({ only: ['pending_generations'] })
+      } else if (response.data?.status === 'warning') {
+        toast.warning(response.data.message)
       }
     } catch (error) {
       console.error('Erro ao gerar personas:', error)
@@ -845,6 +834,7 @@ const Personas = ({ project, setProject }) => {
             {isSubmitting ? t('common.processing') : t('personas.new')}
           </Button>
           <GenerateAIButton
+            type="personas"
             isGenerating={isGenerating}
             onClick={generatePersonas}
             tooltip={tooltipInfo.aiGeneratedPersonas}

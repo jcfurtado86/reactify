@@ -9,7 +9,8 @@ class OverallModelClass extends Model
 {
   protected $fillable = [
     'name',
-    'project_id'
+    'project_id',
+    'is_ai_generated',
   ];
 
   public function system_interfaces(): BelongsToMany

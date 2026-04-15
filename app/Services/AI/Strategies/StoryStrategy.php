@@ -6,12 +6,12 @@ use App\Models\Interview;
 use App\Models\Project;
 use App\Models\Story;
 use App\Services\AI\GeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 use Illuminate\Support\Facades\DB;
 
 class StoryStrategy implements GeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Stories'; }
@@ -178,6 +178,18 @@ class StoryStrategy implements GeneratorStrategy
         }
         $parsed['message']['stories'] = $stories;
         return $parsed;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        foreach ($parsed['message']['stories'] ?? [] as $storyData) {
+            Story::create([
+                'project_id' => $project->id,
+                'title' => $storyData['title'] ?? '',
+                'type' => $storyData['type'] ?? 'user',
+                'is_ai_generated' => true,
+            ]);
+        }
     }
 
     // --- helpers de formatação (iguais ao controller antigo) ---

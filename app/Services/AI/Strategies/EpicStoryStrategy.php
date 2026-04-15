@@ -6,11 +6,11 @@ use App\Models\Interview;
 use App\Models\Project;
 use App\Models\Story;
 use App\Services\AI\GeneratorStrategy;
-use App\Services\AI\ParsesGeminiJson;
+use App\Services\AI\ParsesLlmJson;
 
 class EpicStoryStrategy implements GeneratorStrategy
 {
-    use ParsesGeminiJson;
+    use ParsesLlmJson;
 
     public function validationRules(): array { return []; }
     public function label(): string { return 'Epic Stories'; }
@@ -118,5 +118,24 @@ class EpicStoryStrategy implements GeneratorStrategy
     public function postProcess(array $parsed, Project $project, array $validated): array
     {
         return $parsed;
+    }
+
+    public function persistGenerated(array $parsed, Project $project, array $validated): void
+    {
+        foreach ($parsed['decomposed_epics'] ?? [] as $epic) {
+            $epicId = $epic['original_epic_id'] ?? null;
+            if (!$epicId) {
+                continue;
+            }
+            foreach ($epic['new_stories'] ?? [] as $newStory) {
+                Story::create([
+                    'project_id' => $project->id,
+                    'epic_id' => $epicId,
+                    'title' => $newStory['title'] ?? '',
+                    'type' => $newStory['type'] ?? 'user',
+                    'is_ai_generated' => true,
+                ]);
+            }
+        }
     }
 }

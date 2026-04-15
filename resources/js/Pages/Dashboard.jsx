@@ -1,7 +1,6 @@
 import React from 'react'
 import { Head, router, usePage } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
-import { ExpandableCard } from './projects/project-ceremonies/Inception/ProductCanvas'
 import Interview from '@/Components/Interview'
 import { useTooltipInfo } from '@/lib/projectData'
 import { ProjectPermissions } from '@/Components/ProjectPermissions'
@@ -11,7 +10,6 @@ import {
   ArrowRight,
   CircleCheckBig,
   CircleAlert,
-  List,
   ChevronDown,
   AlertTriangle,
   FileWarning,
@@ -829,6 +827,12 @@ const Dashboard = ({ project, setProject }) => {
             </div>
           </div>
 
+          {project.description && (
+            <p className="text-sm text-muted-foreground whitespace-pre-line">
+              {project.description}
+            </p>
+          )}
+
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock size={14} />
             {project.updated_at
@@ -986,18 +990,6 @@ const Dashboard = ({ project, setProject }) => {
             onSelect={goToSprintPage}
           />
         </section>
-
-        <ExpandableCard
-          title={project?.title || t('nav.projects')}
-          content={project?.description}
-          col={1}
-          variant="chart_1"
-          icon={List}
-          editable={false}
-          defaultExpanded={true}
-          placeholder={t('dashboard.describe_project_placeholder')}
-          className="min-w-full"
-        />
 
         {/* Collapsible interviews */}
         <section className="bg-card rounded-lg">

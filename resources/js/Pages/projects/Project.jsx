@@ -42,6 +42,16 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
   const tooltipInfo = useTooltipInfo()
   const [project, setProject] = useState({ ...projectDB })
   const { can } = usePermissions()
+
+  // Sincroniza o state local com o prop do Inertia. Sem isso, o
+  // useState fica congelado no valor inicial e qualquer refresh de
+  // página (ex: back() depois de um POST de criar/editar artefato) não
+  // chega no state — usuário vê o card temporário pendurado pra sempre.
+  useEffect(() => {
+    if (projectDB && projectDB.id) {
+      setProject(projectDB)
+    }
+  }, [projectDB])
   // Inception States
 
   // Menu items têm labelKey (i18n key) em vez de label estática. A

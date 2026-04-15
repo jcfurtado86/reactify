@@ -8,7 +8,7 @@ class Journey extends Model
 {
   use SoftDeletes;
 
-  protected $fillable = ['title', 'steps', 'project_id', 'invest_card'];
+  protected $fillable = ['title', 'steps', 'project_id', 'invest_card', 'is_ai_generated'];
 
   protected $casts = [
     'steps' => 'array',
