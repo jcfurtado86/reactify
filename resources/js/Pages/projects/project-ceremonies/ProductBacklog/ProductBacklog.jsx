@@ -161,8 +161,15 @@ const ProductBacklog = ({ project, setProject }) => {
       const stories = localProject?.stories || []
       const sprints = localProject?.sprints || []
 
+      // Épicas (stories com filhas) não entram no backlog — só as filhas
+      // reais aparecem. Épicas são placeholders, não unidades de trabalho.
+      const epicParentIds = new Set(
+        stories.filter((s) => s.epic_id).map((s) => s.epic_id),
+      )
+
       const productBacklog = stories
         .filter((story) => {
+          if (epicParentIds.has(story.id)) return false
           const isInActiveSprint = sprints.some(
             (sprint) =>
               sprint.status === 'active' &&

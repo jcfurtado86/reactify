@@ -222,11 +222,17 @@ const transformArrayToMatrixObject = (
 ) => {
   if (!prioritizations || !allProjectStories) return {}
 
+  // Set de ids que são épicas (têm filhas) — usado pra ignorar rows
+  // velhas de priorização ligadas a épicos que depois foram quebrados.
+  const epicParentIds = new Set(
+    allProjectStories.filter((s) => s.epic_id).map((s) => s.epic_id),
+  )
+
   return prioritizations.reduce((matrix, item) => {
     const cellId = `cell-${item.priority_id}-${item.position}`
     const storyDetails = allProjectStories.find((s) => s.id === item.story_id)
 
-    if (storyDetails) {
+    if (storyDetails && !epicParentIds.has(storyDetails.id)) {
       // If this cellId is not yet in our matrix, initialize it with an empty array
       if (!matrix[cellId]) {
         matrix[cellId] = []
@@ -314,8 +320,24 @@ const PrioritizationMatrix = ({ project, setProject }) => {
         .filter(Boolean)
         .map((story) => story.story_id),
     )
-    return project.stories.filter((story) => !assignedStoryIds.has(story.id))
-  }, [project.stories, prioritizationMatrix])
+    // Também exclui stories já persistidas em project.prioritizations
+    // — cobre o caso em que o estado local da matriz não refletiu a
+    // row persistida (ex: reload, chegada de broadcast).
+    const persistedPrioritizedIds = new Set(
+      (project?.prioritizations || []).map((p) => p.story_id),
+    )
+    // Épicas (stories com filhas) não são priorizadas — só as filhas
+    // reais. Épicas são placeholders, não unidades priorizáveis.
+    const epicParentIds = new Set(
+      project.stories.filter((s) => s.epic_id).map((s) => s.epic_id),
+    )
+    return project.stories.filter(
+      (story) =>
+        !assignedStoryIds.has(story.id) &&
+        !persistedPrioritizedIds.has(story.id) &&
+        !epicParentIds.has(story.id),
+    )
+  }, [project.stories, project?.prioritizations, prioritizationMatrix])
 
   const handleDragStart = (event) => {
     const { active } = event
@@ -570,7 +592,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
                   )
                 })
             ) : (
-              <div className="col-span-4 md:col-span-5 lg:col-span-6 flex flex-col items-center justify-center p-6 text-muted-foreground min-h-[100px]">
+              <div className="w-full flex flex-col items-center justify-center p-6 text-muted-foreground min-h-[100px]">
                 <BookText
                   size={32}
                   className="mb-3 text-primary flex-shrink-0" // Adicionado flex-shrink-0
