@@ -2,17 +2,38 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChatMessage extends Model
 {
-    use HasFactory;
+    public $timestamps = false;
 
-    protected $fillable = ['chat_session_id', 'sender', 'message'];
+    protected $fillable = [
+        'project_id',
+        'user_id',
+        'sender',
+        'message',
+        'page_context',
+        'feedback',
+        'feedback_comment',
+        'model_provider',
+        'model_name',
+        'latency_ms',
+    ];
 
-    public function session()
+    protected $casts = [
+        'page_context' => 'array',
+        'created_at' => 'datetime',
+    ];
+
+    public function project(): BelongsTo
     {
-        return $this->belongsTo(ChatSession::class);
+        return $this->belongsTo(Project::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

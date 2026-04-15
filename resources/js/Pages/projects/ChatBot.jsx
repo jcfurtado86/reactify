@@ -39,21 +39,48 @@ const AIMessage = ({ fullContent, animate }) => {
 /**
  * Componente principal do ChatBot, agora com WebSockets (Laravel Echo).
  */
+const welcomeMessage = (t) => ({
+  id: 'welcome',
+  message: t('chat.welcome'),
+  sender: 'model',
+  timestamp: new Date().toISOString(),
+  animate: false,
+})
+
 const ChatBot = ({ project, currentPage, currentContextData }) => {
   const { t } = useTranslation()
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      message: t('chat.welcome'),
-      sender: 'bot',
-      timestamp: new Date().toISOString(),
-      animate: false,
-    },
-  ])
+  const [messages, setMessages] = useState([welcomeMessage(t)])
   const [isOpen, setIsOpen] = useState(false)
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const chatBodyRef = useRef(null)
+
+  useEffect(() => {
+    if (!isOpen || !project?.id || historyLoaded) return
+
+    fetch(route('chat.history', project.id), {
+      headers: { Accept: 'application/json' },
+      credentials: 'same-origin',
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const loaded = (data.messages || []).map((m) => ({
+          id: `db-${m.id}`,
+          message: m.message,
+          sender: m.sender,
+          timestamp: m.created_at,
+          animate: false,
+          feedback: m.feedback,
+        }))
+        setMessages(loaded.length > 0 ? loaded : [welcomeMessage(t)])
+        setHistoryLoaded(true)
+      })
+      .catch((err) => {
+        console.error('Erro carregando histórico do chat:', err)
+        setHistoryLoaded(true)
+      })
+  }, [isOpen, project?.id, historyLoaded, t])
 
   useEffect(() => {
     if (chatBodyRef.current) {

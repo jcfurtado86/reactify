@@ -477,7 +477,12 @@ Route::prefix('chat')
     Route::post('/{project}/', [ChatController::class, 'store'])->name(
       'chat.store'
     );
-    // Route::get('/{project}/history', [ChatController::class, 'getHistory'])->name('api.chat.history');
+    Route::get('/{project}/history', [ChatController::class, 'history'])->name(
+      'chat.history'
+    );
+    Route::patch('/message/{message}/feedback', [ChatController::class, 'feedback'])->name(
+      'chat.feedback'
+    );
   });
 
 require __DIR__ . '/auth.php';

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\ChatMessage;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\PythonChatBridge;
@@ -23,9 +24,6 @@ class ProcessChatJob implements ShouldQueue
     public $chatHistory;
     public $userMessage;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(Project $project, User $user, array $pageContext, array $chatHistory, string $userMessage)
     {
         $this->project = $project;
@@ -35,13 +33,10 @@ class ProcessChatJob implements ShouldQueue
         $this->userMessage = $userMessage;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(PythonChatBridge $aiService): void
     {
+        $startedAt = microtime(true);
         try {
-            // Chamar o Python e ESPERAR 
             $fullResponse = $aiService->generateBlockingResponse(
                 $this->project,
                 $this->user,
@@ -50,11 +45,22 @@ class ProcessChatJob implements ShouldQueue
                 $this->userMessage
             );
 
-            // Quando o Python responde, enviamos o evento via WebSocket
             if ($fullResponse) {
+                $latencyMs = (int) ((microtime(true) - $startedAt) * 1000);
+
+                ChatMessage::create([
+                    'project_id' => $this->project->id,
+                    'user_id' => $this->user->id,
+                    'sender' => 'model',
+                    'message' => $fullResponse,
+                    'page_context' => $this->pageContext,
+                    'model_provider' => config('services.llm.provider'),
+                    'model_name' => config('services.llm.' . config('services.llm.provider') . '_model'),
+                    'latency_ms' => $latencyMs,
+                ]);
+
                 ChatMessageReceived::dispatch($this->project, $this->user, $fullResponse);
             }
-
         } catch (\Exception $e) {
             Log::error('Erro no ProcessChatJob: ' . $e->getMessage());
             ChatMessageReceived::dispatch($this->project, $this->user, "Ocorreu um erro no assistente de IA: " . $e->getMessage());
