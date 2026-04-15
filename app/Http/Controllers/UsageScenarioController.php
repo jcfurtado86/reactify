@@ -53,13 +53,6 @@ class UsageScenarioController extends Controller
       'description.then_1' => 'nullable|string',
       'description.and' => 'nullable|string',
       'description.then_2' => 'nullable|string',
-      'invest_card' => 'nullable|array',
-      'invest_card.independent' => 'nullable|string|in:yes,no,na',
-      'invest_card.negotiable' => 'nullable|string|in:yes,no,na',
-      'invest_card.valuable' => 'nullable|string|in:yes,no,na',
-      'invest_card.estimable' => 'nullable|string|in:yes,no,na',
-      'invest_card.small' => 'nullable|string|in:yes,no,na',
-      'invest_card.testable' => 'nullable|string|in:yes,no,na',
     ]);
 
     $scenario->update($validated);

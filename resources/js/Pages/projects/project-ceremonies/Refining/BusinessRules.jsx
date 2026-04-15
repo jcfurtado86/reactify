@@ -15,7 +15,6 @@ import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
 import { isTemporary, inspectionStatus } from '@/lib/utils'
-import InvestCard from '../Inspection/InvestCard'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import StatusBadge from '@/Components/StatusBadge'
@@ -211,7 +210,6 @@ const BusinessRuleCard = ({
   businessRule,
   lastElement = false,
   setProject,
-  onInspect,
   systemColors,
 }) => {
   const { errors } = usePage().props
@@ -301,7 +299,6 @@ const BusinessRuleCard = ({
           isEditing={isEditing}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onInspect={onInspect}
         />
 
         <div
@@ -374,9 +371,6 @@ const BusinessRuleCard = ({
 const BusinessRules = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // inspection states
-  const [inspectionId, setInspectionId] = useState(null)
-  const [anchorEl, setAnchorEl] = useState(null)
   //ia states
   const [aiGeneratedBusinessRules, setAiGeneratedBusinessRules] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -409,18 +403,6 @@ const BusinessRules = ({ project, setProject }) => {
       return acc
     }, new Map())
   }, [project?.business_rules]) // Dependência atualizada
-
-  // inspection function
-  const inspectRule = (ruleId) => {
-    if (inspectionId === ruleId) {
-      setInspectionId(null)
-      setAnchorEl(null)
-    } else {
-      const element = document.querySelector(`[data-card-id="${ruleId}"]`)
-      setAnchorEl(element)
-      setInspectionId(ruleId)
-    }
-  }
 
   const addBusinessRule = (storyId) => {
     router.post(
@@ -578,16 +560,6 @@ const BusinessRules = ({ project, setProject }) => {
           systemColors={project?.system_colors}
         />
       )}
-      {inspectionId && (
-        <InvestCard
-          itemCategory={'business_rules'}
-          itemId={inspectionId}
-          anchorEl={anchorEl}
-          project={project}
-          setProject={setProject}
-          setInspectionId={setInspectionId}
-        />
-      )}
       {!hasStories && (
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
           <GanttChartSquare size={40} className="mb-4 text-primary" />
@@ -627,7 +599,6 @@ const BusinessRules = ({ project, setProject }) => {
                           index === array.length - 1 && array.length > 1
                         }
                         setProject={setProject}
-                        onInspect={() => inspectRule(businessRule.id)}
                         systemColors={project?.system_colors}
                       />
                     ))}
@@ -664,7 +635,6 @@ const BusinessRules = ({ project, setProject }) => {
                           index === array.length - 1 && array.length > 1
                         }
                         setProject={setProject}
-                        onInspect={() => inspectRule(businessRule.id)}
                         systemColors={project?.system_colors}
                       />
                     ))}

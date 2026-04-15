@@ -28,7 +28,6 @@ import {
   ChevronRight,
   Minus,
   ChevronsUp,
-  ChartArea,
   GripVertical,
 } from 'lucide-react'
 import { router, usePage } from '@inertiajs/react'
@@ -40,7 +39,6 @@ import { useTooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
-import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
 import { useJourneysAIStore } from '@/stores/useJourneysAIStore'
 import JourneysAIModal from './components/JourneysAIModal'
@@ -246,9 +244,6 @@ const JourneyStepItem = ({
 const Journeys = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // inspection states
-  const [inspectionId, setInspectionId] = useState(null)
-  const [anchorEl, setAnchorEl] = useState(null)
   const [expandedJourney, setExpandedJourney] = useState(null)
   const [editingStep, setEditingStep] = useState({
     journeyId: null,
@@ -303,18 +298,6 @@ const Journeys = ({ project, setProject }) => {
       },
     }),
   )
-  // inspection function
-  const inspectJourney = (e, journeyId) => {
-    e.stopPropagation()
-    if (inspectionId === journeyId) {
-      setInspectionId(null)
-      setAnchorEl(null)
-    } else {
-      const element = document.querySelector(`[data-card-id="${journeyId}"]`)
-      setAnchorEl(element)
-      setInspectionId(journeyId)
-    }
-  }
   // Função que será chamada quando o arrasto terminar
   const handleDragEnd = (event, journeyId) => {
     const { active, over } = event
@@ -649,16 +632,6 @@ const Journeys = ({ project, setProject }) => {
 
   return (
     <div className="flex flex-col gap-4 p-4 w-full">
-      {inspectionId && can('journey.manage') && (
-        <InvestCard
-          itemCategory={'journeys'}
-          itemId={inspectionId}
-          anchorEl={anchorEl}
-          project={project}
-          setProject={setProject}
-          setInspectionId={setInspectionId}
-        />
-      )}
       {/* AI Generated Journeys Modal — extraído para componente +
           Zustand store (Q2/Q4 do plano de qualidade). */}
       <JourneysAIModal colors={colors} onConfirm={confirmGeneratedJourneys} />
@@ -723,15 +696,6 @@ const Journeys = ({ project, setProject }) => {
                   <div className="flex items-center">
                     {can('journey.manage') && (
                       <>
-                        <ButtonWithTooltip
-                          tooltipContent="Inspecionar (INVEST Card)"
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-foreground"
-                          onClick={(e) => inspectJourney(e, journey.id)}
-                        >
-                          <ChartArea size={20} />
-                        </ButtonWithTooltip>
                         {editingJourney === journey.id ? (
                           <ButtonWithTooltip
                             tooltipContent={t('journeys.save_title')}

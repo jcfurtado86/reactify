@@ -28,7 +28,6 @@ import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import { ColorOptions } from '@/Components/ColorComponents'
 import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
-import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
 import { usePage } from '@inertiajs/react'
 
@@ -188,7 +187,6 @@ const GoalItem = ({
   onSave,
   onCancel,
   onDelete,
-  onInspect,
   textareaRef,
   typeSelectId,
   onToggleTypeSelect,
@@ -464,7 +462,6 @@ const GoalItem = ({
         disabled={disabled}
         onEdit={onEdit}
         onDelete={onDelete}
-        onInspect={onInspect}
       />
     </div>
   )
@@ -472,9 +469,6 @@ const GoalItem = ({
 const Goals = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // inspection states
-  const [inspectionId, setInspectionId] = useState(null)
-  const [anchorEl, setAnchorEl] = useState(null)
   //states
   const [editingId, setEditingId] = useState(null)
   const [editValue, setEditValue] = useState('')
@@ -489,18 +483,6 @@ const Goals = ({ project, setProject }) => {
   const [isModalMinimized, setIsModalMinimized] = useState(false)
   const { can } = usePermissions()
   const { errors } = usePage().props
-
-  // inspection function
-  const inspectGoal = (goalId) => {
-    if (inspectionId === goalId) {
-      setInspectionId(null)
-      setAnchorEl(null)
-    } else {
-      const element = document.querySelector(`[data-card-id="${goalId}"]`)
-      setAnchorEl(element)
-      setInspectionId(goalId)
-    }
-  }
 
   const isTemporary = (goal) =>
     typeof goal.id === 'string' && goal.id.startsWith('temp-')
@@ -806,16 +788,6 @@ const Goals = ({ project, setProject }) => {
           systemColors={project?.system_colors}
         />
       )}
-      {inspectionId && can('goal.manage') && (
-        <InvestCard
-          itemCategory={'goal_sketches'}
-          itemId={inspectionId}
-          anchorEl={anchorEl}
-          project={project}
-          setProject={setProject}
-          setInspectionId={setInspectionId}
-        />
-      )}
       <div className="flex flex-col gap-2">
         <InfoButton
           data={tooltipInfo.constraintGoal}
@@ -844,12 +816,9 @@ const Goals = ({ project, setProject }) => {
                 onSave={() => editGoal(goal)}
                 onCancel={() => setEditingId(null)}
                 onDelete={() => deleteGoal(goal.id)}
-                onInspect={() => inspectGoal(goal.id)}
                 textareaRef={editingId === goal.id ? textareaRef : null}
                 typeSelectId={typeSelectId}
                 onToggleTypeSelect={() => toggleTypeSelect(goal.id)}
-                onChange
-                GoalType={changeGoalType}
                 onChangeGoalType={changeGoalType}
                 prioritySelectId={prioritySelectId}
                 onTogglePrioritySelect={() => togglePrioritySelect(goal.id)}
@@ -904,7 +873,6 @@ const Goals = ({ project, setProject }) => {
                 onSave={() => editGoal(goal)}
                 onCancel={() => setEditingId(null)}
                 onDelete={() => deleteGoal(goal.id)}
-                onInspect={() => inspectGoal(goal.id)}
                 textareaRef={editingId === goal.id ? textareaRef : null}
                 typeSelectId={typeSelectId}
                 onToggleTypeSelect={() => toggleTypeSelect(goal.id)}

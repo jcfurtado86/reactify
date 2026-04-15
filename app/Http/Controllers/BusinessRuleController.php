@@ -43,13 +43,6 @@ class BusinessRuleController extends Controller
   {
     $validated = $request->validate([
       'title' => 'nullable|string|max:255',
-      'invest_card' => 'nullable|array',
-      'invest_card.independent' => 'nullable|string|in:yes,no,na',
-      'invest_card.negotiable' => 'nullable|string|in:yes,no,na',
-      'invest_card.valuable' => 'nullable|string|in:yes,no,na',
-      'invest_card.estimable' => 'nullable|string|in:yes,no,na',
-      'invest_card.small' => 'nullable|string|in:yes,no,na',
-      'invest_card.testable' => 'nullable|string|in:yes,no,na',
     ]);
 
     $rule->update($validated);

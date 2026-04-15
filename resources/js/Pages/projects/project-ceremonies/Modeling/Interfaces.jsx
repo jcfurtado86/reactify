@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Minus, Check, X, ChevronsUp, Network } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
-import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
@@ -175,9 +174,6 @@ const GeneratedItemsModal = ({
 const Interfaces = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // inspection states
-  const [inspectionId, setInspectionId] = useState(null)
-  const [anchorEl, setAnchorEl] = useState(null)
   // A lista de todas as classes disponíveis para o formulário.
   const allClassModels = project.overall_model_classes || []
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -213,20 +209,6 @@ const Interfaces = ({ project, setProject }) => {
     project_id: project.id,
     overall_model_class_ids: [],
   })
-
-  // inspection function
-  const inspectInterface = (interfaceId) => {
-    if (inspectionId === interfaceId) {
-      setInspectionId(null)
-      setAnchorEl(null)
-    } else {
-      const element = document.querySelector(
-        `[data-card-interface-id="${interfaceId}"]`,
-      )
-      setAnchorEl(element)
-      setInspectionId(interfaceId)
-    }
-  }
 
   // Abre o dialog para criar uma NOVA interface.
   const handleOpenForCreate = () => {
@@ -317,7 +299,7 @@ const Interfaces = ({ project, setProject }) => {
     )
   }
 
-  const InterfaceCard = ({ data, onClick, onDelete, onInspect }) => {
+  const InterfaceCard = ({ data, onClick, onDelete }) => {
     const [isHovered, setIsHovered] = useState(false)
 
     const relatedIds = data.overall_model_class_ids || []
@@ -336,7 +318,6 @@ const Interfaces = ({ project, setProject }) => {
         <MotionDivOptions
           isHovered={isHovered}
           onDelete={onDelete}
-          onInspect={onInspect}
         />
 
         {/* Área principal do card, que também pode ser usada para edição */}
@@ -518,16 +499,6 @@ const Interfaces = ({ project, setProject }) => {
             toggleItemSelection={toggleInterfaceSelection}
             confirmGeneratedItems={confirmGeneratedInterfaces}
             toggleAllItems={toggleAllInterfaces}
-          />
-        )}
-        {inspectionId && (
-          <InvestCard
-            itemCategory={'system_interfaces'}
-            itemId={inspectionId}
-            anchorEl={anchorEl}
-            project={project}
-            setProject={setProject}
-            setInspectionId={setInspectionId}
           />
         )}
         {/* dialog for adding interface*/}
@@ -730,7 +701,6 @@ const Interfaces = ({ project, setProject }) => {
                   data={item}
                   onDelete={() => handleDelete(item)}
                   onClick={() => handleOpenForEdit(item)}
-                  onInspect={() => inspectInterface(item.id)}
                 />
               ))
             ) : (
@@ -761,7 +731,6 @@ const Interfaces = ({ project, setProject }) => {
                   data={item}
                   onDelete={() => handleDelete(item)}
                   onClick={() => handleOpenForEdit(item)}
-                  onInspect={() => inspectInterface(item.id)}
                 />
               ))
             ) : (

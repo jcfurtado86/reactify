@@ -19,7 +19,6 @@ class UsageScenario extends Model
     'story_id',
     'project_id',
     'description',
-    'invest_card',
     'is_ai_generated',
   ];
   /**
@@ -29,7 +28,6 @@ class UsageScenario extends Model
    */
   protected $casts = [
     'description' => 'array',
-    'invest_card' => 'array',
   ];
 
   /**

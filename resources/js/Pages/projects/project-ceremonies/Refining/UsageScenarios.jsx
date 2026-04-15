@@ -13,7 +13,6 @@ import {
 import { isTemporary, inspectionStatus } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
-import InvestCard from '../Inspection/InvestCard'
 import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
@@ -239,7 +238,6 @@ const ScenarioCard = ({
   story,
   lastElement = false,
   setProject,
-  onInspect,
   systemColors,
 }) => {
   const { errors } = usePage().props
@@ -362,7 +360,6 @@ const ScenarioCard = ({
             isEditing={isEditing}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onInspect={onInspect}
           />
         )}
         <div className="flex-1  border border-border bg-card rounded-md shadow-sm p-3">
@@ -605,9 +602,6 @@ const ScenarioCard = ({
 const UsageScenarios = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // inspection states
-  const [inspectionId, setInspectionId] = useState(null)
-  const [anchorEl, setAnchorEl] = useState(null)
   //ia states
   const [aiGeneratedUsageScenarios, setAiGeneratedUsageScenarios] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -640,18 +634,6 @@ const UsageScenarios = ({ project, setProject }) => {
       return acc
     }, new Map())
   }, [project?.usage_scenarios])
-
-  // inspection function
-  const inspectScenario = (scenarioId) => {
-    if (inspectionId === scenarioId) {
-      setInspectionId(null)
-      setAnchorEl(null)
-    } else {
-      const element = document.querySelector(`[data-card-id="${scenarioId}"]`)
-      setAnchorEl(element)
-      setInspectionId(scenarioId)
-    }
-  }
 
   const addScenario = (storyId) => {
     const newScenarioData = {
@@ -800,16 +782,6 @@ const UsageScenarios = ({ project, setProject }) => {
           systemColors={project?.system_colors}
         />
       )}
-      {inspectionId && (
-        <InvestCard
-          itemCategory={'usage_scenarios'}
-          itemId={inspectionId}
-          anchorEl={anchorEl}
-          project={project}
-          setProject={setProject}
-          setInspectionId={setInspectionId}
-        />
-      )}
       {!hasStories && (
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
           <FileText size={40} className="mb-4 text-primary" />
@@ -846,7 +818,6 @@ const UsageScenarios = ({ project, setProject }) => {
                       lastElement={
                         index === array.length - 1 && array.length > 1
                       }
-                      onInspect={() => inspectScenario(scenario.id)}
                       systemColors={project?.system_colors}
                     />
                   ))}
@@ -881,7 +852,6 @@ const UsageScenarios = ({ project, setProject }) => {
                         lastElement={
                           index === array.length - 1 && array.length > 1
                         }
-                        onInspect={() => inspectScenario(scenario.id)}
                         systemColors={project?.system_colors}
                       />
                     ))}

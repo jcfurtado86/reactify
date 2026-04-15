@@ -13,12 +13,9 @@ class Goal extends Model
     'type',
     'priority',
     'project_id',
-    'invest_card',
     'is_ai_generated',
   ];
-  protected $casts = [
-    'invest_card' => 'array',
-  ];
+  protected $casts = [];
   protected $table = 'goal_sketches';
 
   public function project()

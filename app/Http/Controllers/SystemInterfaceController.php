@@ -91,13 +91,6 @@ class SystemInterfaceController extends Controller
       'overall_model_class_ids' => 'nullable|array',
       'overall_model_class_ids.*' =>
         'nullable|integer|exists:overall_model_classes,id',
-      'invest_card' => 'nullable|array',
-      'invest_card.independent' => 'nullable|string|in:yes,no,na',
-      'invest_card.negotiable' => 'nullable|string|in:yes,no,na',
-      'invest_card.valuable' => 'nullable|string|in:yes,no,na',
-      'invest_card.estimable' => 'nullable|string|in:yes,no,na',
-      'invest_card.small' => 'nullable|string|in:yes,no,na',
-      'invest_card.testable' => 'nullable|string|in:yes,no,na',
     ]);
 
     $interfaceData = Arr::except($validatedData, ['overall_model_class_ids']);

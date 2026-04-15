@@ -4,7 +4,6 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import { Plus, StickyNote, X } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
-import InvestCard from '../Inspection/InvestCard'
 import { useTooltipInfo } from '@/lib/projectData'
 import { toast } from 'sonner'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
@@ -165,7 +164,6 @@ const CRCCard = ({
   cancelEditTitle,
   reusableClasses,
   handleCollaboratorChange,
-  onInspect,
 }) => {
   const { t } = useTranslation()
   const { errors } = usePage().props
@@ -280,7 +278,6 @@ const CRCCard = ({
               isHovered={isHeaderHovered}
               onEdit={() => startEditTitle(card)}
               onDelete={() => confirmDeleteCard(card.id)}
-              onInspect={onInspect}
             />
           </>
         )}
@@ -350,10 +347,6 @@ const CRCCard = ({
 const OverallModel = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // inspection states
-  const [inspectionId, setInspectionId] = useState(null)
-  const [anchorEl, setAnchorEl] = useState(null)
-
   // IA states movidos para useOverallModelAIStore (Q2/Q4).
   // Lemos só o que precisamos dentro deste componente; o modal
   // externo (OverallModelAIModal) consome o store diretamente.
@@ -373,18 +366,6 @@ const OverallModel = ({ project, setProject }) => {
   const [deleteConfirmCardId, setDeleteConfirmCardId] = useState(null)
   const CLASS_NAME_MAX = 40
   const { errors } = usePage().props
-
-  // inspection function
-  const inspectOverallModel = (modelId) => {
-    if (inspectionId === modelId) {
-      setInspectionId(null)
-      setAnchorEl(null)
-    } else {
-      const element = document.querySelector(`[data-card-id="${modelId}"]`)
-      setAnchorEl(element)
-      setInspectionId(modelId)
-    }
-  }
 
   const handleAddReusableName = () => {
     if (!newReusableName.trim()) return
@@ -643,16 +624,6 @@ const OverallModel = ({ project, setProject }) => {
   return (
     <div className="p-4 flex flex-col gap-3">
       <OverallModelAIModal onConfirm={confirmGeneratedCards} />
-      {inspectionId && (
-        <InvestCard
-          itemCategory={'crc_cards'}
-          itemId={inspectionId}
-          anchorEl={anchorEl}
-          project={project}
-          setProject={setProject}
-          setInspectionId={setInspectionId}
-        />
-      )}
       <section className="flex gap-2 ">
         <Accordion
           type="single"
@@ -764,7 +735,6 @@ const OverallModel = ({ project, setProject }) => {
                 setEditValue={setEditValue}
                 reusableClasses={project?.overall_model_classes || []}
                 handleCollaboratorChange={handleCollaboratorChange}
-                onInspect={() => inspectOverallModel(card.id)}
               />
             ))
         ) : (

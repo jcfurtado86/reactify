@@ -15,7 +15,6 @@ class Persona extends Model
     'project_id',
     'profile',
     'expectations',
-    'invest_card',
     'goals',
     'is_ai_generated',
   ];
@@ -24,7 +23,6 @@ class Persona extends Model
     'profile' => 'array',
     'expectations' => 'array',
     'goals' => 'array',
-    'invest_card' => 'array',
   ];
 
   public function project()

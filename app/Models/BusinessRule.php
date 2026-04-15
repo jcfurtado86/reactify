@@ -15,10 +15,8 @@ class BusinessRule extends Model
    *
    * @var array<int, string>
    */
-  protected $fillable = ['title', 'story_id', 'project_id', 'invest_card', 'is_ai_generated'];
-  protected $casts = [
-    'invest_card' => 'array',
-  ];
+  protected $fillable = ['title', 'story_id', 'project_id', 'is_ai_generated'];
+  protected $casts = [];
   /**
    * Get the story that owns the business rule.
    */

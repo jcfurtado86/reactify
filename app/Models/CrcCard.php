@@ -15,14 +15,12 @@ class CrcCard extends Model
     'collaborators',
     'responsabilities',
     'project_id',
-    'invest_card',
     'is_ai_generated',
   ];
 
   protected $casts = [
     'collaborators' => 'array',
     'responsabilities' => 'array',
-    'invest_card' => 'array',
   ];
 
   public function project(): BelongsTo

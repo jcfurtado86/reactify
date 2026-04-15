@@ -70,13 +70,6 @@ class OverallModelController extends Controller
       'collaborators.*' => 'nullable|string|max:30',
       'responsabilities' => 'nullable|array',
       'responsabilities.*' => 'nullable|string|max:40',
-      'invest_card' => 'nullable|array',
-      'invest_card.independent' => 'nullable|string|in:yes,no,na',
-      'invest_card.negotiable' => 'nullable|string|in:yes,no,na',
-      'invest_card.valuable' => 'nullable|string|in:yes,no,na',
-      'invest_card.estimable' => 'nullable|string|in:yes,no,na',
-      'invest_card.small' => 'nullable|string|in:yes,no,na',
-      'invest_card.testable' => 'nullable|string|in:yes,no,na',
     ]);
 
     if ($request->has('class') && $request->class !== $model->class) {

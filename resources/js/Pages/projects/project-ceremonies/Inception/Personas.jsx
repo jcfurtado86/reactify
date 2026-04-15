@@ -17,7 +17,6 @@ import MotionDivOptions from '@/Components/MotionDivOptions'
 import TextareaAutosize from 'react-textarea-autosize'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
-import InvestCard from '../Inspection/InvestCard'
 import { useTooltipInfo } from '@/lib/projectData'
 import { inspectionStatus } from '@/lib/utils'
 import StatusBadge from '@/Components/StatusBadge'
@@ -200,7 +199,6 @@ const PersonaCard = ({
   editPersonaName,
   saveEditPersona,
   startEditPersona,
-  inspectPersona,
   personaFieldVariants,
   getFieldTitle,
   editingField,
@@ -331,7 +329,6 @@ const PersonaCard = ({
           isHovered={isHovered}
           onEdit={() => startEditPersona(persona.id)}
           onDelete={() => confirmDeletePersona(persona.id)}
-          onInspect={() => inspectPersona(persona.id)}
         />
       </AccordionItem>
     </Accordion>
@@ -422,9 +419,6 @@ const PersonaItem = ({
 const Personas = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // inspection states
-  const [inspectionId, setInspectionId] = useState(null)
-  const [anchorEl, setAnchorEl] = useState(null)
   const textareaRef = useRef(null)
   const [editingField, setEditingField] = useState({
     personaId: null,
@@ -653,17 +647,6 @@ const Personas = ({ project, setProject }) => {
     }
   }
 
-  // inspection function
-  const inspectPersona = (personaId) => {
-    if (inspectionId === personaId) {
-      setInspectionId(null)
-      setAnchorEl(null)
-    } else {
-      const element = document.querySelector(`[data-card-id="${personaId}"]`)
-      setAnchorEl(element)
-      setInspectionId(personaId)
-    }
-  }
   //ia functions
   const generatePersonas = async () => {
     setIsGenerating(true)
@@ -788,17 +771,6 @@ const Personas = ({ project, setProject }) => {
           toggleAllItems={toggleAllPersonas}
         />
       )}
-      {inspectionId && can('persona.manage') && (
-        <InvestCard
-          itemCategory={'personas'}
-          itemId={inspectionId}
-          anchorEl={anchorEl}
-          project={project}
-          setProject={setProject}
-          setInspectionId={setInspectionId}
-        />
-      )}
-
       {project.personas && project.personas.length > 0 ? (
         project.personas
           .sort((a, b) => a.id - b.id)
@@ -821,7 +793,6 @@ const Personas = ({ project, setProject }) => {
                 startEditPersona={startEditPersona}
                 confirmDeleteItem={confirmDeleteItem}
                 confirmDeletePersona={confirmDeletePersona}
-                inspectPersona={inspectPersona}
                 personaFieldVariants={personaFieldVariants}
                 addNewItem={addNewItem}
                 disabled={!can('persona.manage')}
