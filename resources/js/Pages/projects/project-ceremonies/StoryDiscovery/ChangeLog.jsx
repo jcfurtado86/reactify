@@ -3,6 +3,7 @@ import ChangeRequestForm from '../../../../Components/ChangeRequestForm'
 import ChangeRequestDetails from '../../../../Components/ChangeRequestDetails'
 import { useState } from 'react'
 import { Eye } from 'lucide-react'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import {
   Dialog,
   DialogContent,
@@ -119,14 +120,14 @@ const ChangeLog = ({ project }) => {
                   {getStatusBadge(request.status)}
                 </TableCell>
                 <TableCell className="text-center">
-                  <Button
+                  <ButtonWithTooltip
                     variant="ghost"
                     size="icon"
                     onClick={() => setSelectedRequest(request)}
-                    title={t('change_log.view_details')}
+                    tooltipContent={t('change_log.view_details')}
                   >
                     <Eye className="h-4 w-4" />
-                  </Button>
+                  </ButtonWithTooltip>
                 </TableCell>
               </TableRow>
             ))

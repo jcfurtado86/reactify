@@ -146,13 +146,17 @@ export const SprintTable = ({
                 </SpanButton>
               </>
             )}
-            <SpanButton
-              title={t('sprint.delete_sprint')}
-              variant="destructive"
-              onClick={() => openDeleteSprintForm(sprint)}
-            >
-              <TrashIcon className="size-3" />
-            </SpanButton>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SpanButton
+                  variant="destructive"
+                  onClick={() => openDeleteSprintForm(sprint)}
+                >
+                  <TrashIcon className="size-3" />
+                </SpanButton>
+              </TooltipTrigger>
+              <TooltipContent>{t('sprint.delete_sprint')}</TooltipContent>
+            </Tooltip>
           </div>
         </AccordionTrigger>
 

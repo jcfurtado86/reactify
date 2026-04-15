@@ -344,8 +344,8 @@ const Storyboards = ({ project }) => {
             initialData={sceneData}
             excalidrawAPI={(api) => setExcalidrawAPI(api)}
             renderTopRightUI={() => (
-              <TooltipProvider>
-                <Tooltip delayDuration={100}>
+              <TooltipProvider delayDuration={100} skipDelayDuration={200}>
+                <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="secondary"
@@ -357,7 +357,7 @@ const Storyboards = ({ project }) => {
                   </TooltipTrigger>
                   <TooltipContent>{t('storyboards.insert_attachment')}</TooltipContent>
                 </Tooltip>
-                <Tooltip delayDuration={100}>
+                <Tooltip>
                   <TooltipTrigger asChild>
                     <div>
                       <Button

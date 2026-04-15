@@ -409,14 +409,17 @@ export const CeremonyCard = ({
           className="p-4 hover:no-underline"
         >
           <div className="flex w-full items-center gap-2">
-            <SpanButton
-              title={t('dashboard.go_to', { name: item.title })}
-              onClick={onClick}
-              variant="link"
-            >
-              {item.title}
-              <ArrowRight className="size-3 ml-1" />
-            </SpanButton>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SpanButton onClick={onClick} variant="link">
+                  {item.title}
+                  <ArrowRight className="size-3 ml-1" />
+                </SpanButton>
+              </TooltipTrigger>
+              <TooltipContent>
+                {t('dashboard.go_to', { name: item.title })}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </AccordionTrigger>
 
@@ -458,7 +461,6 @@ export const CeremonyCard = ({
               return (
                 <ButtonWithTooltip
                   variant="link"
-                  title={t('dashboard.go_to', { name: artifact.label })}
                   key={artifact.title}
                   className="flex items-center gap-2"
                   onClick={() =>
@@ -819,12 +821,18 @@ const Dashboard = ({ project, setProject }) => {
                   : t('dashboard.inactive')}
               </Badge>
               {currentUserRole && (
-                <Badge
-                  variant={roleBadgeVariant[currentUserRole] || 'outline'}
-                  title={t('project_permissions.role')}
-                >
-                  {t(`project_permissions.roles.${currentUserRole}`)}
-                </Badge>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant={roleBadgeVariant[currentUserRole] || 'outline'}
+                    >
+                      {t(`project_permissions.roles.${currentUserRole}`)}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t('project_permissions.role')}
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
             <div className="flex items-center gap-2">

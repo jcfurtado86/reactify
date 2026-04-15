@@ -14,7 +14,7 @@ const MotionDivOptions = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <TooltipProvider delayDuration={100}>
+    <>
       <AnimatePresence>
         {isHovered && !isEditing && !isTemporary && !disabled && (
           <motion.div
@@ -97,7 +97,7 @@ const MotionDivOptions = ({
           </motion.div>
         )}
       </AnimatePresence>
-    </TooltipProvider>
+    </>
   )
 }
 

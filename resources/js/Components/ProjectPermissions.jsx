@@ -1,4 +1,5 @@
 import { Plus, LoaderCircle, X, UserCog } from 'lucide-react'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import { usePage, router } from '@inertiajs/react'
 import axios from 'axios'
 import { useTranslation } from 'react-i18next'
@@ -134,9 +135,14 @@ export function ProjectPermissions({ project }) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="secondary" title={t('project_permissions.title')} size="icon">
+        <ButtonWithTooltip
+          variant="secondary"
+          size="icon"
+          tooltipContent={t('project_permissions.title')}
+          side="bottom"
+        >
           <UserCog className="size-4" />
-        </Button>
+        </ButtonWithTooltip>
       </SheetTrigger>
       <SheetContent className="max-w-[370px] sm:max-w-[450px] md:max-w-[470px]">
         <SheetHeader>

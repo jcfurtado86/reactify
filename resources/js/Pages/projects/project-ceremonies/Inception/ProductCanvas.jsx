@@ -14,6 +14,7 @@ import {
   ChevronsUp,
 } from 'lucide-react'
 import GenerateAIButton from '@/Components/GenerateAIButton'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -265,28 +266,32 @@ const ExpandableCard = ({
             <div className="flex items-center gap-2">
               {isEditing ? (
                 <>
-                  <button
+                  <ButtonWithTooltip
                     onClick={handleSave}
                     disabled={isSaving}
+                    variant="ghost"
+                    size="icon"
                     className="text-success hover:text-success/90 transition-colors disabled:opacity-50"
-                    title="Save (Ctrl+Enter)"
+                    tooltipContent="Save (Ctrl+Enter)"
                   >
                     <Save
                       size={16}
                       className={isSaving ? 'animate-pulse' : ''}
                     />
-                  </button>
-                  <button
+                  </ButtonWithTooltip>
+                  <ButtonWithTooltip
                     onClick={handleCancel}
                     disabled={isSaving}
+                    variant="ghost"
+                    size="icon"
                     className="text-destructive hover:text-destructive/90 transition-colors disabled:opacity-50"
-                    title="Cancel (Esc)"
+                    tooltipContent="Cancel (Esc)"
                   >
                     <X size={16} />
-                  </button>
+                  </ButtonWithTooltip>
                 </>
               ) : (
-                <Button
+                <ButtonWithTooltip
                   onClick={() => setIsEditing(true)}
                   variant="ghost"
                   size="icon"
@@ -294,10 +299,10 @@ const ExpandableCard = ({
                     ' transition-colors',
                     isHovered || !hasContent ? 'opacity-100' : 'opacity-0',
                   )}
-                  title={t('product_canvas.edit_content')}
+                  tooltipContent={t('product_canvas.edit_content')}
                 >
                   <EditIcon size={16} />
-                </Button>
+                </ButtonWithTooltip>
               )}
             </div>
           )}

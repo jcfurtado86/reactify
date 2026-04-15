@@ -24,28 +24,26 @@ const ButtonWithTooltip = forwardRef(function ButtonWithTooltip(
   ref,
 ) {
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            ref={ref}
-            variant={variant}
-            size={size}
-            className={className}
-            onClick={onClick}
-            disabled={disabled}
-            {...rest}
-          >
-            {children}
-          </Button>
-        </TooltipTrigger>
-        {tooltipContent && (
-          <TooltipContent side={side} className="max-w-64">
-            {tooltipContent}
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          ref={ref}
+          variant={variant}
+          size={size}
+          className={className}
+          onClick={onClick}
+          disabled={disabled}
+          {...rest}
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      {tooltipContent && (
+        <TooltipContent side={side} className="max-w-64">
+          {tooltipContent}
+        </TooltipContent>
+      )}
+    </Tooltip>
   )
 })
 

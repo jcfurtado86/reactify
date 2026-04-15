@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { router, usePage } from '@inertiajs/react'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 /**
  * Botão que alterna entre os dois idiomas suportados (pt ↔ en).
@@ -81,10 +82,12 @@ const LanguageSwitcher = ({ className = '' }) => {
   }
 
   return (
-    <button
+    <ButtonWithTooltip
       type="button"
       onClick={toggle}
-      title={`${t('nav.language')}: ${meta.label} → ${nextMeta.label}`}
+      variant="ghost"
+      tooltipContent={`${t('nav.language')}: ${meta.label} → ${nextMeta.label}`}
+      side="bottom"
       aria-label={t('nav.language')}
       className={
         'inline-flex items-center justify-center gap-1.5 h-9 px-2 rounded-md text-foreground text-xs font-medium hover:bg-accent transition-colors ' +
@@ -93,7 +96,7 @@ const LanguageSwitcher = ({ className = '' }) => {
     >
       <Flag />
       <span>{meta.code}</span>
-    </button>
+    </ButtonWithTooltip>
   )
 }
 

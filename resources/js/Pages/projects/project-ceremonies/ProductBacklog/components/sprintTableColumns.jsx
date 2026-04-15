@@ -1,5 +1,6 @@
 import { EllipsisVertical, Undo2 } from 'lucide-react'
 import { getStatusColor } from '@/lib/utils'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import i18n from '@/i18n'
 
 const t = (...args) => i18n.t(...args)
@@ -95,9 +96,9 @@ export const getSharedColumns = ({
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" title={t('common.actions')}>
+            <ButtonWithTooltip variant="ghost" size="icon" tooltipContent={t('common.actions')}>
               <EllipsisVertical />
-            </Button>
+            </ButtonWithTooltip>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="start">
             <DropdownMenuItem>

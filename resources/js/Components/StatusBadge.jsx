@@ -24,16 +24,14 @@ const StatusBadge = ({ status }) => {
   }
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <SpanButton variant={'ghost'} className="hover:bg-transparent ">
-            {element}
-          </SpanButton>
-        </TooltipTrigger>
-        <TooltipContent>{message}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <SpanButton variant={'ghost'} className="hover:bg-transparent ">
+          {element}
+        </SpanButton>
+      </TooltipTrigger>
+      <TooltipContent>{message}</TooltipContent>
+    </Tooltip>
   )
 }
 export default StatusBadge

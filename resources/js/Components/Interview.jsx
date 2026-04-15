@@ -18,6 +18,7 @@ import { cn, formatDate } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import TextareaAutosize from 'react-textarea-autosize'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const InterviewEditModal = ({ interview, onClose }) => {
   const { t } = useTranslation()
@@ -195,24 +196,28 @@ const InterviewListItem = ({ interview, onEditClick }) => {
 
       <div className="relative flex items-center">
         {interview.extraction_status === 'failed' && !showConfirmDelete && (
-          <button
+          <ButtonWithTooltip
             onClick={handleRetry}
+            variant="ghost"
+            size="icon"
             className="ml-4 text-muted-foreground opacity-60 transition-opacity hover:opacity-100"
-            title={t('interview.retry_extraction')}
+            tooltipContent={t('interview.retry_extraction')}
           >
             <RotateCcw className="h-4 w-4" />
-          </button>
+          </ButtonWithTooltip>
         )}
         {interview.extraction_status === 'completed' &&
           interview.transcript &&
           !showConfirmDelete && (
-            <button
+            <ButtonWithTooltip
               onClick={() => onEditClick(interview)}
+              variant="ghost"
+              size="icon"
               className="ml-4 text-muted-foreground opacity-60 transition-opacity hover:opacity-100"
-              title={t('interview.view_transcript')}
+              tooltipContent={t('interview.view_transcript')}
             >
               <Pencil className="h-4 w-4" />
-            </button>
+            </ButtonWithTooltip>
           )}
 
         {showConfirmDelete ? (
@@ -220,29 +225,35 @@ const InterviewListItem = ({ interview, onEditClick }) => {
             <span className="text-xs text-muted-foreground">
               {t('interview.remove_confirm')}
             </span>
-            <button
+            <ButtonWithTooltip
               onClick={confirmDeletion}
+              variant="ghost"
+              size="icon"
               className="p-1 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
-              title={t('common.confirm')}
+              tooltipContent={t('common.confirm')}
             >
               <Check className="h-3 w-3" />
-            </button>
-            <button
+            </ButtonWithTooltip>
+            <ButtonWithTooltip
               onClick={() => setShowConfirmDelete(false)}
+              variant="ghost"
+              size="icon"
               className="p-1 rounded-md bg-gray-500 text-white hover:bg-gray-600 transition-colors"
-              title={t('common.cancel')}
+              tooltipContent={t('common.cancel')}
             >
               <X className="h-3 w-3" />
-            </button>
+            </ButtonWithTooltip>
           </div>
         ) : (
-          <button
+          <ButtonWithTooltip
             onClick={handleDelete}
+            variant="ghost"
+            size="icon"
             className="ml-4 text-destructive opacity-60 transition-opacity hover:opacity-100"
-            title={t('interview.remove')}
+            tooltipContent={t('interview.remove')}
           >
             <Trash2 className="h-4 w-4" />
-          </button>
+          </ButtonWithTooltip>
         )}
       </div>
     </div>

@@ -367,22 +367,20 @@ const ScenarioCard = ({
             <div className="w-full flex flex-col text-left font-normal items-center gap-1">
               {/* botoes de salvar e sair*/}
               <div className="flex items-center gap-1 self-end">
-                <TooltipProvider delayDuration={100}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <Switch
-                          variant="default"
-                          checked={isExpanded}
-                          onCheckedChange={expandScenario}
-                        />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {isExpanded ? 'Mostrar menos' : 'Mostrar mais'}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Switch
+                        variant="default"
+                        checked={isExpanded}
+                        onCheckedChange={expandScenario}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isExpanded ? 'Mostrar menos' : 'Mostrar mais'}
+                  </TooltipContent>
+                </Tooltip>
 
                 <Button
                   variant="ghost"

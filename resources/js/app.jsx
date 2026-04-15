@@ -8,6 +8,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { createRoot } from 'react-dom/client'
 import { configureEcho } from '@laravel/echo-react'
 import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 configureEcho({
   broadcaster: 'reverb',
 })
@@ -25,7 +26,7 @@ createInertiaApp({
     // 1. Create a function that renders our app with a given theme
     const renderAppWithTheme = (currentTheme) => {
       root.render(
-        <>
+        <TooltipProvider delayDuration={100} skipDelayDuration={200}>
           <Toaster
             theme={currentTheme} // <-- The theme is now a dynamic variable
             expand
@@ -35,7 +36,7 @@ createInertiaApp({
             duration={3000}
           />
           <App {...props} />
-        </>,
+        </TooltipProvider>,
       )
     }
 

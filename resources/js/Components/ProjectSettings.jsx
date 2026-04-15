@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from '@inertiajs/react'
 import { Settings, LoaderCircle, MousePointerClick, Trash2 } from 'lucide-react'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import { useTranslation } from 'react-i18next'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
@@ -46,14 +47,15 @@ export function ProjectSettings({ project }) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button
+        <ButtonWithTooltip
           variant="secondary"
           size="icon"
-          title={t('project_settings.title')}
+          tooltipContent={t('project_settings.title')}
+          side="bottom"
         >
           <Settings className="size-4" />
           <span className="sr-only">{t('project_settings.title')}</span>
-        </Button>
+        </ButtonWithTooltip>
       </SheetTrigger>
       <SheetContent className="w-[370px] sm:w-[450px] md:w-[470px]">
         <form onSubmit={handleSaveChanges}>
@@ -119,17 +121,17 @@ export function ProjectSettings({ project }) {
                   </EmojiPicker>
                 </PopoverContent>
               </Popover>
-              <Button
+              <ButtonWithTooltip
                 variant="outline"
                 size="icon"
-                title={t('home.remove_emoji')}
+                tooltipContent={t('home.remove_emoji')}
                 onClick={(e) => {
                   e.preventDefault()
                   setData('emoji', null)
                 }}
               >
                 <Trash2 />
-              </Button>
+              </ButtonWithTooltip>
             </div>
              {errors.emoji && (
                 <p className="text-sm text-destructive">{errors.emoji}</p>

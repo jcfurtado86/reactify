@@ -93,7 +93,6 @@ const LeftMenu = ({ isOpen, setIsOpen }) => {
               return (
                 <ButtonWithTooltip
                   key={project.id}
-                  title={project.title}
                   variant={`${isCurrentProject ? 'secondary' : 'outline'}`}
                   onClick={() =>
                     router.get(route('project.show', { id: project.id }))

@@ -14,6 +14,7 @@ import RaccoonIcon from '/resources/images/raccoonIconHeadTransparent.png'
 import { useTheme } from '@/Context/ThemeContext'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '@/Components/LanguageSwitcher'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const TopMenu = ({ isOpen, setIsOpen }) => {
   const { props } = usePage()
@@ -47,19 +48,20 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
       className="flex justify-between items-center bg-background text-foreground p-1 border-b border-border"
     >
       <div className="flex items-center gap-4 ml-1">
-        <Button
+        <ButtonWithTooltip
           variant="ghost"
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? t('top_menu.close_side_menu') : t('top_menu.open_side_menu')}
-          title={isOpen ? t('top_menu.close_side_menu') : t('top_menu.open_side_menu')}
+          tooltipContent={isOpen ? t('top_menu.close_side_menu') : t('top_menu.open_side_menu')}
+          side="bottom"
         >
           {isOpen ? (
             <PanelLeftClose className="!size-5" />
           ) : (
             <PanelLeftOpen className="!size-5" />
           )}
-        </Button>
+        </ButtonWithTooltip>
         {/* link para dasboard */}
         <Link
           as="div"
@@ -82,16 +84,19 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
             defaultValue="zinc"
             onValueChange={(value) => setThemeColor(value)}
           >
-            <SelectTrigger title={t('top_menu.theme_selector')}>
-              <SelectValue placeholder={t('top_menu.theme_selector')} />
-            </SelectTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('top_menu.theme_selector')} />
+                </SelectTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                {t('top_menu.theme_selector')}
+              </TooltipContent>
+            </Tooltip>
             <SelectContent>
               {themes.map((theme) => (
-                <SelectItem
-                  value={theme.name}
-                  key={theme.name}
-                  title={theme.name}
-                >
+                <SelectItem value={theme.name} key={theme.name}>
                   <section className="flex items-center gap-1">
                     <div
                       style={{ background: theme.color }}
@@ -105,26 +110,28 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           </Select>
         </div>
         <LanguageSwitcher />
-        <Button
+        <ButtonWithTooltip
           variant="ghost"
           size="icon"
           onClick={handleThemeToggle}
           aria-label={t('top_menu.toggle_theme')}
-          title={t('top_menu.toggle_theme')}
+          tooltipContent={t('top_menu.toggle_theme')}
+          side="bottom"
         >
           {theme === 'dark' ? (
             <Moon className="!size-5" />
           ) : (
             <Sun className="!size-5" />
           )}
-        </Button>
+        </ButtonWithTooltip>
 
-        <Button
+        <ButtonWithTooltip
           variant="ghost"
           size="icon"
           onClick={() => router.get(route('notifications.index'))}
           aria-label={t('nav.notifications')}
-          title={t('nav.notifications')}
+          tooltipContent={t('nav.notifications')}
+          side="bottom"
         >
           <Bell className="!size-5" />
           <Badge
@@ -132,16 +139,17 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
           >
             {notifications.filter((n) => !n.read_at).length}
           </Badge>
-        </Button>
+        </ButtonWithTooltip>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
+            <ButtonWithTooltip
               variant="ghost"
               size="icon"
               className="rounded-full"
               aria-label={t('nav.profile')}
-              title={t('nav.profile')}
+              tooltipContent={t('nav.profile')}
+              side="bottom"
             >
               {user?.avatar_url ? (
                 <img
@@ -152,7 +160,7 @@ const TopMenu = ({ isOpen, setIsOpen }) => {
               ) : (
                 <User className="size-7 text-foreground" />
               )}
-            </Button>
+            </ButtonWithTooltip>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="start">
             <DropdownMenuLabel>

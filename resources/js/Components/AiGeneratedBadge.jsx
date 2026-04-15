@@ -3,6 +3,7 @@ import { route } from 'ziggy-js'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import axios from 'axios'
+import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 /**
  * Badge visual + ações pra um item gerado por IA pendente de revisão.
@@ -44,30 +45,38 @@ const AiGeneratedBadge = ({ item, type, onDiscard, compact = false }) => {
 
   return (
     <span className="inline-flex items-center gap-1.5 align-middle whitespace-nowrap">
-      <span
-        className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] leading-none font-medium text-amber-600 dark:text-amber-400 border border-amber-500/30"
-        title={t('ai_review.badge_tooltip', 'Gerado por IA, revise antes de aprovar')}
-      >
-        <Sparkles className="h-3 w-3 shrink-0" />
-        {!compact && (t('ai_review.badge_label', 'IA'))}
-      </span>
-      <button
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] leading-none font-medium text-amber-600 dark:text-amber-400 border border-amber-500/30">
+            <Sparkles className="h-3 w-3 shrink-0" />
+            {!compact && (t('ai_review.badge_label', 'IA'))}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          {t('ai_review.badge_tooltip', 'Gerado por IA, revise antes de aprovar')}
+        </TooltipContent>
+      </Tooltip>
+      <ButtonWithTooltip
         type="button"
         onClick={handleApprove}
+        variant="ghost"
+        size="icon"
         className="inline-flex items-center justify-center rounded-md p-1 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
-        title={t('ai_review.approve', 'Aprovar')}
+        tooltipContent={t('ai_review.approve', 'Aprovar')}
       >
         <Check className="h-3.5 w-3.5" />
-      </button>
+      </ButtonWithTooltip>
       {onDiscard && (
-        <button
+        <ButtonWithTooltip
           type="button"
           onClick={handleDiscard}
+          variant="ghost"
+          size="icon"
           className="inline-flex items-center justify-center rounded-md p-1 text-destructive hover:bg-destructive/10 transition-colors"
-          title={t('ai_review.discard', 'Descartar')}
+          tooltipContent={t('ai_review.discard', 'Descartar')}
         >
           <X className="h-3.5 w-3.5" />
-        </button>
+        </ButtonWithTooltip>
       )}
     </span>
   )
