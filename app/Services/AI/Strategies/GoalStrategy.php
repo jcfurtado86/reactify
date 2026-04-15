@@ -4,6 +4,7 @@ namespace App\Services\AI\Strategies;
 
 use App\Models\Goal;
 use App\Models\Interview;
+use App\Models\ProductCanvas;
 use App\Models\Project;
 use App\Services\AI\GeneratorStrategy;
 use App\Services\AI\ParsesLlmJson;
@@ -41,9 +42,24 @@ class GoalStrategy implements GeneratorStrategy
             )->implode("\n");
         }
 
+        $canvas = ProductCanvas::where('project_id', $project->id)->first();
+        $canvasContext = 'Nenhum Product Canvas definido.';
+        if ($canvas) {
+            $parts = [];
+            if (!empty($canvas->product_is)) $parts[] = "Produto É: {$canvas->product_is}";
+            if (!empty($canvas->product_is_not)) $parts[] = "Produto NÃO É: {$canvas->product_is_not}";
+            if (!empty($canvas->issues)) $parts[] = "Problemas: {$canvas->issues}";
+            if (!empty($canvas->solutions)) $parts[] = "Soluções: {$canvas->solutions}";
+            if (!empty($canvas->restrictions)) $parts[] = "Restrições: {$canvas->restrictions}";
+            if (!empty($parts)) {
+                $canvasContext = implode("\n", $parts);
+            }
+        }
+
         return [
             'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
             'existing' => $existingContext,
+            'canvas' => $canvasContext,
         ];
     }
 
@@ -51,11 +67,15 @@ class GoalStrategy implements GeneratorStrategy
     {
         $transcript = $context['transcripts'];
         $existing = $context['existing'];
+        $canvas = $context['canvas'];
 
         return <<<PROMPT
         Analise a transcrição da entrevista abaixo e extraia os objetivos de negócio (Business Goals) e as restrições (Constraint Goals).
 
         Transcrição: "{$transcript}"
+
+        **Product Canvas do Projeto (use como orientação):**
+        {$canvas}
 
         LISTA DE GOALS JÁ EXISTENTES (NÃO REPITA):
         {$existing}

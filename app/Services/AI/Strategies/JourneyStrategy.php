@@ -2,6 +2,7 @@
 
 namespace App\Services\AI\Strategies;
 
+use App\Models\Goal;
 use App\Models\Interview;
 use App\Models\Journey;
 use App\Models\Persona;
@@ -68,9 +69,15 @@ class JourneyStrategy implements BatchedGeneratorStrategy
             })->implode("\n\n");
         }
 
+        $projectGoals = Goal::where('project_id', $project->id)->get();
+        $projectGoalsContext = $projectGoals->isEmpty()
+            ? 'Nenhum goal definido.'
+            : $projectGoals->map(fn($g) => "- \"{$g->title}\" (Tipo: {$g->type})")->implode("\n");
+
         return [
             'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
             'existing' => $existingContext,
+            'project_goals' => $projectGoalsContext,
         ];
     }
 
@@ -79,6 +86,7 @@ class JourneyStrategy implements BatchedGeneratorStrategy
         $persona = $item;
         $interviewContext = $sharedContext['transcripts'];
         $existing = $sharedContext['existing'];
+        $projectGoals = $sharedContext['project_goals'];
 
         $goals = is_string($persona->goals) ? json_decode($persona->goals, true) : $persona->goals;
         $goalsJson = json_encode($goals, JSON_UNESCAPED_UNICODE);
@@ -96,6 +104,9 @@ class JourneyStrategy implements BatchedGeneratorStrategy
 
         Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):
         {$interviewContext}
+
+        **Goals do Projeto:**
+        {$projectGoals}
 
         LISTA DE JOURNEYS JÁ EXISTENTES (NÃO REPITA):
         {$existing}

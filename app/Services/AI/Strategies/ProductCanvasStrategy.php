@@ -2,6 +2,7 @@
 
 namespace App\Services\AI\Strategies;
 
+use App\Models\Goal;
 use App\Models\Interview;
 use App\Models\Project;
 use App\Models\ProductCanvas;
@@ -61,9 +62,15 @@ class ProductCanvasStrategy implements GeneratorStrategy
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         }
 
+        $goals = Goal::where('project_id', $project->id)->get();
+        $goalsContext = $goals->isEmpty()
+            ? 'Nenhum goal definido.'
+            : $goals->map(fn($g) => "- \"{$g->title}\" (Tipo: {$g->type})")->implode("\n");
+
         return [
             'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
             'existing' => $existingContext,
+            'goals' => $goalsContext,
         ];
     }
 
@@ -71,6 +78,7 @@ class ProductCanvasStrategy implements GeneratorStrategy
     {
         $transcripts = $context['transcripts'];
         $existing = $context['existing'];
+        $goals = $context['goals'];
 
         return <<<PROMPT
         Sua tarefa é preencher um Product Canvas com base nas transcrições de entrevistas de usuários fornecidas.
@@ -79,6 +87,9 @@ class ProductCanvasStrategy implements GeneratorStrategy
 
         **Transcrição das Entrevistas:**
         {$transcripts}
+
+        **Goals do Projeto (use como orientação de valor):**
+        {$goals}
 
         **Product Canvas ATUAL (Use como base para refinar):**
         {$existing}

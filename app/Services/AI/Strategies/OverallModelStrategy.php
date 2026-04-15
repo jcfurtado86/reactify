@@ -2,6 +2,7 @@
 
 namespace App\Services\AI\Strategies;
 
+use App\Models\BusinessRule;
 use App\Models\CrcCard;
 use App\Models\Interview;
 use App\Models\OverallModelClass;
@@ -60,11 +61,17 @@ class OverallModelStrategy implements GeneratorStrategy
                 ->implode("\n");
         }
 
+        $rules = BusinessRule::where('project_id', $project->id)->get();
+        $rulesContext = $rules->isEmpty()
+            ? 'Nenhuma regra definida.'
+            : $rules->map(fn($r) => "- {$r->title}")->implode("\n");
+
         return [
             'stories' => $stories->map(fn($s) => "- ({$s->type}): {$s->title}")->implode("\n"),
             'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
             'existing_crc' => $existingCrcContext,
             'existing_classes' => $existingClassesContext,
+            'rules' => $rulesContext,
         ];
     }
 
@@ -74,6 +81,7 @@ class OverallModelStrategy implements GeneratorStrategy
         $interviewContext = $context['transcripts'];
         $existingCrcContext = $context['existing_crc'];
         $existingClassesContext = $context['existing_classes'];
+        $rulesContext = $context['rules'];
 
         return <<<PROMPT
         Sua tarefa tem duas partes:
@@ -87,6 +95,9 @@ class OverallModelStrategy implements GeneratorStrategy
         Contexto das entrevistas de requisitos do Projeto (Use como base de conhecimento):
         {$interviewContext}
         **Fim do contexto da entrevista**
+
+        **Regras de Negócio do Projeto (use como invariantes do modelo):**
+        {$rulesContext}
 
         OVERAL MODEL EXISTENTE:
         CRC Cards Atuais:

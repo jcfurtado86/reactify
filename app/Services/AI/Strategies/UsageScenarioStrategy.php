@@ -2,6 +2,7 @@
 
 namespace App\Services\AI\Strategies;
 
+use App\Models\BusinessRule;
 use App\Models\Interview;
 use App\Models\Project;
 use App\Models\Story;
@@ -50,9 +51,12 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
 
         $existing = UsageScenario::where('project_id', $project->id)->get();
 
+        $rules = BusinessRule::where('project_id', $project->id)->get();
+
         return [
             'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
             'existing_by_story' => $existing->groupBy('story_id'),
+            'rules_by_story' => $rules->groupBy('story_id'),
         ];
     }
 
@@ -61,6 +65,14 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
         $story = $item;
         $interviewContext = $sharedContext['transcripts'];
         $existingByStory = $sharedContext['existing_by_story'];
+        $rulesByStory = $sharedContext['rules_by_story'];
+
+        $storyRulesContext = 'Nenhuma regra definida para esta story.';
+        if (isset($rulesByStory[$story->id])) {
+            $storyRulesContext = $rulesByStory[$story->id]
+                ->map(fn($rule) => "- {$rule->title}")
+                ->implode("\n");
+        }
 
         $storyScenariosContext = 'Nenhum.';
         if (isset($existingByStory[$story->id])) {
@@ -98,6 +110,9 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
 
         CENÁRIOS JÁ EXISTENTES PARA ESTA STORY:
         {$storyScenariosContext}
+
+        **Regras de Negócio DESTA Story (não gere cenários que as violem):**
+        {$storyRulesContext}
 
         O **NOVO** cenário deve seguir a estrutura:
         - 'as': O papel do usuário.

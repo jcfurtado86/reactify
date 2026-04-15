@@ -2,6 +2,7 @@
 
 namespace App\Services\AI\Strategies;
 
+use App\Models\Goal;
 use App\Models\Interview;
 use App\Models\Persona;
 use App\Models\Project;
@@ -57,9 +58,15 @@ class PersonaStrategy implements GeneratorStrategy
             })->implode("\n\n");
         }
 
+        $goals = Goal::where('project_id', $project->id)->get();
+        $goalsContext = $goals->isEmpty()
+            ? 'Nenhum goal definido.'
+            : $goals->map(fn($g) => "- \"{$g->title}\" (Tipo: {$g->type})")->implode("\n");
+
         return [
             'transcripts' => $interviews->pluck('transcript')->implode("\n\n---\n\n"),
             'existing' => $existingContext,
+            'goals' => $goalsContext,
         ];
     }
 
@@ -67,12 +74,16 @@ class PersonaStrategy implements GeneratorStrategy
     {
         $escapedTranscript = json_encode($context['transcripts']);
         $existing = $context['existing'];
+        $goals = $context['goals'];
 
         return <<<PROMPT
         Com base na transcrição da entrevista de usuário fornecida abaixo, analise o texto e crie 1 a 2 personas detalhadas.
 
         Transcrição da Entrevista:
         {$escapedTranscript}
+
+        **Goals do Projeto (calibre os perfis contra esses objetivos):**
+        {$goals}
 
         LISTA DE PERSONAS JÁ EXISTENTES (NÃO REPITA):
         {$existing}
