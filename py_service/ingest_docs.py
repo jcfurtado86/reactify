@@ -1,81 +1,71 @@
-#VETORIZA ARQUIVO PDF COM DOCLING
+"""
+Ingestão de PDFs na base de conhecimento RAG do chat.
+
+Usa a mesma vector_store de `rag.py` (embeddings + collection do env),
+então o `search_knowledge_base` do agente acha o conteúdo sem nenhum
+ajuste a mais.
+
+Uso:
+    python ingest_docs.py react_m/Dissertacao_Bleno_VersaoFinal.pdf [outro.pdf ...]
+
+Sem args, ingere todo PDF dentro de `react_m/`.
+"""
 import os
+import sys
 from dotenv import load_dotenv
 
-# Carrega variáveis de ambiente
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
 load_dotenv()
 
-# Bibliotecas do LangChain e Vetores
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_postgres import PGVector
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-
-# Docling para processamento de arquivos
 from docling.document_converter import DocumentConverter
 
-# Configuração do Modelo de Embeddings Local (O mesmo do seu hf.py)
-MODEL_NAME = "BAAI/bge-m3"
-MODEL_PATH = ".hf_models" # Ajuste se o caminho for diferente
-model_kwargs = {'device': 'cpu'} # Mude para 'cuda' se tiver GPU NVIDIA configurada
-encode_kwargs = {'normalize_embeddings': True}
+from rag import vector_store
 
-print(f"🔄 Carregando modelo de embeddings: {MODEL_NAME}...")
-embeddings = HuggingFaceEmbeddings(
-    model_name=MODEL_PATH, # Aponta para a pasta local onde você salvou
-    model_kwargs=model_kwargs,
-    encode_kwargs=encode_kwargs
-)
 
-# Configuração do Banco de Dados (PGVector)
-# Nota: O 'collection_name' separa diferentes conjuntos de documentos no mesmo banco
-connection_string = os.getenv("DATABASE_URL")
-collection_name = "react"
-
-vector_store = PGVector(
-    embeddings=embeddings,
-    collection_name=collection_name,
-    connection=connection_string,
-    use_jsonb=True,
-)
-
-def process_and_ingest(file_path):
-    print(f"📄 Processando arquivo: {file_path}")
-    
-    # 1. Converter PDF para Markdown usando Docling
+def process_and_ingest(file_path: str) -> None:
+    print(f"📄 Processando: {file_path}")
     converter = DocumentConverter()
     result = converter.convert(file_path)
     doc_content = result.document.export_to_markdown()
-    
-    # 2. Criar Objeto Documento do LangChain
-    # Adicionamos metadados para saber a origem depois
+
     raw_doc = Document(
         page_content=doc_content,
-        metadata={"source": file_path}
+        metadata={"source": os.path.basename(file_path)},
     )
-    
-    # 3. Dividir o texto em pedaços (Chunks)
-    # Chunk size 1000 é um padrão seguro. Overlap ajuda a manter contexto entre pedaços.
-    text_splitter = RecursiveCharacterTextSplitter(
+
+    splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,
-        separators=["\n\n", "\n", " ", ""]
+        separators=["\n\n", "\n", " ", ""],
     )
-    chunks = text_splitter.split_documents([raw_doc])
-    
-    print(f"✂️  Documento dividido em {len(chunks)} pedaços.")
-    
-    # 4. Salvar no Postgres
-    print("💾 Salvando vetores no banco de dados...")
+    chunks = splitter.split_documents([raw_doc])
+    print(f"✂️  {len(chunks)} chunks")
+
     vector_store.add_documents(chunks)
-    print("✅ Ingestão concluída com sucesso!")
+    print(f"✅ Ingerido: {file_path}")
+
+
+def _default_targets() -> list[str]:
+    base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "react_m")
+    if not os.path.isdir(base):
+        return []
+    return sorted(
+        os.path.join(base, f)
+        for f in os.listdir(base)
+        if f.lower().endswith(".pdf")
+    )
+
 
 if __name__ == "__main__":
-    # Teste direto: Ajuste o caminho para um PDF real que você tenha aí
-    file_test = "react_m/Dissertacao_Bleno_VersaoFinal.pdf"
-    
-    if os.path.exists(file_test):
-        process_and_ingest(file_test)
-    else:
-        print(f"⚠️ Arquivo de teste não encontrado: {file_test}")
-        print("Por favor, ajuste a variável 'file_test' no final do script.")
+    targets = sys.argv[1:] or _default_targets()
+    if not targets:
+        print("⚠️  Nenhum PDF informado e react_m/ vazio.")
+        sys.exit(1)
+
+    for path in targets:
+        if not os.path.exists(path):
+            print(f"⚠️  Não encontrado: {path}")
+            continue
+        process_and_ingest(path)
