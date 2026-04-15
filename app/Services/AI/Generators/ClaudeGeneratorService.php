@@ -21,8 +21,8 @@ class ClaudeGeneratorService extends AbstractLlmGeneratorService
 {
     protected function callLlm(string $prompt, ?array $schema = null): string
     {
-        $model = config('services.artifact_llm.claude_model', 'claude-haiku-4-5-20251001');
-        $apiKey = config('services.artifact_llm.claude_api_key') ?: env('ANTHROPIC_API_KEY');
+        $model = config('services.llm.claude_model', 'claude-haiku-4-5-20251001');
+        $apiKey = config('services.llm.claude_api_key') ?: env('ANTHROPIC_API_KEY');
 
         $client = new Client(apiKey: $apiKey);
 

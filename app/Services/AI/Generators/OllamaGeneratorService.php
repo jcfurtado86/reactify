@@ -22,8 +22,8 @@ class OllamaGeneratorService extends AbstractLlmGeneratorService
 {
     protected function callLlm(string $prompt, ?array $schema = null): string
     {
-        $model = config('services.artifact_llm.ollama_model');
-        $think = (bool) config('services.artifact_llm.ollama_think', false);
+        $model = config('services.llm.ollama_model');
+        $think = (bool) config('services.llm.ollama_think', false);
 
         $prefix = $think ? '' : '/no_think ';
 

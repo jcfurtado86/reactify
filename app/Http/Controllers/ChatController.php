@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Services\AIAssistantServiceGemini;
-use App\Services\AIAssistantServiceOllama;
+use App\Services\PythonChatBridge;
 use App\Jobs\ProcessChatJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +13,7 @@ class ChatController extends Controller
 {
   protected $aiAssistantService;
 
-  public function __construct(AIAssistantServiceGemini $aiAssistantService)
+  public function __construct(PythonChatBridge $aiAssistantService)
   {
     $this->aiAssistantService = $aiAssistantService;
   }

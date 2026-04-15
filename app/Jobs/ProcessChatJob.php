@@ -4,8 +4,8 @@ namespace App\Jobs;
 
 use App\Models\Project;
 use App\Models\User;
-use App\Services\AIAssistantServiceGemini; 
-use App\Events\ChatMessageReceived; 
+use App\Services\PythonChatBridge;
+use App\Events\ChatMessageReceived;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -38,7 +38,7 @@ class ProcessChatJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(AIAssistantServiceGemini $aiService): void
+    public function handle(PythonChatBridge $aiService): void
     {
         try {
             // Chamar o Python e ESPERAR 

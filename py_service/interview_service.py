@@ -21,12 +21,14 @@ import requests
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 
+# Carrega primeiro o .env do Laravel (pai), depois o local do py_service
+# se existir. Fonte única de verdade: o Laravel .env.
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
+load_dotenv()
+
 from config import Config
 from postprocessors import build_postprocessor
 from transcribers import build_transcriber
-
-
-load_dotenv()
 
 app = Flask(__name__)
 

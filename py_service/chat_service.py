@@ -8,6 +8,14 @@ especializados (prompts, agent, tools, rag) e devolve a resposta final.
 Toda a lógica de negócio vive nos módulos vizinhos — testável sem
 subir Flask.
 """
+import os
+from dotenv import load_dotenv
+# Carrega o .env do Laravel (um nível acima) como fonte de verdade, além
+# do .env local do py_service se existir. O Laravel .env tem LLM_PROVIDER,
+# DATABASE_URL, chaves de API e outras vars compartilhadas.
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
+load_dotenv()  # py_service/.env sobrescreve se existir
+
 from flask import Flask, Response, jsonify, request
 
 from config import Config

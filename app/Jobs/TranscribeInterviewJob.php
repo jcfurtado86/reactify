@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Interview;
+use App\Services\AI\TranscriptCleanupService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,32 +28,38 @@ class TranscribeInterviewJob implements ShouldQueue
         $this->interview = $interview;
     }
 
-    public function handle(): void
+    public function handle(TranscriptCleanupService $cleaner): void
     {
 
         $pythonServiceUrl = config('services.python_transcriber.url');
 
         try {
-            $response = Http::timeout($this->timeout - 10) // Timeout da requisição um pouco menor que o do job
+            $response = Http::timeout($this->timeout - 10)
                 ->post($pythonServiceUrl . '/transcribe', [
                     'file_url' => $this->interview->file_path,
                 ]);
 
-            if ($response->successful()) {
-                $this->interview->update([
-                    'transcript_raw' => $response->json('transcript_raw'),
-                    'transcript' => $response->json('transcript'),
-                    'extraction_status' => 'completed'
-                ]);
-            } else {
+            if (!$response->successful()) {
                 throw new \Exception('Serviço de transcrição retornou um erro: ' . $response->body());
             }
 
+            // Hoje o py_service ainda pode devolver um 'transcript' pre-processado
+            // (se POSTPROCESSOR_PROVIDER != noop). Preferimos sempre o raw e
+            // processamos aqui no Laravel via TranscriptCleanupService, que
+            // usa o mesmo provider plugável do resto do pipeline.
+            $raw = $response->json('transcript_raw') ?? $response->json('transcript') ?? '';
+            $cleaned = $cleaner->cleanup($raw);
+
+            $this->interview->update([
+                'transcript_raw' => $raw,
+                'transcript' => $cleaned,
+                'extraction_status' => 'completed',
+            ]);
         } catch (\Exception $e) {
             Log::error('Falha no job de transcrição: ' . $e->getMessage());
             $this->interview->update(['extraction_status' => 'failed']);
             broadcast(new ProjectUpdated($this->interview->project));
-            $this->fail($e); // Marca o job como falho
+            $this->fail($e);
             return;
         }
 

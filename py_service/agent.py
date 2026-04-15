@@ -2,34 +2,20 @@
 Setup do LLM e construção do agente LangChain.
 """
 import langchain
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain.agents import create_agent
 from config import Config
 from rag import search_knowledge_base
 from tools import make_agent_tools
+from llm_factory import build_llm
 
 langchain.debug = Config.LANGCHAIN_DEBUG
 
 
-def _build_llm():
-    """
-    Factory do LLM. Por enquanto só suporta Gemini; a migração para Ollama
-    (ver MIGRATION_PLAN_OLLAMA.md) adiciona aqui um branch por provider.
-    """
-    provider = Config.LLM_PROVIDER
-    if provider in ("gemini", "google_genai"):
-        return ChatGoogleGenerativeAI(
-            model=Config.LLM_MODEL,
-            temperature=Config.LLM_TEMPERATURE,
-        )
-    raise RuntimeError(
-        f"LLM_PROVIDER não suportado: {provider!r}. "
-        "Valores aceitos hoje: 'gemini'."
-    )
-
-
-llm = _build_llm()
+# LLM instanciado uma vez na startup — troca de provider exige restart
+# do py_service, mas o factory é agnóstico de caller. Os 3 providers
+# (Gemini, Claude, Ollama) seguem o mesmo protocol do LangChain.
+llm = build_llm(temperature=Config.LLM_TEMPERATURE)
 
 
 def build_chat_history(chat_history_raw):

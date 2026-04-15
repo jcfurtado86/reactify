@@ -51,12 +51,12 @@ return [
         'url' => env('PYTHON_CHAT_SERVICE_URL', 'http://127.0.0.1:5002/chat-stream'),
         'api_key' => env('PYTHON_SERVICE_API_KEY'),
     ],
-  'artifact_llm' => [
-    'provider' => env('ARTIFACT_LLM_PROVIDER', 'ollama'),
-    'ollama_model' => env('ARTIFACT_LLM_OLLAMA_MODEL', 'qwen3:8b'),
-    'ollama_think' => filter_var(env('ARTIFACT_LLM_OLLAMA_THINK', false), FILTER_VALIDATE_BOOLEAN),
-    'claude_model' => env('ARTIFACT_LLM_CLAUDE_MODEL', 'claude-haiku-4-5-20251001'),
+  'llm' => [
+    'provider' => env('LLM_PROVIDER', 'ollama'),
+    'ollama_model' => env('LLM_OLLAMA_MODEL', 'qwen3:8b'),
+    'ollama_think' => filter_var(env('LLM_OLLAMA_THINK', false), FILTER_VALIDATE_BOOLEAN),
+    'claude_model' => env('LLM_CLAUDE_MODEL', 'claude-haiku-4-5-20251001'),
     'claude_api_key' => env('ANTHROPIC_API_KEY'),
-    'gemini_model' => env('ARTIFACT_LLM_GEMINI_MODEL', 'gemini-2.5-flash'),
+    'gemini_model' => env('LLM_GEMINI_MODEL', 'gemini-2.5-flash'),
   ],
 ];

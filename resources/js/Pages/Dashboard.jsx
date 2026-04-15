@@ -2,6 +2,7 @@ import React from 'react'
 import { Head, router, usePage } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
 import Interview from '@/Components/Interview'
+import ChatBot from './projects/ChatBot.jsx'
 import { useTooltipInfo } from '@/lib/projectData'
 import { ProjectPermissions } from '@/Components/ProjectPermissions'
 import { ProjectSettings } from '@/Components/ProjectSettings'
@@ -1069,6 +1070,11 @@ const Dashboard = ({ project, setProject }) => {
           </React.Fragment>
         ))}
       </section>
+      <ChatBot
+        project={project}
+        currentPage={{ page: 'dashboard', artifact: null }}
+        currentContextData={null}
+      />
     </main>
   )
 }

@@ -58,12 +58,12 @@ class AppServiceProvider extends ServiceProvider
     $this->app->bind(
       \App\Services\AI\Contracts\LlmGeneratorService::class,
       function () {
-        return match (config('services.artifact_llm.provider', 'ollama')) {
+        return match (config('services.llm.provider', 'ollama')) {
           'ollama' => new \App\Services\AI\Generators\OllamaGeneratorService(),
           'gemini' => new \App\Services\AI\Generators\GeminiGeneratorService(),
           'claude' => new \App\Services\AI\Generators\ClaudeGeneratorService(),
           default => throw new \RuntimeException(
-            'ARTIFACT_LLM_PROVIDER inválido: ' . config('services.artifact_llm.provider')
+            'LLM_PROVIDER inválido: ' . config('services.llm.provider')
           ),
         };
       }
