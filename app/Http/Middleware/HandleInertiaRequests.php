@@ -6,8 +6,10 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\GenerationJob;
+use App\Models\Project;
 use App\Models\ProjectInvitation;
 use App\Notifications\UserInvitedToProject;
+use App\Support\ProjectAccess;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -38,6 +40,19 @@ class HandleInertiaRequests extends Middleware
         'user' => fn() => $request->user()
           ? $request->user()->only(['id', 'name', 'email', 'provider_avatar', 'avatar_url'])
           : null,
+
+        // Permissões resolvidas pro projeto da rota atual (se houver).
+        // Array de strings tipo 'persona.manage'. Usado por useCan() no frontend.
+        'permissions' => fn() => ProjectAccess::permissionsFor(
+          $request->user(),
+          $this->resolveCurrentProject($request),
+        ),
+
+        // Papel do usuário no projeto atual (string ou null).
+        'currentProjectRole' => fn() => ProjectAccess::roleFor(
+          $request->user(),
+          $this->resolveCurrentProject($request),
+        )?->value,
 
         'notifications' => function () use ($request) {
           if (!$request->user()) {
@@ -134,5 +149,27 @@ class HandleInertiaRequests extends Middleware
           ->all()
         : [],
     ]);
+  }
+
+  // Tenta resolver o Project do request atual a partir do parâmetro de rota.
+  // Funciona para rotas que recebem {project} (model binding) ou {project_id}.
+  private function resolveCurrentProject(Request $request): ?Project
+  {
+    $route = $request->route();
+    if (!$route) {
+      return null;
+    }
+    $param = $route->parameter('project');
+    if ($param instanceof Project) {
+      return $param;
+    }
+    if (is_numeric($param)) {
+      return Project::find((int) $param);
+    }
+    $id = $route->parameter('project_id');
+    if (is_numeric($id)) {
+      return Project::find((int) $id);
+    }
+    return null;
   }
 }

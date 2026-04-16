@@ -222,7 +222,7 @@ const JourneyStepItem = ({
         </button>
       )}
 
-      <MotionDivOptions
+      <MotionDivOptions slot="journey.manage"
         disabled={disabled}
         isHovered={isHovered}
         isEditing={isEditing}

@@ -94,7 +94,7 @@ const EditableListItem = ({
       ) : (
         <>
           <p className="text-sm px-2 flex-1 break-words">{item}</p>
-          <MotionDivOptions
+          <MotionDivOptions slot="overallModel.manage"
             isHovered={isHovered}
             isEditing={isEditing}
             onEdit={onEdit}
@@ -132,7 +132,7 @@ const CollaboratorItem = ({ item, onChange, onDelete, options = [] }) => {
           ))}
         </SelectContent>
       </Select>
-      <MotionDivOptions
+      <MotionDivOptions slot="overallModel.manage"
         isHovered={isHovered}
         onDelete={onDelete}
         options={{ edit: false, delete: true }}
@@ -267,7 +267,7 @@ const CRCCard = ({
               type="crc_cards"
               onDiscard={() => confirmDeleteCard(card.id)}
             />
-            <MotionDivOptions
+            <MotionDivOptions slot="overallModel.manage"
               isHovered={isHeaderHovered}
               onEdit={() => startEditTitle(card)}
               onDelete={() => confirmDeleteCard(card.id)}

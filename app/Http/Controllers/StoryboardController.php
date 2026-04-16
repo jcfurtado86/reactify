@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use App\Models\Storyboard;
 use Illuminate\Http\Request;
 use Cloudinary\Api\Exception\NotFound;
@@ -11,7 +12,6 @@ class StoryboardController extends Controller
 {
   public function store(Request $request)
   {
-    ds($request->all());
     $request->validate(
       [
         'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -19,6 +19,9 @@ class StoryboardController extends Controller
         'project_id' => 'required|exists:projects,id'
       ]
     );
+
+    $project = Project::findOrFail($request['project_id']);
+    $this->authorize('create', [Storyboard::class, $project]);
 
     try {
       $file = $request->file('image');
@@ -77,6 +80,7 @@ class StoryboardController extends Controller
 
   public function destroy(Storyboard $storyboard)
   {
+    $this->authorize('delete', $storyboard);
     try {
       $publicID = 'reactify/storyboards/story_id=' . $storyboard->story_id;
 

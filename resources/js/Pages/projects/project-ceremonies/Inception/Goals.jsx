@@ -307,7 +307,7 @@ const GoalItem = ({
         </CardContent>
       </Card>
 
-      <MotionDivOptions
+      <MotionDivOptions slot="goal.manage"
         isHovered={isHovered}
         isEditing={isEditing}
         isTemporary={isTemporary(goal.id)}

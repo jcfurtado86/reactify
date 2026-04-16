@@ -753,7 +753,6 @@
     "role": "Role",
     "roles": {
       "administrator": "Administrator",
-      "facilitator": "Facilitator",
       "team": "Team",
       "customer": "Customer",
       "domain_expert": "Domain Expert"
@@ -782,6 +781,27 @@
     "draft_already_pending": "A pending invite already exists for this email",
     "draft_duplicate": "This email is already in the list",
     "toast_invites_sent": "{{count}} invite(s) sent"
+  },
+  "permission_gate": {
+    "disabled_with_role": "Your role ({{role}}) does not allow you to {{action}}. Talk to an administrator.",
+    "disabled_no_role": "You do not have permission to {{action}}.",
+    "actions": {
+      "persona.manage": "manage personas",
+      "goal.manage": "manage goals",
+      "journey.manage": "manage journeys",
+      "productCanvas.manage": "edit the Product Canvas",
+      "userStory.manage": "manage user stories",
+      "businessRule.manage": "manage business rules",
+      "usageScenario.manage": "manage usage scenarios",
+      "overallModel.manage": "edit the overall model",
+      "interface.manage": "edit system interfaces",
+      "storyboard.manage": "edit storyboards",
+      "prioritizationMatrix.manage": "prioritize the backlog",
+      "changeLog.manage": "manage the change log",
+      "productBacklog.manage": "manage the product backlog",
+      "sprint.manage": "manage sprints",
+      "inspectionCards.manage": "inspect via INVEST"
+    }
   },
   "ai_errors": {
     "missing_prereqs": "To generate {{label}}, you must register at least one of each of the following: {{items}}.",

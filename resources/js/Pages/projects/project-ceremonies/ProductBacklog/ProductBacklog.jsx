@@ -22,9 +22,11 @@ import {
 } from './components/sprintTableColumns'
 import SprintTable from './components/SprintTable'
 import SpanButton from '@/Components/SpanButton'
+import { usePermissionGate } from '@/lib/usePermissionGate'
 
 const ProductBacklog = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const { allowed: canManageSprint, reason: sprintReason } = usePermissionGate('sprint.manage')
   const [localProject, setLocalProject] = useState(project)
   const [startDate, setStartDate] = useState(new Date())
   const [endDate, setEndDate] = useState(
@@ -610,7 +612,7 @@ const ProductBacklog = ({ project, setProject }) => {
                 {t('product_backlog.title_with_count', { count: productBacklogTable.getRowCount() })}
               </span>
 
-              <SpanButton variant="secondary" onClick={(e) => createSprint(e)}>
+              <SpanButton variant="secondary" onClick={(e) => createSprint(e)} disabled={!canManageSprint} title={sprintReason || ''}>
                 {t('product_backlog.create_sprint')}
               </SpanButton>
               <SpanButton

@@ -33,7 +33,7 @@ const StoryCard = ({ story, addScenario, systemColors }) => {
 
   return (
     <div className="relative group w-52 flex-shrink-0 text-left">
-      <MotionDivOptions isHovered={true} onAdd={addScenario} />
+      <MotionDivOptions slot="usageScenario.manage" isHovered={true} onAdd={addScenario} />
 
       <div className="flex flex-col h-full items-center justify-start p-2 gap-1 text-xs font-normal text-foreground border border-border bg-card rounded-md shadow-sm ">
         <div className="mr-auto">
@@ -178,7 +178,7 @@ const ScenarioCard = ({
         className="relative group flex w-full h-full"
       >
         {!isTemporary(scenario.id) && (
-          <MotionDivOptions
+          <MotionDivOptions slot="usageScenario.manage"
             isHovered={isHovered}
             isEditing={isEditing}
             onEdit={handleEdit}

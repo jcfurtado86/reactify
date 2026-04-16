@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChangeRequest;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,12 +15,11 @@ class ChangeRequestController extends Controller
             'project_id' => 'required|exists:projects,id',
             'requester_name' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
-            // 'effort' => 'nullable|integer|min:1|max:100',
             'request_date' => 'required|date',
-            // 'stories' => 'nullable|array',
-            // 'stories.*.story_id' => 'required|exists:stories,id',
-            // 'stories.*.impact_type' => 'required|string',
         ]);
+
+        $project = Project::findOrFail($validated['project_id']);
+        $this->authorize('create', [ChangeRequest::class, $project]);
 
         $changeRequest = ChangeRequest::create([
             'project_id' => $validated['project_id'],
@@ -43,6 +43,7 @@ class ChangeRequestController extends Controller
 
     public function update(Request $request, ChangeRequest $changeRequest)
     {
+        $this->authorize('update', $changeRequest);
         $validated = $request->validate([
             'status' => 'sometimes|string',
             // 'effort' => 'nullable|integer|min:1|max:100',
@@ -55,6 +56,7 @@ class ChangeRequestController extends Controller
 
     public function destroy(ChangeRequest $changeRequest)
     {
+        $this->authorize('delete', $changeRequest);
         $changeRequest->delete();
 
         return back()->with('success', 'Solicitação de mudança deletada.');

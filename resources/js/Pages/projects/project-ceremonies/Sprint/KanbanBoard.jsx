@@ -12,6 +12,8 @@ import {
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { getStatusColor, isSprintActive } from '@/lib/utils'
+import { usePermissionGate } from '@/lib/usePermissionGate'
+import { toast } from 'sonner'
 // ============================================================================
 // Subcomponente para o Card da Story (Item Arrastável)
 // ============================================================================
@@ -110,6 +112,7 @@ const KanbanColumn = ({ id, variant, title, stories, systemColors }) => {
 // ============================================================================
 const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
   const { t } = useTranslation()
+  const { allowed: canManageSprint, reason: sprintReason } = usePermissionGate('sprint.manage')
   const [localStories, setLocalStories] = useState([])
 
   // ✅ Estado para armazenar a story que está sendo arrastada
@@ -191,16 +194,20 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
     )
   }
 
-  // ✅ Novo handler: chamado quando o arraste COMEÇA
   const handleDragStart = (event) => {
+    if (!canManageSprint) return
     const story = event.active.data.current?.story
     if (story) {
       setActiveStory(story)
     }
   }
 
-  // ✅ Handler atualizado: chamado quando o arraste TERMINA
   const handleDragEnd = (event) => {
+    if (!canManageSprint) {
+      toast.error(sprintReason)
+      setActiveStory(null)
+      return
+    }
     const { active, over } = event
     const story = active?.data.current?.story || null
     if (over && active.id !== over.id) {

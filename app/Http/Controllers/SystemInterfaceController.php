@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Project;
 use App\Models\SystemInterface;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\BulkStoreSystemInterfaceRequest;
@@ -13,6 +14,8 @@ class SystemInterfaceController extends Controller
   public function bulk(BulkStoreSystemInterfaceRequest $request)
   {
     $validatedData = $request->validated();
+    $project = Project::findOrFail($validatedData['system_interfaces'][0]['project_id']);
+    $this->authorize('create', [SystemInterface::class, $project]);
 
     DB::transaction(function () use ($validatedData) {
       foreach ($validatedData['system_interfaces'] as $interfaceData) {
@@ -51,6 +54,9 @@ class SystemInterfaceController extends Controller
         'nullable|integer|exists:overall_model_classes,id',
     ]);
 
+    $project = Project::findOrFail($validatedData['project_id']);
+    $this->authorize('create', [SystemInterface::class, $project]);
+
     $interface = DB::transaction(function () use ($validatedData) {
       $newInterface = SystemInterface::create([
         'title' => $validatedData['title'],
@@ -83,6 +89,7 @@ class SystemInterfaceController extends Controller
 
   public function update(Request $request, SystemInterface $interface)
   {
+    $this->authorize('update', $interface);
     $validatedData = $request->validate([
       'title' => 'nullable|string|max:255',
       'input' => 'nullable|string|max:255',
@@ -110,6 +117,7 @@ class SystemInterfaceController extends Controller
 
   public function destroy(SystemInterface $interface)
   {
+    $this->authorize('delete', $interface);
     $interface->delete();
     return back()->with([
       'message' => 'Interface deleted successfully',

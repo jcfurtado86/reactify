@@ -2,12 +2,14 @@
 
 namespace App\Enums;
 
+// Papéis humanos seguem REACT-M (Customer, Domain Expert, Team).
+// Facilitador do REACT-M NÃO é usuário humano — é o chatbot em py_service/chat_service.py.
+// Administrator é conceito de ferramenta (dono/ops do projeto), fora do REACT-M.
 enum UserRole: string
 {
   case CUSTOMER = 'customer';
   case DOMAIN_EXPERT = 'domain_expert';
   case TEAM = 'team';
-  case FACILITATOR = 'facilitator';
   case ADMINISTRATOR = 'administrator';
 
   public function label(): string
@@ -16,7 +18,6 @@ enum UserRole: string
       self::CUSTOMER => 'Customer',
       self::DOMAIN_EXPERT => 'Domain Expert',
       self::TEAM => 'Team',
-      self::FACILITATOR => 'Facilitator',
       self::ADMINISTRATOR => 'Administrator',
     };
   }
@@ -25,73 +26,82 @@ enum UserRole: string
   {
     return match ($this) {
       self::ADMINISTRATOR => PermissionEnum::cases(),
+
       self::CUSTOMER => [
         PermissionEnum::PERSONA_VIEW,
         PermissionEnum::GOAL_VIEW,
         PermissionEnum::JOURNEY_VIEW,
         PermissionEnum::PRODUCT_CANVAS_VIEW,
         PermissionEnum::USER_STORY_VIEW,
-        PermissionEnum::CHANGE_LOG_MANAGE,
-        PermissionEnum::CHANGE_LOG_VIEW,
-        PermissionEnum::PRIORITIZATION_MATRIX_MANAGE,
-        PermissionEnum::PRIORITIZATION_MATRIX_VIEW,
-        PermissionEnum::SPRINT_VIEW,
         PermissionEnum::BUSINESS_RULE_VIEW,
         PermissionEnum::USAGE_SCENARIO_VIEW,
         PermissionEnum::OVERALL_MODEL_VIEW,
         PermissionEnum::INTERFACE_VIEW,
         PermissionEnum::STORYBOARD_VIEW,
-      ],
-      self::DOMAIN_EXPERT => [
-        PermissionEnum::PRODUCT_BACKLOG_MANAGE,
+        PermissionEnum::PRIORITIZATION_MATRIX_VIEW,
+        PermissionEnum::PRIORITIZATION_MATRIX_MANAGE,
+        PermissionEnum::CHANGE_LOG_VIEW,
+        PermissionEnum::CHANGE_LOG_MANAGE,
         PermissionEnum::PRODUCT_BACKLOG_VIEW,
-        PermissionEnum::PERSONA_MANAGE,
-        PermissionEnum::PERSONA_VIEW,
-        PermissionEnum::GOAL_MANAGE,
-        PermissionEnum::GOAL_VIEW,
-        PermissionEnum::JOURNEY_MANAGE,
-        PermissionEnum::JOURNEY_VIEW,
-        PermissionEnum::PRODUCT_CANVAS_MANAGE,
-        PermissionEnum::PRODUCT_CANVAS_VIEW,
-        PermissionEnum::USER_STORY_MANAGE,
-        PermissionEnum::USER_STORY_VIEW,
-        PermissionEnum::CHANGE_LOG_MANAGE,
-        PermissionEnum::CHANGE_LOG_VIEW,
-        PermissionEnum::PRIORITIZATION_MATRIX_MANAGE,
-        PermissionEnum::PRIORITIZATION_MATRIX_VIEW,
-        PermissionEnum::BUSINESS_RULE_MANAGE,
-        PermissionEnum::BUSINESS_RULE_VIEW,
-        PermissionEnum::USAGE_SCENARIO_MANAGE,
-        PermissionEnum::USAGE_SCENARIO_VIEW,
-        PermissionEnum::OVERALL_MODEL_MANAGE,
-        PermissionEnum::OVERALL_MODEL_VIEW,
-        PermissionEnum::INTERFACE_MANAGE,
-        PermissionEnum::INTERFACE_VIEW,
-        PermissionEnum::STORYBOARD_MANAGE,
-        PermissionEnum::STORYBOARD_VIEW,
-        // PermissionEnum::INTERVIEW_MANAGE,
-        // PermissionEnum::INTERVIEW_VIEW,
+        PermissionEnum::SPRINT_VIEW,
+        PermissionEnum::INSPECTION_CARDS_VIEW,
       ],
+
+      self::DOMAIN_EXPERT => [
+        PermissionEnum::PERSONA_VIEW,
+        PermissionEnum::PERSONA_MANAGE,
+        PermissionEnum::GOAL_VIEW,
+        PermissionEnum::GOAL_MANAGE,
+        PermissionEnum::JOURNEY_VIEW,
+        PermissionEnum::JOURNEY_MANAGE,
+        PermissionEnum::PRODUCT_CANVAS_VIEW,
+        PermissionEnum::PRODUCT_CANVAS_MANAGE,
+        PermissionEnum::USER_STORY_VIEW,
+        PermissionEnum::USER_STORY_MANAGE,
+        PermissionEnum::BUSINESS_RULE_VIEW,
+        PermissionEnum::BUSINESS_RULE_MANAGE,
+        PermissionEnum::USAGE_SCENARIO_VIEW,
+        PermissionEnum::USAGE_SCENARIO_MANAGE,
+        PermissionEnum::OVERALL_MODEL_VIEW,
+        PermissionEnum::INTERFACE_VIEW,
+        PermissionEnum::STORYBOARD_VIEW,
+        PermissionEnum::PRIORITIZATION_MATRIX_VIEW,
+        PermissionEnum::PRIORITIZATION_MATRIX_MANAGE,
+        PermissionEnum::CHANGE_LOG_VIEW,
+        PermissionEnum::CHANGE_LOG_MANAGE,
+        PermissionEnum::PRODUCT_BACKLOG_VIEW,
+        PermissionEnum::PRODUCT_BACKLOG_MANAGE,
+        PermissionEnum::SPRINT_VIEW,
+        PermissionEnum::INSPECTION_CARDS_VIEW,
+      ],
+
       self::TEAM => [
         PermissionEnum::PERSONA_VIEW,
+        PermissionEnum::PERSONA_MANAGE,
         PermissionEnum::GOAL_VIEW,
         PermissionEnum::JOURNEY_VIEW,
         PermissionEnum::PRODUCT_CANVAS_VIEW,
-        PermissionEnum::USER_STORY_MANAGE, // Story Points
         PermissionEnum::USER_STORY_VIEW,
-        PermissionEnum::CHANGE_LOG_VIEW,
-        PermissionEnum::PRIORITIZATION_MATRIX_VIEW,
-        PermissionEnum::SPRINT_MANAGE,
-        PermissionEnum::SPRINT_VIEW,
+        PermissionEnum::USER_STORY_MANAGE,
         PermissionEnum::BUSINESS_RULE_VIEW,
+        PermissionEnum::BUSINESS_RULE_MANAGE,
         PermissionEnum::USAGE_SCENARIO_VIEW,
-        PermissionEnum::OVERALL_MODEL_MANAGE,
+        PermissionEnum::USAGE_SCENARIO_MANAGE,
         PermissionEnum::OVERALL_MODEL_VIEW,
-        PermissionEnum::INTERFACE_MANAGE,
+        PermissionEnum::OVERALL_MODEL_MANAGE,
         PermissionEnum::INTERFACE_VIEW,
-        PermissionEnum::STORYBOARD_MANAGE,
+        PermissionEnum::INTERFACE_MANAGE,
         PermissionEnum::STORYBOARD_VIEW,
-        // PermissionEnum::VIEW_INTERVIEW,
+        PermissionEnum::STORYBOARD_MANAGE,
+        PermissionEnum::PRIORITIZATION_MATRIX_VIEW,
+        PermissionEnum::PRIORITIZATION_MATRIX_MANAGE,
+        PermissionEnum::CHANGE_LOG_VIEW,
+        PermissionEnum::CHANGE_LOG_MANAGE,
+        PermissionEnum::PRODUCT_BACKLOG_VIEW,
+        PermissionEnum::SPRINT_VIEW,
+        PermissionEnum::SPRINT_MANAGE,
+        PermissionEnum::INSPECTION_CARDS_VIEW,
+        PermissionEnum::INSPECTION_CARDS_MANAGE,
       ],
     };
   }
@@ -101,7 +111,7 @@ enum UserRole: string
     if ($this === self::ADMINISTRATOR) {
       return true;
     }
-    return in_array($permission, $this->permissions());
+    return in_array($permission, $this->permissions(), true);
   }
 
   public static function values(): array

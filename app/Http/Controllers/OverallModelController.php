@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\CrcCard;
+use App\Models\Project;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\BulkStoreOverallModelRequest;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,8 @@ class OverallModelController extends Controller
   public function bulk(BulkStoreOverallModelRequest $request)
   {
     $validatedData = $request->validated();
+    $project = Project::findOrFail($validatedData['crc_cards'][0]['project_id']);
+    $this->authorize('create', [CrcCard::class, $project]);
 
     DB::transaction(function () use ($validatedData) {
       foreach ($validatedData['crc_cards'] as $cardData) {
@@ -46,7 +49,9 @@ class OverallModelController extends Controller
       'responsabilities.*' => 'required|string|max:40',
     ]);
 
-    // Garante que a classe principal exista no banco de classes
+    $project = Project::findOrFail($validated['project_id']);
+    $this->authorize('create', [CrcCard::class, $project]);
+
     OverallModelClass::firstOrCreate(
       ['project_id' => $validated['project_id'], 'name' => $validated['class']],
       ['project_id' => $validated['project_id'], 'name' => $validated['class']]
@@ -64,6 +69,7 @@ class OverallModelController extends Controller
 
   public function update(Request $request, CrcCard $model)
   {
+    $this->authorize('update', $model);
     $validated = $request->validate([
       'class' => 'nullable|string|max:30',
       'collaborators' => 'nullable|array',
@@ -106,6 +112,7 @@ class OverallModelController extends Controller
 
   public function destroy(CrcCard $model)
   {
+    $this->authorize('delete', $model);
     $model->delete();
 
     Log::warning('CRC Card deleted', ['id' => $model->id]);

@@ -12,9 +12,11 @@ import {
 } from '@/components/ui/dialog'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '@/lib/utils'
+import { usePermissionGate } from '@/lib/usePermissionGate'
 
 const ChangeLog = ({ project }) => {
   const { t } = useTranslation()
+  const { allowed: canManageChangeLog, reason: changeLogReason } = usePermissionGate('changeLog.manage')
   const changeRequests = project.change_requests || []
   const [showForm, setShowForm] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState(null)
@@ -47,7 +49,7 @@ const ChangeLog = ({ project }) => {
       <div className="w-full flex justify-between items-center p-4">
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogTrigger asChild>
-            <Button variant="secondary">{t('change_log.new_request')}</Button>
+            <Button variant="secondary" disabled={!canManageChangeLog} title={changeLogReason || ''}>{t('change_log.new_request')}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl h-content p-0 border-0">
             <DialogTitle className="sr-only">

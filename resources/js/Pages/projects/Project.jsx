@@ -573,12 +573,10 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
   )
 }
 const Project = ({ project, page, artifact }) => {
-  const { auth, project: currentProject } = usePage().props
-
-  const currentUserInProject = currentProject.users.find(
-    (user) => user.user_id === auth.user.id,
-  )
-  const currentUserPermissions = currentUserInProject?.pivot?.permissions || []
+  const { auth } = usePage().props
+  // Permissões vêm injetadas pelo HandleInertiaRequests.share,
+  // resolvidas pro projeto da rota atual. Array de strings tipo 'persona.manage'.
+  const currentUserPermissions = auth?.permissions || []
   return (
     <PermissionProvider permissions={currentUserPermissions}>
       <Head title={project.title} />

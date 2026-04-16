@@ -28,7 +28,7 @@ const StoryCard = ({ story, addEpicStory, systemColors }) => {
 
   return (
     <div className="relative group text-left">
-      <MotionDivOptions isHovered={true} onAdd={addEpicStory} />
+      <MotionDivOptions slot="userStory.manage" isHovered={true} onAdd={addEpicStory} />
 
       {/* Este é o corpo do card, com o estilo que você solicitou. */}
       <div
@@ -131,7 +131,7 @@ const EpicStoryCard = ({
         onMouseLeave={() => setIsHovered(false)}
         className="relative group flex w-full h-full"
       >
-        <MotionDivOptions
+        <MotionDivOptions slot="userStory.manage"
           isHovered={isHovered}
           isEditing={isEditing}
           onEdit={handleEdit}

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Project;
 use App\Models\Story;
 use App\Models\Prioritization;
 
@@ -16,6 +17,9 @@ class PrioritizationController extends Controller
       'priority_id' => 'required|exists:matrix_priorities,id',
       'position' => 'required|integer',
     ]);
+
+    $project = Project::findOrFail($validatedData['project_id']);
+    $this->authorize('create', [Prioritization::class, $project]);
 
     $story = Story::find($validatedData['story_id']);
 
@@ -32,6 +36,7 @@ class PrioritizationController extends Controller
 
   public function update(Request $request, Prioritization $prioritization)
   {
+    $this->authorize('update', $prioritization);
     $validatedData = $request->validate([
       'priority_id' => 'required|exists:matrix_priorities,id',
       'position' => 'required|integer',
@@ -50,6 +55,7 @@ class PrioritizationController extends Controller
 
   public function destroy(Prioritization $prioritization)
   {
+    $this->authorize('delete', $prioritization);
     $story = $prioritization->story;
 
     if ($story->status !== 'prioritized') {

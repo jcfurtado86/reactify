@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use App\Models\UsageScenario;
 use Illuminate\Http\Request;
 use App\Http\Requests\BulkStoreUsageScenarioRequest;
@@ -12,6 +13,8 @@ class UsageScenarioController extends Controller
   public function bulk(BulkStoreUsageScenarioRequest $request)
   {
     $validatedData = $request->validated();
+    $project = Project::findOrFail($validatedData['usage_scenarios'][0]['project_id']);
+    $this->authorize('create', [UsageScenario::class, $project]);
     DB::transaction(function () use ($validatedData) {
       foreach ($validatedData['usage_scenarios'] as $scenarioData) {
         UsageScenario::create($scenarioData);
@@ -34,6 +37,9 @@ class UsageScenarioController extends Controller
       'project_id' => 'required|exists:projects,id',
     ]);
 
+    $project = Project::findOrFail($validated['project_id']);
+    $this->authorize('create', [UsageScenario::class, $project]);
+
     $usageScenario = UsageScenario::create($validated);
 
     return back()->with([
@@ -44,7 +50,7 @@ class UsageScenarioController extends Controller
 
   public function update(Request $request, UsageScenario $scenario)
   {
-    ds($scenario);
+    $this->authorize('update', $scenario);
     $validated = $request->validate([
       'description' => 'nullable|array',
       'description.as' => 'nullable|string',
@@ -65,6 +71,7 @@ class UsageScenarioController extends Controller
 
   public function destroy(UsageScenario $scenario)
   {
+    $this->authorize('delete', $scenario);
     $scenario->delete();
 
     return back()->with([

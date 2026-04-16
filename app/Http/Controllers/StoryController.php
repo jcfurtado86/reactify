@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
+use App\Models\Sprint;
 use App\Models\Story;
 use App\Http\Requests\StoreStoryRequest;
 use App\Http\Requests\BulkStoreStoryRequest;
 use App\Http\Requests\UpdateStoryRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class StoryController extends Controller
@@ -15,6 +18,8 @@ class StoryController extends Controller
   public function store(StoreStoryRequest $request)
   {
     $validated = $request->validated();
+    $project = Project::findOrFail($validated['project_id']);
+    $this->authorize('create', [Story::class, $project]);
 
     Story::create($validated);
 
@@ -28,6 +33,8 @@ class StoryController extends Controller
   public function bulk(BulkStoreStoryRequest $request)
   {
     $validated = $request->validated();
+    $project = Project::findOrFail($validated['stories'][0]['project_id']);
+    $this->authorize('create', [Story::class, $project]);
 
     Log::warning('Bulk Story created', $validated['stories']);
 
@@ -45,6 +52,7 @@ class StoryController extends Controller
 
   public function update(UpdateStoryRequest $request, Story $story)
   {
+    $this->authorize('update', $story);
     $validated = $request->validated();
 
     $oldType = $story->type;
@@ -90,6 +98,7 @@ class StoryController extends Controller
 
   public function prioritize(Request $request, Story $story)
   {
+    Gate::authorize('prioritizationMatrix.manage', $story->project);
     $validated = $request->validate([
       'value' => 'nullable|integer',
       'complexity' => 'nullable|string|max:255',
@@ -111,6 +120,9 @@ class StoryController extends Controller
       'position' => 'sometimes|integer|min:0',
     ]);
 
+    $sprint = Sprint::findOrFail($validated['sprint_id']);
+    $this->authorize('update', $sprint);
+
     $story->sprints()->attach($validated['sprint_id'], [
       'kanban_status' => $validated['kanban_status'] ?? 'todo',
       'position' => $validated['position'] ?? 0,
@@ -124,6 +136,8 @@ class StoryController extends Controller
 
   public function removeFromSprint(Story $story, $sprintId)
   {
+    $sprint = Sprint::findOrFail($sprintId);
+    $this->authorize('update', $sprint);
     $story->sprints()->detach($sprintId);
     return back()->with([
       'status' => 'success',
@@ -133,6 +147,8 @@ class StoryController extends Controller
 
   public function updateKanbanStatus(Request $request, Story $story, $sprintId)
   {
+    $sprint = Sprint::findOrFail($sprintId);
+    $this->authorize('update', $sprint);
     $validated = $request->validate([
       'kanban_status' => 'required|in:todo,in_progress,review,done',
       'position' => 'sometimes|integer|min:0',
@@ -148,6 +164,7 @@ class StoryController extends Controller
 
   public function destroy(Story $story)
   {
+    $this->authorize('delete', $story);
     $story->delete();
 
     Log::warning('Story deleted', ['id' => $story->id]);

@@ -155,7 +155,7 @@ const PersonaCard = ({
             </div>
           ))}
         </AccordionContent>
-        <MotionDivOptions
+        <MotionDivOptions slot="persona.manage"
           disabled={disabled}
           isHovered={isHovered}
           onEdit={() => startEditPersona(persona.id)}
@@ -235,7 +235,7 @@ const PersonaItem = ({
         </p>
       )}
 
-      <MotionDivOptions
+      <MotionDivOptions slot="persona.manage"
         disabled={disabled}
         isHovered={isHovered}
         isEditing={isEditing}

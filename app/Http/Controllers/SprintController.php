@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use App\Models\Sprint;
 use App\Models\Story;
 use Illuminate\Http\Request;
@@ -51,6 +52,9 @@ class SprintController extends Controller
       'project_id' => 'required|exists:projects,id',
     ]);
 
+    $project = Project::findOrFail($validated['project_id']);
+    $this->authorize('create', [Sprint::class, $project]);
+
     $sprint = Sprint::create($validated);
     Log::info("Sprint created successfully: {$sprint->id}  -  {$sprint->name}");
 
@@ -62,6 +66,7 @@ class SprintController extends Controller
 
   public function update(Request $request, Sprint $sprint)
   {
+    $this->authorize('update', $sprint);
     $validated = $request->validate([
       'name' => 'sometimes|string|max:30',
       'start_date' => 'sometimes|date_format:Y-m-d|after_or_equal:today',
@@ -84,6 +89,7 @@ class SprintController extends Controller
 
   public function finish(Request $request, Sprint $sprint)
   {
+    $this->authorize('update', $sprint);
     $validated = $request->validate([
       'new_sprint_id' => 'present|nullable|exists:sprints,id',
     ]);
@@ -158,7 +164,7 @@ class SprintController extends Controller
 
   public function destroy(Sprint $sprint)
   {
-    // Antes de deletar, retorna todas as stories para o product backlog
+    $this->authorize('delete', $sprint);
     $storyIds = $sprint->stories()->pluck('story_id');
 
     Story::whereIn('id', $storyIds)->update([

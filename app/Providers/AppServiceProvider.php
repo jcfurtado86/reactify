@@ -42,9 +42,12 @@ use App\Models\SystemInterface;
 use App\Models\Interview;
 use App\Models\Project;
 
+use App\Enums\PermissionEnum;
+use App\Support\ProjectAccess;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -96,6 +99,8 @@ class AppServiceProvider extends ServiceProvider
     SystemColor::observe(SystemColorObserver::class);
     Sprint::observe(SprintObserver::class);
 
+    $this->registerPolicies();
+
     ResetPassword::toMailUsing(function ($notifiable, $token) {
       $url = url(route('password.reset', [
         'token' => $token,
@@ -121,5 +126,57 @@ class AppServiceProvider extends ServiceProvider
         ->action(__('emails.verify_email.cta'), $url)
         ->line(__('emails.verify_email.ignore_notice'));
     });
+  }
+
+  private function registerPolicies(): void
+  {
+    // Administrator short-circuit: antes de qualquer policy, se o papel do usuário
+    // no projeto resolvido for Administrator, libera.
+    Gate::before(function ($user, $ability, $arguments = []) {
+      $project = null;
+      foreach ($arguments as $arg) {
+        if ($arg instanceof Project) {
+          $project = $arg;
+          break;
+        }
+        if (is_object($arg) && isset($arg->project_id)) {
+          $project = Project::find($arg->project_id);
+          break;
+        }
+      }
+      if ($project && ProjectAccess::roleFor($user, $project)?->value === 'administrator') {
+        return true;
+      }
+      return null;
+    });
+
+    // Policies de artefato (model dedicado).
+    Gate::policy(Persona::class, \App\Policies\PersonaPolicy::class);
+    Gate::policy(Goal::class, \App\Policies\GoalPolicy::class);
+    Gate::policy(Journey::class, \App\Policies\JourneyPolicy::class);
+    Gate::policy(ProductCanvas::class, \App\Policies\ProductCanvasPolicy::class);
+    Gate::policy(Story::class, \App\Policies\UserStoryPolicy::class);
+    Gate::policy(BusinessRule::class, \App\Policies\BusinessRulePolicy::class);
+    Gate::policy(UsageScenario::class, \App\Policies\UsageScenarioPolicy::class);
+    Gate::policy(\App\Models\OverallModelClass::class, \App\Policies\OverallModelPolicy::class);
+    Gate::policy(CrcCard::class, \App\Policies\OverallModelPolicy::class);
+    Gate::policy(SystemInterface::class, \App\Policies\SystemInterfacePolicy::class);
+    Gate::policy(Storyboard::class, \App\Policies\StoryboardPolicy::class);
+    Gate::policy(MatrixPriority::class, \App\Policies\PrioritizationMatrixPolicy::class);
+    Gate::policy(Prioritization::class, \App\Policies\PrioritizationMatrixPolicy::class);
+    Gate::policy(ChangeRequest::class, \App\Policies\ChangeLogPolicy::class);
+    Gate::policy(Sprint::class, \App\Policies\SprintPolicy::class);
+
+    // Gates para capacidades sem model dedicado.
+    // Inspection cards = jsonb invest_card dentro de Story; autorização semântica separada.
+    // Product Backlog = visão agregada, não model.
+    Gate::define('productBacklog.view', fn ($user, Project $project) =>
+      ProjectAccess::can($user, $project, PermissionEnum::PRODUCT_BACKLOG_VIEW));
+    Gate::define('productBacklog.manage', fn ($user, Project $project) =>
+      ProjectAccess::can($user, $project, PermissionEnum::PRODUCT_BACKLOG_MANAGE));
+    Gate::define('inspectionCards.view', fn ($user, Project $project) =>
+      ProjectAccess::can($user, $project, PermissionEnum::INSPECTION_CARDS_VIEW));
+    Gate::define('inspectionCards.manage', fn ($user, Project $project) =>
+      ProjectAccess::can($user, $project, PermissionEnum::INSPECTION_CARDS_MANAGE));
   }
 }

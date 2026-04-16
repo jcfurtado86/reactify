@@ -6,6 +6,7 @@ import { isTemporary, cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import StatusBadge from '@/Components/StatusBadge'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
+import { usePermissions } from '@/Context/PermissionContext'
 
 const routerNames = {
   // local state name -> route name
@@ -27,6 +28,8 @@ const InvestCard = ({
   setInspectionId,
 }) => {
   const { t } = useTranslation()
+  const { can } = usePermissions()
+  const canManageInspection = can('inspectionCards.manage')
   const item = project[itemCategory]?.find((element) => element.id === itemId)
   const [investState, setInvestState] = useState({
     independent: item?.invest_card?.independent || 'na',
@@ -212,6 +215,7 @@ const InvestCard = ({
               size="icon"
               onClick={handleSubmit}
               title={t('common.save')}
+              disabled={!canManageInspection}
             >
               <Check />
             </Button>

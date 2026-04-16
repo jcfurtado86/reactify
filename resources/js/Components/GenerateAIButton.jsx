@@ -45,6 +45,22 @@ const FALLBACK_TYPE_LABELS = {
   product_canvas: 'Product Canvas',
 }
 
+// Mapeamento de slug de tipo → slot do PermissionEnum que controla
+// a criação desse artefato. Usado pra gated do botão "Gerar com IA".
+const TYPE_PERMISSION = {
+  personas: 'persona.manage',
+  goals: 'goal.manage',
+  journeys: 'journey.manage',
+  product_canvas: 'productCanvas.manage',
+  stories: 'userStory.manage',
+  epic_stories: 'userStory.manage',
+  business_rules: 'businessRule.manage',
+  usage_scenarios: 'usageScenario.manage',
+  overall_model: 'overallModel.manage',
+  system_interfaces: 'interface.manage',
+  storyboards: 'storyboard.manage',
+}
+
 const formatElapsed = (seconds) => {
   const mm = Math.floor(seconds / 60)
     .toString()
@@ -113,6 +129,17 @@ const GenerateAIButton = ({
     ? pageProps.pending_generations
     : []
   const pending = allJobs.filter((j) => j.status === 'queued' || j.status === 'running')
+
+  // Papel do usuário no projeto não tem permissão de manage neste artefato?
+  // Esconde o botão inteiro. Backend também bloqueia (layered defense).
+  const permissionSlot = type ? TYPE_PERMISSION[type] : null
+  const userPerms = pageProps?.auth?.permissions
+  const hasPermission = permissionSlot
+    ? Array.isArray(userPerms) && userPerms.includes(permissionSlot)
+    : true
+  if (!hasPermission) {
+    return null
+  }
   const failedJobs = allJobs.filter((j) => j.status === 'failed')
   const [panelOpen, setPanelOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)

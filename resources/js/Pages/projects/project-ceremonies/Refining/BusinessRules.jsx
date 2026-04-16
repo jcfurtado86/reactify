@@ -32,7 +32,7 @@ const StoryCard = ({ story, addBusinessRule, systemColors }) => {
   return (
     <div className="relative group text-left">
       {/* O onAdd agora chama a função para adicionar uma regra de negócio */}
-      <MotionDivOptions isHovered={true} onAdd={addBusinessRule} />
+      <MotionDivOptions slot="businessRule.manage" isHovered={true} onAdd={addBusinessRule} />
 
       <div
         className={`
@@ -144,7 +144,7 @@ const BusinessRuleCard = ({
         className="relative group flex w-full h-full"
         data-card-id={businessRule.id}
       >
-        <MotionDivOptions
+        <MotionDivOptions slot="businessRule.manage"
           isHovered={isHovered}
           isEditing={isEditing}
           onEdit={handleEdit}

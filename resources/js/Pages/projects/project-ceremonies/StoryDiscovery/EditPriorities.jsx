@@ -5,6 +5,7 @@ import { ColorOptions, ColorPickerPopover } from '@/Components/ColorComponents'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { usePermissionGate } from '@/lib/usePermissionGate'
 
 const NAME_MAX = 30;
 
@@ -175,6 +176,7 @@ const PriorityEditPopover = ({ priority, children, setProject, project }) => {
 
 const EditPriorities = ({ project, setProject, priorities, projectId }) => {
   const { t } = useTranslation()
+  const { allowed: canManage, reason: gateReason } = usePermissionGate('prioritizationMatrix.manage')
   const [newName, setNewName] = useState('')
   const [newColor, setNewColor] = useState('#ffffff')
   const [isStoring, setIsStoring] = useState(false)
@@ -261,7 +263,7 @@ const EditPriorities = ({ project, setProject, priorities, projectId }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="secondary">{t('edit_priorities.edit_button')}</Button>
+        <Button variant="secondary" disabled={!canManage} title={gateReason || ''}>{t('edit_priorities.edit_button')}</Button>
       </SheetTrigger>
       <SheetContent
         style={{

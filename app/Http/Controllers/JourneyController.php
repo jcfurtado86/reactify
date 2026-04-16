@@ -7,6 +7,7 @@ use App\Http\Requests\StoreJourneyRequest;
 use App\Http\Requests\UpdateJourneyRequest;
 use App\Http\Requests\BulkStoreJourneyRequest;
 use App\Models\Journey;
+use App\Models\Project;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Events\ProjectUpdated;
@@ -16,6 +17,8 @@ class JourneyController extends Controller
   public function store(StoreJourneyRequest $request)
   {
     $validated = $request->validated();
+    $project = Project::findOrFail($validated['project_id']);
+    $this->authorize('create', [Journey::class, $project]);
 
     $journey = Journey::create($validated);
 
@@ -29,6 +32,8 @@ class JourneyController extends Controller
   public function bulk(BulkStoreJourneyRequest $request)
   {
     $validated = $request->validated();
+    $project = Project::findOrFail($validated['project_id']);
+    $this->authorize('create', [Journey::class, $project]);
 
     DB::transaction(function () use ($validated) {
       foreach ($validated['journeys'] as $journeyData) {
@@ -56,7 +61,7 @@ class JourneyController extends Controller
 
   public function update(UpdateJourneyRequest $request, Journey $journey)
   {
-
+    $this->authorize('update', $journey);
     $validated = $request->validated();
 
     $journey->update($validated);
@@ -68,6 +73,7 @@ class JourneyController extends Controller
 
   public function destroy(Journey $journey)
   {
+    $this->authorize('delete', $journey);
     $journey->delete();
 
     Log::info('Journey deleted', ['id' => $journey->id]);

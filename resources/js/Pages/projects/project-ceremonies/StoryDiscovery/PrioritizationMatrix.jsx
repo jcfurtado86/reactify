@@ -33,6 +33,8 @@ import {
 import EditPriorities from './EditPriorities'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
+import { usePermissionGate } from '@/lib/usePermissionGate'
+import { toast } from 'sonner'
 
 const SortablePriorityColumn = ({
   priority,
@@ -265,6 +267,9 @@ const transformArrayToMatrixObject = (
 }
 const PrioritizationMatrix = ({ project, setProject }) => {
   const { t } = useTranslation()
+  const gate = usePermissionGate('prioritizationMatrix.manage')
+  const canManagePrioritization = gate.allowed
+  const prioritizationReason = gate.reason
   const childrenByEpicId = useGroupedStories(project?.stories)
   const GRID_ROWS = project.goal_sketches.length || 4
   const priorityOrder = {
@@ -340,12 +345,17 @@ const PrioritizationMatrix = ({ project, setProject }) => {
   }, [project.stories, project?.prioritizations, prioritizationMatrix])
 
   const handleDragStart = (event) => {
+    if (!canManagePrioritization) return
     const { active } = event
     setActiveItem(active)
   }
 
   const handleDragEnd = (event) => {
     setActiveItem(null)
+    if (!canManagePrioritization) {
+      toast.error(prioritizationReason)
+      return
+    }
     const { active, over } = event
     if (!over) return
     if (

@@ -153,7 +153,7 @@ const Interfaces = ({ project, setProject }) => {
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* O componente com os botões de editar/excluir que aparece no hover */}
-        <MotionDivOptions
+        <MotionDivOptions slot="interface.manage"
           isHovered={isHovered}
           onDelete={onDelete}
         />

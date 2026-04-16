@@ -10,9 +10,6 @@ enum PermissionEnum: string
   case USER_STORY_VIEW = 'userStory.view';
   case USER_STORY_MANAGE = 'userStory.manage';
 
-  case SYSTEM_STORY_VIEW = 'systemStory.view';
-  case SYSTEM_STORY_MANAGE = 'systemStory.manage';
-
   case GOAL_VIEW = 'goal.view';
   case GOAL_MANAGE = 'goal.manage';
 

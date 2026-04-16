@@ -753,7 +753,6 @@
     "role": "Papel",
     "roles": {
       "administrator": "Administrador",
-      "facilitator": "Facilitador",
       "team": "Equipe",
       "customer": "Cliente",
       "domain_expert": "Especialista no domínio"
@@ -782,6 +781,27 @@
     "draft_already_pending": "Já existe um convite pendente para este email",
     "draft_duplicate": "Este email já está na lista",
     "toast_invites_sent": "{{count}} convite(s) enviados"
+  },
+  "permission_gate": {
+    "disabled_with_role": "Seu papel ({{role}}) não permite {{action}}. Fale com um administrador.",
+    "disabled_no_role": "Você não tem permissão para {{action}}.",
+    "actions": {
+      "persona.manage": "gerenciar personas",
+      "goal.manage": "gerenciar objetivos",
+      "journey.manage": "gerenciar jornadas",
+      "productCanvas.manage": "editar o Product Canvas",
+      "userStory.manage": "gerenciar histórias de usuário",
+      "businessRule.manage": "gerenciar regras de negócio",
+      "usageScenario.manage": "gerenciar cenários de uso",
+      "overallModel.manage": "editar o modelo global",
+      "interface.manage": "editar interfaces de sistema",
+      "storyboard.manage": "editar storyboards",
+      "prioritizationMatrix.manage": "priorizar o backlog",
+      "changeLog.manage": "gerenciar o change log",
+      "productBacklog.manage": "gerenciar o product backlog",
+      "sprint.manage": "gerenciar sprints",
+      "inspectionCards.manage": "inspecionar via INVEST"
+    }
   },
   "ai_errors": {
     "missing_prereqs": "Para gerar {{label}}, é necessário cadastrar ao menos um de cada item a seguir: {{items}}.",

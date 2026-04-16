@@ -20,11 +20,15 @@ export function PermissionProvider({ children, permissions }) {
   )
 }
 
-// 3. Cria o hook customizado para facilitar o uso
+// 3. Cria o hook customizado para facilitar o uso.
+// Se o componente for renderizado fora de um PermissionProvider
+// (ex: Dashboard, páginas públicas), retorna um contexto "vazio" que
+// nega tudo — nunca crasha. Quem precisa de acesso obrigatório a um
+// projeto deve estar dentro do Provider de Project.jsx.
 export function usePermissions() {
   const context = useContext(PermissionContext)
   if (!context) {
-    throw new Error('usePermissions must be used within a PermissionProvider')
+    return { permissions: [], can: () => false }
   }
   return context
 }

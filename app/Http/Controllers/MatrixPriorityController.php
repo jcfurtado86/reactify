@@ -28,6 +28,9 @@ class MatrixPriorityController extends Controller
       'project_id' => 'required|exists:projects,id',
     ]);
 
+    $project = Project::findOrFail($validatedData['project_id']);
+    $this->authorize('create', [MatrixPriority::class, $project]);
+
     try {
       $nextOrder = MatrixPriority::where('project_id', $validatedData['project_id'])->count();
       $validatedData['order_column'] = $nextOrder;
@@ -42,6 +45,7 @@ class MatrixPriorityController extends Controller
 
   public function update(Request $request, MatrixPriority $priority)
   {
+    $this->authorize('update', $priority);
     $validatedData = $request->validate([
       'name' => [
         'nullable',
@@ -66,6 +70,7 @@ class MatrixPriorityController extends Controller
 
   public function destroy(MatrixPriority $priority)
   {
+    $this->authorize('delete', $priority);
     try {
       $priority->delete();
 
@@ -86,6 +91,7 @@ class MatrixPriorityController extends Controller
         'project_id' => 'required|exists:projects,id',
       ]);
       $project = Project::findOrFail($request->project_id);
+      $this->authorize('create', [MatrixPriority::class, $project]);
 
       DB::transaction(function () use ($request) {
         foreach ($request->priorities as $priorityData) {

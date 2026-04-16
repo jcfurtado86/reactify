@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGoalRequest;
 use App\Http\Requests\UpdateGoalRequest;
 use App\Models\Goal;
+use App\Models\Project;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\BulkStoreGoalRequest;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,9 @@ class GoalController extends Controller
   public function bulk(BulkStoreGoalRequest $request)
   {
     $validatedData = $request->validated();
-    
+    $project = Project::findOrFail($validatedData['goals'][0]['project_id']);
+    $this->authorize('create', [Goal::class, $project]);
+
     DB::transaction(function () use ($validatedData) {
       foreach ($validatedData['goals'] as $goalData) {
         Goal::create($goalData);
@@ -31,6 +34,8 @@ class GoalController extends Controller
   public function store(StoreGoalRequest $request)
   {
     $validated = $request->validated();
+    $project = Project::findOrFail($validated['project_id']);
+    $this->authorize('create', [Goal::class, $project]);
 
     $goal = Goal::create($validated);
 
@@ -43,6 +48,7 @@ class GoalController extends Controller
 
   public function update(UpdateGoalRequest $request, Goal $goal)
   {
+    $this->authorize('update', $goal);
     $validated = $request->validated();
 
     $goal->update($validated);
@@ -55,6 +61,7 @@ class GoalController extends Controller
   }
   public function destroy(Goal $goal)
   {
+    $this->authorize('delete', $goal);
     $goal->delete();
 
     Log::info('Goal deleted', [

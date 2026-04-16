@@ -256,7 +256,7 @@ const StoryItem = ({
             )}
           </div>
 
-          <MotionDivOptions
+          <MotionDivOptions slot="userStory.manage"
             isHovered={isHovered}
             isEditing={isEditing}
             isTemporary={isTemporary(story.id)}
