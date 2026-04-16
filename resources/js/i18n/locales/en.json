@@ -110,7 +110,8 @@
     "effort": "Effort",
     "set_deadline": "Set deadline",
     "save_status": "Save status",
-    "change_status": "Change status"
+    "change_status": "Change status",
+    "related_stories": "Impacted stories"
   },
   "notifications_page": {
     "title": "Notifications",
@@ -354,7 +355,12 @@
     "sprint_timeline": "Sprint timeline",
     "timeline_empty": "No sprints created yet",
     "cycle_aria": "REACT-M cycle",
-    "cycle_center_hint": "iterative"
+    "cycle_center_hint": "iterative",
+    "completeness_invest": "INVEST",
+    "completeness_rules": "Business Rules",
+    "completeness_scenarios": "Usage Scenarios",
+    "completeness_personas": "Personas covered",
+    "completeness_goals": "Goals covered"
   },
   "project": {
     "overview": "Overview",
@@ -393,7 +399,8 @@
       "inception": "Inception",
       "story_discovery": "Discovery",
       "refining": "Refining",
-      "modeling": "Modeling"
+      "modeling": "Modeling",
+      "inspection": "Inspection"
     }
   },
   "chat": {
@@ -467,7 +474,8 @@
     "confirm_delete_item_body": "This action cannot be undone.",
     "toast_added": "Persona added",
     "click_to_add": "Click edit to add",
-    "default_name": "New Persona"
+    "default_name": "New Persona",
+    "linked_stories": "Linked stories:"
   },
   "journeys": {
     "singular": "Journey",
@@ -533,7 +541,11 @@
     "new_system_story": "New System Story",
     "empty_user": "No User Story",
     "empty_system": "No System Story",
-    "toast_updated": "Story updated"
+    "toast_updated": "Story updated",
+    "select_persona": "Persona",
+    "no_persona": "None",
+    "rules_label": "Business Rules",
+    "scenarios_label": "Usage Scenarios"
   },
   "epic_stories": {
     "title": "Epic Stories",
@@ -659,7 +671,28 @@
     "go_to_stories": "Go to Stories",
     "go_to_goals": "Go to Goals",
     "toast_removed": "Prioritization removed",
-    "toast_added": "Story prioritized"
+    "toast_added": "Story prioritized",
+    "tab_user_stories": "User Stories",
+    "tab_system_stories": "System Stories"
+  },
+  "inspection_dashboard": {
+    "story": "Story",
+    "status": "Status",
+    "empty": "No stories in this filter.",
+    "filter_all": "All",
+    "filter_validated": "Approved",
+    "filter_rejected": "Issues",
+    "filter_pending": "Pending"
+  },
+  "story_detail": {
+    "overall_model": "Overall Model (CRC)",
+    "interfaces": "System Interfaces",
+    "no_persona": "No persona linked",
+    "no_rules": "No business rules",
+    "no_scenarios": "No usage scenarios",
+    "no_crc": "No CRC cards",
+    "no_interfaces": "No interfaces",
+    "no_storyboards": "No storyboards"
   },
   "change_log": {
     "title": "Change Log",

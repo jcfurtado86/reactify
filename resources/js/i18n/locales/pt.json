@@ -110,7 +110,8 @@
     "effort": "Esforço",
     "set_deadline": "Definir prazo",
     "save_status": "Salvar status",
-    "change_status": "Alterar status"
+    "change_status": "Alterar status",
+    "related_stories": "Stories impactadas"
   },
   "notifications_page": {
     "title": "Notificações",
@@ -354,7 +355,12 @@
     "sprint_timeline": "Linha do tempo das sprints",
     "timeline_empty": "Nenhuma sprint criada ainda",
     "cycle_aria": "Ciclo REACT-M",
-    "cycle_center_hint": "iterativo"
+    "cycle_center_hint": "iterativo",
+    "completeness_invest": "INVEST",
+    "completeness_rules": "Regras de Negocio",
+    "completeness_scenarios": "Cenarios de Uso",
+    "completeness_personas": "Personas cobertas",
+    "completeness_goals": "Goals cobertos"
   },
   "project": {
     "overview": "Visão geral",
@@ -393,7 +399,8 @@
       "inception": "Inception",
       "story_discovery": "Discovery",
       "refining": "Refining",
-      "modeling": "Modeling"
+      "modeling": "Modeling",
+      "inspection": "Inspection"
     }
   },
   "chat": {
@@ -467,7 +474,8 @@
     "confirm_delete_item_body": "Esta ação não pode ser desfeita.",
     "toast_added": "Persona adicionada",
     "click_to_add": "Clique em editar para adicionar",
-    "default_name": "Nova Persona"
+    "default_name": "Nova Persona",
+    "linked_stories": "Stories vinculadas:"
   },
   "journeys": {
     "singular": "Jornada",
@@ -533,7 +541,11 @@
     "new_system_story": "Nova System Story",
     "empty_user": "Nenhuma User Story",
     "empty_system": "Nenhuma System Story",
-    "toast_updated": "Story atualizada"
+    "toast_updated": "Story atualizada",
+    "select_persona": "Persona",
+    "no_persona": "Nenhuma",
+    "rules_label": "Regras de Negocio",
+    "scenarios_label": "Cenarios de Uso"
   },
   "epic_stories": {
     "title": "Estórias Épicas",
@@ -659,7 +671,28 @@
     "go_to_stories": "Ir para Stories",
     "go_to_goals": "Ir para Goals",
     "toast_removed": "Priorização removida",
-    "toast_added": "Story priorizada"
+    "toast_added": "Story priorizada",
+    "tab_user_stories": "User Stories",
+    "tab_system_stories": "System Stories"
+  },
+  "inspection_dashboard": {
+    "story": "Story",
+    "status": "Status",
+    "empty": "Nenhuma story neste filtro.",
+    "filter_all": "Todas",
+    "filter_validated": "Aprovadas",
+    "filter_rejected": "Com problemas",
+    "filter_pending": "Pendentes"
+  },
+  "story_detail": {
+    "overall_model": "Overall Model (CRC)",
+    "interfaces": "Interfaces de Sistema",
+    "no_persona": "Nenhuma persona vinculada",
+    "no_rules": "Nenhuma regra cadastrada",
+    "no_scenarios": "Nenhum cenario cadastrado",
+    "no_crc": "Nenhum CRC cadastrado",
+    "no_interfaces": "Nenhuma interface cadastrada",
+    "no_storyboards": "Nenhum storyboard cadastrado"
   },
   "change_log": {
     "title": "Registro de Mudanças",
