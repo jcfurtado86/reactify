@@ -397,7 +397,7 @@
     }
   },
   "chat": {
-    "title": "AI Assistant",
+    "title": "Facilitator",
     "placeholder": "Type your question...",
     "send": "Send message",
     "loading": "Thinking...",

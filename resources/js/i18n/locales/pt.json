@@ -397,7 +397,7 @@
     }
   },
   "chat": {
-    "title": "Assistente de IA",
+    "title": "Facilitador",
     "placeholder": "Digite sua pergunta...",
     "send": "Enviar mensagem",
     "loading": "Pensando...",

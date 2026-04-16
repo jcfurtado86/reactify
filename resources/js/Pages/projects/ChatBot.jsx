@@ -40,22 +40,114 @@ const AIMessage = ({ fullContent, animate }) => {
 /**
  * Componente principal do ChatBot, agora com WebSockets (Laravel Echo).
  */
-const welcomeMessage = (t) => ({
-  id: 'welcome',
-  message: t('chat.welcome'),
-  sender: 'model',
-  timestamp: new Date().toISOString(),
-  animate: false,
-})
+function computeProjectGaps(project) {
+  const stories = project?.stories || []
+  const epicParentIds = new Set(stories.filter((s) => s.epic_id).map((s) => s.epic_id))
+  const workStories = stories.filter((s) => !epicParentIds.has(s.id))
+  const userStories = workStories.filter((s) => s.type === 'user')
+  const rules = project?.business_rules || []
+  const scenarios = project?.usage_scenarios || []
+  const personas = project?.personas || []
+  const goals = project?.goal_sketches || []
+  const prioritizations = project?.prioritizations || []
+
+  const gaps = []
+
+  const personasWithoutStories = personas.filter(
+    (p) => !userStories.some((s) => s.personas?.some((sp) => sp.id === p.id)),
+  )
+  if (personasWithoutStories.length > 0) {
+    gaps.push({
+      icon: '👤',
+      text: `${personasWithoutStories.length} persona(s) sem stories vinculadas: ${personasWithoutStories.map((p) => p.name).join(', ')}`,
+    })
+  }
+
+  const storiesWithoutPersona = userStories.filter(
+    (s) => !s.personas || s.personas.length === 0,
+  )
+  if (storiesWithoutPersona.length > 0) {
+    gaps.push({
+      icon: '📝',
+      text: `${storiesWithoutPersona.length} user story(ies) sem persona vinculada`,
+    })
+  }
+
+  const ruleStoryIds = new Set(rules.map((r) => r.story_id))
+  const storiesWithoutRules = workStories.filter((s) => !ruleStoryIds.has(s.id))
+  if (storiesWithoutRules.length > 0) {
+    gaps.push({
+      icon: '📋',
+      text: `${storiesWithoutRules.length} story(ies) sem regras de negocio`,
+    })
+  }
+
+  const scenarioStoryIds = new Set(scenarios.map((s) => s.story_id))
+  const storiesWithoutScenarios = workStories.filter((s) => !scenarioStoryIds.has(s.id))
+  if (storiesWithoutScenarios.length > 0) {
+    gaps.push({
+      icon: '🎭',
+      text: `${storiesWithoutScenarios.length} story(ies) sem cenarios de uso`,
+    })
+  }
+
+  const storiesWithoutInvest = workStories.filter((s) => {
+    const ic = s.invest_card
+    if (!ic) return true
+    return Object.values(ic).some((v) => v === 'no') || Object.values(ic).length === 0
+  })
+  if (storiesWithoutInvest.length > 0) {
+    gaps.push({
+      icon: '🛡',
+      text: `${storiesWithoutInvest.length} story(ies) com INVEST pendente ou reprovado`,
+    })
+  }
+
+  const coveredGoalIds = new Set(prioritizations.filter((p) => p.goal_id).map((p) => p.goal_id))
+  const goalsWithoutStories = goals.filter((g) => !coveredGoalIds.has(g.id))
+  if (goalsWithoutStories.length > 0) {
+    gaps.push({
+      icon: '🎯',
+      text: `${goalsWithoutStories.length} goal(s) sem stories priorizadas`,
+    })
+  }
+
+  return gaps
+}
+
+function buildWelcomeWithGaps(t, gaps) {
+  if (gaps.length === 0) return null
+  const lines = gaps.map((g) => `- ${g.icon} ${g.text}`).join('\n')
+  return `**Pontos de atencao no projeto:**\n${lines}`
+}
+
+const welcomeMessage = (t, gaps = []) => {
+  const msg = buildWelcomeWithGaps(t, gaps)
+  if (!msg) return null
+  return {
+    id: 'welcome',
+    message: msg,
+    sender: 'model',
+    timestamp: new Date().toISOString(),
+    animate: false,
+  }
+}
 
 const ChatBot = ({ project, currentPage, currentContextData }) => {
   const { t } = useTranslation()
-  const [messages, setMessages] = useState([welcomeMessage(t)])
+  const gaps = useMemo(() => computeProjectGaps(project), [project])
+  const [messages, setMessages] = useState([])
   const [isOpen, setIsOpen] = useState(false)
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [historyLoaded, setHistoryLoaded] = useState(false)
   const chatBodyRef = useRef(null)
+
+  useEffect(() => {
+    if (historyLoaded) return
+    const w = welcomeMessage(t, gaps)
+    setMessages(w ? [w] : [])
+  }, [gaps, t, historyLoaded])
 
   useEffect(() => {
     if (!isOpen || !project?.id || historyLoaded) return
@@ -75,11 +167,13 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
           feedback: m.feedback,
         }))
         setMessages((prev) => {
-          // Se o usuário já enviou algo antes do fetch resolver, não
-          // sobrescreve — só substitui o welcome placeholder inicial.
-          const isInitial = prev.length === 1 && prev[0].id === 'welcome'
+          const isInitial = prev.length <= 1 && (!prev[0] || prev[0].id === 'welcome')
           if (!isInitial) return prev
-          return loaded.length > 0 ? loaded : prev
+          const w = welcomeMessage(t, gaps)
+          if (loaded.length > 0) {
+            return w ? [...loaded, w] : loaded
+          }
+          return w ? [w] : []
         })
         setHistoryLoaded(true)
       })
@@ -361,7 +455,7 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
         className="fixed bottom-2 right-2 size-12 rounded-full shadow-lg transition-transform transform hover:scale-110 z-50"
         aria-label={isOpen ? t('chat.close_chat') : t('chat.open_chat')}
         aria-expanded={isOpen}
-        tooltipContent={isOpen ? null : <div>{t('chat.title')}</div>}
+        tooltipContent={isOpen ? null : <div>{t('chat.title')}{gaps.length > 0 ? ` (${gaps.length})` : ''}</div>}
         side="left"
       >
         <AnimatePresence initial={false} mode="wait">
@@ -379,6 +473,11 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
             )}
           </motion.div>
         </AnimatePresence>
+        {!isOpen && gaps.length > 0 && (
+          <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-amber-500 text-white text-[10px] font-bold border-2 border-card shadow">
+            {gaps.length}
+          </span>
+        )}
       </ButtonWithTooltip>
     </>
   )
