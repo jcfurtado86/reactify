@@ -104,7 +104,12 @@ class StoryStrategy implements GeneratorStrategy
         $existingContext = 'Nenhuma.';
         if ($existingStories->isNotEmpty()) {
             $existingContext = $existingStories
-                ->map(fn($s) => "- \"{$s->title}\" Tipo:{$s->type}")
+                ->map(function ($s) {
+                    $flags = '';
+                    if ($s->status === 'done') $flags .= ' [CONCLUIDA]';
+                    if (!$s->is_ai_generated) $flags .= ' [APROVADO]';
+                    return "- \"{$s->title}\" Tipo:{$s->type}{$flags}";
+                })
                 ->implode("\n");
         }
 
@@ -173,11 +178,16 @@ class StoryStrategy implements GeneratorStrategy
           ]
         }
 
+        PROTEÇÃO DE ARTEFATOS:
+        - Stories marcadas como [CONCLUIDA] sao definitivas. Nao gere variacoes, duplicatas ou reformulacoes dessas stories.
+        - Stories marcadas como [APROVADO] foram validadas pelo usuario ou criadas manualmente. Nao duplique nem gere variacoes semanticas.
+        - Compare semanticamente cada story que voce pretende gerar com TODAS as stories existentes listadas acima. Se o significado for equivalente ou muito proximo, NAO inclua.
+        - Gere apenas stories NOVAS que nao existam na lista acima.
+
         REGRAS DE FORMATO:
         - Todo item DEVE ter `title` (string) e `type` ("user" ou "system").
         - Todo item DEVE ter `persona_name` (string ou null): nome exato da persona que esta story atende. Use os nomes das personas fornecidas no contexto. System stories podem ter null.
         - Todo item DEVE ter `goal_title` (string ou null): titulo exato do goal/constraint goal que esta story serve. Use os titulos fornecidos no contexto.
-        - Não repita stories existentes nem variações semânticas.
         - Baseie-se nos contextos acima, não invente funcionalidades fora do domínio.
         PROMPT;
     }

@@ -83,7 +83,8 @@ class JourneyStrategy implements BatchedGeneratorStrategy
         $existingContext = 'Nenhuma.';
         if ($existing->isNotEmpty()) {
             $existingContext = $existing->map(function ($journey) {
-                $str = "- Título: {$journey->title}\n  Passos:\n";
+                $flag = $journey->is_ai_generated ? '' : ' [APROVADO]';
+                $str = "- Título: {$journey->title}{$flag}\n  Passos:\n";
                 $steps = is_string($journey->steps) ? json_decode($journey->steps, true) : $journey->steps;
                 if (is_array($steps)) {
                     foreach ($steps as $index => $step) {
@@ -157,6 +158,11 @@ class JourneyStrategy implements BatchedGeneratorStrategy
                 }
             ]
         }
+
+        PROTEÇÃO DE ARTEFATOS:
+        - Journeys marcadas como [APROVADO] foram validadas pelo usuario ou criadas manualmente. Nao gere journeys que repitam, contradigam ou sejam variacoes semanticas dessas.
+        - Compare semanticamente cada journey que voce pretende gerar com TODAS as journeys existentes listadas acima. Se o fluxo for equivalente ou muito proximo, NAO inclua.
+        - Gere apenas journeys NOVAS que complementem as existentes.
 
         IMPORTANTE: Retorne apenas o JSON e não use \ para escapar caracteres especiais.
         IMPORTANTE: Gere apenas journeys que AINDA NÃO EXISTEM na lista fornecida. Se nenhuma nova journey for encontrada, retorne um array "journeys" vazio.

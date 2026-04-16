@@ -79,6 +79,7 @@ class EpicStoryStrategy implements GeneratorStrategy
 
         $stories = Story::where('project_id', $project->id)
             ->whereNull('epic_id')
+            ->where('status', '!=', 'done')
             ->whereNotIn('id', $decomposedEpicIds)
             ->get();
 
@@ -135,6 +136,10 @@ class EpicStoryStrategy implements GeneratorStrategy
                 }
             ]
         }
+
+        PROTEÇÃO DE ARTEFATOS:
+        - Stories concluidas (status done) nao devem ser decompostas.
+        - Stories que o usuario validou ou criou manualmente nao devem ser decompostas a menos que claramente sejam epicas pelos criterios acima.
 
         IMPORTANTE: Se nenhuma estória (que não esteja na lista de já decompostos) for considerada um épico, retorne um array "decomposed_epics" vazio.
         IMPORTANTE: As novas estórias decompostas devem obrigatoriamente manter o mesmo 'type' ('user' ou 'system') da estória épica original da qual elas se originaram.

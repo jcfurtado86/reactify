@@ -70,7 +70,10 @@ class SystemInterfaceStrategy implements GeneratorStrategy
         $existingContext = 'Nenhuma.';
         if ($existing->isNotEmpty()) {
             $existingContext = $existing
-                ->map(fn($i) => "- {$i->title} (Tipo: {$i->type})")
+                ->map(function ($i) {
+                    $flag = $i->is_ai_generated ? '' : ' [APROVADO]';
+                    return "- {$i->title} (Tipo: {$i->type}){$flag}";
+                })
                 ->implode("\n");
         }
 
@@ -156,7 +159,11 @@ class SystemInterfaceStrategy implements GeneratorStrategy
 
         TAREFA OBRIGATÓRIA: Identifique TODAS as interfaces relevantes — internas (entre CRC cards) e externas (com sistemas de terceiros mencionados nas stories). Mínimo 4 interfaces. Um projeto típico tem 5-12 interfaces identificáveis.
 
-        IMPORTANTE: Gere apenas interfaces que AINDA NÃO EXISTEM na lista fornecida.
+        PROTEÇÃO DE ARTEFATOS:
+        - Interfaces marcadas como [APROVADO] foram validadas pelo usuario ou criadas manualmente. Nao gere interfaces que repitam, contradigam ou sejam variacoes semanticas dessas.
+        - Compare semanticamente cada interface que voce pretende gerar com TODAS as interfaces existentes listadas acima. Se representam o mesmo ponto de comunicacao, NAO inclua.
+        - Gere apenas interfaces NOVAS que complementem as existentes.
+
         IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }

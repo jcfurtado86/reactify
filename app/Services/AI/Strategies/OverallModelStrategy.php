@@ -81,14 +81,18 @@ class OverallModelStrategy implements GeneratorStrategy
                     ? json_decode($card->collaborators)
                     : $card->collaborators;
                 $collabStr = is_array($collab) ? implode(', ', $collab) : '';
-                return "- Classe: {$card->class} (Colaboradores: {$collabStr})";
+                $flag = $card->is_ai_generated ? '' : ' [APROVADO]';
+                return "- Classe: {$card->class} (Colaboradores: {$collabStr}){$flag}";
             })->implode("\n");
         }
 
         $existingClassesContext = 'Nenhuma Classe.';
         if ($existingClasses->isNotEmpty()) {
             $existingClassesContext = $existingClasses
-                ->map(fn($c) => "- {$c->name}")
+                ->map(function ($c) {
+                    $flag = $c->is_ai_generated ? '' : ' [APROVADO]';
+                    return "- {$c->name}{$flag}";
+                })
                 ->implode("\n");
         }
 
@@ -183,11 +187,15 @@ class OverallModelStrategy implements GeneratorStrategy
             ]
         }
 
+        PROTEÇÃO DE ARTEFATOS:
+        - CRC Cards e classes marcados como [APROVADO] foram validados pelo usuario ou criados manualmente. Nao duplique, renomeie ou gere variacoes semanticas desses.
+        - Compare semanticamente cada classe que voce pretende gerar com TODAS as classes existentes listadas acima. Se representam a mesma entidade de dominio, NAO inclua.
+        - Gere apenas classes e CRC cards NOVOS que complementem o modelo existente.
+
         REGRAS DE CONSISTÊNCIA:
         - Toda classe em `collaborators` DEVE estar em `overall_model_classes`.
         - `overall_model_classes` contém todas as classes (novas + existentes) de forma única.
         - `crc_cards` contém apenas as NOVAS classes identificadas.
-        - Não repita classes/CRC cards existentes.
         PROMPT;
     }
 

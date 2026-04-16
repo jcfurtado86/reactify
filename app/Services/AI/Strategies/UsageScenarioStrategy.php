@@ -72,6 +72,7 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
     public function items(Project $project, array $validated): iterable
     {
         return Story::where('project_id', $project->id)
+            ->where('status', '!=', 'done')
             ->whereDoesntHave('stories')
             ->get();
     }
@@ -111,7 +112,8 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
                     if (!is_array($desc)) {
                         $desc = json_decode(strval($desc), true) ?? [];
                     }
-                    $str = "- Cenário:\n";
+                    $flag = $scenario->is_ai_generated ? '' : ' [APROVADO]';
+                    $str = "- Cenário{$flag}:\n";
                     $keyMap = ['as' => 'COMO', 'given' => 'DADO QUE', 'when' => 'QUANDO'];
                     foreach ($desc as $key => $value) {
                         if (isset($keyMap[$key])) {
@@ -168,8 +170,12 @@ class UsageScenarioStrategy implements BatchedGeneratorStrategy
             ]
         }
 
+        PROTEÇÃO DE ARTEFATOS:
+        - Cenarios marcados como [APROVADO] foram validados pelo usuario ou criados manualmente. Nao gere cenarios que repitam, contradigam ou sejam variacoes semanticas desses.
+        - Compare semanticamente cada cenario que voce pretende gerar com TODOS os cenarios existentes listados acima. Se o significado for equivalente ou muito proximo, NAO inclua.
+        - Gere apenas cenarios NOVOS que complementem os existentes.
+
         REGRAS DE FORMATO:
-        - Não gere cenários que repitam cenários existentes.
         - Respeite as regras de negócio da story (listadas acima) — não crie cenários que as violem.
         PROMPT;
     }

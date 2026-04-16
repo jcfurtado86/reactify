@@ -58,7 +58,8 @@ class PersonaStrategy implements GeneratorStrategy
         $existingContext = 'Nenhuma.';
         if ($existing->isNotEmpty()) {
             $existingContext = $existing->map(function ($persona) {
-                $str = "- Nome: {$persona->name} (ID: {$persona->id})\n";
+                $flag = $persona->is_ai_generated ? '' : ' [APROVADO]';
+                $str = "- Nome: {$persona->name} (ID: {$persona->id}){$flag}\n";
                 $formatList = function (?array $items, string $label) {
                     $out = "  {$label}:\n";
                     if (!empty($items)) {
@@ -129,6 +130,11 @@ class PersonaStrategy implements GeneratorStrategy
                 }
             ]
         }
+
+        PROTEÇÃO DE ARTEFATOS:
+        - Personas marcadas como [APROVADO] foram validadas pelo usuario ou criadas manualmente. Nao recrie personas com nomes similares ou perfis equivalentes.
+        - Compare semanticamente cada persona que voce pretende gerar com TODAS as personas existentes listadas acima. Se representam o mesmo arquetipo de usuario, NAO inclua.
+        - Gere apenas personas NOVAS que representem arquetipos distintos dos existentes.
 
         IMPORTANTE: Baseie-se exclusivamente no conteúdo da transcrição fornecida. Não invente informações.
         IMPORTANTE: Gere apenas personas que AINDA NÃO EXISTEM na lista fornecida. Se nenhuma nova persona for identificada, retorne um array "personas" vazio.

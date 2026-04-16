@@ -56,9 +56,10 @@ class GoalStrategy implements GeneratorStrategy
 
         $existingContext = 'Nenhum.';
         if ($existing->isNotEmpty()) {
-            $existingContext = $existing->map(
-                fn($goal) => "- \"{$goal->title}\" (Tipo: {$goal->type})"
-            )->implode("\n");
+            $existingContext = $existing->map(function ($goal) {
+                $flag = $goal->is_ai_generated ? '' : ' [APROVADO]';
+                return "- \"{$goal->title}\" (Tipo: {$goal->type}){$flag}";
+            })->implode("\n");
         }
 
         $canvas = ProductCanvas::where('project_id', $project->id)->first();
@@ -122,8 +123,12 @@ class GoalStrategy implements GeneratorStrategy
 
         TAREFA OBRIGATÓRIA: Extraia TODOS os goals (bg e cg) identificáveis a partir do contexto. Mínimo 5 goals. Não retorne array vazio na primeira rodada — sempre existem objetivos derivaveis da entrevista e do canvas.
 
+        PROTEÇÃO DE ARTEFATOS:
+        - Goals marcados como [APROVADO] foram validados pelo usuario ou criados manualmente. Nao gere goals que repitam, contradigam ou sejam variacoes semanticas desses.
+        - Compare semanticamente cada goal que voce pretende gerar com TODOS os goals existentes listados acima. Se o significado for equivalente ou muito proximo, NAO inclua.
+        - Gere apenas goals NOVOS que complementem os existentes.
+
         IMPORTANTE: Baseie-se **exclusivamente** no conteúdo da transcrição.
-        IMPORTANTE: Não repita goals que já existem na lista acima.
         IMPORTANTE: Retorne apenas o JSON.
         PROMPT;
     }

@@ -63,6 +63,7 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
     public function items(Project $project, array $validated): iterable
     {
         return Story::where('project_id', $project->id)
+            ->where('status', '!=', 'done')
             ->whereDoesntHave('stories')
             ->get();
     }
@@ -96,7 +97,10 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
         $storyRulesContext = 'Nenhuma.';
         if (isset($existingByStory[$story->id])) {
             $storyRulesContext = $existingByStory[$story->id]
-                ->map(fn($rule) => "- \"{$rule->title}\"")
+                ->map(function ($rule) {
+                    $flag = $rule->is_ai_generated ? '' : ' [APROVADO]';
+                    return "- BR{$rule->id}: \"{$rule->title}\"{$flag}";
+                })
                 ->implode("\n");
         }
 
@@ -135,8 +139,12 @@ class BusinessRuleStrategy implements BatchedGeneratorStrategy
             ]
         }
 
+        PROTEÇÃO DE ARTEFATOS:
+        - Regras marcadas como [APROVADO] foram validadas pelo usuario ou criadas manualmente. Nao gere regras que repitam, contradigam ou sejam variacoes semanticas dessas.
+        - Compare semanticamente cada regra que voce pretende gerar com TODAS as regras existentes listadas acima. Se o significado for equivalente ou muito proximo, NAO inclua.
+        - Gere apenas regras NOVAS que complementem as existentes.
+
         REGRAS DE FORMATO:
-        - Não gere regras que repitam ou completem regras já existentes (veja a lista acima).
         - Todo item DEVE ter `title` (string) e `rule_type` ("structural" ou "dynamic").
         PROMPT;
     }
