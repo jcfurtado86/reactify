@@ -380,3 +380,57 @@ test('outsider cannot create any artifact (403)', function () {
         'request_date' => '2026-04-15', 'project_id' => $project->id,
     ])->assertForbidden();
 });
+
+// ===========================
+// SPRINT: apenas uma ativa por projeto
+// ===========================
+
+test('nao permite criar segunda sprint ativa no mesmo projeto', function () {
+    [$user, $project] = setupProject('team');
+    Sprint::create([
+        'name' => 'S1', 'start_date' => '2026-05-01', 'end_date' => '2026-05-15',
+        'status' => 'active', 'project_id' => $project->id,
+    ]);
+    $response = test()->actingAs($user)->post(route('sprint.store'), [
+        'name' => 'S2', 'start_date' => '2026-05-16', 'end_date' => '2026-05-30',
+        'status' => 'active', 'project_id' => $project->id,
+    ]);
+    $response->assertSessionHasErrors('status');
+});
+
+test('permite criar sprint ativa se nenhuma ativa existe', function () {
+    [$user, $project] = setupProject('team');
+    Sprint::create([
+        'name' => 'S1', 'start_date' => '2026-04-01', 'end_date' => '2026-04-15',
+        'status' => 'completed', 'project_id' => $project->id,
+    ]);
+    test()->actingAs($user)->post(route('sprint.store'), [
+        'name' => 'S2', 'start_date' => '2026-05-01', 'end_date' => '2026-05-15',
+        'status' => 'active', 'project_id' => $project->id,
+    ])->assertRedirect();
+});
+
+test('nao permite criar sprint com datas que sobrepoe sprint existente', function () {
+    [$user, $project] = setupProject('team');
+    Sprint::create([
+        'name' => 'S1', 'start_date' => '2026-05-01', 'end_date' => '2026-05-15',
+        'status' => 'completed', 'project_id' => $project->id,
+    ]);
+    $response = test()->actingAs($user)->post(route('sprint.store'), [
+        'name' => 'S2', 'start_date' => '2026-05-10', 'end_date' => '2026-05-25',
+        'status' => 'active', 'project_id' => $project->id,
+    ]);
+    $response->assertSessionHasErrors('start_date');
+});
+
+test('permite criar sprint com datas sem sobreposicao', function () {
+    [$user, $project] = setupProject('team');
+    Sprint::create([
+        'name' => 'S1', 'start_date' => '2026-05-01', 'end_date' => '2026-05-15',
+        'status' => 'completed', 'project_id' => $project->id,
+    ]);
+    test()->actingAs($user)->post(route('sprint.store'), [
+        'name' => 'S2', 'start_date' => '2026-05-16', 'end_date' => '2026-05-30',
+        'status' => 'active', 'project_id' => $project->id,
+    ])->assertRedirect();
+});

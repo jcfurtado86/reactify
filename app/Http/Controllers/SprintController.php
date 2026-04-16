@@ -55,6 +55,27 @@ class SprintController extends Controller
     $project = Project::findOrFail($validated['project_id']);
     $this->authorize('create', [Sprint::class, $project]);
 
+    $hasActive = Sprint::where('project_id', $project->id)
+      ->where('status', 'active')
+      ->exists();
+
+    if ($hasActive && $validated['status'] === 'active') {
+      return back()->withErrors([
+        'status' => __('Já existe uma sprint ativa neste projeto. Finalize-a antes de criar outra.'),
+      ]);
+    }
+
+    $overlapping = Sprint::where('project_id', $project->id)
+      ->where('start_date', '<=', $validated['end_date'])
+      ->where('end_date', '>=', $validated['start_date'])
+      ->exists();
+
+    if ($overlapping) {
+      return back()->withErrors([
+        'start_date' => __('As datas desta sprint conflitam com uma sprint existente.'),
+      ]);
+    }
+
     $sprint = Sprint::create($validated);
     Log::info("Sprint created successfully: {$sprint->id}  -  {$sprint->name}");
 
@@ -73,6 +94,21 @@ class SprintController extends Controller
       'end_date' => 'sometimes|date_format:Y-m-d|after:start_date',
       'status' => 'sometimes|in:active,completed',
     ]);
+
+    $newStart = $validated['start_date'] ?? $sprint->start_date;
+    $newEnd = $validated['end_date'] ?? $sprint->end_date;
+
+    $overlapping = Sprint::where('project_id', $sprint->project_id)
+      ->where('id', '!=', $sprint->id)
+      ->where('start_date', '<=', $newEnd)
+      ->where('end_date', '>=', $newStart)
+      ->exists();
+
+    if ($overlapping) {
+      return back()->withErrors([
+        'start_date' => __('As datas desta sprint conflitam com uma sprint existente.'),
+      ]);
+    }
 
     $sprint->update($validated);
 

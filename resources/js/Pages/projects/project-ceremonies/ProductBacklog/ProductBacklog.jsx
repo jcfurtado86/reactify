@@ -45,6 +45,23 @@ const ProductBacklog = ({ project, setProject }) => {
   const [selectedStories, setSelectedStories] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [sprintName, setSprintName] = useState('')
+
+  // Data mínima para início de nova sprint: dia seguinte ao fim da última sprint.
+  // Usa parseDateAsLocal pra evitar shift de timezone (end_date vem como "YYYY-MM-DD").
+  const minStartDate = useMemo(() => {
+    const sprints = localProject?.sprints || []
+    if (sprints.length === 0) return new Date()
+    const latestEnd = sprints
+      .map((s) => parseDateAsLocal(s.end_date))
+      .filter(Boolean)
+      .reduce((max, d) => (d > max ? d : max), new Date(0))
+    const dayAfter = new Date(latestEnd)
+    dayAfter.setDate(dayAfter.getDate() + 1)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return dayAfter > today ? dayAfter : today
+  }, [localProject?.sprints])
   //
   const [sorting, setSorting] = useState([])
   const [rowSelection, setRowSelection] = useState({})
@@ -148,14 +165,22 @@ const ProductBacklog = ({ project, setProject }) => {
   }, [open])
 
   useEffect(() => {
-    if (sprintOperation === 'start' || sprintOperation === 'create')
+    if (sprintOperation === 'create') {
+      setStartDate(minStartDate)
+      setEndDate(new Date(minStartDate.getTime() + 14 * 24 * 60 * 60 * 1000))
+    } else if (sprintOperation === 'start') {
       setStartDate(new Date())
-    else setStartDate(parseDateAsLocal(selectedSprint?.start_date))
-
-    setEndDate(
-      parseDateAsLocal(selectedSprint?.end_date) ||
-        new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-    )
+      setEndDate(
+        parseDateAsLocal(selectedSprint?.end_date) ||
+          new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      )
+    } else {
+      setStartDate(parseDateAsLocal(selectedSprint?.start_date))
+      setEndDate(
+        parseDateAsLocal(selectedSprint?.end_date) ||
+          new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      )
+    }
   }, [selectedSprint, sprintOperation])
 
   const { productBacklogStories, sprintBacklogStories, deliveredStories } =
@@ -285,6 +310,10 @@ const ProductBacklog = ({ project, setProject }) => {
             setSelectedSprint(null)
             setOpen(false)
           },
+          onError: (errs) => {
+            const msg = Object.values(errs)[0]
+            if (msg) toast.error(msg)
+          },
         },
       )
     } else {
@@ -303,8 +332,12 @@ const ProductBacklog = ({ project, setProject }) => {
           onSuccess: () => {
             setOpen(false)
             setSelectedSprint(null)
-            setStartDate(new Date())
-            setEndDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))
+            setStartDate(minStartDate)
+            setEndDate(new Date(minStartDate.getTime() + 14 * 24 * 60 * 60 * 1000))
+          },
+          onError: (errs) => {
+            const msg = Object.values(errs)[0]
+            if (msg) toast.error(msg)
           },
         },
       )
@@ -313,10 +346,13 @@ const ProductBacklog = ({ project, setProject }) => {
 
   const createSprint = (e) => {
     e.preventDefault()
+    const nextNumber = (localProject?.sprints?.length || 0) + 1
+    setSprintName(`Sprint ${nextNumber}`)
     setOpen(!open)
     setSelectedSprint(null)
     setSprintOperation('create')
-    setStartDate(new Date())
+    setStartDate(minStartDate)
+    setEndDate(new Date(minStartDate.getTime() + 14 * 24 * 60 * 60 * 1000))
   }
 
   const deleteSprint = (e) => {
@@ -364,6 +400,7 @@ const ProductBacklog = ({ project, setProject }) => {
       setSprintOperation('start')
     } else setSprintOperation('edit')
 
+    setSprintName(sprint?.name || '')
     setOpen(!open)
     setSelectedSprint(sprint)
   }
@@ -505,9 +542,8 @@ const ProductBacklog = ({ project, setProject }) => {
                   id="name-1"
                   name="name"
                   maxLength={30}
-                  defaultValue={
-                    selectedSprint?.name || 'Sprint 1 - Configuração Inicial'
-                  }
+                  value={sprintName}
+                  onChange={(e) => setSprintName(e.target.value)}
                 />
                 <span className="text-destructive text-sm">{errors?.name}</span>
               </div>
@@ -536,8 +572,14 @@ const ProductBacklog = ({ project, setProject }) => {
                     <Calendar
                       mode="single"
                       selected={startDate}
-                      onSelect={setStartDate}
-                      disabled={{ before: new Date() }}
+                      onSelect={(date) => {
+                        setStartDate(date)
+                        if (endDate && date && date >= endDate) {
+                          setEndDate(new Date(date.getTime() + 14 * 24 * 60 * 60 * 1000))
+                        }
+                      }}
+                      disabled={{ before: sprintOperation === 'create' ? minStartDate : new Date() }}
+                      defaultMonth={sprintOperation === 'create' ? minStartDate : startDate}
                       locale={currentDateFnsLocale()}
                       initialFocus
                     />
@@ -573,7 +615,8 @@ const ProductBacklog = ({ project, setProject }) => {
                       mode="single"
                       selected={endDate}
                       onSelect={setEndDate}
-                      disabled={{ before: new Date() }}
+                      disabled={{ before: startDate || minStartDate }}
+                      defaultMonth={endDate || startDate}
                       locale={currentDateFnsLocale()}
                       initialFocus
                     />
