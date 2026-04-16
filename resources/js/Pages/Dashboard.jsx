@@ -540,17 +540,19 @@ const Dashboard = ({ project, setProject }) => {
     const sprints = project?.sprints || []
     const activeSprint = sprints.find((s) => s.status === 'active')
 
-    // Uma story é "priorizada" quando tem uma linha correspondente em
-    // project.prioritizations (onde mora o priority_id e a position).
-    // Os campos s.value/s.complexity são de outro contexto e ficavam null.
+    const epicParentIds = new Set(
+      stories.filter((s) => s.epic_id).map((s) => s.epic_id),
+    )
+    const workStories = stories.filter((s) => !epicParentIds.has(s.id))
+
     const prioritizedIds = new Set(
       (project?.prioritizations || []).map((p) => p.story_id),
     )
-    const unprioritized = stories.filter(
+    const unprioritized = workStories.filter(
       (s) => !prioritizedIds.has(s.id),
     ).length
 
-    const investNotOk = stories.filter((s) => {
+    const investNotOk = workStories.filter((s) => {
       const st = investStatus(s.invest_card)
       return st === 'missing' || st === 'pending' || st === 'rejected'
     }).length
@@ -563,11 +565,6 @@ const Dashboard = ({ project, setProject }) => {
     const activeSprintDone = activeSprintStories.filter(
       (s) => s.pivot?.kanban_status === 'done',
     ).length
-
-    const epicParentIds = new Set(
-      stories.filter((s) => s.epic_id).map((s) => s.epic_id),
-    )
-    const workStories = stories.filter((s) => !epicParentIds.has(s.id))
 
     const businessRules = project?.business_rules || []
     const usageScenarios = project?.usage_scenarios || []
