@@ -16,16 +16,15 @@ test('sending REAL project invitation notification to unregistered user', functi
     ->actingAs($owner)
     ->from(route('dashboard'))
     ->post(route('projects.invitations.store', $project->id), [
-      'email' => $userToInvite,
-      'role' => UserRole::TEAM->value,
+      'invites' => [
+        ['email' => $userToInvite, 'role' => UserRole::TEAM->value],
+      ],
     ]);
 
   $response
-    ->assertSessionHas('status', 'success')
-    ->assertSessionHas('message', 'Invitation sent successfully')
+    ->assertSessionHasNoErrors()
     ->assertRedirect(route('dashboard'));
 
-  //testa o armazenamento do convite no banco de dados
   $this
     ->assertDatabaseHas('project_invitations', [
       'email' => $userToInvite,
@@ -33,6 +32,7 @@ test('sending REAL project invitation notification to unregistered user', functi
       'role' => UserRole::TEAM->value,
     ]);
 });
+
 test('sending REAL project invitation notification to registered user', function () {
   $owner = User::factory()->create();
   $userToInvite = User::factory()->create();
@@ -43,16 +43,15 @@ test('sending REAL project invitation notification to registered user', function
     ->actingAs($owner)
     ->from(route('dashboard'))
     ->post(route('projects.invitations.store', $project->id), [
-      'email' => $userToInvite->email,
-      'role' => UserRole::TEAM->value,
+      'invites' => [
+        ['email' => $userToInvite->email, 'role' => UserRole::TEAM->value],
+      ],
     ]);
 
   $response
-    ->assertSessionHas('status', 'success')
-    ->assertSessionHas('message', 'Invitation sent successfully')
+    ->assertSessionHasNoErrors()
     ->assertRedirect(route('dashboard'));
 
-  //testa o armazenamento do convite no banco de dados
   $this
     ->assertDatabaseHas('notifications', [
       'notifiable_id' => $userToInvite->id,
@@ -67,7 +66,7 @@ test('sending REAL project invitation notification to registered user', function
 
 test('sending FAKE project invitation notification to registered user', function () {
   Notification::fake();
-  // 2. Crie os dados necessários para este teste específico.
+
   $owner = User::factory()->create();
   $userToInvite = User::factory()->create();
   $project = Project::factory()->create();
@@ -77,10 +76,11 @@ test('sending FAKE project invitation notification to registered user', function
     ->actingAs($owner)
     ->from(route('dashboard'))
     ->post(route('projects.invitations.store', $project->id), [
-      'email' => $userToInvite->email,
-      'role' => UserRole::TEAM->value,
+      'invites' => [
+        ['email' => $userToInvite->email, 'role' => UserRole::TEAM->value],
+      ],
     ]);
-  //testa o envio do e-mail
+
   Notification::assertSentTo(
     $userToInvite,
     UserInvitedToProject::class,
@@ -97,15 +97,49 @@ test('sending FAKE project invitation notification to registered user', function
   );
 
   $response
-    ->assertSessionHas('status', 'success')
-    ->assertSessionHas('message', 'Invitation sent successfully')
+    ->assertSessionHasNoErrors()
     ->assertRedirect(route('dashboard'));
 
-  //testa o armazenamento do convite no banco de dados
   $this
     ->assertDatabaseHas('project_invitations', [
       'email' => $userToInvite->email,
       'project_id' => $project->id,
       'role' => UserRole::TEAM->value,
     ]);
+});
+
+test('sending multiple invites in a single batch', function () {
+  Notification::fake();
+
+  $owner = User::factory()->create();
+  $a = User::factory()->create();
+  $b = User::factory()->create();
+  $project = Project::factory()->create();
+  $project->users()->attach($owner->id, ['role' => UserRole::ADMINISTRATOR->value]);
+
+  $response = $this
+    ->actingAs($owner)
+    ->from(route('dashboard'))
+    ->post(route('projects.invitations.store', $project->id), [
+      'invites' => [
+        ['email' => $a->email, 'role' => UserRole::TEAM->value],
+        ['email' => $b->email, 'role' => UserRole::CUSTOMER->value],
+        ['email' => 'sem-conta@example.com', 'role' => UserRole::DOMAIN_EXPERT->value],
+      ],
+    ]);
+
+  $response->assertSessionHasNoErrors();
+
+  $this->assertDatabaseHas('project_invitations', [
+    'email' => $a->email,
+    'role' => UserRole::TEAM->value,
+  ]);
+  $this->assertDatabaseHas('project_invitations', [
+    'email' => $b->email,
+    'role' => UserRole::CUSTOMER->value,
+  ]);
+  $this->assertDatabaseHas('project_invitations', [
+    'email' => 'sem-conta@example.com',
+    'role' => UserRole::DOMAIN_EXPERT->value,
+  ]);
 });

@@ -1,4 +1,4 @@
-import { Plus, LoaderCircle, X, UserCog } from 'lucide-react'
+import { Plus, LoaderCircle, X, UserCog, Mail } from 'lucide-react'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import { usePage, router } from '@inertiajs/react'
 import axios from 'axios'
@@ -9,11 +9,11 @@ export function ProjectPermissions({ project }) {
   const { auth, errors } = usePage().props
   const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isAddingUser, setIsAddingUser] = useState(false)
+  const [isSendingInvites, setIsSendingInvites] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [currentUserRole, setCurrentUserRole] = useState('')
-  const [newUserRole, setNewUserRole] = useState('')
-  const [newUserEmail, setNewUserEmail] = useState('')
+  const [inviteRows, setInviteRows] = useState([{ email: '', role: '' }])
+  const [rowErrors, setRowErrors] = useState({})
 
   // Variável de controle de permissão
   const canManagePermissions = currentUserRole === 'administrator'
@@ -78,31 +78,106 @@ export function ProjectPermissions({ project }) {
     )
     setIsLoading(false)
   }
-  // Função para adicionar um novo usuário ao projeto
-  const handleAddUser = async () => {
-    if (!newUserEmail) return
-    setIsAddingUser(true)
-    const emailSent = newUserEmail
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+  const handleAddRow = () => {
+    setInviteRows([...inviteRows, { email: '', role: '' }])
+  }
+
+  const handleRemoveRow = (index) => {
+    const next = inviteRows.filter((_, i) => i !== index)
+    setInviteRows(next.length === 0 ? [{ email: '', role: '' }] : next)
+    setRowErrors({})
+  }
+
+  const handleRowChange = (index, field, value) => {
+    setInviteRows(
+      inviteRows.map((row, i) =>
+        i === index ? { ...row, [field]: value } : row,
+      ),
+    )
+    if (rowErrors[index]) {
+      const { [index]: _, ...rest } = rowErrors
+      setRowErrors(rest)
+    }
+  }
+
+  const validateRows = () => {
+    const errs = {}
+    const seen = new Set()
+
+    inviteRows.forEach((row, i) => {
+      const email = row.email.trim().toLowerCase()
+
+      if (!email || !row.role) {
+        errs[i] = t('project_permissions.draft_missing_fields')
+        return
+      }
+      if (!isValidEmail(email)) {
+        errs[i] = t('project_permissions.draft_invalid_email')
+        return
+      }
+      if (users.some((u) => u.email?.toLowerCase() === email)) {
+        errs[i] = t('project_permissions.draft_already_member')
+        return
+      }
+      if (
+        project?.invitations?.some((inv) => inv.email?.toLowerCase() === email)
+      ) {
+        errs[i] = t('project_permissions.draft_already_pending')
+        return
+      }
+      if (seen.has(email)) {
+        errs[i] = t('project_permissions.draft_duplicate')
+        return
+      }
+      seen.add(email)
+    })
+
+    return errs
+  }
+
+  const handleSendInvites = () => {
+    const errs = validateRows()
+    if (Object.keys(errs).length > 0) {
+      setRowErrors(errs)
+      return
+    }
+
+    const invites = inviteRows.map((row) => ({
+      email: row.email.trim().toLowerCase(),
+      role: row.role,
+    }))
+    const count = invites.length
+    setIsSendingInvites(true)
 
     router.post(
       route('projects.invitations.store', project.id),
+      { invites },
       {
-        email: newUserEmail,
-        role: newUserRole,
-      },
-      {
+        preserveScroll: true,
         onSuccess: () => {
-          toastSuccess('project_permissions.toast_invited', {
-            email: emailSent,
-          })
-          normalizeProjectUsers(project?.users)
+          toastSuccess('project_permissions.toast_invites_sent', { count })
+          setInviteRows([{ email: '', role: '' }])
+          setRowErrors({})
         },
         onError: (error) =>
           toastApiError(error, 'project_permissions.toast_invite_error'),
+        onFinish: () => setIsSendingInvites(false),
       },
     )
-    setIsAddingUser(false)
-    setNewUserEmail('') // Limpa o input
+  }
+
+  const handleCancelInvite = (invitationId) => {
+    router.delete(
+      route('projects.invitations.cancel', [project.id, invitationId]),
+      {
+        preserveScroll: true,
+        onSuccess: () => toastSuccess('project_permissions.toast_invite_cancelled'),
+        onError: (error) =>
+          toastApiError(error, 'project_permissions.toast_cancel_invite_error'),
+      },
+    )
   }
 
   const handleRemoveUser = async (memberId) => {
@@ -218,12 +293,50 @@ export function ProjectPermissions({ project }) {
                   </div>
                 )
               })}
+          {project?.invitations?.length > 0 && (
+            <div className="flex flex-col gap-2 pt-2">
+              <Separator />
+              <p className="text-foreground text-sm font-medium pt-2">
+                {t('project_permissions.pending_invites_title')}
+              </p>
+              {project.invitations.map((inv) => (
+                <div
+                  key={inv.id}
+                  className="flex w-full items-center justify-between"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Mail className="size-4 text-muted-foreground shrink-0" />
+                    <div className="flex flex-col min-w-0">
+                      <p className="text-sm text-foreground truncate">
+                        {inv.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {t(`project_permissions.roles.${inv.role}`)} ·{' '}
+                        {t('project_permissions.pending_invite_hint')}
+                      </p>
+                    </div>
+                  </div>
+                  {canManagePermissions && (
+                    <ButtonWithTooltip
+                      variant="ghost"
+                      size="icon"
+                      tooltipContent={t('project_permissions.cancel_invite')}
+                      side="left"
+                      onClick={() => handleCancelInvite(inv.id)}
+                    >
+                      <X className="size-4 text-foreground" />
+                    </ButtonWithTooltip>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           {/* Seção de ações principais */}
           <div className="flex flex-col w-full gap-2 pt-4">
             <Button
               variant="default"
               onClick={handleSaveChanges}
-              disabled={isLoading || isAddingUser}
+              disabled={isLoading || isSendingInvites}
             >
               {isLoading ? t('common.processing') : t('common.save')}
             </Button>
@@ -233,54 +346,86 @@ export function ProjectPermissions({ project }) {
           <SheetFooter>
             <div className="flex flex-col w-full gap-2 pt-4">
               <Separator />
-              {/* Seção para adicionar novo usuário */}
-              <div className="flex flex-col gap-2 text-left ">
-                <div className="text-foreground flex justify-between w-full">
-                  {t('project_permissions.invite_user')}
-                  <Button
+              <div className="flex flex-col gap-2 text-left">
+                <div className="text-foreground flex justify-between w-full items-center">
+                  <span>{t('project_permissions.invite_user')}</span>
+                  <ButtonWithTooltip
                     variant="default"
                     className="p-0 z-20 size-8"
-                    onClick={handleAddUser}
-                    disabled={isAddingUser || !newUserEmail}
+                    tooltipContent={t('project_permissions.add_row')}
+                    side="left"
+                    onClick={handleAddRow}
+                    disabled={isSendingInvites}
                   >
-                    {isAddingUser ? (
-                      <LoaderCircle className="!size-5 animate-spin" />
-                    ) : (
-                      <Plus className="!size-5" />
-                    )}
-                  </Button>
+                    <Plus className="!size-5" />
+                  </ButtonWithTooltip>
                 </div>
-                <span className="text-destructive text-xs">{errors.email}</span>
-                <span className="text-destructive text-xs">{errors.role}</span>
-                <div className="flex gap-1">
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder={t('project_permissions.email_placeholder')}
-                    className="text-foreground"
-                    value={newUserEmail}
-                    onChange={(e) => setNewUserEmail(e.target.value)}
-                    disabled={isAddingUser}
-                  />
-                  <Select
-                    value={newUserRole}
-                    onValueChange={(e) => setNewUserRole(e)}
-                  >
-                    <SelectTrigger className="max-w-[30%]">
-                      <SelectValue placeholder={t('project_permissions.role')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="customer">{t('project_permissions.roles.customer')}</SelectItem>
-                      <SelectItem value="domain_expert">
-                        {t('project_permissions.roles.domain_expert')}
-                      </SelectItem>
-                      <SelectItem value="team">{t('project_permissions.roles.team')}</SelectItem>
-                      <SelectItem value="administrator">
-                        {t('project_permissions.roles.administrator')}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+
+                <div className="flex flex-col gap-2">
+                  {inviteRows.map((row, index) => (
+                    <div key={index} className="flex flex-col gap-1">
+                      <div className="flex gap-1 items-center">
+                        <Input
+                          type="email"
+                          placeholder={t('project_permissions.email_placeholder')}
+                          className="text-foreground"
+                          value={row.email}
+                          onChange={(e) =>
+                            handleRowChange(index, 'email', e.target.value)
+                          }
+                          disabled={isSendingInvites}
+                        />
+                        <Select
+                          value={row.role}
+                          onValueChange={(v) => handleRowChange(index, 'role', v)}
+                          disabled={isSendingInvites}
+                        >
+                          <SelectTrigger className="max-w-[30%]">
+                            <SelectValue placeholder={t('project_permissions.role')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="customer">{t('project_permissions.roles.customer')}</SelectItem>
+                            <SelectItem value="domain_expert">
+                              {t('project_permissions.roles.domain_expert')}
+                            </SelectItem>
+                            <SelectItem value="team">{t('project_permissions.roles.team')}</SelectItem>
+                            <SelectItem value="administrator">
+                              {t('project_permissions.roles.administrator')}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveRow(index)}
+                          disabled={isSendingInvites}
+                        >
+                          <X className="size-4 text-foreground" />
+                        </Button>
+                      </div>
+                      {rowErrors[index] && (
+                        <span className="text-destructive text-xs">
+                          {rowErrors[index]}
+                        </span>
+                      )}
+                    </div>
+                  ))}
                 </div>
+
+                <Button
+                  variant="default"
+                  className="mt-2"
+                  onClick={handleSendInvites}
+                  disabled={isSendingInvites}
+                >
+                  {isSendingInvites ? (
+                    <LoaderCircle className="!size-5 animate-spin" />
+                  ) : (
+                    t('project_permissions.send_invites', {
+                      count: inviteRows.length,
+                    })
+                  )}
+                </Button>
               </div>
             </div>
           </SheetFooter>

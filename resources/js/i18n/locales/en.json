@@ -766,7 +766,20 @@
     "toast_invited": "Invitation sent to {{email}}",
     "toast_removed": "Member removed from project",
     "toast_invite_error": "Failed to send invitation",
-    "toast_remove_error": "Failed to remove member"
+    "toast_remove_error": "Failed to remove member",
+    "pending_invites_title": "Pending invitations",
+    "pending_invite_hint": "Waiting for the invitee to accept",
+    "cancel_invite": "Cancel invitation",
+    "toast_invite_cancelled": "Invitation cancelled",
+    "toast_cancel_invite_error": "Failed to cancel invitation",
+    "add_row": "Add row",
+    "send_invites": "Send invites ({{count}})",
+    "draft_missing_fields": "Fill in email and role",
+    "draft_invalid_email": "Invalid email",
+    "draft_already_member": "This user is already a member",
+    "draft_already_pending": "A pending invite already exists for this email",
+    "draft_duplicate": "This email is already in the list",
+    "toast_invites_sent": "{{count}} invite(s) sent"
   },
   "ai_errors": {
     "missing_prereqs": "To generate {{label}}, you must register at least one of each of the following: {{items}}.",

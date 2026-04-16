@@ -153,6 +153,12 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     'store',
   ])->name('projects.invitations.store');
 
+  //cancela convite pendente
+  Route::delete('/projects/{project}/invitations/{invitation}', [
+    ProjectInvitationController::class,
+    'cancel',
+  ])->name('projects.invitations.cancel');
+
   // Rotas para stories
   Route::prefix('story')->group(function () {
     Route::post('/', [StoryController::class, 'store'])->name('story.store');

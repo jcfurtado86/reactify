@@ -766,7 +766,20 @@
     "toast_invited": "Convite enviado para {{email}}",
     "toast_removed": "Membro removido do projeto",
     "toast_invite_error": "Falha ao enviar convite",
-    "toast_remove_error": "Falha ao remover membro"
+    "toast_remove_error": "Falha ao remover membro",
+    "pending_invites_title": "Convites pendentes",
+    "pending_invite_hint": "Aguardando aceite do convidado",
+    "cancel_invite": "Cancelar convite",
+    "toast_invite_cancelled": "Convite cancelado",
+    "toast_cancel_invite_error": "Falha ao cancelar convite",
+    "add_row": "Adicionar linha",
+    "send_invites": "Enviar convites ({{count}})",
+    "draft_missing_fields": "Informe email e papel",
+    "draft_invalid_email": "Email inválido",
+    "draft_already_member": "Este usuário já é membro do projeto",
+    "draft_already_pending": "Já existe um convite pendente para este email",
+    "draft_duplicate": "Este email já está na lista",
+    "toast_invites_sent": "{{count}} convite(s) enviados"
   },
   "ai_errors": {
     "missing_prereqs": "Para gerar {{label}}, é necessário cadastrar ao menos um de cada item a seguir: {{items}}.",
