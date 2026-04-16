@@ -1,4 +1,4 @@
-import { formatDate, isSprintActive } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import { Trash2Icon as TrashIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -119,7 +119,7 @@ export const SprintTable = ({
               </Badge>
             )}
 
-            {isSprintActive(sprint) && sprint.status === 'active' && (
+            {sprint.status === 'active' && (
               <Badge variant="badge" className={'bg-green-300'}>
                 {t('sprint.sprint_active')}
               </Badge>
@@ -128,15 +128,9 @@ export const SprintTable = ({
               <>
                 <SpanButton
                   variant="secondary"
-                  onClick={() => {
-                    !isSprintActive(sprint)
-                      ? openEditSprintForm(sprint, true)
-                      : openEndSprintForm(sprint)
-                  }}
+                  onClick={() => openEndSprintForm(sprint)}
                 >
-                  {!isSprintActive(sprint)
-                    ? 'Iniciar Sprint'
-                    : 'Finalizar Sprint'}
+                  {t('sprint.finish_sprint', 'Finalizar Sprint')}
                 </SpanButton>
                 <SpanButton
                   variant="secondary"

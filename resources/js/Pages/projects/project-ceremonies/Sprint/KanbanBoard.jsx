@@ -11,7 +11,7 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { getStatusColor, isSprintActive } from '@/lib/utils'
+import { getStatusColor } from '@/lib/utils'
 import { usePermissionGate } from '@/lib/usePermissionGate'
 import { toast } from 'sonner'
 // ============================================================================
@@ -121,7 +121,7 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
   useEffect(() => {
     if (sprints) {
       const sprintStories = sprints
-        .filter((s) => s.status !== 'completed' && isSprintActive(s))
+        .filter((s) => s.status === 'active')
         .flatMap((sprint) => {
           const sprintStories = sprint.stories || []
           return sprintStories.map((story) => ({

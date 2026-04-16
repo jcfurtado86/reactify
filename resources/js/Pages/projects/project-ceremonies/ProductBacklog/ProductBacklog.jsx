@@ -1,6 +1,6 @@
 import { router, useForm, usePage } from '@inertiajs/react'
 import { useTranslation } from 'react-i18next'
-import { cn, formatDate, isSprintActive, parseDateAsLocal } from '@/lib/utils'
+import { cn, formatDate, parseDateAsLocal, computeBacklogSplit } from '@/lib/utils'
 import { format } from 'date-fns'
 import { currentDateFnsLocale } from '@/lib/utils'
 import {
@@ -185,53 +185,10 @@ const ProductBacklog = ({ project, setProject }) => {
 
   const { productBacklogStories, sprintBacklogStories, deliveredStories } =
     useMemo(() => {
-      const stories = localProject?.stories || []
-      const sprints = localProject?.sprints || []
-
-      // Épicas (stories com filhas) não entram no backlog — só as filhas
-      // reais aparecem. Épicas são placeholders, não unidades de trabalho.
-      const epicParentIds = new Set(
-        stories.filter((s) => s.epic_id).map((s) => s.epic_id),
+      const { productBacklog, sprintBacklog, delivered } = computeBacklogSplit(
+        localProject?.stories || [],
+        localProject?.sprints || [],
       )
-
-      const productBacklog = stories
-        .filter((story) => {
-          if (epicParentIds.has(story.id)) return false
-          const isInActiveSprint = sprints.some(
-            (sprint) =>
-              sprint.status === 'active' &&
-              sprint.stories?.some(
-                (sprintStory) => sprintStory.id === story.id,
-              ),
-          )
-
-          return (
-            (story.status === 'prioritized' || story.value !== null) &&
-            !isInActiveSprint
-          )
-        })
-        .sort((a, b) => {
-          if (a.status === 'prioritized' && b.status !== 'prioritized')
-            return -1
-          if (b.status === 'prioritized' && a.status !== 'prioritized') return 1
-          return (b.value ?? -1) - (a.value ?? -1)
-        })
-
-      const sprintBacklog = []
-      const delivered = []
-
-      sprints.forEach((sprint) => {
-        if (sprint.status === 'active') {
-          sprint.stories?.forEach((story) => {
-            if (story.pivot?.kanban_status === 'done') {
-              delivered.push({ ...story, sprint_name: sprint.name })
-            } else {
-              sprintBacklog.push({ ...story, sprint_name: sprint.name })
-            }
-          })
-        }
-      })
-
       return {
         productBacklogStories: productBacklog,
         sprintBacklogStories: sprintBacklog,
@@ -296,13 +253,17 @@ const ProductBacklog = ({ project, setProject }) => {
     }
 
     if (selectedSprint) {
+      const payload = {
+        name: sprintData.name,
+        start_date: sprintData.start_date.split('T')[0],
+        end_date: sprintData.end_date.split('T')[0],
+      }
+      if (sprintOperation === 'start') {
+        payload.status = 'active'
+      }
       router.patch(
         route('sprint.update', selectedSprint.id),
-        {
-          name: sprintData.name,
-          start_date: sprintData.start_date.split('T')[0],
-          end_date: sprintData.end_date.split('T')[0],
-        },
+        payload,
         {
           preserveState: true,
           preserveScroll: true,

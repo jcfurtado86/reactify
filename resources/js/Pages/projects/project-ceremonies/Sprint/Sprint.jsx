@@ -1,9 +1,7 @@
 import KanbanBoard from './KanbanBoard'
-import { isSprintActive } from '@/lib/utils'
+
 const getActiveSprints = (sprints) => {
-  return sprints.filter((sprint) => {
-    return isSprintActive(sprint)
-  })
+  return sprints.filter((sprint) => sprint.status === 'active')
 }
 
 const Sprint = ({ project, setProject }) => {

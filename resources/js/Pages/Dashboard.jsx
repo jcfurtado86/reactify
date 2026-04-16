@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import SpanButton from '@/Components/SpanButton'
 import MainLayout from '@/Layouts/MainLayout'
-import { cn, currentIntlLocale } from '@/lib/utils'
+import { cn, currentIntlLocale, computeBacklogSplit } from '@/lib/utils'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 
 const roleBadgeVariant = {
@@ -568,46 +568,10 @@ const Dashboard = ({ project, setProject }) => {
 
   const { productBacklogStories, sprintBacklogStories, deliveredStories } =
     useMemo(() => {
-      const stories = project?.stories || []
-      const sprints = project?.sprints || []
-
-      const productBacklog = stories
-        .filter((story) => {
-          const isInActiveSprint = sprints.some(
-            (sprint) =>
-              sprint.status === 'active' &&
-              sprint.stories?.some(
-                (sprintStory) => sprintStory.id === story.id,
-              ),
-          )
-
-          return (
-            (story.status === 'prioritized' || story.value !== null) &&
-            !isInActiveSprint
-          )
-        })
-        .sort((a, b) => {
-          if (a.status === 'prioritized' && b.status !== 'prioritized')
-            return -1
-          if (b.status === 'prioritized' && a.status !== 'prioritized') return 1
-          return (b.value ?? -1) - (a.value ?? -1)
-        })
-
-      const sprintBacklog = []
-      const delivered = []
-
-      sprints.forEach((sprint) => {
-        if (sprint.status === 'active') {
-          sprint.stories?.forEach((story) => {
-            if (story.pivot?.kanban_status === 'done') {
-              delivered.push({ ...story, sprint_name: sprint.name })
-            } else {
-              sprintBacklog.push({ ...story, sprint_name: sprint.name })
-            }
-          })
-        }
-      })
-
+      const { productBacklog, sprintBacklog, delivered } = computeBacklogSplit(
+        project?.stories || [],
+        project?.sprints || [],
+      )
       return {
         productBacklogStories: productBacklog,
         sprintBacklogStories: sprintBacklog,

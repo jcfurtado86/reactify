@@ -216,6 +216,54 @@ export function inspectionStatus(item) {
   }
 }
 
+export function computeBacklogSplit(stories, sprints) {
+  const epicParentIds = new Set(
+    stories.filter((s) => s.epic_id).map((s) => s.epic_id),
+  )
+
+  const productBacklog = stories
+    .filter((story) => {
+      if (epicParentIds.has(story.id)) return false
+      const isInActiveSprint = sprints.some(
+        (sprint) =>
+          sprint.status === 'active' &&
+          sprint.stories?.some((ss) => ss.id === story.id),
+      )
+      return (
+        (story.status === 'prioritized' || story.value !== null) &&
+        !isInActiveSprint
+      )
+    })
+    .sort((a, b) => {
+      if (a.status === 'prioritized' && b.status !== 'prioritized') return -1
+      if (b.status === 'prioritized' && a.status !== 'prioritized') return 1
+      return (b.value ?? -1) - (a.value ?? -1)
+    })
+
+  const sprintBacklog = []
+  const delivered = []
+
+  sprints.forEach((sprint) => {
+    if (sprint.status === 'active') {
+      sprint.stories?.forEach((story) => {
+        if (story.pivot?.kanban_status === 'done') {
+          delivered.push({ ...story, sprint_name: sprint.name })
+        } else {
+          sprintBacklog.push({ ...story, sprint_name: sprint.name })
+        }
+      })
+    } else if (sprint.status === 'completed') {
+      sprint.stories?.forEach((story) => {
+        if (story.pivot?.kanban_status === 'done') {
+          delivered.push({ ...story, sprint_name: sprint.name })
+        }
+      })
+    }
+  })
+
+  return { productBacklog, sprintBacklog, delivered }
+}
+
 export function inspectionColor(status) {
   switch (status) {
     case 'validated':
