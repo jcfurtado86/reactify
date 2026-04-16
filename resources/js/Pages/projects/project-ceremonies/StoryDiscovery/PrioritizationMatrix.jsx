@@ -271,7 +271,32 @@ const PrioritizationMatrix = ({ project, setProject }) => {
   const canManagePrioritization = gate.allowed
   const prioritizationReason = gate.reason
   const childrenByEpicId = useGroupedStories(project?.stories)
-  const GRID_ROWS = project.goal_sketches.length || 4
+  const [storyTypeTab, setStoryTypeTab] = useState('user')
+
+  const filteredGoals = useMemo(() =>
+    (project.goal_sketches || []).filter((g) =>
+      storyTypeTab === 'user' ? g.type === 'bg' : g.type === 'cg'
+    ), [project.goal_sketches, storyTypeTab])
+
+  const filteredStories = useMemo(() =>
+    (project.stories || []).filter((s) => s.type === storyTypeTab),
+    [project.stories, storyTypeTab])
+
+  const filteredGoalIds = useMemo(() => new Set(filteredGoals.map((g) => g.id)), [filteredGoals])
+
+  const goalIdToFilteredIndex = useMemo(() => {
+    const map = new Map()
+    filteredGoals.forEach((g, i) => map.set(g.id, i))
+    return map
+  }, [filteredGoals])
+
+  const filteredPrioritizations = useMemo(() =>
+    (project.prioritizations || [])
+      .filter((p) => filteredGoalIds.has(p.goal_id))
+      .map((p) => ({ ...p, position: goalIdToFilteredIndex.get(p.goal_id) ?? p.position })),
+    [project.prioritizations, filteredGoalIds, goalIdToFilteredIndex])
+
+  const GRID_ROWS = filteredGoals.length || 4
   const priorityOrder = {
     low: 0,
     medium: 1,
@@ -280,8 +305,8 @@ const PrioritizationMatrix = ({ project, setProject }) => {
   const [activeItem, setActiveItem] = useState(null)
   const [prioritizationMatrix, setPrioritizationMatrix] = useState(() =>
     transformArrayToMatrixObject(
-      project?.prioritizations,
-      project?.stories,
+      filteredPrioritizations,
+      filteredStories,
       childrenByEpicId,
     ),
   )
@@ -304,14 +329,13 @@ const PrioritizationMatrix = ({ project, setProject }) => {
   }, [project])
   useEffect(() => {
     const newMatrix = transformArrayToMatrixObject(
-      project.prioritizations,
-      project.stories,
+      filteredPrioritizations,
+      filteredStories,
       childrenByEpicId,
     )
 
-    // Atualiza o estado interno para refletir as novas props
     setPrioritizationMatrix(newMatrix)
-  }, [project])
+  }, [filteredPrioritizations, filteredStories, childrenByEpicId])
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -336,13 +360,13 @@ const PrioritizationMatrix = ({ project, setProject }) => {
     const epicParentIds = new Set(
       project.stories.filter((s) => s.epic_id).map((s) => s.epic_id),
     )
-    return project.stories.filter(
+    return filteredStories.filter(
       (story) =>
         !assignedStoryIds.has(story.id) &&
         !persistedPrioritizedIds.has(story.id) &&
         !epicParentIds.has(story.id),
     )
-  }, [project.stories, project?.prioritizations, prioritizationMatrix])
+  }, [filteredStories, project?.prioritizations, prioritizationMatrix])
 
   const handleDragStart = (event) => {
     if (!canManagePrioritization) return
@@ -554,7 +578,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
     () => orderedPriorities.map((p) => p.id),
     [orderedPriorities],
   )
-  const hasGoals = project.goal_sketches && project.goal_sketches.length > 0
+  const hasGoals = filteredGoals.length > 0
 
   return (
     <DndContext
@@ -571,6 +595,22 @@ const PrioritizationMatrix = ({ project, setProject }) => {
             project={project}
             setProject={setProject}
           />
+          <div className="flex gap-1 bg-muted rounded-lg p-1">
+            <Button
+              variant={storyTypeTab === 'user' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setStoryTypeTab('user')}
+            >
+              {t('prioritization_matrix.tab_user_stories', 'User Stories')}
+            </Button>
+            <Button
+              variant={storyTypeTab === 'system' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setStoryTypeTab('system')}
+            >
+              {t('prioritization_matrix.tab_system_stories', 'System Stories')}
+            </Button>
+          </div>
         </div>
         {/* conteiner de stories*/}
         <section className=" bg-card text-card-foreground border-0 rounded-xl shadow-sm  w-full ">
@@ -638,14 +678,17 @@ const PrioritizationMatrix = ({ project, setProject }) => {
         <section className="flex-1">
           <section className="flex gap-2 justify-between">
             <aside className="flex flex-col w-48 items-center bg-card p-2 gap-2 rounded">
-              <span className="h-11 py-1 ">{t('goals.plural')}</span>
+              <span className="h-11 py-1 text-sm font-medium">
+                {storyTypeTab === 'user'
+                  ? t('goals.business_goals', 'Business Goals')
+                  : t('goals.constraint_goals', 'Constraint Goals')}
+              </span>
               {hasGoals ? (
-                project.goal_sketches
+                [...filteredGoals]
                   .sort((a, b) => {
-                    const priorityA = priorityOrder[a.priority] // Pega o valor numérico para o tipo de 'a'
-                    const priorityB = priorityOrder[b.priority] // Pega o valor numérico para o tipo de 'b'
-
-                    return priorityB - priorityA // Subtrai para ordenar
+                    const priorityA = priorityOrder[a.priority]
+                    const priorityB = priorityOrder[b.priority]
+                    return priorityB - priorityA
                   })
                   .map((goal) => (
                     <GoalCard

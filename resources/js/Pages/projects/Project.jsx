@@ -12,6 +12,8 @@ import Goals from './project-ceremonies/Inception/Goals'
 import Stories from './project-ceremonies/StoryDiscovery/Stories'
 import PrioritizationMatrix from './project-ceremonies/StoryDiscovery/PrioritizationMatrix.jsx'
 import ChangeLog from './project-ceremonies/StoryDiscovery/ChangeLog.jsx'
+// inspection
+import InspectionDashboard from './project-ceremonies/Inspection/InspectionDashboard.jsx'
 // refining
 import EpicStories from './project-ceremonies/Refining/EpicStories.jsx'
 import BusinessRules from './project-ceremonies/Refining/BusinessRules.jsx'
@@ -509,6 +511,13 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
                 <TabsTrigger value="sprint">{t('project.sprint')}</TabsTrigger>
               )}
             </TabsList>
+            {can('inspectionCards.view') && (
+              <TabsList className="ml-1.5">
+                <TabsTrigger value="inspection">
+                  {t('project.inspection', 'Inspection')}
+                </TabsTrigger>
+              </TabsList>
+            )}
 
             {/* Center: Title e Botão de Edição */}
             <div
@@ -562,6 +571,12 @@ const ProjectView = ({ projectDB = [], page = 'inception', artifact }) => {
           <TabsContent value="sprint">
             <Sprint project={project} setProject={setProject} />
           </TabsContent>
+
+          {can('inspectionCards.view') && (
+            <TabsContent value="inspection">
+              <InspectionDashboard project={project} setProject={setProject} />
+            </TabsContent>
+          )}
         </Tabs>
         <ChatBot
           project={projectDB}

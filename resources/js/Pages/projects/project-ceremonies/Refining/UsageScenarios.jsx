@@ -425,6 +425,21 @@ const UsageScenarios = ({ project, setProject }) => {
   const tooltipInfo = useTooltipInfo()
   const hasStories = project?.stories && project.stories.length > 0
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const scrollTo = params.get('scrollTo')
+    if (scrollTo) {
+      setTimeout(() => {
+        const el = document.querySelector(`[data-card-id="${scrollTo}"]`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          el.classList.add('ring-2', 'ring-primary')
+          setTimeout(() => el.classList.remove('ring-2', 'ring-primary'), 2000)
+        }
+      }, 300)
+    }
+  }, [])
+
   // Stories épicas são aquelas referenciadas por outras via epic_id.
   // Quando um épico é quebrado, apenas as filhas contam; o épico vira
   // placeholder e deve sumir do listing de Usage Scenarios.
@@ -521,7 +536,7 @@ const UsageScenarios = ({ project, setProject }) => {
         .map((story) => {
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
           return (
-            <section key={story.id} className="py-1 flex gap-2 min-h-48">
+            <section key={story.id} className="py-1 flex gap-2 min-h-48" data-story-id={story.id}>
               <StoryCard
                 story={story}
                 addScenario={() => addScenario(story.id)}
@@ -555,7 +570,7 @@ const UsageScenarios = ({ project, setProject }) => {
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
           return (
             <React.Fragment key={story.id}>
-              <section className="py-1 flex gap-2 min-h-48" key={story.id}>
+              <section className="py-1 flex gap-2 min-h-48" key={story.id} data-story-id={story.id}>
                 <StoryCard
                   story={story}
                   addScenario={() => addScenario(story.id)}

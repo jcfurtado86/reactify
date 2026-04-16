@@ -31,6 +31,7 @@ class Story extends Model
   {
     return $this->belongsTo(Project::class);
   }
+
   public function storyboards()
   {
     return $this->hasMany(Storyboard::class);
@@ -61,6 +62,12 @@ class Story extends Model
   {
     return $this->belongsToMany(ChangeRequest::class, 'change_request_story')
       ->withPivot('impact_type')
+      ->withTimestamps();
+  }
+
+  public function personas()
+  {
+    return $this->belongsToMany(Persona::class, 'persona_story')
       ->withTimestamps();
   }
 

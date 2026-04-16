@@ -141,9 +141,8 @@ const ProductBacklog = ({ project, setProject }) => {
         },
         onError: (errors) => {
           setIsLoading(false)
-          setError('Failed to move stories to sprint')
-          console.error('Error:', errors)
-
+          const msg = errors?.invest || Object.values(errors)[0] || 'Failed to move stories to sprint'
+          toast.error(msg)
           setLocalProject(project)
         },
       },
@@ -188,6 +187,8 @@ const ProductBacklog = ({ project, setProject }) => {
       const { productBacklog, sprintBacklog, delivered } = computeBacklogSplit(
         localProject?.stories || [],
         localProject?.sprints || [],
+        localProject?.prioritizations || [],
+        localProject?.matrix_priorities || [],
       )
       return {
         productBacklogStories: productBacklog,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Goal;
 use App\Models\Project;
 use App\Models\Story;
 use App\Models\Prioritization;
@@ -27,6 +28,10 @@ class PrioritizationController extends Controller
       return back()->with(['message' => 'Apenas estórias em draft podem ser priorizadas', 'status' => 'error']);
     }
 
+    $goals = Goal::where('project_id', $project->id)->orderBy('id')->get();
+    $goalAtPosition = $goals->values()->get($validatedData['position']);
+    $validatedData['goal_id'] = $goalAtPosition?->id;
+
     $prioritization = Prioritization::create($validatedData);
 
     Story::where('id', $validatedData['story_id'])->update(['status' => 'prioritized']);
@@ -47,6 +52,10 @@ class PrioritizationController extends Controller
     if ($story->status !== 'prioritized') {
       return back()->with(['message' => 'Estórias presentes em sprints não podem ser movidas dentro da matriz ', 'status' => 'error']);
     }
+
+    $goals = Goal::where('project_id', $prioritization->project_id)->orderBy('id')->get();
+    $goalAtPosition = $goals->values()->get($validatedData['position']);
+    $validatedData['goal_id'] = $goalAtPosition?->id;
 
     $prioritization->update($validatedData);
 

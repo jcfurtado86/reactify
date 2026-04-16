@@ -1,4 +1,4 @@
-import { useForm, usePage } from '@inertiajs/react'
+import { useForm, usePage, router } from '@inertiajs/react'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn, currentDateFnsLocale } from '@/lib/utils'
@@ -56,16 +56,12 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    const formData = {
-      ...data,
-      stories: Object.entries(selectedStories).map(([storyId, impactType]) => ({
-        story_id: parseInt(storyId),
-        impact_type: impactType,
-      })),
-    }
+    const storyIds = Object.keys(selectedStories).map((id) => parseInt(id))
 
-    post(route('change-request.store'), {
-      data: formData,
+    router.post(route('change-request.store'), {
+      ...data,
+      story_ids: storyIds,
+    }, {
       onSuccess: () => {
         reset()
         setSelectedStories({})
@@ -130,67 +126,44 @@ const ChangeRequestForm = ({ project, stories = [], onClose }) => {
             </div>
           </div>
 
-          {/* Seleção de Stories */}
-          {/* {stories.length > 0 && (
+          {stories.length > 0 && (
             <div className="space-y-4">
               <Label className="text-base font-semibold">
-                User Stories Relacionadas
+                {t('change_request.related_stories', 'Stories impactadas')}
               </Label>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2  overflow-y-auto  rounded p-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto rounded p-2">
                 {stories.map((story) => {
                   const selectedVariant = storyVariants[story.type] || '#f97316'
                   const realStoryId = story.epic_id
                     ? `${story.epic_id}.${story.epic_index || 0}`
                     : `${story.id}`
                   return (
-                    <div
+                    <label
                       key={story.id}
-                      className="space-y-2 p-2 border border-border rounded text-sm"
+                      className="flex items-start gap-2 p-2 border border-border rounded text-sm cursor-pointer hover:bg-muted/50"
                     >
-                      <Badge
-                        style={{ backgroundColor: selectedVariant }}
-                        variant="badge"
-                      >
-                        {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
-                      </Badge>
-                      <p className="text-left">{story?.title}</p>
-                      <div
-                        className="flex gap-2
-
-
-                      "
-                      >
-                        <label className="flex items-center space-x-2">
-                          <Checkbox
-                            checked={selectedStories[story.id] === 'IMPACTADA'}
-                            onCheckedChange={(checked) =>
-                              handleStorySelection(
-                                story.id,
-                                'IMPACTADA',
-                                checked,
-                              )
-                            }
-                          />
-                          <span>Impactada</span>
-                        </label>
-
-                        <label className="flex items-center space-x-2">
-                          <Checkbox
-                            checked={selectedStories[story.id] === 'NOVA'}
-                            onCheckedChange={(checked) =>
-                              handleStorySelection(story.id, 'NOVA', checked)
-                            }
-                          />
-                          <span>Nova</span>
-                        </label>
+                      <Checkbox
+                        checked={!!selectedStories[story.id]}
+                        onCheckedChange={(checked) =>
+                          handleStorySelection(story.id, 'IMPACTADA', checked)
+                        }
+                      />
+                      <div className="flex flex-col gap-1">
+                        <Badge
+                          style={{ backgroundColor: selectedVariant }}
+                          variant="badge"
+                          className="w-fit"
+                        >
+                          {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`.toUpperCase()}
+                        </Badge>
+                        <span className="text-left text-foreground">{story?.title}</span>
                       </div>
-                    </div>
+                    </label>
                   )
                 })}
               </div>
             </div>
-          )} */}
+          )}
 
           {/* Botões de Ação */}
           <div className="flex gap-3 pt-4">

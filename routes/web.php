@@ -175,6 +175,12 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::delete('/{story}', [StoryController::class, 'destroy'])->name(
       'story.delete'
     );
+    Route::post('/{story}/personas', [StoryController::class, 'syncPersonas'])->name(
+      'story.sync-personas'
+    );
+    Route::post('/{story}/notify-invest', [StoryController::class, 'notifyInvestIssues'])->name(
+      'story.notify-invest'
+    );
   });
   //rotas para storyboard
   Route::prefix('storyboard')->group(function () {

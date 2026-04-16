@@ -1,4 +1,4 @@
-import { X, Check, LoaderCircle } from 'lucide-react'
+import { ShieldCheck, ShieldAlert, Clock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import SpanButton from './SpanButton'
 const StatusBadge = ({ status }) => {
@@ -9,15 +9,15 @@ const StatusBadge = ({ status }) => {
   switch (status) {
     case 'validated':
       message = t('status_badge.criteria_accepted')
-      element = <Check className="text-green-500" />
+      element = <ShieldCheck className="size-4 text-green-500" />
       break
     case 'pending':
       message = t('status_badge.criteria_pending')
-      element = <LoaderCircle className="text-blue-500" />
+      element = <Clock className="size-4 text-blue-500" />
       break
     case 'rejected':
       message = t('status_badge.criteria_rejected')
-      element = <X className="text-red-500" />
+      element = <ShieldAlert className="size-4 text-red-500" />
       break
     default:
       return null
@@ -26,7 +26,7 @@ const StatusBadge = ({ status }) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <SpanButton variant={'ghost'} className="hover:bg-transparent ">
+        <SpanButton variant={'ghost'} className="hover:bg-transparent">
           {element}
         </SpanButton>
       </TooltipTrigger>

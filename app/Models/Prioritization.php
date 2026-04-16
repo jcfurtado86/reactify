@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Prioritization extends Model
 {
-  protected $fillable = ['story_id', 'project_id', 'position', 'priority_id'];
+  protected $fillable = ['story_id', 'project_id', 'position', 'priority_id', 'goal_id'];
 
   public function project()
   {
@@ -25,5 +25,10 @@ class Prioritization extends Model
   public function story()
   {
       return $this->belongsTo(Story::class);
-  } 
+  }
+
+  public function goal()
+  {
+      return $this->belongsTo(Goal::class);
+  }
 }

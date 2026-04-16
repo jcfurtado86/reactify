@@ -151,6 +151,15 @@ const SprintTimeline = ({ sprints, onSelect }) => {
 
 const ReactMCycle = ({ project, currentPhase, onPhaseClick }) => {
   const { t } = useTranslation()
+  const stories = project?.stories || []
+  const epicParentIds = new Set(stories.filter((s) => s.epic_id).map((s) => s.epic_id))
+  const workStories = stories.filter((s) => !epicParentIds.has(s.id))
+  const investValidatedCount = workStories.filter((s) => {
+    const ic = s.invest_card
+    if (!ic) return false
+    return Object.values(ic).every((v) => v === 'yes' || v === 'na')
+  }).length
+
   const counts = {
     inception:
       (project?.personas?.length || 0) +
@@ -165,12 +174,13 @@ const ReactMCycle = ({ project, currentPhase, onPhaseClick }) => {
       (project?.crc_cards?.length || 0) +
       (project?.system_interfaces?.length || 0) +
       (project?.storyboards?.length || 0),
+    inspection: investValidatedCount,
   }
 
   // SVG layout: 4 nodes at top/right/bottom/left, radius 70 around center (100,100)
-  const size = 220
+  const size = 260
   const cx = size / 2
-  const cy = size / 2
+  const cy = 110
   const r = 72
   const nodeR = 32
 
@@ -301,6 +311,23 @@ const ReactMCycle = ({ project, currentPhase, onPhaseClick }) => {
             </g>
           )
         })}
+        {/* Inspection - node solto, deslocado à direita do ciclo */}
+        {(() => {
+          const ix = cx + r + 20
+          const iy = cy + r - 10
+          return (
+            <g className="cursor-pointer" onClick={() => onPhaseClick('inspection')}>
+              <line x1={cx + r * 0.5} y1={cy + r * 0.7} x2={ix} y2={iy} stroke="currentColor" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="3 3" className="text-muted-foreground" />
+              <circle cx={ix} cy={iy} r={nodeR * 0.75} className="fill-card stroke-border" strokeWidth="1.5" strokeDasharray="4 3" />
+              <text x={ix} y={iy - 6} textAnchor="middle" fontSize="7" fontWeight="600" className="fill-muted-foreground" style={{ textTransform: 'uppercase' }}>
+                {t('project.phases.inspection', 'INSPECTION')}
+              </text>
+              <text x={ix} y={iy + 8} textAnchor="middle" fontSize="12" fontWeight="700" className="fill-foreground">
+                {counts.inspection}
+              </text>
+            </g>
+          )
+        })()}
       </svg>
     </div>
   )
@@ -537,6 +564,49 @@ const Dashboard = ({ project, setProject }) => {
       (s) => s.pivot?.kanban_status === 'done',
     ).length
 
+    const epicParentIds = new Set(
+      stories.filter((s) => s.epic_id).map((s) => s.epic_id),
+    )
+    const workStories = stories.filter((s) => !epicParentIds.has(s.id))
+
+    const businessRules = project?.business_rules || []
+    const usageScenarios = project?.usage_scenarios || []
+    const storiesWithRules = new Set(businessRules.map((r) => r.story_id))
+    const storiesWithScenarios = new Set(usageScenarios.map((s) => s.story_id))
+    const totalStories = workStories.length
+
+    const workStoriesWithRules = workStories.filter((s) => storiesWithRules.has(s.id)).length
+    const workStoriesWithScenarios = workStories.filter((s) => storiesWithScenarios.has(s.id)).length
+    const rulesPercent = totalStories > 0
+      ? Math.round((workStoriesWithRules / totalStories) * 100)
+      : 0
+    const scenariosPercent = totalStories > 0
+      ? Math.round((workStoriesWithScenarios / totalStories) * 100)
+      : 0
+    const investComplete = workStories.filter((s) => investStatus(s.invest_card) === 'validated').length
+    const investPercent = totalStories > 0
+      ? Math.round((investComplete / totalStories) * 100)
+      : 0
+
+    const personas = project?.personas || []
+    const storiesWithPersona = new Set()
+    stories.forEach((s) => {
+      if (s.personas && s.personas.length > 0) {
+        s.personas.forEach((p) => storiesWithPersona.add(p.id))
+      }
+    })
+    const personasCovered = personas.filter((p) => storiesWithPersona.has(p.id)).length
+    const personasPercent = personas.length > 0
+      ? Math.round((personasCovered / personas.length) * 100)
+      : 0
+
+    const goalIds = new Set((project?.prioritizations || []).filter((p) => p.goal_id).map((p) => p.goal_id))
+    const allGoals = project?.goal_sketches || []
+    const goalsCovered = allGoals.filter((g) => goalIds.has(g.id)).length
+    const goalsPercent = allGoals.length > 0
+      ? Math.round((goalsCovered / allGoals.length) * 100)
+      : 0
+
     return {
       unprioritized,
       investNotOk,
@@ -544,6 +614,19 @@ const Dashboard = ({ project, setProject }) => {
       activeSprint,
       activeSprintTotal: activeSprintStories.length,
       activeSprintDone,
+      totalStories,
+      rulesPercent,
+      storiesWithRulesCount: workStoriesWithRules,
+      scenariosPercent,
+      storiesWithScenariosCount: workStoriesWithScenarios,
+      investPercent,
+      investComplete,
+      personasPercent,
+      personasCovered,
+      totalPersonas: personas.length,
+      goalsPercent,
+      goalsCovered,
+      totalGoals: allGoals.length,
     }
   }, [project])
 
@@ -571,6 +654,8 @@ const Dashboard = ({ project, setProject }) => {
       const { productBacklog, sprintBacklog, delivered } = computeBacklogSplit(
         project?.stories || [],
         project?.sprints || [],
+        project?.prioritizations || [],
+        project?.matrix_priorities || [],
       )
       return {
         productBacklogStories: productBacklog,
@@ -616,6 +701,12 @@ const Dashboard = ({ project, setProject }) => {
         { label: 'Overall Model', title: 'overallModel' },
         { label: 'Interfaces', title: 'interfaces' },
         { label: 'Storyboards', title: 'storyboards' },
+      ],
+    },
+    {
+      title: 'inspection',
+      artifacts: [
+        { label: t('project.inspection', 'Inspection'), title: 'inspection' },
       ],
     },
     { title: 'productBacklog', amount: 3 },
@@ -948,7 +1039,7 @@ const Dashboard = ({ project, setProject }) => {
               labelKey="dashboard.health_invest_pending"
               count={health.investNotOk}
               tone="warning"
-              onClick={goToStories}
+              onClick={() => router.get(route('project.ceremony.show', { project: project.id, ceremony: 'inspection' }))}
             />
             <HealthCard
               icon={GitPullRequest}
@@ -958,6 +1049,31 @@ const Dashboard = ({ project, setProject }) => {
               onClick={goToChangeLog}
             />
           </div>
+          {health.totalStories > 0 && (
+            <div className="flex gap-2 flex-wrap mt-2">
+              {[
+                { label: t('dashboard.completeness_invest', 'INVEST'), pct: health.investPercent, n: health.investComplete, total: health.totalStories },
+                { label: t('dashboard.completeness_rules', 'Regras de Negocio'), pct: health.rulesPercent, n: health.storiesWithRulesCount, total: health.totalStories },
+                { label: t('dashboard.completeness_scenarios', 'Cenarios de Uso'), pct: health.scenariosPercent, n: health.storiesWithScenariosCount, total: health.totalStories },
+                ...(health.totalPersonas > 0 ? [{ label: t('dashboard.completeness_personas', 'Personas cobertas'), pct: health.personasPercent, n: health.personasCovered, total: health.totalPersonas }] : []),
+                ...(health.totalGoals > 0 ? [{ label: t('dashboard.completeness_goals', 'Goals cobertos'), pct: health.goalsPercent, n: health.goalsCovered, total: health.totalGoals }] : []),
+              ].map((m, i) => (
+                <div key={i} className="flex-1 min-w-[120px] bg-muted/50 rounded-lg p-3 space-y-1">
+                  <div className="flex justify-between items-baseline">
+                    <p className="text-xs text-muted-foreground">{m.label}</p>
+                    <p className="text-xs font-bold text-foreground">{m.pct}%</p>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${m.pct >= 80 ? 'bg-green-500' : m.pct >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                      style={{ width: `${m.pct}%` }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">{m.n}/{m.total}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Sprint timeline */}

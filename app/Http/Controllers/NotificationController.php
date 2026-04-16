@@ -15,6 +15,6 @@ class NotificationController extends Controller
   public function read(Request $request)
   {
     $request->user()->unreadNotifications->markAsRead();
-    return back()->with(['message' => 'Notifications marked as read', 'status' => 'success']);
+    return redirect()->route('notifications.index');
   }
 }

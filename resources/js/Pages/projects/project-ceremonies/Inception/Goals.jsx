@@ -31,6 +31,8 @@ import { usePage } from '@inertiajs/react'
 
 const GoalItem = ({
   goal,
+  project,
+  linkedStories = [],
   disabled = false,
   isEditing,
   editValue,
@@ -304,6 +306,28 @@ const GoalItem = ({
               {goal.title}
             </p>
           )}
+          {linkedStories.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {linkedStories.map((s) => {
+                const storyVariants = project?.system_colors?.stories || {}
+                const color = storyVariants[s.type] || '#f97316'
+                const label = `${s.type === 'system' ? 'SS' : 'US'}${s.id}`
+                return (
+                  <Badge
+                    key={s.id}
+                    style={{ backgroundColor: color }}
+                    className="text-[10px] text-black font-bold cursor-pointer hover:opacity-80 border-transparent"
+                    title={s.title}
+                    onClick={() => router.get(route('project.ceremony.show', {
+                      project: goal.project_id, ceremony: 'storyDiscovery',
+                    }), { artifact: 'stories', scrollTo: s.id })}
+                  >
+                    {label}
+                  </Badge>
+                )
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -534,6 +558,13 @@ const Goals = ({ project, setProject }) => {
     }
   }
 
+  const storiesForGoal = (goalId) => {
+    return (project.prioritizations || [])
+      .filter((p) => p.goal_id === goalId)
+      .map((p) => project.stories?.find((s) => s.id === p.story_id))
+      .filter(Boolean)
+  }
+
   return (
     <div className="goalSketches rounded grid grid-cols-2 gap-2 w-full p-4 items-start">
       {/* --- Column 1: Constraint Goals --- */}
@@ -557,6 +588,8 @@ const Goals = ({ project, setProject }) => {
               <GoalItem
                 key={goal.id}
                 goal={goal}
+                project={project}
+                linkedStories={storiesForGoal(goal.id)}
                 isTemporary={isTemporary(goal)}
                 isEditing={editingId === goal.id}
                 editValue={editValue}
@@ -614,6 +647,8 @@ const Goals = ({ project, setProject }) => {
               <GoalItem
                 key={goal.id}
                 goal={goal}
+                project={project}
+                linkedStories={storiesForGoal(goal.id)}
                 isTemporary={isTemporary(goal)}
                 isEditing={editingId === goal.id}
                 editValue={editValue}

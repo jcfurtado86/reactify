@@ -14,6 +14,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { getStatusColor } from '@/lib/utils'
 import { usePermissionGate } from '@/lib/usePermissionGate'
 import { toast } from 'sonner'
+import StoryDetailDrawer from '@/Components/StoryDetailDrawer'
 // ============================================================================
 // Subcomponente para o Card da Story (Item Arrastável)
 // ============================================================================
@@ -23,6 +24,7 @@ const KanbanStoryCard = ({
   columnKey,
   isOverlay,
   systemColors,
+  onCardClick,
 }) => {
   // ✅ Hook do dnd-kit para tornar este componente arrastável
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -54,11 +56,22 @@ const KanbanStoryCard = ({
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <Card className={`p-3 ${overlayClasses}`}>
+      <Card className={`p-3 ${overlayClasses} group`}>
         <div className="flex flex-col justify-between items-start gap-1">
-          <Badge style={{ backgroundColor: selectedVariant }} variant="badge">
-            {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
-          </Badge>
+          <div className="flex items-center justify-between w-full">
+            <Badge style={{ backgroundColor: selectedVariant }} variant="badge">
+              {`${story.type === 'system' ? 'SS' : 'US'}${realStoryId}`}
+            </Badge>
+            <button
+              type="button"
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-0.5 rounded"
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); onCardClick?.(story) }}
+              onPointerDown={(e) => e.stopPropagation()}
+              title="Ver detalhes"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
           <Badge variant="outline">
             {`${story?.sprint?.name || 'No Sprint'}`}
           </Badge>
@@ -72,7 +85,7 @@ const KanbanStoryCard = ({
 // ============================================================================
 // Subcomponente para a Coluna do Kanban (Área de Soltar)
 // ============================================================================
-const KanbanColumn = ({ id, variant, title, stories, systemColors }) => {
+const KanbanColumn = ({ id, variant, title, stories, systemColors, onCardClick }) => {
   // ✅ Hook do dnd-kit para tornar este componente uma área de soltar
   const { setNodeRef, isOver } = useDroppable({
     id: id,
@@ -100,6 +113,7 @@ const KanbanColumn = ({ id, variant, title, stories, systemColors }) => {
             story={story}
             columnKey={id}
             systemColors={systemColors}
+            onCardClick={onCardClick}
           />
         ))}
       </CardContent>
@@ -114,6 +128,7 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
   const { t } = useTranslation()
   const { allowed: canManageSprint, reason: sprintReason } = usePermissionGate('sprint.manage')
   const [localStories, setLocalStories] = useState([])
+  const [selectedStory, setSelectedStory] = useState(null)
 
   // ✅ Estado para armazenar a story que está sendo arrastada
   const [activeStory, setActiveStory] = useState(null)
@@ -303,6 +318,7 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
                 title={column.title}
                 stories={storiesByStatus[column.key]}
                 systemColors={systemColors}
+                onCardClick={(story) => setSelectedStory(story)}
               />
             ))}
           </div>
@@ -318,6 +334,12 @@ const KanbanBoard = ({ sprints, project, updateProject, systemColors }) => {
           </DragOverlay>
         </DndContext>
       )}
+      <StoryDetailDrawer
+        story={selectedStory}
+        project={project}
+        open={!!selectedStory}
+        onClose={() => setSelectedStory(null)}
+      />
     </div>
   )
 }

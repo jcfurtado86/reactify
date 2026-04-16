@@ -23,6 +23,7 @@ const NAME_MAX = 50;
 
 const PersonaCard = ({
   persona,
+  project,
   disabled = false,
   addNewItem,
   editingPersona,
@@ -42,11 +43,12 @@ const PersonaCard = ({
   confirmDeletePersona,
   errors
 }) => {
+  const { t } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
   const status = inspectionStatus(persona)
 
-  const nameError = errors?.name; 
-  
+  const nameError = errors?.name;
+
   return (
     <Accordion type="single" collapsible>
       <AccordionItem
@@ -100,6 +102,31 @@ const PersonaCard = ({
           </div>
         </AccordionTrigger>
         <AccordionContent className="persona grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
+          {persona.stories && persona.stories.length > 0 && (
+            <div className="col-span-1 md:col-span-2 flex flex-wrap items-center gap-2 px-2 py-1">
+              <span className="text-xs text-muted-foreground font-medium">
+                {t('personas.linked_stories', 'Stories vinculadas:')}
+              </span>
+              {persona.stories.map((s) => {
+                const storyVariants = project?.system_colors?.stories || {}
+                const color = storyVariants[s.type] || '#f97316'
+                const label = `${s.type === 'system' ? 'SS' : 'US'}${s.id}`
+                return (
+                  <Badge
+                    key={s.id}
+                    style={{ backgroundColor: color }}
+                    className="text-[10px] text-black font-bold cursor-pointer hover:opacity-80 border-transparent"
+                    title={s.title}
+                    onClick={() => router.get(route('project.ceremony.show', {
+                      project: persona.project_id, ceremony: 'storyDiscovery',
+                    }), { artifact: 'stories', scrollTo: s.id })}
+                  >
+                    {label}
+                  </Badge>
+                )
+              })}
+            </div>
+          )}
           {['profile', 'expectations', 'goals'].map((field) => (
             <div
               key={field}
@@ -505,6 +532,7 @@ const Personas = ({ project, setProject }) => {
                 key={persona.id}
                 textareaRef={textareaRef}
                 persona={persona}
+                project={project}
                 getFieldTitle={getFieldTitle}
                 editingField={editingField}
                 editingPersona={editingPersona}

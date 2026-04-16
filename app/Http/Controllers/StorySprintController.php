@@ -24,6 +24,22 @@ class StorySprintController extends Controller
     $storyIds = $validated['story_ids'];
     $targetSprintId = $sprint->id;
 
+    $notValidated = Story::whereIn('id', $storyIds)
+      ->get()
+      ->filter(function ($story) {
+        $ic = $story->invest_card;
+        if (!$ic) return true;
+        return !collect($ic)->every(fn ($v) => $v === 'yes' || $v === 'na');
+      })
+      ->pluck('title')
+      ->toArray();
+
+    if (!empty($notValidated)) {
+      return back()->withErrors([
+        'invest' => __('Stories sem aprovacao INVEST: ') . implode(', ', $notValidated),
+      ]);
+    }
+
     try {
       DB::transaction(function () use ($storyIds, $sprint, $targetSprintId) {
         $pivotTable = $sprint->stories()->getTable();

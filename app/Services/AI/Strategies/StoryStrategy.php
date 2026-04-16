@@ -168,13 +168,15 @@ class StoryStrategy implements GeneratorStrategy
         Exemplo de resposta válida:
         {
           "stories": [
-            { "title": "Como cliente, quero reservar um veículo online para evitar deslocamentos à loja", "type": "user" },
-            { "title": "Como sistema, devo bloquear veículos automaticamente no período reservado", "type": "system" }
+            { "title": "Como cliente, quero reservar um veículo online para evitar deslocamentos à loja", "type": "user", "persona_name": "Cliente Final", "goal_title": "Facilitar reservas online" },
+            { "title": "Como sistema, devo bloquear veículos automaticamente no período reservado", "type": "system", "persona_name": null, "goal_title": "Garantir integridade de reservas" }
           ]
         }
 
         REGRAS DE FORMATO:
         - Todo item DEVE ter `title` (string) e `type` ("user" ou "system").
+        - Todo item DEVE ter `persona_name` (string ou null): nome exato da persona que esta story atende. Use os nomes das personas fornecidas no contexto. System stories podem ter null.
+        - Todo item DEVE ter `goal_title` (string ou null): titulo exato do goal/constraint goal que esta story serve. Use os titulos fornecidos no contexto.
         - Não repita stories existentes nem variações semânticas.
         - Baseie-se nos contextos acima, não invente funcionalidades fora do domínio.
         PROMPT;
@@ -204,13 +206,26 @@ class StoryStrategy implements GeneratorStrategy
 
     public function persistGenerated(array $parsed, Project $project, array $validated): void
     {
+        $personas = \App\Models\Persona::where('project_id', $project->id)->get();
+        $goals = \App\Models\Goal::where('project_id', $project->id)->get();
+
         foreach ($parsed['message']['stories'] ?? [] as $storyData) {
-            Story::create([
+            $story = Story::create([
                 'project_id' => $project->id,
                 'title' => $storyData['title'] ?? '',
                 'type' => $storyData['type'] ?? 'user',
                 'is_ai_generated' => true,
             ]);
+
+            if ($story->type !== 'system' && !empty($storyData['persona_name'])) {
+                $persona = $personas->first(fn ($p) =>
+                    mb_strtolower($p->name) === mb_strtolower($storyData['persona_name'])
+                );
+                if ($persona) {
+                    $story->personas()->attach($persona->id);
+                }
+            }
+
         }
     }
 

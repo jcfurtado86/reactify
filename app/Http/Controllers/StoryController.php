@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Models\Project;
 use App\Models\Sprint;
 use App\Models\Story;
+use App\Notifications\InvestIssueNotification;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use App\Http\Requests\StoreStoryRequest;
 use App\Http\Requests\BulkStoreStoryRequest;
 use App\Http\Requests\UpdateStoryRequest;
@@ -85,7 +89,6 @@ class StoryController extends Controller
       ]);
     }
 
-    // 6. Sucesso!
     Log::info('Story and children (if applicable) updated', [
       'id' => $story->id,
     ]);
@@ -94,6 +97,30 @@ class StoryController extends Controller
       'message' => 'Story updated successfully.',
       'status' => 'success',
     ]);
+  }
+
+  public function notifyInvestIssues(Request $request, Story $story)
+  {
+    $this->authorize('update', $story);
+
+    $validated = $request->validate([
+      'failed_criteria' => 'required|array|min:1',
+      'failed_criteria.*' => 'string|in:independent,negotiable,valuable,estimable,small,testable',
+    ]);
+
+    $domainExperts = $story->project->users()
+      ->wherePivot('role', UserRole::DOMAIN_EXPERT->value)
+      ->get();
+    $admins = $story->project->users()
+      ->wherePivot('role', UserRole::ADMINISTRATOR->value)
+      ->get();
+    $notifyUsers = $domainExperts->merge($admins)->unique('id');
+    $evaluator = Auth::user();
+
+    $criteria = (array) $validated['failed_criteria'];
+    Notification::send($notifyUsers, new InvestIssueNotification($story, $criteria, $evaluator));
+
+    return response()->json(['ok' => true]);
   }
 
   public function prioritize(Request $request, Story $story)
@@ -122,6 +149,14 @@ class StoryController extends Controller
 
     $sprint = Sprint::findOrFail($validated['sprint_id']);
     $this->authorize('update', $sprint);
+
+    $ic = $story->invest_card;
+    $investValidated = $ic && collect($ic)->every(fn ($v) => $v === 'yes' || $v === 'na');
+    if (!$investValidated) {
+      return back()->withErrors([
+        'invest' => __('Esta story precisa ser aprovada na inspecao INVEST antes de entrar na sprint.'),
+      ]);
+    }
 
     $story->sprints()->attach($validated['sprint_id'], [
       'kanban_status' => $validated['kanban_status'] ?? 'todo',
@@ -168,6 +203,24 @@ class StoryController extends Controller
     $story->delete();
 
     Log::warning('Story deleted', ['id' => $story->id]);
+    return back();
+  }
+
+  public function syncPersonas(Request $request, Story $story)
+  {
+    $this->authorize('update', $story);
+
+    if ($story->type === 'system') {
+      return back()->withErrors(['persona_ids' => 'System stories não possuem persona.']);
+    }
+
+    $validated = $request->validate([
+      'persona_ids' => 'present|array',
+      'persona_ids.*' => 'integer|exists:personas,id',
+    ]);
+
+    $story->personas()->sync($validated['persona_ids']);
+
     return back();
   }
 }

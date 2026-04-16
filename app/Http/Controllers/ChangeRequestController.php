@@ -16,6 +16,8 @@ class ChangeRequestController extends Controller
             'requester_name' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             'request_date' => 'required|date',
+            'story_ids' => 'nullable|array',
+            'story_ids.*' => 'integer|exists:stories,id',
         ]);
 
         $project = Project::findOrFail($validated['project_id']);
@@ -24,19 +26,13 @@ class ChangeRequestController extends Controller
         $changeRequest = ChangeRequest::create([
             'project_id' => $validated['project_id'],
             'requester_name' => $validated['requester_name'],
-            // 'requested_by_id' => Auth::id(),
             'description' => $validated['description'],
-            // 'effort' => $validated['effort'],
             'request_date' => $validated['request_date'],
         ]);
 
-        // if (!empty($validated['stories'])) {
-        //     foreach ($validated['stories'] as $storyData) {
-        //         $changeRequest->stories()->attach($storyData['story_id'], [
-        //             'impact_type' => $storyData['impact_type']
-        //         ]);
-        //     }
-        // }
+        if (!empty($validated['story_ids'])) {
+            $changeRequest->stories()->attach($validated['story_ids']);
+        }
 
         return back()->with('success', 'Solicitação de mudança criada.');
     }

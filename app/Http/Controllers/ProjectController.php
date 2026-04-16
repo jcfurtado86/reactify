@@ -22,10 +22,10 @@ class ProjectController extends Controller
   {
     return response()->json([
       'project' => $project->load([
-        'stories',
+        'stories.personas:id,name',
         'goal_sketches',
         'journeys',
-        'personas',
+        'personas.stories:id,title,type',
         'product_canvas',
         'crc_cards',
         'overall_model_classes',
@@ -33,7 +33,7 @@ class ProjectController extends Controller
         'matrix_priorities',
         'sprints.stories',
         'business_rules',
-        'change_requests',
+        'change_requests.stories:id,title,type',
         'usage_scenarios',
         'system_interfaces',
         'storyboards',
@@ -54,10 +54,10 @@ class ProjectController extends Controller
 
     return response()->json([
       'projects' => $projects->load([
-        'stories',
+        'stories.personas:id,name',
         'goal_sketches',
         'journeys',
-        'personas',
+        'personas.stories:id,title,type',
         'product_canvas',
         'crc_cards',
         'overall_model_classes',
@@ -65,7 +65,7 @@ class ProjectController extends Controller
         'matrix_priorities',
         'sprints.stories',
         'business_rules',
-        'change_requests',
+        'change_requests.stories:id,title,type',
         'usage_scenarios',
         'system_interfaces',
         'storyboards',
@@ -90,10 +90,10 @@ class ProjectController extends Controller
     }
 
     $project->load([
-      'stories',
+      'stories.personas:id,name',
       'goal_sketches',
       'journeys',
-      'personas',
+      'personas.stories:id,title,type',
       'product_canvas',
       'crc_cards',
       'overall_model_classes',
@@ -101,7 +101,7 @@ class ProjectController extends Controller
       'matrix_priorities',
       'sprints.stories',
       'business_rules',
-      'change_requests',
+      'change_requests.stories:id,title,type',
       'usage_scenarios',
       'system_interfaces',
       'storyboards',
@@ -133,10 +133,10 @@ class ProjectController extends Controller
     }
 
     $project->load([
-      'stories',
+      'stories.personas:id,name',
       'goal_sketches',
       'journeys',
-      'personas',
+      'personas.stories:id,title,type',
       'product_canvas',
       'crc_cards',
       'overall_model_classes',
@@ -144,7 +144,7 @@ class ProjectController extends Controller
       'matrix_priorities',
       'sprints.stories',
       'business_rules',
-      'change_requests',
+      'change_requests.stories:id,title,type',
       'usage_scenarios',
       'system_interfaces',
       'storyboards',

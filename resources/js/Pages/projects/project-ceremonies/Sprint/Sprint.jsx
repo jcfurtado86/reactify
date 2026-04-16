@@ -17,6 +17,7 @@ const Sprint = ({ project, setProject }) => {
     <div className="w-full space-y-6 p-4">
       <KanbanBoard
         sprints={activeSprints}
+        project={project}
         systemColors={project?.system_colors}
         updateProject={updateProjectData}
       />

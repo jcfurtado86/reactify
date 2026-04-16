@@ -216,10 +216,21 @@ export function inspectionStatus(item) {
   }
 }
 
-export function computeBacklogSplit(stories, sprints) {
+export function computeBacklogSplit(stories, sprints, prioritizations = [], matrixPriorities = []) {
   const epicParentIds = new Set(
     stories.filter((s) => s.epic_id).map((s) => s.epic_id),
   )
+
+  const priorityOrderMap = new Map()
+  ;[...matrixPriorities]
+    .sort((a, b) => a.order_column - b.order_column)
+    .forEach((p, i) => priorityOrderMap.set(p.id, i))
+
+  const storyPriorityOrder = new Map()
+  prioritizations.forEach((p) => {
+    const order = priorityOrderMap.get(p.priority_id) ?? 999
+    storyPriorityOrder.set(p.story_id, order)
+  })
 
   const productBacklog = stories
     .filter((story) => {
@@ -235,8 +246,9 @@ export function computeBacklogSplit(stories, sprints) {
       )
     })
     .sort((a, b) => {
-      if (a.status === 'prioritized' && b.status !== 'prioritized') return -1
-      if (b.status === 'prioritized' && a.status !== 'prioritized') return 1
+      const pa = storyPriorityOrder.get(a.id) ?? 999
+      const pb = storyPriorityOrder.get(b.id) ?? 999
+      if (pa !== pb) return pa - pb
       return (b.value ?? -1) - (a.value ?? -1)
     })
 

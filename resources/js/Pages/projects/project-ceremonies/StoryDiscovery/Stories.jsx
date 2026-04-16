@@ -30,6 +30,53 @@ import InvestCard from '../Inspection/InvestCard'
 import StatusBadge from '@/Components/StatusBadge'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 
+const PersonaSelect = ({ story, allPersonas, canManage }) => {
+  const { t } = useTranslation()
+  const currentPersona = (story.personas || [])[0] || null
+  const currentId = currentPersona ? String(currentPersona.id) : ''
+
+  const selectPersona = (value) => {
+    const ids = value === 'none' ? [] : [parseInt(value)]
+    router.post(
+      route('story.sync-personas', story.id),
+      { persona_ids: ids },
+      { preserveState: true, preserveScroll: true },
+    )
+  }
+
+  if (!allPersonas || allPersonas.length === 0) return null
+
+  if (!canManage) {
+    if (!currentPersona) return null
+    return (
+      <Badge className="text-[11px] px-2 py-0.5 font-medium bg-green-500/15 text-green-700 dark:text-green-400 border border-green-500/30">
+        👤 {currentPersona.name}
+      </Badge>
+    )
+  }
+
+  return (
+    <Select value={currentId} onValueChange={selectPersona}>
+      <SelectTrigger className={cn(
+        "h-7 w-auto min-w-[120px] max-w-[200px] text-[11px] px-2 py-0 font-medium rounded-md",
+        currentPersona
+          ? "border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400"
+          : "border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400"
+      )}>
+        <SelectValue placeholder={t('stories.select_persona', '👤 Persona')} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="none" className="text-xs">{t('stories.no_persona', 'Nenhuma')}</SelectItem>
+        {allPersonas.map((p) => (
+          <SelectItem key={p.id} value={String(p.id)} className="text-xs">
+            {p.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
+
 const StoryItem = ({
   story,
   systemColors,
@@ -45,6 +92,9 @@ const StoryItem = ({
   typeSelectId,
   onToggleTypeSelect,
   onChangeStoryType,
+  allPersonas,
+  canManage,
+  isEpic = false,
   disabled = false,
   errors,
 }) => {
@@ -254,6 +304,58 @@ const StoryItem = ({
                 {story.title}
               </p>
             )}
+            {!isEpic && story.type !== 'system' && <PersonaSelect story={story} allPersonas={allPersonas} canManage={canManage} />}
+            {!isEpic && story.refining && story.refining.rules.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1">
+                {story.refining.rules.map((r) => (
+                  <Badge
+                    key={`br-${r.id}`}
+                    style={{ backgroundColor: systemColors?.business_rules?.default || '#f97316' }}
+                    className="text-[10px] px-1.5 py-0 cursor-pointer hover:opacity-80 text-black font-bold border-transparent"
+                    title={`Regra: ${r.title}`}
+                    onClick={() => router.get(route('project.ceremony.show', {
+                      project: story.project_id, ceremony: 'refining',
+                    }), { artifact: 'businessRules', scrollTo: r.id })}
+                  >
+                    BR{r.id}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            {!isEpic && story.refining && story.refining.scenarios.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1">
+                {story.refining.scenarios.map((s) => (
+                  <Badge
+                    key={`uc-${s.id}`}
+                    style={{ backgroundColor: systemColors?.usage_scenarios?.default || '#14b8a6' }}
+                    className="text-[10px] px-1.5 py-0 cursor-pointer hover:opacity-80 text-black font-bold border-transparent"
+                    title={`Cenario: ${s.description?.as || ''} ${s.description?.when || ''}`}
+                    onClick={() => router.get(route('project.ceremony.show', {
+                      project: story.project_id, ceremony: 'refining',
+                    }), { artifact: 'usageScenarios', scrollTo: s.id })}
+                  >
+                    UC{s.id}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            {!isEpic && story.refining && story.refining.storyboards.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1">
+                {story.refining.storyboards.map((sb) => (
+                  <Badge
+                    key={`sb-${sb.id}`}
+                    variant="outline"
+                    className="text-[10px] px-1.5 py-0 cursor-pointer hover:bg-accent"
+                    title="Storyboard"
+                    onClick={() => router.get(route('project.ceremony.show', {
+                      project: story.project_id, ceremony: 'modeling',
+                    }), { artifact: 'storyboards' })}
+                  >
+                    SB{sb.id}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           <MotionDivOptions slot="userStory.manage"
@@ -286,6 +388,21 @@ const Stories = ({ project, setProject }) => {
   const { can } = usePermissions()
   const { errors } = usePage().props
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const scrollTo = params.get('scrollTo')
+    if (scrollTo) {
+      setTimeout(() => {
+        const el = document.querySelector(`[data-card-id="${scrollTo}"]`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          el.classList.add('ring-2', 'ring-primary')
+          setTimeout(() => el.classList.remove('ring-2', 'ring-primary'), 2000)
+        }
+      }, 300)
+    }
+  }, [])
+
   // Map epic_id -> [children] para renderizar filhas indentadas abaixo
   // da épica-pai. Permite exibição nested preservando as épicas na listagem.
   const childrenByEpicId = useMemo(() => {
@@ -309,8 +426,16 @@ const Stories = ({ project, setProject }) => {
   const renderStoryWithChildren = (story) => {
     const children = childrenByEpicId.get(story.id) || []
     const isEpic = (s) => (childrenByEpicId.get(s.id) || []).length > 0
+    const withRefiningData = (s) => ({
+      ...s,
+      refining: {
+        rules: (project.business_rules || []).filter((r) => r.story_id === s.id),
+        scenarios: (project.usage_scenarios || []).filter((u) => u.story_id === s.id),
+        storyboards: (project.storyboards || []).filter((sb) => sb.story_id === s.id),
+      },
+    })
     const commonProps = (s) => ({
-      story: s,
+      story: withRefiningData(s),
       isEditing: editingId === s.id,
       editValue: editValue,
       onValueChange: handleInputChange,
@@ -325,6 +450,9 @@ const Stories = ({ project, setProject }) => {
       onToggleTypeSelect: () => toggleTypeSelect(s.id),
       onChangeStoryType: changeStoryType,
       systemColors: project?.system_colors,
+      allPersonas: project?.personas || [],
+      canManage: can('userStory.manage'),
+      isEpic: isEpic(s),
       disabled: !can('userStory.manage'),
       errors: errors,
     })
@@ -532,6 +660,9 @@ const Stories = ({ project, setProject }) => {
       <div className="flex flex-col gap-2 ">
         <InfoButton
           data={tooltipInfo.systemStory}
+          badgeStyle={{
+            backgroundColor: project?.system_colors?.stories.system,
+          }}
           badgeContent={
             project?.stories?.filter((story) => story.type === 'system')
               .length || 0

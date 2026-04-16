@@ -113,10 +113,32 @@ const ChangeLog = ({ project }) => {
                   {request.requester_name || request.requester?.name || 'N/A'}
                 </TableCell>
                 <TableCell
-                  className="max-w-xs truncate"
+                  className="max-w-xs"
                   title={request.description}
                 >
-                  {request.description}
+                  <p className="truncate">{request.description}</p>
+                  {request.stories && request.stories.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {request.stories.map((s) => (
+                        <Tooltip key={s.id}>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] px-1.5 py-0 cursor-pointer hover:bg-accent"
+                              onClick={() => router.get(route('project.ceremony.show', {
+                                project: project.id, ceremony: 'storyDiscovery',
+                              }), { artifact: 'stories', scrollTo: s.id })}
+                            >
+                              {s.type === 'system' ? 'SS' : 'US'}{s.id}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="text-sm">{s.title}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell className="text-center">
                   {getStatusBadge(request.status)}

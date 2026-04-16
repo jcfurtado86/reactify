@@ -1,6 +1,6 @@
 import MainLayout from '@/Layouts/MainLayout'
 import { usePage, router, Head } from '@inertiajs/react'
-import { BellRing, Trash } from 'lucide-react'
+import { BellRing, Trash, ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { currentIntlLocale } from '@/lib/utils'
 
@@ -34,12 +34,19 @@ const Notifications = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-2 text-2xl font-bold">
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => window.history.back()}
+              >
+                <ArrowLeft className="size-5" />
+              </Button>
               <BellRing className="h-6 w-6" />
               <span>{t('notifications_page.title')}</span>
             </div>
             <Button
               variant="secondary"
-              className="h-12 "
+              className="h-12"
               onClick={() => router.patch(route('notifications.read'))}
             >
               {t('notifications_page.mark_all_read')}

@@ -29,4 +29,10 @@ class Persona extends Model
   {
     return $this->belongsTo(Project::class);
   }
+
+  public function stories()
+  {
+    return $this->belongsToMany(Story::class, 'persona_story')
+      ->withTimestamps();
+  }
 }

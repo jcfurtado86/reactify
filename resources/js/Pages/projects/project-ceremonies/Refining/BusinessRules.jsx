@@ -223,6 +223,21 @@ const BusinessRules = ({ project, setProject }) => {
   const tooltipInfo = useTooltipInfo()
   const hasStories = project?.stories && project.stories.length > 0
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const scrollTo = params.get('scrollTo')
+    if (scrollTo) {
+      setTimeout(() => {
+        const el = document.querySelector(`[data-card-id="${scrollTo}"]`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          el.classList.add('ring-2', 'ring-primary')
+          setTimeout(() => el.classList.remove('ring-2', 'ring-primary'), 2000)
+        }
+      }, 300)
+    }
+  }, [])
+
   // Stories épicas são aquelas referenciadas por outras via epic_id.
   // Quando um épico é quebrado, apenas as filhas contam como stories reais;
   // o épico vira um placeholder e deve sumir dos listings de Business Rules.
@@ -319,7 +334,7 @@ const BusinessRules = ({ project, setProject }) => {
             businessRulesByStoryId.get(story.id) || []
           return (
             <React.Fragment key={story.id}>
-              <section className="py-1 flex gap-1 items-stretch" key={story.id}>
+              <section className="py-1 flex gap-1 items-stretch" key={story.id} data-story-id={story.id}>
                 <StoryCard
                   story={story}
                   addBusinessRule={() => addBusinessRule(story.id)}
@@ -355,7 +370,7 @@ const BusinessRules = ({ project, setProject }) => {
             businessRulesByStoryId.get(story.id) || []
           return (
             <React.Fragment key={story.id}>
-              <section className="py-1 flex gap-1 items-stretch" key={story.id}>
+              <section className="py-1 flex gap-1 items-stretch" key={story.id} data-story-id={story.id}>
                 <StoryCard
                   story={story}
                   addBusinessRule={() => addBusinessRule(story.id)}

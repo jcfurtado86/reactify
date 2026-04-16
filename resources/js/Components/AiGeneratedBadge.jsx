@@ -44,10 +44,10 @@ const AiGeneratedBadge = ({ item, type, onDiscard, compact = false }) => {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 align-middle whitespace-nowrap">
+    <span className="inline-flex items-center gap-0.5 align-middle whitespace-nowrap border border-dashed border-muted-foreground/25 rounded-full px-0.5 py-px">
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] leading-none font-medium text-amber-600 dark:text-amber-400 border border-amber-500/30">
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/40 px-1.5 py-px text-[10px] leading-tight font-medium text-muted-foreground">
             <Sparkles className="h-3 w-3 shrink-0" />
             {!compact && (t('ai_review.badge_label', 'IA'))}
           </span>
@@ -61,7 +61,7 @@ const AiGeneratedBadge = ({ item, type, onDiscard, compact = false }) => {
         onClick={handleApprove}
         variant="ghost"
         size="icon"
-        className="inline-flex items-center justify-center rounded-md p-1 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+        className="inline-flex items-center justify-center rounded-md p-0.5 text-emerald-600 hover:bg-emerald-500/10 transition-colors size-6"
         tooltipContent={t('ai_review.approve', 'Aprovar')}
       >
         <Check className="h-3.5 w-3.5" />
@@ -72,7 +72,7 @@ const AiGeneratedBadge = ({ item, type, onDiscard, compact = false }) => {
           onClick={handleDiscard}
           variant="ghost"
           size="icon"
-          className="inline-flex items-center justify-center rounded-md p-1 text-destructive hover:bg-destructive/10 transition-colors"
+          className="inline-flex items-center justify-center rounded-md p-0.5 text-destructive hover:bg-destructive/10 transition-colors size-6"
           tooltipContent={t('ai_review.discard', 'Descartar')}
         >
           <X className="h-3.5 w-3.5" />
