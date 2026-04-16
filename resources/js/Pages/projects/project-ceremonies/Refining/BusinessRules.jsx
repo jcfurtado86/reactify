@@ -15,6 +15,7 @@ import GenerateAIButton from '@/Components/GenerateAIButton'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import StatusBadge from '@/Components/StatusBadge'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
+import ShowDoneToggle from '@/Components/ShowDoneToggle'
 import { usePage } from '@inertiajs/react' 
 import { cn } from '@/lib/utils'
 /**
@@ -238,6 +239,8 @@ const BusinessRules = ({ project, setProject }) => {
     }
   }, [])
 
+  const [showDone, setShowDone] = useState(false)
+
   // Stories épicas são aquelas referenciadas por outras via epic_id.
   // Quando um épico é quebrado, apenas as filhas contam como stories reais;
   // o épico vira um placeholder e deve sumir dos listings de Business Rules.
@@ -314,6 +317,9 @@ const BusinessRules = ({ project, setProject }) => {
 
   return (
     <section className="p-2 flex flex-col gap-2 ">
+      <div className="flex justify-end">
+        <ShowDoneToggle show={showDone} onToggle={() => setShowDone(!showDone)} />
+      </div>
       {!hasStories && (
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
           <GanttChartSquare size={40} className="mb-4 text-primary" />
@@ -327,14 +333,19 @@ const BusinessRules = ({ project, setProject }) => {
       )}
       {/* user stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'user' && !isBrokenEpic(story))
-        .sort((a, b) => a.id - b.id)
+        ?.filter((story) => story.type === 'user' && !isBrokenEpic(story) && (showDone || story.status !== 'done'))
+        .sort((a, b) => {
+          const aDone = a.status === 'done'
+          const bDone = b.status === 'done'
+          if (aDone !== bDone) return aDone ? 1 : -1
+          return a.id - b.id
+        })
         .map((story) => {
           const relatedBusinessRules =
             businessRulesByStoryId.get(story.id) || []
           return (
             <React.Fragment key={story.id}>
-              <section className="py-1 flex gap-1 items-stretch" key={story.id} data-story-id={story.id}>
+              <section className={`py-1 flex gap-1 items-stretch ${story.status === 'done' ? 'opacity-40 pointer-events-none' : ''}`} key={story.id} data-story-id={story.id}>
                 <StoryCard
                   story={story}
                   addBusinessRule={() => addBusinessRule(story.id)}
@@ -363,14 +374,19 @@ const BusinessRules = ({ project, setProject }) => {
         })}
       {/* system stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'system' && !isBrokenEpic(story))
-        .sort((a, b) => a.id - b.id)
+        ?.filter((story) => story.type === 'system' && !isBrokenEpic(story) && (showDone || story.status !== 'done'))
+        .sort((a, b) => {
+          const aDone = a.status === 'done'
+          const bDone = b.status === 'done'
+          if (aDone !== bDone) return aDone ? 1 : -1
+          return a.id - b.id
+        })
         .map((story) => {
           const relatedBusinessRules =
             businessRulesByStoryId.get(story.id) || []
           return (
             <React.Fragment key={story.id}>
-              <section className="py-1 flex gap-1 items-stretch" key={story.id} data-story-id={story.id}>
+              <section className={`py-1 flex gap-1 items-stretch ${story.status === 'done' ? 'opacity-40 pointer-events-none' : ''}`} key={story.id} data-story-id={story.id}>
                 <StoryCard
                   story={story}
                   addBusinessRule={() => addBusinessRule(story.id)}

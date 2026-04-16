@@ -12,6 +12,7 @@ import { router } from '@inertiajs/react'
 import { isTemporary, useGroupedStories } from '@/lib/utils'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
+import ShowDoneToggle from '@/Components/ShowDoneToggle'
 import ReactTextareaAutosize from 'react-textarea-autosize'
 import { usePage } from '@inertiajs/react' 
 import { cn } from '@/lib/utils' 
@@ -227,7 +228,7 @@ const EpicStoryCard = ({
 const EpicStories = ({ project, setProject }) => {
   const { t } = useTranslation()
   const tooltipInfo = useTooltipInfo()
-  // memoriza o estado das stories derivadas
+  const [showDone, setShowDone] = useState(false)
   const childrenByEpicId = useGroupedStories(project?.stories)
   const hasStories = project?.stories && project.stories.length > 0
 
@@ -285,6 +286,9 @@ const EpicStories = ({ project, setProject }) => {
 
   return (
     <section className="p-2 flex flex-col gap-2">
+      <div className="flex justify-end">
+        <ShowDoneToggle show={showDone} onToggle={() => setShowDone(!showDone)} />
+      </div>
       {!hasStories && (
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
           <Layers size={40} className="mb-4 text-primary" />
@@ -296,11 +300,17 @@ const EpicStories = ({ project, setProject }) => {
       )}
       {/* user stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'user' && !story.epic_id)
+        ?.filter((story) => story.type === 'user' && !story.epic_id && (showDone || story.status !== 'done'))
+        .sort((a, b) => {
+          const aDone = a.status === 'done'
+          const bDone = b.status === 'done'
+          if (aDone !== bDone) return aDone ? 1 : -1
+          return a.id - b.id
+        })
         .map((story, i) => {
-          const relatedEpics = childrenByEpicId.get(story.id) || []
+          const relatedEpics = (childrenByEpicId.get(story.id) || []).filter((c) => showDone || c.status !== 'done')
           return (
-            <section className="py-1 flex items-stretch" key={story.id}>
+            <section className={`py-1 flex items-stretch ${story.status === 'done' ? 'opacity-40 pointer-events-none' : ''}`} key={story.id}>
               <StoryCard
                 story={story}
                 addEpicStory={() => addEpicStory(story)}
@@ -329,11 +339,17 @@ const EpicStories = ({ project, setProject }) => {
         })}
       {/* system stories*/}
       {project?.stories
-        ?.filter((story) => story.type === 'system' && !story.epic_id)
+        ?.filter((story) => story.type === 'system' && !story.epic_id && (showDone || story.status !== 'done'))
+        .sort((a, b) => {
+          const aDone = a.status === 'done'
+          const bDone = b.status === 'done'
+          if (aDone !== bDone) return aDone ? 1 : -1
+          return a.id - b.id
+        })
         .map((story, i) => {
-          const relatedEpics = childrenByEpicId.get(story.id) || []
+          const relatedEpics = (childrenByEpicId.get(story.id) || []).filter((c) => showDone || c.status !== 'done')
           return (
-            <section className="py-1 flex gap-1 items-stretch" key={story.id}>
+            <section className={`py-1 flex gap-1 items-stretch ${story.status === 'done' ? 'opacity-40 pointer-events-none' : ''}`} key={story.id}>
               <StoryCard
                 story={story}
                 addEpicStory={() => addEpicStory(story)}

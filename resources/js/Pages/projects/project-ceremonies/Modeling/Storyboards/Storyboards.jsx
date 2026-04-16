@@ -4,6 +4,7 @@ import { Excalidraw, WelcomeScreen, exportToBlob } from '@excalidraw/excalidraw'
 import { Paperclip, Save } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useGroupedStories } from '@/lib/utils'
+import ShowDoneToggle from '@/Components/ShowDoneToggle'
 const blobToDataURL = (blob) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -31,6 +32,7 @@ const StoryCard = ({
       className={`
         flex flex-col h-full items-center justify-start p-2 gap-1 text-sm font-normal text-foreground cursor-pointer
         border border-border bg-card rounded-md shadow-sm transition-opacity duration-300 ${isSelected ? ' border-primary' : 'border-accent'}
+        ${story.status === 'done' ? 'opacity-40' : ''}
         `}
     >
       {story && (
@@ -55,6 +57,7 @@ const Storyboards = ({ project }) => {
   const [selectedStory, setSelectedStory] = useState(null)
   const [sceneVersion, setSceneVersion] = useState(0)
   const childrenByEpicId = useGroupedStories(project?.stories)
+  const [showDone, setShowDone] = useState(false)
 
   const fileInputRef = useRef(null)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -312,8 +315,17 @@ const Storyboards = ({ project }) => {
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup className="gap-2">
+              <div className="px-1">
+                <ShowDoneToggle show={showDone} onToggle={() => setShowDone(!showDone)} />
+              </div>
               {project?.stories
-                ?.sort((b, a) => a.type.localeCompare(b.type))
+                ?.filter((story) => showDone || story.status !== 'done')
+                .sort((a, b) => {
+                  const aDone = a.status === 'done'
+                  const bDone = b.status === 'done'
+                  if (aDone !== bDone) return aDone ? 1 : -1
+                  return b.type.localeCompare(a.type)
+                })
                 .map((story) => {
                   return (
                     <StoryCard

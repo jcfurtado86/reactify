@@ -35,6 +35,7 @@ import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
 import { toastSuccess, toastApiError } from '@/lib/toastHelpers'
 import { usePermissionGate } from '@/lib/usePermissionGate'
 import { toast } from 'sonner'
+import ShowDoneToggle from '@/Components/ShowDoneToggle'
 
 const SortablePriorityColumn = ({
   priority,
@@ -272,6 +273,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
   const prioritizationReason = gate.reason
   const childrenByEpicId = useGroupedStories(project?.stories)
   const [storyTypeTab, setStoryTypeTab] = useState('user')
+  const [showDone, setShowDone] = useState(false)
 
   const filteredGoals = useMemo(() =>
     (project.goal_sketches || []).filter((g) =>
@@ -279,8 +281,10 @@ const PrioritizationMatrix = ({ project, setProject }) => {
     ), [project.goal_sketches, storyTypeTab])
 
   const filteredStories = useMemo(() =>
-    (project.stories || []).filter((s) => s.type === storyTypeTab),
-    [project.stories, storyTypeTab])
+    (project.stories || []).filter((s) =>
+      s.type === storyTypeTab && (showDone || s.status !== 'done')
+    ),
+    [project.stories, storyTypeTab, showDone])
 
   const filteredGoalIds = useMemo(() => new Set(filteredGoals.map((g) => g.id)), [filteredGoals])
 
@@ -290,11 +294,15 @@ const PrioritizationMatrix = ({ project, setProject }) => {
     return map
   }, [filteredGoals])
 
+  const doneStoryIds = useMemo(() =>
+    new Set((project.stories || []).filter((s) => s.status === 'done').map((s) => s.id)),
+    [project.stories])
+
   const filteredPrioritizations = useMemo(() =>
     (project.prioritizations || [])
-      .filter((p) => filteredGoalIds.has(p.goal_id))
+      .filter((p) => filteredGoalIds.has(p.goal_id) && (showDone || !doneStoryIds.has(p.story_id)))
       .map((p) => ({ ...p, position: goalIdToFilteredIndex.get(p.goal_id) ?? p.position })),
-    [project.prioritizations, filteredGoalIds, goalIdToFilteredIndex])
+    [project.prioritizations, filteredGoalIds, goalIdToFilteredIndex, showDone, doneStoryIds])
 
   const GRID_ROWS = filteredGoals.length || 4
   const priorityOrder = {
@@ -611,6 +619,7 @@ const PrioritizationMatrix = ({ project, setProject }) => {
               {t('prioritization_matrix.tab_system_stories', 'System Stories')}
             </Button>
           </div>
+          <ShowDoneToggle show={showDone} onToggle={() => setShowDone(!showDone)} />
         </div>
         {/* conteiner de stories*/}
         <section className=" bg-card text-card-foreground border-0 rounded-xl shadow-sm  w-full ">

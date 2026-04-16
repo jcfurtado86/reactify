@@ -51,6 +51,8 @@
     "backlog": "Backlog",
     "items_count": "{{count}} itens",
     "no_results": "Sem resultados",
+    "show_done": "Mostrar concluidas",
+    "hide_done": "Ocultar concluidas",
     "toast": {
       "saved": "Alterações salvas",
       "deleted": "Item excluído",

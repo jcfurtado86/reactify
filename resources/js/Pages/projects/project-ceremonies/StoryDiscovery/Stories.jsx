@@ -27,6 +27,7 @@ import InfoButton from '@/Components/InfoButton'
 import { useTooltipInfo } from '@/lib/projectData'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import InvestCard from '../Inspection/InvestCard'
+import ShowDoneToggle from '@/Components/ShowDoneToggle'
 import StatusBadge from '@/Components/StatusBadge'
 import AiGeneratedBadge from '@/Components/AiGeneratedBadge'
 
@@ -137,17 +138,19 @@ const StoryItem = ({
   const realStoryId = story.epic_id
     ? `${story.epic_id}.${story.epic_index || 0}`
     : `${story.id}`
+  const isDone = story.status === 'done'
+
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative group"
+      className={cn('relative group', isDone && 'opacity-40')}
       data-card-id={story.id}
     >
       <Card
         className={cn(
           'bg-card border transition-all duration-300 ease-in-out rounded',
-          titleError ? 'border-destructive' : '', // Borda vermelha no Card se erro
+          titleError ? 'border-destructive' : '',
         )}
       >
         <CardContent
@@ -232,6 +235,11 @@ const StoryItem = ({
                 </Badge>
               )}
               <StatusBadge status={status} />
+              {isDone && story.sprintName && (
+                <Badge variant="outline" className="text-[9px] px-1 py-0 text-muted-foreground">
+                  {story.sprintName}
+                </Badge>
+              )}
               <AiGeneratedBadge
                 item={story}
                 type="stories"
@@ -304,7 +312,7 @@ const StoryItem = ({
                 {story.title}
               </p>
             )}
-            {!isEpic && story.type !== 'system' && <PersonaSelect story={story} allPersonas={allPersonas} canManage={canManage} />}
+            {!isEpic && !isDone && story.type !== 'system' && <PersonaSelect story={story} allPersonas={allPersonas} canManage={canManage} />}
             {!isEpic && story.refining && story.refining.rules.length > 0 && (
               <div className="flex flex-wrap items-center gap-1">
                 {story.refining.rules.map((r) => (
@@ -362,7 +370,7 @@ const StoryItem = ({
             isHovered={isHovered}
             isEditing={isEditing}
             isTemporary={isTemporary(story.id)}
-            disabled={disabled}
+            disabled={disabled || isDone}
             onEdit={onEdit}
             onDelete={onDelete}
             onInspect={onInspect}
@@ -387,6 +395,7 @@ const Stories = ({ project, setProject }) => {
   //
   const { can } = usePermissions()
   const { errors } = usePage().props
+  const [showDone, setShowDone] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -417,9 +426,48 @@ const Stories = ({ project, setProject }) => {
     return map
   }, [project?.stories])
 
+  const isStoryGroupDone = (story) => {
+    const children = childrenByEpicId.get(story.id) || []
+    if (children.length > 0) {
+      return children.every((c) => c.status === 'done')
+    }
+    return story.status === 'done'
+  }
+
+  const getSprintForStory = (storyId) => {
+    const sprints = project?.sprints || []
+    for (const sprint of sprints) {
+      const found = (sprint.stories || []).find((s) => s.id === storyId && s.pivot?.kanban_status === 'done')
+      if (found) return sprint.name
+    }
+    return null
+  }
+
   const handleInputChange = (e) => {
     setEditValue(e.target.value)
   }
+
+  const visibleUserStories = useMemo(() =>
+    (project?.stories || [])
+      .filter((s) => s.type === 'user' && !s.epic_id && (showDone || !isStoryGroupDone(s)))
+      .sort((a, b) => {
+        const aDone = isStoryGroupDone(a)
+        const bDone = isStoryGroupDone(b)
+        if (aDone !== bDone) return aDone ? 1 : -1
+        return a.id - b.id
+      }),
+    [project?.stories, showDone, childrenByEpicId])
+
+  const visibleSystemStories = useMemo(() =>
+    (project?.stories || [])
+      .filter((s) => s.type === 'system' && !s.epic_id && (showDone || !isStoryGroupDone(s)))
+      .sort((a, b) => {
+        const aDone = isStoryGroupDone(a)
+        const bDone = isStoryGroupDone(b)
+        if (aDone !== bDone) return aDone ? 1 : -1
+        return a.id - b.id
+      }),
+    [project?.stories, showDone, childrenByEpicId])
 
   // Renderiza uma story + (se for épica) suas filhas indentadas abaixo,
   // com uma barra lateral conectando visualmente a hierarquia.
@@ -428,6 +476,7 @@ const Stories = ({ project, setProject }) => {
     const isEpic = (s) => (childrenByEpicId.get(s.id) || []).length > 0
     const withRefiningData = (s) => ({
       ...s,
+      sprintName: getSprintForStory(s.id),
       refining: {
         rules: (project.business_rules || []).filter((r) => r.story_id === s.id),
         scenarios: (project.usage_scenarios || []).filter((u) => u.story_id === s.id),
@@ -461,9 +510,11 @@ const Stories = ({ project, setProject }) => {
         <StoryItem {...commonProps(story)} />
         {children.length > 0 && (
           <div className="ml-6 pl-4 border-l-2 border-primary/30 flex flex-col gap-2 my-1">
-            {children.map((child) => (
-              <StoryItem key={child.id} {...commonProps(child)} />
-            ))}
+            {children
+              .filter((child) => showDone || child.status !== 'done')
+              .map((child) => (
+                <StoryItem key={child.id} {...commonProps(child)} />
+              ))}
           </div>
         )}
       </React.Fragment>
@@ -608,6 +659,9 @@ const Stories = ({ project, setProject }) => {
 
   return (
     <div className="stories rounded grid grid-cols-2 gap-2 w-full p-4 cursor-pointer items-start">
+      <div className="col-span-2 flex justify-end">
+        <ShowDoneToggle show={showDone} onToggle={() => setShowDone(!showDone)} />
+      </div>
       {inspectionId && can('userStory.manage') && (
         <InvestCard
           itemCategory={'stories'}
@@ -631,12 +685,8 @@ const Stories = ({ project, setProject }) => {
           }
         />
 
-        {project?.stories?.filter((story) => story.type === 'user').length >
-        0 ? (
-          project?.stories
-            .filter((story) => story.type === 'user' && !story.epic_id)
-            .sort((a, b) => a.id - b.id)
-            .map((story) => renderStoryWithChildren(story))
+        {visibleUserStories.length > 0 ? (
+          visibleUserStories.map((story) => renderStoryWithChildren(story))
         ) : (
           <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
             <BookText size={32} className="mb-3 text-primary" />
@@ -668,12 +718,8 @@ const Stories = ({ project, setProject }) => {
               .length || 0
           }
         />
-        {project?.stories?.filter((story) => story.type === 'system').length >
-        0 ? (
-          project?.stories
-            .filter((story) => story.type === 'system' && !story.epic_id)
-            .sort((a, b) => a.id - b.id)
-            .map((story) => renderStoryWithChildren(story))
+        {visibleSystemStories.length > 0 ? (
+          visibleSystemStories.map((story) => renderStoryWithChildren(story))
         ) : (
           <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[100px]">
             <BookText size={32} className="mb-3 text-primary" />

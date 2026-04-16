@@ -12,6 +12,7 @@ import { isTemporary, inspectionStatus } from '@/lib/utils'
 import MotionDivOptions from '@/Components/MotionDivOptions'
 import GenerateAIButton from '@/Components/GenerateAIButton'
 import { toast } from 'sonner'
+import ShowDoneToggle from '@/Components/ShowDoneToggle'
 import { toastApiError } from '@/lib/toastHelpers'
 import { useTooltipInfo } from '@/lib/projectData'
 import StatusBadge from '@/Components/StatusBadge'
@@ -440,6 +441,8 @@ const UsageScenarios = ({ project, setProject }) => {
     }
   }, [])
 
+  const [showDone, setShowDone] = useState(false)
+
   // Stories épicas são aquelas referenciadas por outras via epic_id.
   // Quando um épico é quebrado, apenas as filhas contam; o épico vira
   // placeholder e deve sumir do listing de Usage Scenarios.
@@ -519,6 +522,9 @@ const UsageScenarios = ({ project, setProject }) => {
 
   return (
     <section className="p-2 flex flex-col">
+      <div className="flex justify-end mb-2">
+        <ShowDoneToggle show={showDone} onToggle={() => setShowDone(!showDone)} />
+      </div>
       {!hasStories && (
         <div className="flex flex-col items-center justify-center p-6 bg-card rounded-lg text-muted-foreground border-2 border-dashed border-border min-h-[200px]">
           <FileText size={40} className="mb-4 text-primary" />
@@ -531,12 +537,17 @@ const UsageScenarios = ({ project, setProject }) => {
         </div>
       )}
       {project?.stories
-        ?.filter((story) => story.type === 'user' && !isBrokenEpic(story))
-        .sort((a, b) => a.id - b.id)
+        ?.filter((story) => story.type === 'user' && !isBrokenEpic(story) && (showDone || story.status !== 'done'))
+        .sort((a, b) => {
+          const aDone = a.status === 'done'
+          const bDone = b.status === 'done'
+          if (aDone !== bDone) return aDone ? 1 : -1
+          return a.id - b.id
+        })
         .map((story) => {
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
           return (
-            <section key={story.id} className="py-1 flex gap-2 min-h-48" data-story-id={story.id}>
+            <section key={story.id} className={`py-1 flex gap-2 min-h-48 ${story.status === 'done' ? 'opacity-40 pointer-events-none' : ''}`} data-story-id={story.id}>
               <StoryCard
                 story={story}
                 addScenario={() => addScenario(story.id)}
@@ -564,13 +575,18 @@ const UsageScenarios = ({ project, setProject }) => {
         })}
       {/* system  */}
       {project?.stories
-        ?.filter((story) => story.type === 'system' && !isBrokenEpic(story))
-        .sort((a, b) => a.id - b.id)
+        ?.filter((story) => story.type === 'system' && !isBrokenEpic(story) && (showDone || story.status !== 'done'))
+        .sort((a, b) => {
+          const aDone = a.status === 'done'
+          const bDone = b.status === 'done'
+          if (aDone !== bDone) return aDone ? 1 : -1
+          return a.id - b.id
+        })
         .map((story) => {
           const relatedScenarios = scenariosByStoryId.get(story.id) || []
           return (
             <React.Fragment key={story.id}>
-              <section className="py-1 flex gap-2 min-h-48" key={story.id} data-story-id={story.id}>
+              <section className={`py-1 flex gap-2 min-h-48 ${story.status === 'done' ? 'opacity-40 pointer-events-none' : ''}`} key={story.id} data-story-id={story.id}>
                 <StoryCard
                   story={story}
                   addScenario={() => addScenario(story.id)}

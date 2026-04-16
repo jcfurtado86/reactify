@@ -2,7 +2,7 @@ import { router } from '@inertiajs/react'
 import axios from 'axios'
 import { useTranslation } from 'react-i18next'
 import { usePermissions } from '@/Context/PermissionContext'
-import { inspectionStatus } from '@/lib/utils'
+import { inspectionStatus, cn } from '@/lib/utils'
 import StatusBadge from '@/Components/StatusBadge'
 
 const INVEST_KEYS = ['independent', 'negotiable', 'valuable', 'estimable', 'small', 'testable']
@@ -72,8 +72,12 @@ const InspectionDashboard = ({ project, setProject }) => {
       .sort((a, b) => a.id - b.id),
     [project.stories])
 
-  const filtered = stories.filter((s) => {
+  const activeStories = stories.filter((s) => s.status !== 'done')
+  const doneStories = stories.filter((s) => s.status === 'done')
+
+  const filtered = (filter === 'done' ? doneStories : activeStories).filter((s) => {
     if (filter === 'all') return true
+    if (filter === 'done') return true
     const status = inspectionStatus(s)
     if (filter === 'validated') return status === 'validated'
     if (filter === 'rejected') return status === 'rejected'
@@ -82,13 +86,14 @@ const InspectionDashboard = ({ project, setProject }) => {
   })
 
   const counts = {
-    all: stories.length,
-    validated: stories.filter((s) => inspectionStatus(s) === 'validated').length,
-    rejected: stories.filter((s) => inspectionStatus(s) === 'rejected').length,
-    pending: stories.filter((s) => {
+    all: activeStories.length,
+    validated: activeStories.filter((s) => inspectionStatus(s) === 'validated').length,
+    rejected: activeStories.filter((s) => inspectionStatus(s) === 'rejected').length,
+    pending: activeStories.filter((s) => {
       const st = inspectionStatus(s)
       return st === 'pending' || st === null
     }).length,
+    done: doneStories.length,
   }
 
   const toggleInvest = (storyId, field) => {
@@ -116,7 +121,7 @@ const InspectionDashboard = ({ project, setProject }) => {
   return (
     <div className="p-4 space-y-4">
       <div className="flex gap-2">
-        {['all', 'rejected', 'pending', 'validated'].map((f) => (
+        {['all', 'rejected', 'pending', 'validated', 'done'].map((f) => (
           <Button
             key={f}
             variant={filter === f ? 'default' : 'outline'}
@@ -144,8 +149,9 @@ const InspectionDashboard = ({ project, setProject }) => {
           <tbody>
             {filtered.map((story) => {
               const ic = story.invest_card || {}
+              const isDone = story.status === 'done'
               return (
-                <tr key={story.id} className="border-t border-border hover:bg-muted/30">
+                <tr key={story.id} className={cn('border-t border-border hover:bg-muted/30', isDone && 'opacity-40')}>
                   <td className="p-3">
                     <div className="flex items-start gap-2">
                       <Badge variant="outline" className="text-[10px] shrink-0 mt-0.5">
@@ -158,7 +164,7 @@ const InspectionDashboard = ({ project, setProject }) => {
                     <td key={k} className="p-3 text-center">
                       <InvestCell
                         value={ic[k] || 'na'}
-                        canManage={canManage}
+                        canManage={canManage && !isDone}
                         onClick={() => toggleInvest(story.id, k)}
                       />
                     </td>
