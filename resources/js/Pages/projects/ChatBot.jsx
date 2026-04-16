@@ -1,10 +1,11 @@
 import { router } from '@inertiajs/react'
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, X, SendHorizontal, LoaderCircle } from 'lucide-react'
+import { MessageSquare, X, SendHorizontal, LoaderCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { useTranslation } from 'react-i18next'
 import ButtonWithTooltip from '@/Components/ButtonWithTooltip'
+import axios from 'axios'
 
 const AIMessage = ({ fullContent, animate }) => {
   const [displayedContent, setDisplayedContent] = useState(
@@ -192,6 +193,26 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
     }
   }
 
+  const handleFeedback = async (messageId, value) => {
+    if (typeof messageId !== 'string' || !messageId.startsWith('db-')) return
+    const dbId = messageId.slice(3)
+    const current = messages.find((m) => m.id === messageId)?.feedback
+    const next = current === value ? null : value
+
+    setMessages((prev) =>
+      prev.map((m) => (m.id === messageId ? { ...m, feedback: next } : m)),
+    )
+
+    try {
+      await axios.patch(route('chat.feedback', dbId), { feedback: next })
+    } catch (err) {
+      console.error('Erro ao enviar feedback do chat:', err)
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, feedback: current } : m)),
+      )
+    }
+  }
+
   const toggleChat = () => setIsOpen(!isOpen)
 
   return (
@@ -242,32 +263,64 @@ const ChatBot = ({ project, currentPage, currentContextData }) => {
                 return (
                   <div
                     key={message.id}
-                    className={`flex relative gap-2.5 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex gap-2.5 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div
-                      className={`max-w-[80%] rounded-lg text-left px-3 py-2 ${message.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
-                    >
+                    <div className="flex flex-col max-w-[80%] gap-1">
                       <div
-                        className={`${message.sender === 'user' ? ' text-primary-foreground' : 'text-secondary-foreground'}`}
+                        className={`relative rounded-lg text-left px-3 py-2 ${message.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
                       >
-                        {message.sender !== 'user' ? (
-                          <AIMessage
-                            fullContent={message.message}
-                            animate={message.animate}
-                          />
-                        ) : (
-                          <div className="prose-container prose prose-sm">
-                            <ReactMarkdown>{message.message}</ReactMarkdown>
+                        <div
+                          className={`${message.sender === 'user' ? ' text-primary-foreground' : 'text-secondary-foreground'}`}
+                        >
+                          {message.sender !== 'user' ? (
+                            <AIMessage
+                              fullContent={message.message}
+                              animate={message.animate}
+                            />
+                          ) : (
+                            <div className="prose-container prose prose-sm">
+                              <ReactMarkdown>{message.message}</ReactMarkdown>
+                            </div>
+                          )}
+                        </div>
+                        <span
+                          style={{
+                            clipPath: 'polygon(0 0, 50% 100%, 100% 0)',
+                          }}
+                          className={`absolute bottom-0 size-3 block translate-y-1/2 ${message.sender === 'user' ? 'bg-primary text-primary-foreground -rotate-45 right-0 translate-x-1/2' : 'bg-secondary text-secondary-foreground rotate-45 left-0 -translate-x-1/2'}`}
+                        />
+                      </div>
+                      {message.sender !== 'user' &&
+                        typeof message.id === 'string' &&
+                        message.id.startsWith('db-') && (
+                          <div className="flex gap-1 justify-end pr-1">
+                            <ButtonWithTooltip
+                              variant="ghost"
+                              size="icon"
+                              className="size-6"
+                              tooltipContent={t('chat.feedback_helpful')}
+                              side="top"
+                              onClick={() => handleFeedback(message.id, 'up')}
+                            >
+                              <ThumbsUp
+                                className={`size-3.5 ${message.feedback === 'up' ? 'text-primary fill-primary' : 'text-muted-foreground'}`}
+                              />
+                            </ButtonWithTooltip>
+                            <ButtonWithTooltip
+                              variant="ghost"
+                              size="icon"
+                              className="size-6"
+                              tooltipContent={t('chat.feedback_not_helpful')}
+                              side="top"
+                              onClick={() => handleFeedback(message.id, 'down')}
+                            >
+                              <ThumbsDown
+                                className={`size-3.5 ${message.feedback === 'down' ? 'text-destructive fill-destructive' : 'text-muted-foreground'}`}
+                              />
+                            </ButtonWithTooltip>
                           </div>
                         )}
-                      </div>
                     </div>
-                    <span
-                      style={{
-                        clipPath: 'polygon(0 0, 50% 100%, 100% 0)',
-                      }}
-                      className={`absolute bottom-0 size-3 block translate-y-1/2 ${message.sender === 'user' ? 'bg-primary text-primary-foreground -rotate-45 translate-x-1/2' : 'bg-secondary text-secondary-foreground rotate-45 -translate-x-1/2'}`}
-                    />
                   </div>
                 )
               })}

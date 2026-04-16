@@ -405,7 +405,9 @@
     "welcome": "Olá! 👋 Eu sou seu assistente REACT-M e atuarei como seu Facilitador. Como posso **guiar** você ou sua equipe na cerimônia de hoje?",
     "error_sending": "Erro ao enviar mensagem",
     "error_request": "Erro ao processar a requisição.",
-    "error_response": "Ocorreu um erro ao processar sua mensagem: {{message}}"
+    "error_response": "Ocorreu um erro ao processar sua mensagem: {{message}}",
+    "feedback_helpful": "Resposta útil",
+    "feedback_not_helpful": "Resposta não útil"
   },
   "ai_modal": {
     "generate_with_ai": "Gerar com IA",
